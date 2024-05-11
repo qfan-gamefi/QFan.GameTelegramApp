@@ -5,7 +5,7 @@ import { MainScene } from './scenes/MainScene';
 const config: Phaser.Types.Core.GameConfig = {
     type: AUTO,
     width: 384,
-    height: 590,
+    height: 490,
     parent: 'game-container',
     backgroundColor: '#028af8',
     scene: [

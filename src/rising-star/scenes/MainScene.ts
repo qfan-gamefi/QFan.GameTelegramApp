@@ -8,8 +8,8 @@ const DUDE = "dude";
 const BALL = 'ball';
 const MIN_KICK_POWER_X = 100;
 const MAX_KICK_POWER_X = 150;
-const MIN_KICK_POWER_Y = -10;
-const MAX_KICK_POWER_Y = -100;
+const MIN_KICK_POWER_Y = -50;
+const MAX_KICK_POWER_Y = -150;
 const BALL_THRESH_HOLD = 200;
 const KICK_POWER_X_TEXT = 'kick_power_x';
 const KICK_POWER_Y_TEXT = 'kick_power_y';
@@ -28,15 +28,17 @@ export class MainScene extends Scene {
   preload() {
     this.load.image(GROUND_TEXT, './assets/platform.png');
     this.load.image(SKY_TEXT, './assets/bg.png');
-    this.load.spritesheet(DUDE, './assets/dude.png', { frameWidth: 32, frameHeight: 48 });
-    this.load.spritesheet(BALL, './assets/balls.png', { frameWidth: 14, frameHeight: 14 });
+    this.load.spritesheet(DUDE, './assets/dude.png',
+      { frameWidth: 92, frameHeight: 125 });
+    this.load.spritesheet(BALL, './assets/balls.png',
+      { frameWidth: 32, frameHeight: 32 });
   }
 
   create() {
     this.cursors = this.input.keyboard?.createCursorKeys();
     this.platforms = this.physics.add.staticGroup();
     this.add.image(400, 300, SKY_TEXT);
-    this.platforms.create(400, 568, 'ground').setScale(2).refreshBody();
+    this.platforms.create(400, 468, 'ground').setScale(2).refreshBody();
     this.player = this.createPlayer();
     this.ball = this.createBall();
     this.physics.add.collider(this.player, this.platforms);
@@ -60,11 +62,11 @@ export class MainScene extends Scene {
       const y_power = this.ball.getData(KICK_POWER_Y_TEXT)
       this.ball.setVelocity(this.ball.getData(KICK_POWER_X_TEXT), y_power);
       this.ball.setData(KICK_POWER_Y_TEXT, y_power + 3);
+
     }
     else {
       this.ball.setVelocityX(-80);
     }
-
 
     // if (this.cursors?.left.isDown) {
     //   this.player.setVelocityX(-160);
@@ -91,14 +93,14 @@ export class MainScene extends Scene {
     ball.setBounce(0.5);
     this.anims.create({
       key: 'right-ball',
-      frames: this.anims.generateFrameNumbers(BALL, { start: 0, end: 1 }),
+      frames: this.anims.generateFrameNumbers(BALL, { start: 0, end: 3 }),
       frameRate: 10,
       repeat: -1
     });
     return ball;
   }
   createPlayer() {
-    const player = this.physics.add.sprite(100, 450, DUDE);
+    const player = this.physics.add.sprite(100, 350, DUDE);
 
     this.anims.create({
       key: 'left',
@@ -115,7 +117,7 @@ export class MainScene extends Scene {
 
     this.anims.create({
       key: 'right',
-      frames: this.anims.generateFrameNumbers(DUDE, { start: 5, end: 8 }),
+      frames: this.anims.generateFrameNumbers(DUDE, { start: 0, end: 5 }),
       frameRate: 10,
       repeat: -1
     });
@@ -125,8 +127,9 @@ export class MainScene extends Scene {
     return player;
   }
   kickball() {
-    this.ball.data.set(KICK_POWER_X_TEXT, Phaser.Math.FloatBetween(MIN_KICK_POWER_X, MAX_KICK_POWER_X))
-    this.ball.data.set(KICK_POWER_Y_TEXT, Phaser.Math.FloatBetween(MIN_KICK_POWER_Y, MAX_KICK_POWER_Y))
-    // Phaser.Math.FloatBetween(MIN_KICK_POWER_Y, MAX_KICK_POWER_Y)
+    if (this.player.getBottomRight().x - this.ball.getBottomLeft().x > 30) {
+      this.ball.data.set(KICK_POWER_X_TEXT, Phaser.Math.FloatBetween(MIN_KICK_POWER_X, MAX_KICK_POWER_X));
+      this.ball.data.set(KICK_POWER_Y_TEXT, Phaser.Math.FloatBetween(MIN_KICK_POWER_Y, MAX_KICK_POWER_Y));
+    }
   }
 }

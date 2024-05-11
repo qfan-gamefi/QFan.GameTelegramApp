@@ -75,7 +75,56 @@ import SampleGame from './rising-star/SampleGame.vue';
 // }
 
 </script>
-
+<style scoped>
+    .full-width{
+        width: 100%;
+    }
+    .container{
+        width: 384;
+        height: 490,
+    }
+    .wOne3rd{
+        width: 33.333333%;
+    }
+    .w50{
+        width: 50%;
+    }
+    .absolute-training-btn{
+        position: absolute;
+        top : 40%;
+        width: 384px;
+        padding: 10px;
+        background-color: rgba(11, 92, 197, 0.24);
+        border: none;
+        font-style: italic;
+    }
+    .absolute-training-btn:hover{
+        background-color: rgba(11, 92, 197, 0.589);
+        color: white;
+        font-weight: 1.2em;
+    }
+    .button-container{
+        padding: 3px;
+    }
+    .button-container button{
+        padding: 5px
+    }
+</style>
 <template>
-    <SampleGame />
+    <button class="absolute-training-btn button-decoration">START TRAINING</button>
+    <div class="container">
+        <div class="button-container">
+            <button class="full-width">
+                LOGIN
+            </button>
+        </div>
+        <SampleGame class="full-width"/>
+        <div class="button-container">
+            <button class="w50 button-decoration">Shop</button>
+            <button class="w50 button-decoration">Mission</button>
+            <button class="wOne3rd button-decoration">Booster</button>
+            <button class="wOne3rd button-decoration">Invite</button>
+            <button class="wOne3rd button-decoration">Invite</button>
+        </div>
+    </div>
 </template>

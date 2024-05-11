@@ -52,8 +52,8 @@ export default {
         width: 100%;
     }
     .container{
-        width: 384;
-        height: 490,
+        width: 384px;
+        height: 490px;
     }
     .wOne3rd{
         width: 33.333333%;
@@ -83,7 +83,7 @@ export default {
     }
 </style>
 <template>
-    <button class="absolute-training-btn button-decoration">START TRAINING</button>
+    <!-- <button class="absolute-training-btn button-decoration">START TRAINING</button> -->
     <div class="container">
         <div class="button-container">
             <button id="login_button" class="full-width" v-show="!isTelegramLogin">

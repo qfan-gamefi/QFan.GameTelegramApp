@@ -3,7 +3,6 @@ import { onMounted, onUnmounted, ref } from 'vue';
 import Phaser from 'phaser';
 import StartGame from './main';
 import { EventBus } from './EventBus';
-import { Alert } from 'vue-tg'
 
 // Save the current scene instance
 const scene = ref();

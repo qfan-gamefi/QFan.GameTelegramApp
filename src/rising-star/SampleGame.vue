@@ -11,17 +11,7 @@ const game = ref();
 const emit = defineEmits(['current-active-scene']);
 
 onMounted(() => {
-
     game.value = StartGame('game-container');
-
-    EventBus.on('current-scene-ready', (scene_instance: Phaser.Scene) => {
-
-        emit('current-active-scene', scene_instance);
-
-        scene.value = scene_instance;
-
-    });
-
 });
 
 onUnmounted(() => {
@@ -36,7 +26,18 @@ onUnmounted(() => {
 defineExpose({ scene, game });
 
 </script>
-
+<script lang="ts">
+export default {
+    data() {
+        return {scene: this.scene,game: this.game}
+    },
+    methods: {
+        ChangeSence(sence : String){
+            game.value.scene.start(sence);
+        }
+    },
+    };
+</script>
 <template>
     <div id="game-container"></div>
 </template>

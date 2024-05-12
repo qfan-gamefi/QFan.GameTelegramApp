@@ -25,6 +25,10 @@ export class MainScene extends Scene {
   player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   ball: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
 
+  constructor() {
+    super({ key: 'MainScene' });
+  }
+
   preload() {
     this.load.image(GROUND_TEXT, './assets/platform.png');
     this.load.image(SKY_TEXT, './assets/bg.png');
@@ -38,7 +42,7 @@ export class MainScene extends Scene {
     this.cursors = this.input.keyboard?.createCursorKeys();
     this.platforms = this.physics.add.staticGroup();
     this.add.image(400, 300, SKY_TEXT);
-    this.platforms.create(400, 468, 'ground').setScale(2).refreshBody();
+    this.platforms.create(400, 528, 'ground').setScale(3).refreshBody();
     this.player = this.createPlayer();
     this.ball = this.createBall();
     this.physics.add.collider(this.player, this.platforms);
@@ -67,26 +71,6 @@ export class MainScene extends Scene {
     else {
       this.ball.setVelocityX(-80);
     }
-
-    // if (this.cursors?.left.isDown) {
-    //   this.player.setVelocityX(-160);
-
-    //   this.player.anims.play('left', true);
-    // }
-    // else if (this.cursors?.right.isDown) {
-    //   this.player.setVelocityX(160);
-
-    //   this.player.anims.play('right', true);
-    // }
-    // else {
-    //   this.player.setVelocityX(0);
-
-    //   this.player.anims.play('turn');
-    // }
-
-    // if (this.cursors?.up.isDown && this.player.body.touching.down) {
-    //   this.player.setVelocityY(-230);
-    // }
   }
   createBall() {
     const ball = this.physics.add.sprite(400, 100, BALL);

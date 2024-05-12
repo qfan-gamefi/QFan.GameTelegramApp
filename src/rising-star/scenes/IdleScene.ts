@@ -1,7 +1,5 @@
 import { GameObjects, Scene } from 'phaser';
 
-import { EventBus } from '../EventBus';
-
 const SKY_TEXT = 'sky';
 const GROUND_TEXT = 'ground';
 const DUDE = "dude";
@@ -17,11 +15,15 @@ export class IdleScene extends Scene {
   player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   ball: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
 
+  constructor() {
+    super({ key: 'IdleScene' });
+  }
+
   preload() {
     this.load.image(GROUND_TEXT, './assets/platform.png');
     this.load.image(SKY_TEXT, './assets/bg.png');
-    this.load.spritesheet(DUDE, './assets/dude.png',
-      { frameWidth: 92, frameHeight: 125 });
+    this.load.spritesheet(DUDE, './assets/dude-idle.png',
+      { frameWidth: 67, frameHeight: 129 });
   }
 
   create() {
@@ -41,8 +43,8 @@ export class IdleScene extends Scene {
 
     this.anims.create({
       key: 'right',
-      frames: this.anims.generateFrameNumbers(DUDE, { start: 0, end: 5 }),
-      frameRate: 10,
+      frames: this.anims.generateFrameNumbers(DUDE, { start: 0, end: 3 }),
+      frameRate: 5,
       repeat: -1
     });
 

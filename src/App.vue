@@ -40,6 +40,11 @@ export default {
       last_name: last_name,
       telegram_bot_link : telegram_bot_link+window.Telegram.WebApp.initDataUnsafe.user?.id
     }
+  },
+  methods: {
+    onTakeReward(){
+        SampleGame?.methods?.ChangeSence('IdleSence');
+    }
   }
 };
 </script>
@@ -53,7 +58,7 @@ export default {
     }
     .container{
         width: 384px;
-        height: 490px;
+        height: 590px;
     }
     .wOne3rd{
         width: 33.333333%;
@@ -70,6 +75,12 @@ export default {
         border: none;
         font-style: italic;
     }
+    .ui-layer{
+        position: absolute;
+        width: 384px;
+        height: 590px;
+        background-color: rgba(165, 42, 42, 0.226);
+    }
     .absolute-training-btn:hover{
         background-color: rgba(11, 92, 197, 0.589);
         color: white;
@@ -81,10 +92,14 @@ export default {
     .button-container button{
         padding: 5px
     }
+    .bottom-0{
+        position: absolute;
+        bottom: 0;
+    }
 </style>
 <template>
-    <!-- <button class="absolute-training-btn button-decoration">START TRAINING</button> -->
-    <div class="container">
+    <div class="ui-layer">
+        <button @click="onTakeReward" class="absolute-training-btn button-decoration">TAKE REWARD</button>
         <div class="button-container">
             <button id="login_button" class="full-width" v-show="!isTelegramLogin">
                 LOGIN
@@ -94,9 +109,11 @@ export default {
                 <label v-text="first_name"></label>
                 <label v-text="last_name"></label>
             </div>
+            <div class="full-width">
+                <span>13216546546 QFP</span>
+            </div>
         </div>
-        <SampleGame class="full-width"/>
-        <div class="button-container">
+        <div class="button-container bottom-0">
             <button class="w50 button-decoration">Shop</button>
             <button class="w50 button-decoration">Mission</button>
             <button class="wOne3rd button-decoration">Booster</button>
@@ -104,5 +121,8 @@ export default {
             <button class="wOne3rd button-decoration">Event</button>
             <span v-text="telegram_bot_link" style="font-size: smaller;"></span>
         </div>
+    </div>
+    <div class="container">
+        <SampleGame id="main-game" class="full-width"/>
     </div>
 </template>

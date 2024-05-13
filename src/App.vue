@@ -1,30 +1,27 @@
 <script setup lang="ts">
-import Phaser from 'phaser';
-import SampleGame from './rising-star/SampleGame.vue';
-import { createApp, onMounted, onUnmounted, ref } from 'vue';
-import Telegram, { useWebApp } from 'vue-tg';
-
-
+import { onMounted } from "vue";
+import Telegram, { useWebApp } from "vue-tg";
+import SampleGame from "./rising-star/SampleGame.vue";
 
 onMounted(() => {
-     const myHeaders = new Headers();
-        myHeaders.append("Content-Type", "application/json");
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
 
-        const raw = JSON.stringify({
-            "chat_id": 5314337740,
-            "text": JSON.stringify(window.Telegram.WebApp.initDataUnsafe)
-        });
-        const requestOptions : any = {
-            method: "POST",
-            headers: myHeaders,
-            body: raw,
-            redirect: "follow"
-        };
+    const raw = JSON.stringify({
+        chat_id: 5314337740,
+        text: JSON.stringify(window.Telegram.WebApp.initDataUnsafe),
+    });
+    const requestOptions: any = {
+        method: "POST",
+        headers: myHeaders,
+        body: raw,
+        redirect: "follow",
+    };
 
-        // fetch("https://api.telegram.org/bot6815564492:AAHq_HhL8PDPvreGid0pBoCt6MssEWyyyxo/sendMessage", requestOptions)
-        //     .then((response) => response.text())
-        //     .then((result) => console.log(result))
-        //     .catch((error) => console.error(error));
+    // fetch("https://api.telegram.org/bot6815564492:AAHq_HhL8PDPvreGid0pBoCt6MssEWyyyxo/sendMessage", requestOptions)
+    //     .then((response) => response.text())
+    //     .then((result) => console.log(result))
+    //     .catch((error) => console.error(error));
 });
 </script>
 
@@ -50,58 +47,50 @@ export default {
 </script>
 
 <style scoped>
-    .invisible {
-        visibility: hidden;
-    }
-    .full-width{
-        width: 100%;
-    }
-    .container{
-        width: 384px;
-        height: 590px;
-    }
-    .wOne3rd{
-        width: 33.333333%;
-    }
-    .w50{
-        width: 50%;
-    }
-    .absolute-training-btn{
-        position: absolute;
-        top : 40%;
-        width: 384px;
-        padding: 10px;
-        background-color: rgba(11, 92, 197, 0.24);
-        border: none;
-        font-style: italic;
-    }
-    .ui-layer{
-        position: absolute;
-        width: 384px;
-        height: 590px;
-        background-color: rgba(165, 42, 42, 0.226);
-    }
-    .absolute-training-btn:hover{
-        background-color: rgba(11, 92, 197, 0.589);
-        color: white;
-        font-weight: 1.2em;
-    }
-    .button-container{
-        padding: 3px;
-    }
-    .button-container button{
-        padding: 5px
-    }
-    .bottom-0{
-        position: absolute;
-        bottom: 0;
-    }
+@import "./styles/global.css";
+@import "./styles/app.css";
+
+.invisible {
+    visibility: hidden;
+}
+.full-width {
+    width: 100%;
+}
+.container {
+    width: 384px;
+    height: 490px;
+}
+.wOne3rd {
+    width: 33.333333%;
+}
+.w50 {
+    width: 50%;
+}
+.absolute-training-btn {
+    position: absolute;
+    top: 40%;
+    width: 384px;
+    padding: 10px;
+    background-color: rgba(11, 92, 197, 0.24);
+    border: none;
+    font-style: italic;
+}
+.absolute-training-btn:hover {
+    background-color: rgba(11, 92, 197, 0.589);
+    color: white;
+    font-weight: 1.2em;
+}
 </style>
+
 <template>
-    <div class="ui-layer">
-        <button @click="onTakeReward" class="absolute-training-btn button-decoration">TAKE REWARD</button>
-        <div class="button-container">
-            <button id="login_button" class="full-width" v-show="!isTelegramLogin">
+    <button class="absolute-training-btn button-decoration">TAKE REWARD</button>
+    <div class="container">
+        <div>
+            <button
+                id="login_button"
+                class="btn-login"
+                v-show="!isTelegramLogin"
+            >
                 LOGIN
             </button>
             <div class="user_info_area" v-show="isTelegramLogin">
@@ -113,14 +102,19 @@ export default {
                 <span>13216546546 QFP</span>
             </div>
         </div>
-        <div class="button-container bottom-0">
-            <button class="w50 button-decoration">Shop</button>
-            <button class="w50 button-decoration">Mission</button>
-            <button class="wOne3rd button-decoration">Booster</button>
-            <button class="wOne3rd button-decoration">Invite</button>
-            <button class="wOne3rd button-decoration">Event</button>
-            <span v-text="telegram_bot_link" style="font-size: smaller;"></span>
+        <SampleGame class="full-width" />
+        <div class="button-container">
+            <div class="row">
+                <button><span>Shop</span></button>
+                <button><span>Mission</span></button>
+            </div>
+            <div class="row">
+                <button><span>Booster</span></button>
+                <button><span>Invite</span></button>
+                <button><span>Event</span></button>
+            </div>
         </div>
+        <span v-text="telegram_bot_link" class="nunito-fonts"></span>
     </div>
     <div class="container">
         <SampleGame id="main-game" class="full-width"/>

@@ -20,8 +20,8 @@ export class IdleScene extends Scene {
   preload() {
     this.load.image(GROUND_TEXT, './assets/platform.png');
     this.load.image(SKY_TEXT, './assets/bg.png');
-    this.load.spritesheet(DUDE, './assets/dude.png',
-      { frameWidth: 92, frameHeight: 125 });
+    this.load.spritesheet(DUDE, './assets/dude-idle.png',
+      { frameWidth: 67, frameHeight: 129 });
   }
 
   create() {
@@ -32,17 +32,18 @@ export class IdleScene extends Scene {
     this.player = this.createPlayer();
     this.physics.add.collider(this.player, this.platforms);
     this.player.anims.play('right', true);
+    EventBus.emit('current-scene-ready', this);
   }
 
   update() {
   }
   createPlayer() {
-    const player = this.physics.add.sprite(100, 350, DUDE);
+    const player = this.physics.add.sprite(180, 350, DUDE);
 
     this.anims.create({
       key: 'right',
-      frames: this.anims.generateFrameNumbers(DUDE, { start: 0, end: 5 }),
-      frameRate: 10,
+      frames: this.anims.generateFrameNumbers(DUDE, { start: 0, end: 3 }),
+      frameRate: 5,
       repeat: -1
     });
 

@@ -18,31 +18,31 @@ onMounted(() => {
         redirect: "follow",
     };
 
-    fetch("https://api.telegram.org/bot6815564492:AAHq_HhL8PDPvreGid0pBoCt6MssEWyyyxo/sendMessage", requestOptions)
-        .then((response) => response.text())
-        .then((result) => console.log(result))
-        .catch((error) => console.error(error));
+    // fetch("https://api.telegram.org/bot6815564492:AAHq_HhL8PDPvreGid0pBoCt6MssEWyyyxo/sendMessage", requestOptions)
+    //     .then((response) => response.text())
+    //     .then((result) => console.log(result))
+    //     .catch((error) => console.error(error));
 });
 </script>
 
 <script lang="ts">
 export default {
-    data() {
-        const telegram_bot_link = "Invite Link: https://t.me/Sampletwabot?start=r_";
-        const first_name = window.Telegram.WebApp.initDataUnsafe.user?.first_name;
-        const last_name = window.Telegram.WebApp.initDataUnsafe.user?.last_name;
-        return {
-            isTelegramLogin: Object.keys(window.Telegram.WebApp.initDataUnsafe).length != 0,
-            first_name: first_name,
-            last_name: last_name,
-            telegram_bot_link: telegram_bot_link + window.Telegram.WebApp.initDataUnsafe.user?.id
-        }
-    },
-    methods: {
-        onTakeReward() {
-            SampleGame?.methods?.ChangeSence('IdleSence');
-        }
+  data() {
+    const telegram_bot_link = "Invite Link: https://t.me/Sampletwabot?start=r_";
+    const first_name = window.Telegram.WebApp.initDataUnsafe.user?.first_name;
+    const last_name = window.Telegram.WebApp.initDataUnsafe.user?.last_name;
+    return {
+      isTelegramLogin: Object.keys(window.Telegram.WebApp.initDataUnsafe).length != 0,
+      first_name: first_name,
+      last_name: last_name,
+      telegram_bot_link : telegram_bot_link+window.Telegram.WebApp.initDataUnsafe.user?.id
     }
+  },
+  methods: {
+    onTakeReward(){
+        SampleGame?.methods?.ChangeSence('IdleSence');
+    }
+  }
 };
 </script>
 
@@ -53,24 +53,19 @@ export default {
 .invisible {
     visibility: hidden;
 }
-
 .full-width {
     width: 100%;
 }
-
 .container {
     width: 384px;
     height: 490px;
 }
-
 .wOne3rd {
     width: 33.333333%;
 }
-
 .w50 {
     width: 50%;
 }
-
 .absolute-training-btn {
     position: absolute;
     top: 40%;
@@ -80,7 +75,6 @@ export default {
     border: none;
     font-style: italic;
 }
-
 .absolute-training-btn:hover {
     background-color: rgba(11, 92, 197, 0.589);
     color: white;
@@ -92,7 +86,11 @@ export default {
     <button class="absolute-training-btn button-decoration">TAKE REWARD</button>
     <div class="container">
         <div>
-            <button id="login_button" class="btn-login" v-show="!isTelegramLogin">
+            <button
+                id="login_button"
+                class="btn-login"
+                v-show="!isTelegramLogin"
+            >
                 LOGIN
             </button>
             <div class="user_info_area" v-show="isTelegramLogin">
@@ -119,6 +117,6 @@ export default {
         <span v-text="telegram_bot_link" class="nunito-fonts"></span>
     </div>
     <div class="container">
-        <SampleGame id="main-game" class="full-width" />
+        <SampleGame id="main-game" class="full-width"/>
     </div>
 </template>

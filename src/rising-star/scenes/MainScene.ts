@@ -46,7 +46,7 @@ export class MainScene extends Scene {
     this.player.anims.play('right', true);
     this.ball.anims.play('right-ball', true);
     this.physics.add.overlap(this.player, this.ball, this.kickball, undefined, this);
-
+    EventBus.emit('current-scene-ready', this);
   }
 
   update() {

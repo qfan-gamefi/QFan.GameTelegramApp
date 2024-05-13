@@ -3,6 +3,8 @@ import { onMounted } from "vue";
 import Telegram from "vue-tg";
 import SampleGame from "./rising-star/SampleGame.vue";
 
+
+
 onMounted(() => {
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
@@ -23,6 +25,13 @@ onMounted(() => {
     //     .then((result) => console.log(result))
     //     .catch((error) => console.error(error));
 });
+const changeScene = () => {
+    const scene = toRaw(phaserRef.value.scene);
+    if (scene) {
+        //  Call the changeScene method defined in the `MainMenu`, `Game` and `GameOver` Scenes
+        scene.changeScene();
+    }
+}
 </script>
 
 <script lang="ts">
@@ -59,7 +68,7 @@ export default {
             last_name: last_name,
             telegram_bot_link:
                 telegram_bot_link +
-                    window.Telegram.WebApp.initDataUnsafe.user?.id || "",
+                window.Telegram.WebApp.initDataUnsafe.user?.id || "",
             showCoomingSoon: false,
             isCopiedToClipboard: false,
         };
@@ -97,21 +106,14 @@ export default {
 </style>
 
 <template>
-    <!-- <button class="absolute-training-btn button-decoration">START TRAINING</button> -->
+
     <div class="container">
+        <button class="absolute-training-btn button-decoration">START TRAINING</button>
         <div>
-            <button
-                id="login_button"
-                class="btn-login"
-                v-show="!isTelegramLogin"
-            >
+            <button id="login_button" class="btn-login" v-show="!isTelegramLogin">
                 LOGIN
             </button>
-            <!-- <div class="user_info_area" v-show="isTelegramLogin">
-                <span>Hello</span>
-                <label v-text="first_name"></label>
-                <label v-text="last_name"></label>
-            </div> -->
+            <button class="commit_reward" @click="commit_reward">Take reward and start training</button>
         </div>
 
         <div class="container-game">
@@ -123,7 +125,7 @@ export default {
                 </div>
             </div>
 
-            <SampleGame />
+            <SampleGame ref="phaserRef" @current-active-scene="currentScene" />
         </div>
 
         <div class="button-container">
@@ -149,13 +151,10 @@ export default {
         </div>
         <!-- <span v-text="telegram_bot_link" class="nunito-fonts"></span> -->
 
-        <div
-            :class="[
-                'popup-cooming-soon',
-                { 'closing-popup': !showCoomingSoon },
-            ]"
-            v-if="showCoomingSoon"
-        >
+        <div :class="[
+            'popup-cooming-soon',
+            { 'closing-popup': !showCoomingSoon },
+        ]" v-if="showCoomingSoon">
             <p>Coming soon</p>
             <button @click="hidePopupCoomingSoon" class="btn-close-coming-soon">
                 Close

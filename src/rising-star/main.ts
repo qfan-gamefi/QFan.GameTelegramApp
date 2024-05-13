@@ -1,5 +1,6 @@
 import { AUTO, Game } from 'phaser';
 import { MainScene } from './scenes/MainScene';
+import { IdleScene } from './scenes/IdleScene';
 //  Find out more information about the Game Config at:
 //  https://newdocs.phaser.io/docs/3.70.0/Phaser.Types.Core.GameConfig
 const config: Phaser.Types.Core.GameConfig = {
@@ -9,7 +10,7 @@ const config: Phaser.Types.Core.GameConfig = {
     parent: 'game-container',
     backgroundColor: '#028af8',
     scene: [
-        MainScene
+        IdleScene
     ],
     physics: {
         default: 'arcade',
@@ -20,7 +21,7 @@ const config: Phaser.Types.Core.GameConfig = {
     },
 };
 
-const StartGame = (parent: string) => {
+const StartGame = (parent: any) => {
 
     return new Game({ ...config, parent });
 

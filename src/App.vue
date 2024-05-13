@@ -2,8 +2,10 @@
 import { onMounted } from "vue";
 import Telegram from "vue-tg";
 import SampleGame from "./rising-star/SampleGame.vue";
+import Phaser from 'phaser';
+import { ref, toRaw } from 'vue';
 
-
+const phaserRef = ref();
 
 onMounted(() => {
     const myHeaders = new Headers();
@@ -25,7 +27,7 @@ onMounted(() => {
     //     .then((result) => console.log(result))
     //     .catch((error) => console.error(error));
 });
-const changeScene = () => {
+const commit_reward = () => {
     const scene = toRaw(phaserRef.value.scene);
     if (scene) {
         //  Call the changeScene method defined in the `MainMenu`, `Game` and `GameOver` Scenes

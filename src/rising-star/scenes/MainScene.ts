@@ -4,7 +4,7 @@ import { EventBus } from '../EventBus';
 
 const SKY_TEXT = 'sky';
 const GROUND_TEXT = 'ground';
-const DUDE = "dude";
+const DUDE_RUN = "dude_run";
 const BALL = 'ball';
 const MIN_KICK_POWER_X = 100;
 const MAX_KICK_POWER_X = 150;
@@ -22,35 +22,44 @@ export class MainScene extends Scene {
 
   platforms: Phaser.Physics.Arcade.StaticGroup;
   cursors: Phaser.Types.Input.Keyboard.CursorKeys | undefined;
-  player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+  player_run: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   ball: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+  loaded: Boolean = false;
+
+  constructor() {
+    super('MainScene');
+  }
 
   preload() {
+    this.loaded = true;
     this.load.image(GROUND_TEXT, './assets/platform.png');
     this.load.image(SKY_TEXT, './assets/bg.png');
-    this.load.spritesheet(DUDE, './assets/dude.png',
+    this.load.spritesheet(DUDE_RUN, './assets/dude_run.png',
       { frameWidth: 92, frameHeight: 125 });
     this.load.spritesheet(BALL, './assets/balls.png',
       { frameWidth: 32, frameHeight: 32 });
   }
 
   create() {
+    if (!this.loaded) {
+      this.preload();
+    }
     this.cursors = this.input.keyboard?.createCursorKeys();
     this.platforms = this.physics.add.staticGroup();
     this.add.image(400, 300, SKY_TEXT);
     this.platforms.create(400, 468, 'ground').setScale(2).refreshBody();
-    this.player = this.createPlayer();
+    this.player_run = this.createPlayer();
     this.ball = this.createBall();
-    this.physics.add.collider(this.player, this.platforms);
+    this.physics.add.collider(this.player_run, this.platforms);
     this.physics.add.collider(this.ball, this.platforms);
-    this.player.anims.play('right', true);
+    this.player_run.anims.play('right', true);
     this.ball.anims.play('right-ball', true);
-    this.physics.add.overlap(this.player, this.ball, this.kickball, undefined, this);
+    this.physics.add.overlap(this.player_run, this.ball, this.kickball, undefined, this);
     EventBus.emit('current-scene-ready', this);
   }
 
   update() {
-    const player_position = this.player.getCenter();
+    const player_position = this.player_run.getCenter();
     const ball_position = this.ball.getCenter();
     if (Phaser.Math.Distance.Between(player_position.x, player_position.y, ball_position.x, ball_position.y) > BALL_THRESH_HOLD) {
       if (this.ball.getData(KICK_POWER_X_TEXT)) {
@@ -100,24 +109,24 @@ export class MainScene extends Scene {
     return ball;
   }
   createPlayer() {
-    const player = this.physics.add.sprite(100, 350, DUDE);
+    const player = this.physics.add.sprite(100, 350, DUDE_RUN);
 
     this.anims.create({
       key: 'left',
-      frames: this.anims.generateFrameNumbers(DUDE, { start: 0, end: 2 }),
+      frames: this.anims.generateFrameNumbers(DUDE_RUN, { start: 0, end: 2 }),
       frameRate: 10,
       repeat: -1
     });
 
     this.anims.create({
       key: 'turn',
-      frames: [{ key: DUDE, frame: 4 }],
+      frames: [{ key: DUDE_RUN, frame: 4 }],
       frameRate: 20
     });
 
     this.anims.create({
       key: 'right',
-      frames: this.anims.generateFrameNumbers(DUDE, { start: 0, end: 5 }),
+      frames: this.anims.generateFrameNumbers(DUDE_RUN, { start: 0, end: 5 }),
       frameRate: 10,
       repeat: -1
     });
@@ -127,9 +136,12 @@ export class MainScene extends Scene {
     return player;
   }
   kickball() {
-    if (this.player.getBottomRight().x - this.ball.getBottomLeft().x > 30) {
+    if (this.player_run.getBottomRight().x - this.ball.getBottomLeft().x > 30) {
       this.ball.data.set(KICK_POWER_X_TEXT, Phaser.Math.FloatBetween(MIN_KICK_POWER_X, MAX_KICK_POWER_X));
       this.ball.data.set(KICK_POWER_Y_TEXT, Phaser.Math.FloatBetween(MIN_KICK_POWER_Y, MAX_KICK_POWER_Y));
     }
+  }
+  changeScene() {
+    this.scene.start('IdleScene');
   }
 }

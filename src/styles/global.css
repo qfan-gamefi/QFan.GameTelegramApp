@@ -1,0 +1,67 @@
+@font-face {
+    font-family: "GAMERIA";
+    src: url("../../public/assets/fonts/GAMERIA.ttf");
+}
+
+body {
+    font-family: "GAMERIA", sans-serif;
+}
+
+.nunito-fonts {
+    font-family: "Nunito", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+}
+
+button {
+    font-family: "GAMERIA", sans-serif;
+    outline: 0px;
+    margin: 0px;
+    cursor: pointer;
+    user-select: none;
+    vertical-align: middle;
+    appearance: none;
+    text-decoration: none;
+    color: inherit;
+    text-transform: uppercase;
+    min-width: 64px;
+    width: 100%;
+    box-sizing: border-box;
+    -webkit-box-pack: center;
+    justify-content: center;
+    white-space: nowrap;
+    transition: all 0.25s ease-in 0s;
+    height: 16px;
+    font-family: GAMERIA, sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 1px;
+    -webkit-text-fill-color: unset;
+    -webkit-text-stroke: 1px rgb(139, 129, 116);
+    background: rgb(226, 154, 54);
+    border: 2px solid rgb(163, 112, 41);
+    box-shadow: rgb(163, 112, 41) 0px 4px 0px;
+    position: relative;
+    display: flex;
+    -webkit-box-align: center;
+    align-items: center;
+    flex-direction: row;
+    padding: 14px 22px;
+    /* border-radius: 20px; */
+    gap: 8px;
+}
+
+button span {
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 1px;
+    background: linear-gradient(
+            rgb(246, 245, 244) 0%,
+            rgb(208, 204, 200) 115.91%
+        )
+        text;
+}

@@ -61,6 +61,7 @@ export default {
                 telegram_bot_link +
                     window.Telegram.WebApp.initDataUnsafe.user?.id || "",
             showCoomingSoon: false,
+            isCopiedToClipboard: false,
         };
     },
     methods: {
@@ -74,11 +75,11 @@ export default {
             document.execCommand("copy");
             document.body.removeChild(input);
             // Thông báo hoặc cập nhật trạng thái sau khi sao chép
-            alert("Copied to clipboard!");
-            // this.isCopiedToClipboard = true;
-            // setTimeout(() => {
-            //     this.isCopiedToClipboard = false;
-            // }, 2000);
+            // alert("Copied to clipboard!");
+            this.isCopiedToClipboard = true;
+            setTimeout(() => {
+                this.isCopiedToClipboard = false;
+            }, 2000);
         },
         showPopupCoomingSoon() {
             this.showCoomingSoon = true;
@@ -127,7 +128,9 @@ export default {
 
         <div class="button-container">
             <div class="row">
-                <button @click="showPopupCoomingSoon"><span>Shop</span></button>
+                <button @click="showPopupCoomingSoon">
+                    <span>Shop</span>
+                </button>
                 <button @click="copyToClipboard">
                     <span>Copy Invite</span>
                 </button>
@@ -154,7 +157,13 @@ export default {
             v-if="showCoomingSoon"
         >
             <p>Coming soon</p>
-            <button @click="hidePopupCoomingSoon">Close</button>
+            <button @click="hidePopupCoomingSoon" class="btn-close-coming-soon">
+                Close
+            </button>
+        </div>
+
+        <div class="copy-success-message" v-if="isCopiedToClipboard">
+            <span>Copied to clipboard!</span>
         </div>
     </div>
 </template>

@@ -1,0 +1,18 @@
+.btn-login {
+    /* margin-bottom: 10px; */
+}
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.row button {
+    flex: 1;
+    /* margin: 5px; */
+}

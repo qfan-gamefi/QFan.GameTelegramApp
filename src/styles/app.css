@@ -133,3 +133,118 @@
     width: auto;
     margin: 0 auto;
 }
+
+.wrap-commit_reward {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    background: #67bdef;
+    padding: 15px;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.wrap-commit_reward .box-info {
+    display: flex;
+    justify-content: space-between;
+}
+
+/* .wrap-commit_reward::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 10px;
+    background: red;
+    border-top-left-radius: 20px;
+    z-index: -1;
+    top: 0;
+} */
+
+.wrap-commit_reward .box-left {
+    text-shadow: 2px 2px 0 #9f8900, -2px -2px 0 #9f8900, 2px -2px 0 #9f8900,
+        -2px 2px 0 #9f8900, 2px 0 0 #9f8900, -2px 0 0 #9f8900, 0 2px 0 #9f8900,
+        0 -2px 0 #9f8900;
+}
+
+.wrap-commit_reward .box-right {
+    text-shadow: 2px 2px 0 #9f8900, -2px -2px 0 #9f8900, 2px -2px 0 #9f8900,
+        -2px 2px 0 #9f8900, 2px 0 0 #9f8900, -2px 0 0 #9f8900, 0 2px 0 #9f8900,
+        0 -2px 0 #9f8900;
+}
+
+.box-left .content {
+    font-size: 12px;
+}
+
+.wrap-score {
+    width: 70%;
+    position: absolute;
+    top: 16%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 30px;
+    border-radius: 10px;
+}
+
+.wrap-score::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #67bdef;
+    filter: blur(20px);
+    z-index: -1;
+    border-radius: 30%;
+}
+
+.wrap-score .content {
+    text-align: center;
+    text-shadow: 2px 2px 0 #9f8900, -2px -2px 0 #9f8900, 2px -2px 0 #9f8900,
+        -2px 2px 0 #9f8900, 2px 0 0 #9f8900, -2px 0 0 #9f8900, 0 2px 0 #9f8900,
+        0 -2px 0 #9f8900;
+}
+
+.content .score {
+    font-size: 28px;
+}
+
+.btn-commit_reward {
+    border-radius: 20px;
+    border: none;
+    width: auto;
+}
+
+.wrap-commit_reward::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 8px;
+    background: #8080806b;
+    z-index: 1;
+}
+
+.wrap-commit_reward::before {
+    bottom: 0;
+    content: "";
+    background: linear-gradient(to right, #8b910f, #fcea78);
+    height: 8px;
+    position: absolute;
+    left: 0;
+    z-index: 2;
+    width: var(--pseudo-width);
+}
+
+.box-info {
+    margin-bottom: 8px;
+}
+
+.icon-home {
+    width: 20px;
+}

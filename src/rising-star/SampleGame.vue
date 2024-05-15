@@ -12,10 +12,8 @@ const emit = defineEmits(["current-active-scene"]);
 
 onMounted(() => {
     game.value = StartGame("game-container");
-
     EventBus.on("current-scene-ready", (scene_instance: Phaser.Scene) => {
         emit("current-active-scene", scene_instance);
-
         scene.value = scene_instance;
     });
 });
@@ -27,7 +25,19 @@ onUnmounted(() => {
     }
 });
 
-defineExpose({ scene, game });
+defineExpose({
+    scene,
+    game: {
+        value: game.value,
+        isRunning: true,
+        start() {
+            this.isRunning = true;
+        },
+        stop() {
+            this.isRunning = false;
+        },
+    },
+});
 </script>
 
 <template>

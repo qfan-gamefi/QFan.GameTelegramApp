@@ -158,7 +158,6 @@
     justify-content: space-between;
 }
 
-
 /* .wrap-commit_reward::before {
     content: "";
     position: absolute;
@@ -172,11 +171,15 @@
 } */
 
 .wrap-commit_reward .box-left {
-    text-shadow: 2px 2px 0 #9f8900, -2px -2px 0 #9f8900, 2px -2px 0 #9f8900, -2px 2px 0 #9f8900, 2px 0 0 #9f8900, -2px 0 0 #9f8900, 0 2px 0 #9f8900, 0 -2px 0 #9f8900;
+    text-shadow: 2px 2px 0 #9f8900, -2px -2px 0 #9f8900, 2px -2px 0 #9f8900,
+        -2px 2px 0 #9f8900, 2px 0 0 #9f8900, -2px 0 0 #9f8900, 0 2px 0 #9f8900,
+        0 -2px 0 #9f8900;
 }
 
 .wrap-commit_reward .box-right {
-    text-shadow: 2px 2px 0 #9f8900, -2px -2px 0 #9f8900, 2px -2px 0 #9f8900, -2px 2px 0 #9f8900, 2px 0 0 #9f8900, -2px 0 0 #9f8900, 0 2px 0 #9f8900, 0 -2px 0 #9f8900;
+    text-shadow: 2px 2px 0 #9f8900, -2px -2px 0 #9f8900, 2px -2px 0 #9f8900,
+        -2px 2px 0 #9f8900, 2px 0 0 #9f8900, -2px 0 0 #9f8900, 0 2px 0 #9f8900,
+        0 -2px 0 #9f8900;
 }
 
 .box-left .content {
@@ -208,7 +211,13 @@
 
 .wrap-score .content {
     text-align: center;
-    text-shadow: 2px 2px 0 #9f8900, -2px -2px 0 #9f8900, 2px -2px 0 #9f8900, -2px 2px 0 #9f8900, 2px 0 0 #9f8900, -2px 0 0 #9f8900, 0 2px 0 #9f8900, 0 -2px 0 #9f8900;
+    text-shadow: 2px 2px 0 #9f8900, -2px -2px 0 #9f8900, 2px -2px 0 #9f8900,
+        -2px 2px 0 #9f8900, 2px 0 0 #9f8900, -2px 0 0 #9f8900, 0 2px 0 #9f8900,
+        0 -2px 0 #9f8900;
+}
+
+.wrap-score .content img {
+    width: 45px;
 }
 
 .content .score {

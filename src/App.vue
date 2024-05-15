@@ -6,15 +6,30 @@ import { ref, toRaw, onMounted } from "vue";
 
 const phaserRef = ref();
 
-onMounted(() => {});
+onMounted(() => {
+    update_sence();
+});
+
 const commit_reward = () => {
     const scene = toRaw(phaserRef.value.scene);
+    const game = toRaw(phaserRef.value.game);
+
+    // if (action === "toggle") {
+    //     if (game.isRunning) {
+    //         game.stop();
+    //     } else {
+    //         game.start();
+    //     }
+    // }
 
     if (scene) {
-        //  Call the changeScene method defined in the `MainMenu`, `Game` and `GameOver` Scenes
         scene.changeScene();
     }
 };
+
+// const toggleGame = () => {
+//     commit_reward("toggle");
+// };
 </script>
 
 <script lang="ts">
@@ -136,26 +151,34 @@ export default {
         },
         async register() {
             try {
-                    const myHeaders = new Headers();
-                    myHeaders.append("Content-Type", "application/json");
+                const myHeaders = new Headers();
+                myHeaders.append("Content-Type", "application/json");
 
-                    const response = await fetch(
-                        "https://qfan-api.qcloud.asia/api/players",
-                        {
-                            method: "POST",
-                            redirect: "follow",
-                            headers: myHeaders,
-                            body: JSON.stringify({
-                                "data": {
-                                    "playerId": window.Telegram.WebApp.initDataUnsafe.user?.id,
-                                    "firstName": window.Telegram.WebApp.initDataUnsafe.user?.first_name,
-                                    "lastName": window.Telegram.WebApp.initDataUnsafe.user?.last_name,
-                                    "refererCode": window.Telegram.WebApp.initDataUnsafe.start_param
-                                }
-                                })
-                        }
-                    );
-                    const data = await response.json();
+                const response = await fetch(
+                    "https://qfan-api.qcloud.asia/api/players",
+                    {
+                        method: "POST",
+                        redirect: "follow",
+                        headers: myHeaders,
+                        body: JSON.stringify({
+                            data: {
+                                playerId:
+                                    window.Telegram.WebApp.initDataUnsafe.user
+                                        ?.id,
+                                firstName:
+                                    window.Telegram.WebApp.initDataUnsafe.user
+                                        ?.first_name,
+                                lastName:
+                                    window.Telegram.WebApp.initDataUnsafe.user
+                                        ?.last_name,
+                                refererCode:
+                                    window.Telegram.WebApp.initDataUnsafe
+                                        .start_param,
+                            },
+                        }),
+                    }
+                );
+                const data = await response.json();
 
                 if (data?.data) {
                     this.isPopupCode = true;
@@ -169,42 +192,24 @@ export default {
                 console.error("Error fetching API data:", error);
             }
         },
-        async fetchLogin() {
+        async getInfoUser() {
             try {
-                // const response = await fetch(
-                //     "https://qfan-api.qcloud.asia/api/auth/local",
-                //     {
-                //         method: "POST",
-                //         headers: {
-                //             "Content-Type": "application/json",
-                //         },
-                //         body: JSON.stringify({
-                //             // identifier: this.idUser,
-                //             // password: this.idUser,
-                //             identifier: "huan123",
-                //             password: "huan123",
-                //         }),
-                //     }
-                // );
-                var response = await fetch(
-                    "https://qfan-api.qcloud.asia/api/players?populate=qpoint&filters[playerId]="+window.Telegram.WebApp.initDataUnsafe.user?.id,
+                const response = await fetch(
+                    `https://qfan-api.qcloud.asia/api/players?populate=qpoint&filters[playerId]=${this.idUser}`,
                     {
                         method: "GET",
-                        redirect: "follow"
+                        redirect: "follow",
                     }
                 );
                 var data = await response.json();
-                if(data['data'].length == 0){
-                    this.register();
-                }
-                else{
+                if (data["data"].length == 0) {
+                    // this.register(); // tạm ẩn
+                } else {
                     this.dataLogin = data.data[0];
                     this.dataQPoint =
                         data.data[0].attributes.qpoint.data.attributes;
                 }
-
             } catch (error) {
-                // this.register();
                 console.error("Error fetching API data:", error);
             }
         },
@@ -234,7 +239,7 @@ export default {
 
                 if (data) {
                     console.log(data);
-                    // this.isPopupCode = false;
+                    // this.isPopupCode = false; // neu co thi dong popup
                 }
             } catch (error) {
                 this.register();
@@ -267,7 +272,7 @@ export default {
             // const rewardTime: any = new Date(
             //     this.dataQPoint.nextTakeRewardTime
             // ).getTime();
-            const rewardTime = 1915770552375;
+            const rewardTime = Date.now() + 10000;
 
             const timeDiff = rewardTime - currentTime;
 
@@ -278,12 +283,16 @@ export default {
                 const timeDiff = rewardTime - currentTime;
                 this.countdown = this.formatTime(timeDiff);
                 this.isCountingDown = timeDiff > 0;
+
+                // if (this.isCountingDown) {
+                //     commit_reward("toggle");
+                // }
             }, 1000);
         },
     },
     async mounted() {
         this.fetchApiData();
-        await this.fetchLogin();
+        await this.getInfoUser();
         await this.countdownFunc();
     },
 };
@@ -322,6 +331,7 @@ export default {
                 <div class="content">
                     <!-- <div>in storage:</div>
                     <div class="score"></div> -->
+                    <img src="./../public/assets/logo.svg" />
                     <div>QFP Balance: {{ dataQPoint?.balance }}</div>
                 </div>
             </div>
@@ -329,8 +339,8 @@ export default {
             <div class="wrap-commit_reward" :style="beforeStyle">
                 <div class="box-info">
                     <div class="box-left">
-                        <div class="title">Storage</div>
-                        <div class="content">{{ countdown }} to fill</div>
+                        <div class="title">Remain:</div>
+                        <div class="content">{{ countdown }} to train</div>
                     </div>
                     <div class="box-right">
                         <button

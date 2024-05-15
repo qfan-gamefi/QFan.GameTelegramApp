@@ -6,9 +6,7 @@ import { ref, toRaw, onMounted } from "vue";
 
 const phaserRef = ref();
 
-onMounted(() => {
-    update_sence();
-});
+onMounted(() => {});
 
 const commit_reward = () => {
     const scene = toRaw(phaserRef.value.scene);
@@ -202,12 +200,12 @@ export default {
                     }
                 );
                 var data = await response.json();
-                if (data["data"].length == 0) {
+                if (data?.["data"]?.length == 0) {
                     // this.register(); // tạm ẩn
                 } else {
-                    this.dataLogin = data.data[0];
+                    this.dataLogin = data?.data?.[0];
                     this.dataQPoint =
-                        data.data[0].attributes.qpoint.data.attributes;
+                        data?.data?.[0]?.attributes?.qpoint?.data?.attributes;
                 }
             } catch (error) {
                 console.error("Error fetching API data:", error);

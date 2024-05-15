@@ -29,7 +29,6 @@ export default {
         // Kiểm tra xem Telegram WebApp đã khởi tạo dữ liệu hay chưa
         if (window?.Telegram?.WebApp?.initDataUnsafe) {
             const user = window.Telegram.WebApp.initDataUnsafe.user;
-            // user.id
             if (user) {
                 first_name = user.first_name || "";
                 last_name = user.last_name || "";
@@ -47,21 +46,22 @@ export default {
             showCoomingSoon: false,
             isCopiedToClipboard: false,
             apiDataWidth: 10,
-            dataLogin: {
-                jwt: "",
-                user: {
-                    id: null,
-                    username: null,
-                    email: null,
-                    provider: null,
-                    confirmed: true,
-                    blocked: false,
-                    referer_code: null,
-                    qpoint: null,
-                    createdAt: "2024-05-13T10:13:05.573Z",
-                    updatedAt: "2024-05-13T11:58:34.300Z",
-                },
+            dataLogin: null,
+            dataQPoint: {
+                balance: "",
+                lastTakeRewardTime: "",
+                nextTakeRewardTime: "",
+                rewardAmount: "100",
+                createdAt: "",
+                updatedAt: "",
+                publishedAt: "",
+                rewardScheduleHour: "",
             },
+            countdown: "",
+            isCountingDown: false,
+            isPopupCode: false,
+            code: null,
+            errorMessage: "",
         };
     },
     computed: {
@@ -94,6 +94,9 @@ export default {
         hidePopupCoomingSoon() {
             this.showCoomingSoon = false;
         },
+        hidePopupCode() {
+            this.isPopupCode = false;
+        },
         fetchApiData() {
             this.apiDataWidth = 79;
             // try {
@@ -104,32 +107,174 @@ export default {
             //     console.error("Error fetching API data:", error);
             // }
         },
-        async fetchLogin() {
+
+        async loginTele() {
             try {
                 const response = await fetch(
-                    "https://qfan-api.qcloud.asia/api/auth/local",
+                    "https://api.telegram.org/bot7113766207:AAGgpOehwXbbTO83XGak9T5qzbp9p7Wyo8E/getMe",
+                    {
+                        method: "POST",
+                        headers: {
+                            accept: "application/json",
+
+                            "content-type": "application/json",
+                        },
+                    }
+                );
+                const data = await response.json();
+
+                this.idUser = data.result.id;
+
+                if (data.result.id) {
+                    // gọi màn login theo user id
+                    // this.register();
+                    // this.fetchLogin();
+                }
+            } catch (error) {
+                console.error("Error fetching API data:", error);
+            }
+        },
+        async register() {
+            try {
+                const response = await fetch(
+                    "https://qfan-api.qcloud.asia/api/auth/local/register",
                     {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
                         },
                         body: JSON.stringify({
-                            identifier: this.idUser,
-                            password: this.idUser,
+                            // username: this.idUser,
+                            // email: `${this.idUser}@gmail.com`,
+                            // password: this.idUser,
+                            username: "huan123",
+                            email: `huan123@gmail.com`,
+                            password: "huan123",
                         }),
                     }
                 );
                 const data = await response.json();
 
-                this.dataLogin = data;
+                if (data?.data) {
+                    this.isPopupCode = true;
+                } else {
+                    alert(data.error.message);
+                }
             } catch (error) {
                 console.error("Error fetching API data:", error);
             }
         },
+        async fetchLogin() {
+            try {
+                // const response = await fetch(
+                //     "https://qfan-api.qcloud.asia/api/auth/local",
+                //     {
+                //         method: "POST",
+                //         headers: {
+                //             "Content-Type": "application/json",
+                //         },
+                //         body: JSON.stringify({
+                //             // identifier: this.idUser,
+                //             // password: this.idUser,
+                //             identifier: "huan123",
+                //             password: "huan123",
+                //         }),
+                //     }
+                // );
+                const response = await fetch(
+                    "https://qfan-api.qcloud.asia/api/players?populate=qpoint&filters[playerId]=2123800227",
+                    {
+                        method: "GET",
+                    }
+                );
+                const data = await response.json();
+
+                this.dataLogin = data.data[0];
+                this.dataQPoint =
+                    data.data[0].attributes.qpoint.data.attributes;
+            } catch (error) {
+                // this.register();
+                console.error("Error fetching API data:", error);
+            }
+        },
+
+        async submitCode() {
+            if (!this.code) {
+                console.log(this.code);
+                this.errorMessage = "Code is required!";
+                return;
+            }
+            try {
+                this.code = null; // Clear the input field after submission
+                this.errorMessage = "";
+                const response = await fetch(
+                    "https://qfan-api.qcloud.asia/api/player/checkRefererCode",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            refererCode: this.code,
+                        }),
+                    }
+                );
+                const data = await response.json();
+
+                if (data) {
+                    console.log(data);
+                    // this.isPopupCode = false;
+                }
+            } catch (error) {
+                this.register();
+                console.error("Error fetching API data:", error);
+            }
+        },
+        clearError() {
+            this.errorMessage = "";
+        },
+        formatTime(ms: any) {
+            if (ms <= 0) {
+                return "Time expired";
+            }
+
+            const seconds = Math.floor((ms / 1000) % 60);
+            const minutes = Math.floor((ms / (1000 * 60)) % 60);
+            const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
+
+            return `${this.pad(hours)}:${this.pad(minutes)}:${this.pad(
+                seconds
+            )}`;
+        },
+        // Phương thức để thêm số 0 vào trước nếu số là một chữ số
+        pad(value: any) {
+            return value < 10 ? "0" + value : value;
+        },
+
+        countdownFunc() {
+            const currentTime: any = Date.now();
+            // const rewardTime: any = new Date(
+            //     this.dataQPoint.nextTakeRewardTime
+            // ).getTime();
+            const rewardTime = 1915770552375;
+
+            const timeDiff = rewardTime - currentTime;
+
+            this.countdown = this.formatTime(timeDiff);
+            // Cập nhật mỗi giây
+            setInterval(() => {
+                const currentTime = Date.now();
+                const timeDiff = rewardTime - currentTime;
+                this.countdown = this.formatTime(timeDiff);
+                this.isCountingDown = timeDiff > 0;
+            }, 1000);
+        },
     },
-    mounted() {
+    async mounted() {
         this.fetchApiData();
-        this.fetchLogin();
+        await this.loginTele();
+        await this.fetchLogin();
+        await this.countdownFunc();
     },
 };
 </script>
@@ -165,9 +310,9 @@ export default {
 
             <div class="wrap-score">
                 <div class="content">
-                    <div>in storage:</div>
-                    <div class="score">{{ dataLogin?.user?.qpoint }}</div>
-                    <div>HOT Balance: 90.512399</div>
+                    <!-- <div>in storage:</div>
+                    <div class="score"></div> -->
+                    <div>HOT Balance: {{ dataQPoint?.balance }}</div>
                 </div>
             </div>
 
@@ -175,14 +320,15 @@ export default {
                 <div class="box-info">
                     <div class="box-left">
                         <div class="title">Storage</div>
-                        <div class="content">10h 29m to fill</div>
+                        <div class="content">{{ countdown }} to fill</div>
                     </div>
                     <div class="box-right">
                         <button
                             class="btn-commit_reward"
                             @click="commit_reward"
+                            :disabled="isCountingDown"
                         >
-                            Claim
+                            Train
                         </button>
                     </div>
                 </div>
@@ -246,6 +392,29 @@ export default {
             <button @click="hidePopupCoomingSoon" class="btn-close-coming-soon">
                 Close
             </button>
+        </div>
+
+        <!-- popup refere code -->
+        <div class="popup-referer-code" v-if="isPopupCode">
+            <div class="referer-code">Referer code</div>
+            <form @submit.prevent="submitCode">
+                <input
+                    class="code-input"
+                    :class="{ 'input-error': errorMessage }"
+                    type="text"
+                    v-model="code"
+                    id="code"
+                    @input="clearError"
+                />
+                <div v-if="errorMessage" class="text-err-code">
+                    {{ errorMessage }}
+                </div>
+                <button class="btn-submit-code" type="submit">Submit</button>
+            </form>
+
+            <!-- <button @click="hidePopupCode" class="btn-close-coming-soon">
+                Close
+            </button> -->
         </div>
 
         <!-- copy to clipboard -->

@@ -146,10 +146,18 @@
     overflow: hidden;
 }
 
+.btn-commit_reward:disabled {
+    opacity: 0.5;
+    /* làm mờ button khi disabled */
+    cursor: not-allowed;
+    /* thay đổi con trỏ khi disabled */
+}
+
 .wrap-commit_reward .box-info {
     display: flex;
     justify-content: space-between;
 }
+
 
 /* .wrap-commit_reward::before {
     content: "";
@@ -164,15 +172,11 @@
 } */
 
 .wrap-commit_reward .box-left {
-    text-shadow: 2px 2px 0 #9f8900, -2px -2px 0 #9f8900, 2px -2px 0 #9f8900,
-        -2px 2px 0 #9f8900, 2px 0 0 #9f8900, -2px 0 0 #9f8900, 0 2px 0 #9f8900,
-        0 -2px 0 #9f8900;
+    text-shadow: 2px 2px 0 #9f8900, -2px -2px 0 #9f8900, 2px -2px 0 #9f8900, -2px 2px 0 #9f8900, 2px 0 0 #9f8900, -2px 0 0 #9f8900, 0 2px 0 #9f8900, 0 -2px 0 #9f8900;
 }
 
 .wrap-commit_reward .box-right {
-    text-shadow: 2px 2px 0 #9f8900, -2px -2px 0 #9f8900, 2px -2px 0 #9f8900,
-        -2px 2px 0 #9f8900, 2px 0 0 #9f8900, -2px 0 0 #9f8900, 0 2px 0 #9f8900,
-        0 -2px 0 #9f8900;
+    text-shadow: 2px 2px 0 #9f8900, -2px -2px 0 #9f8900, 2px -2px 0 #9f8900, -2px 2px 0 #9f8900, 2px 0 0 #9f8900, -2px 0 0 #9f8900, 0 2px 0 #9f8900, 0 -2px 0 #9f8900;
 }
 
 .box-left .content {
@@ -204,9 +208,7 @@
 
 .wrap-score .content {
     text-align: center;
-    text-shadow: 2px 2px 0 #9f8900, -2px -2px 0 #9f8900, 2px -2px 0 #9f8900,
-        -2px 2px 0 #9f8900, 2px 0 0 #9f8900, -2px 0 0 #9f8900, 0 2px 0 #9f8900,
-        0 -2px 0 #9f8900;
+    text-shadow: 2px 2px 0 #9f8900, -2px -2px 0 #9f8900, 2px -2px 0 #9f8900, -2px 2px 0 #9f8900, 2px 0 0 #9f8900, -2px 0 0 #9f8900, 0 2px 0 #9f8900, 0 -2px 0 #9f8900;
 }
 
 .content .score {
@@ -247,4 +249,68 @@
 
 .icon-home {
     width: 20px;
+}
+
+.popup-referer-code {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border: 2px solid #ccc;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    animation: slideIn 0.5s forwards;
+    border-radius: 10px;
+    color: black;
+}
+
+.referer-code {
+    text-align: center;
+}
+
+.text-err-code {
+    color: red;
+    font-size: 12px;
+    position: absolute;
+}
+
+.code-input {
+    margin-top: 20px;
+    padding: 5px;
+    border: 2px solid #ccc;
+    transition: border-color 0.3s ease;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: #f0f0f0;
+    color: #333;
+    outline: none;
+}
+
+.code-input:focus {
+    border-color: #66afe9;
+    outline: none;
+}
+
+.input-error {
+    border-color: red;
+    animation: pulse 1s infinite;
+}
+
+.btn-submit-code {
+    margin-top: 20px;
+    border-radius: 5px;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
 }

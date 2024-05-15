@@ -24,10 +24,6 @@ const commit_reward = () => {
         scene.changeScene();
     }
 };
-
-// const toggleGame = () => {
-//     commit_reward("toggle");
-// };
 </script>
 
 <script lang="ts">

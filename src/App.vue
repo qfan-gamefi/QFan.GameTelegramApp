@@ -136,30 +136,35 @@ export default {
         },
         async register() {
             try {
-                const response = await fetch(
-                    "https://qfan-api.qcloud.asia/api/auth/local/register",
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            // username: this.idUser,
-                            // email: `${this.idUser}@gmail.com`,
-                            // password: this.idUser,
-                            username: "huan123",
-                            email: `huan123@gmail.com`,
-                            password: "huan123",
-                        }),
-                    }
-                );
-                const data = await response.json();
+                    const myHeaders = new Headers();
+                    myHeaders.append("Content-Type", "application/json");
+
+                    const response = await fetch(
+                        "https://qfan-api.qcloud.asia/api/players",
+                        {
+                            method: "POST",
+                            redirect: "follow",
+                            headers: myHeaders,
+                            body: JSON.stringify({
+                                "data": {
+                                    "playerId": window.Telegram.WebApp.initDataUnsafe.user?.id,
+                                    "firstName": window.Telegram.WebApp.initDataUnsafe.user?.first_name,
+                                    "lastName": window.Telegram.WebApp.initDataUnsafe.user?.last_name,
+                                    "refererCode": window.Telegram.WebApp.initDataUnsafe.start_param
+                                }
+                                })
+                        }
+                    );
+                    const data = await response.json();
 
                 if (data?.data) {
                     this.isPopupCode = true;
                 } else {
                     alert(data.error.message);
                 }
+                this.dataLogin = data.data[0];
+                this.dataQPoint =
+                    data.data[0].attributes.qpoint.data.attributes;
             } catch (error) {
                 console.error("Error fetching API data:", error);
             }
@@ -181,17 +186,23 @@ export default {
                 //         }),
                 //     }
                 // );
-                const response = await fetch(
-                    "https://qfan-api.qcloud.asia/api/players?populate=qpoint&filters[playerId]=2123800227",
+                var response = await fetch(
+                    "https://qfan-api.qcloud.asia/api/players?populate=qpoint&filters[playerId]="+window.Telegram.WebApp.initDataUnsafe.user?.id,
                     {
                         method: "GET",
+                        redirect: "follow"
                     }
                 );
-                const data = await response.json();
+                var data = await response.json();
+                if(data['data'].length == 0){
+                    this.register();
+                }
+                else{
+                    this.dataLogin = data.data[0];
+                    this.dataQPoint =
+                        data.data[0].attributes.qpoint.data.attributes;
+                }
 
-                this.dataLogin = data.data[0];
-                this.dataQPoint =
-                    data.data[0].attributes.qpoint.data.attributes;
             } catch (error) {
                 // this.register();
                 console.error("Error fetching API data:", error);
@@ -272,7 +283,6 @@ export default {
     },
     async mounted() {
         this.fetchApiData();
-        await this.loginTele();
         await this.fetchLogin();
         await this.countdownFunc();
     },
@@ -312,7 +322,7 @@ export default {
                 <div class="content">
                     <!-- <div>in storage:</div>
                     <div class="score"></div> -->
-                    <div>HOT Balance: {{ dataQPoint?.balance }}</div>
+                    <div>QFP Balance: {{ dataQPoint?.balance }}</div>
                 </div>
             </div>
 

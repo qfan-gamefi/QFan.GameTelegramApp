@@ -28,6 +28,7 @@
     border-radius: 5px;
     font-size: 12px;
     animation: slideIn 0.5s forwards;
+    z-index: 1000;
 }
 
 .container-game {

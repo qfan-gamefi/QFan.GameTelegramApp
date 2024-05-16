@@ -274,8 +274,8 @@ export default {
 };
 async function getPlayerInfo() {
     const response = await fetch(
-        // ${ window.Telegram.WebApp.initDataUnsafe.user?.id }
-        `https://qfan-api.qcloud.asia/api/players?populate=qpoint&filters[playerId]=` + 123,
+        // 
+        `https://qfan-api.qcloud.asia/api/players?populate=qpoint&filters[playerId]=${window.Telegram.WebApp.initDataUnsafe.user?.id}`,
         {
             method: "GET",
             redirect: "follow",

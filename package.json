@@ -26,6 +26,7 @@
     },
     "dependencies": {
         "@vueuse/core": "^10.9.0",
+        "axios": "^1.6.8",
         "phaser": "^3.80.1",
         "vue": "^3.4.20",
         "vue-tg": "^0.6.1"

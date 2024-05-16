@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Telegram from "vue-tg";
 import SampleGame from "./rising-star/SampleGame.vue";
-import Phaser from "phaser";
+// import Phaser from "phaser";
 import { ref, toRaw, onMounted } from "vue";
 
 const phaserRef = ref();
@@ -10,16 +10,6 @@ onMounted(() => {});
 
 const commit_reward = () => {
     const scene = toRaw(phaserRef.value.scene);
-    const game = toRaw(phaserRef.value.game);
-
-    // if (action === "toggle") {
-    //     if (game.isRunning) {
-    //         game.stop();
-    //     } else {
-    //         game.start();
-    //     }
-    // }
-
     if (scene) {
         scene.changeScene();
     }
@@ -27,7 +17,14 @@ const commit_reward = () => {
 </script>
 
 <script lang="ts">
+import InviteFrens from "./components/InviteFrens.vue";
+import MissionList from "./components/MissionsList.vue";
+
 export default {
+    components: {
+        InviteFrens,
+        MissionList,
+    },
     data() {
         const telegram_bot_link =
             "Invite Link: https://t.me/Sampletwabot?start=r_";
@@ -71,6 +68,8 @@ export default {
             isPopupCode: false,
             code: null,
             errorMessage: "",
+            showInvite: false,
+            showMission: false,
         };
     },
     computed: {
@@ -186,6 +185,8 @@ export default {
                 console.error("Error fetching API data:", error);
             }
         },
+
+        // b1: gọi info
         async getInfoUser() {
             try {
                 const response = await fetch(
@@ -270,6 +271,11 @@ export default {
 
             const timeDiff = rewardTime - currentTime;
 
+            if (timeDiff > 0) {
+                //gọi run take
+                // commit_reward();
+            }
+
             this.countdown = this.formatTime(timeDiff);
             // Cập nhật mỗi giây
             setInterval(() => {
@@ -277,11 +283,23 @@ export default {
                 const timeDiff = rewardTime - currentTime;
                 this.countdown = this.formatTime(timeDiff);
                 this.isCountingDown = timeDiff > 0;
-
-                // if (this.isCountingDown) {
-                //     commit_reward("toggle");
-                // }
             }, 1000);
+        },
+
+        handleReferal() {
+            this.showInvite = true;
+        },
+        closeInvite() {
+            this.showInvite = false;
+        },
+        handleInvite() {
+            this.copyToClipboard();
+        },
+        handleMission() {
+            this.showMission = true;
+        },
+        closeMission() {
+            this.showMission = false;
         },
     },
     async mounted() {
@@ -360,14 +378,21 @@ export default {
                     />
                     <span>Shop</span>
                 </button>
-                <button @click="copyToClipboard">
+                <button @click="handleReferal">
                     <img
                         src="./../public/assets/button-icons/copy-link.svg"
                         class="icon-home"
                     />
-                    <span>Copy Invite</span>
+                    <span>Referal</span>
                 </button>
+                <InviteFrens
+                    :visible="showInvite"
+                    @close="closeInvite"
+                    @invite="handleInvite"
+                    :idUser="idUser"
+                />
             </div>
+
             <div class="row">
                 <button @click="showPopupCoomingSoon">
                     <img
@@ -376,13 +401,20 @@ export default {
                     />
                     <span>Booster</span>
                 </button>
-                <button @click="showPopupCoomingSoon">
+
+                <button @click="handleMission">
                     <img
                         src="./../public/assets/button-icons/mission.svg"
                         class="icon-home"
                     />
                     <span>Mission</span>
                 </button>
+                <MissionList
+                    :visible="showMission"
+                    @close="closeMission"
+                    @invite="handleMission"
+                />
+
                 <button @click="showPopupCoomingSoon">
                     <img
                         src="./../public/assets/button-icons/event.svg"

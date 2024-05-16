@@ -6,7 +6,9 @@ import { ref, toRaw, onMounted } from "vue";
 
 const phaserRef = ref();
 
-onMounted(() => {});
+onMounted(() => {
+    var data = getPlayerInfo();
+});
 
 const commit_reward = () => {
     const scene = toRaw(phaserRef.value.scene);
@@ -19,7 +21,7 @@ const commit_reward = () => {
 <script lang="ts">
 import InviteFrens from "./components/InviteFrens.vue";
 import MissionList from "./components/MissionsList.vue";
-
+const REF_MESS_PREFIX: string = 'start r_'
 export default {
     components: {
         InviteFrens,
@@ -48,7 +50,7 @@ export default {
             idUser: window.Telegram.WebApp.initDataUnsafe.user?.id,
             telegram_bot_link:
                 telegram_bot_link +
-                    window.Telegram.WebApp.initDataUnsafe.user?.id || "",
+                window.Telegram.WebApp.initDataUnsafe.user?.id || "",
             showCoomingSoon: false,
             isCopiedToClipboard: false,
             apiDataWidth: 10,
@@ -115,72 +117,32 @@ export default {
             //     console.error("Error fetching API data:", error);
             // }
         },
-
-        async loginTele() {
-            try {
-                const response = await fetch(
-                    "https://api.telegram.org/bot7113766207:AAGgpOehwXbbTO83XGak9T5qzbp9p7Wyo8E/getMe",
-                    {
-                        method: "POST",
-                        headers: {
-                            accept: "application/json",
-
-                            "content-type": "application/json",
-                        },
-                    }
-                );
-                const data = await response.json();
-
-                this.idUser = data.result.id;
-
-                if (data.result.id) {
-                    // gọi màn login theo user id
-                    // this.register();
-                    // this.fetchLogin();
-                }
-            } catch (error) {
-                console.error("Error fetching API data:", error);
-            }
-        },
-        async register() {
+        async register(code: string) {
             try {
                 const myHeaders = new Headers();
                 myHeaders.append("Content-Type", "application/json");
 
-                const response = await fetch(
-                    "https://qfan-api.qcloud.asia/api/players",
-                    {
-                        method: "POST",
-                        redirect: "follow",
-                        headers: myHeaders,
-                        body: JSON.stringify({
-                            data: {
-                                playerId:
-                                    window.Telegram.WebApp.initDataUnsafe.user
-                                        ?.id,
-                                firstName:
-                                    window.Telegram.WebApp.initDataUnsafe.user
-                                        ?.first_name,
-                                lastName:
-                                    window.Telegram.WebApp.initDataUnsafe.user
-                                        ?.last_name,
-                                refererCode:
-                                    window.Telegram.WebApp.initDataUnsafe
-                                        .start_param,
-                            },
-                        }),
+                const raw = JSON.stringify({
+                    "message": {
+                        "from": {
+                            "id": window?.Telegram?.WebApp?.initDataUnsafe.user?.id,
+                            "first_name": window?.Telegram?.WebApp?.initDataUnsafe.user?.first_name,
+                            "last_name": window?.Telegram?.WebApp?.initDataUnsafe.user?.last_name
+                        },
+                        "text": "/start r_" + code
                     }
-                );
-                const data = await response.json();
+                });
 
-                if (data?.data) {
-                    this.isPopupCode = true;
-                } else {
-                    alert(data.error.message);
-                }
-                this.dataLogin = data.data[0];
-                this.dataQPoint =
-                    data.data[0].attributes.qpoint.data.attributes;
+                const requestOptions: any = {
+                    method: "POST",
+                    headers: myHeaders,
+                    body: raw,
+                    redirect: "follow"
+                };
+
+                await fetch("https://qfan-api.qcloud.asia/api/player/messageCallback", requestOptions);
+                this.getInfoUser();
+
             } catch (error) {
                 console.error("Error fetching API data:", error);
             }
@@ -189,26 +151,46 @@ export default {
         // b1: gọi info
         async getInfoUser() {
             try {
-                const response = await fetch(
-                    `https://qfan-api.qcloud.asia/api/players?populate=qpoint&filters[playerId]=${this.idUser}`,
-                    {
-                        method: "GET",
-                        redirect: "follow",
-                    }
-                );
-                var data = await response.json();
+                var data = await getPlayerInfo();
+                var refcode = window?.Telegram?.WebApp?.initDataUnsafe?.start_param?.replace(REF_MESS_PREFIX, '');
                 if (data?.["data"]?.length == 0) {
-                    // this.register(); // tạm ẩn
+                    if (refcode && await this.isValidRefCode(refcode)) {
+                        this.register(refcode);
+                    }
+                    else {
+                        this.isPopupCode = true;
+                    }
                 } else {
-                    this.dataLogin = data?.data?.[0];
-                    this.dataQPoint =
-                        data?.data?.[0]?.attributes?.qpoint?.data?.attributes;
+                    this.dataLogin = data?.data[0];
+                    this.dataQPoint = data?.data[0].attributes.qpoint.data.attributes;
                 }
+                this.dataLogin = data?.data[0];
+                this.dataQPoint = data?.data[0].attributes.qpoint.data.attributes;
             } catch (error) {
                 console.error("Error fetching API data:", error);
             }
         },
 
+        async isValidRefCode(referCode: string) {
+            const myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+
+            const raw = JSON.stringify({
+                "data": {
+                    "refererCode": referCode
+                }
+            });
+
+            const requestOptions: any = {
+                method: "POST",
+                headers: myHeaders,
+                body: raw,
+                redirect: "follow"
+            };
+
+            var response = await fetch("https://qfan-api.qcloud.asia/api/player/checkRefererCode", requestOptions);
+            return response.status == 200;
+        },
         async submitCode() {
             if (!this.code) {
                 console.log(this.code);
@@ -216,28 +198,11 @@ export default {
                 return;
             }
             try {
-                this.code = null; // Clear the input field after submission
-                this.errorMessage = "";
-                const response = await fetch(
-                    "https://qfan-api.qcloud.asia/api/player/checkRefererCode",
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            refererCode: this.code,
-                        }),
-                    }
-                );
-                const data = await response.json();
-
-                if (data) {
-                    console.log(data);
-                    // this.isPopupCode = false; // neu co thi dong popup
+                if (await this.isValidRefCode(this.code)) {
+                    this.isPopupCode = false;
+                    this.register(this.code);
                 }
             } catch (error) {
-                this.register();
                 console.error("Error fetching API data:", error);
             }
         },
@@ -267,7 +232,7 @@ export default {
             // const rewardTime: any = new Date(
             //     this.dataQPoint.nextTakeRewardTime
             // ).getTime();
-            const rewardTime = Date.now() + 10000;
+            const rewardTime = Date.now() + 1000;
 
             const timeDiff = rewardTime - currentTime;
 
@@ -303,11 +268,22 @@ export default {
         },
     },
     async mounted() {
-        this.fetchApiData();
         await this.getInfoUser();
         await this.countdownFunc();
     },
 };
+async function getPlayerInfo() {
+    const response = await fetch(
+        // ${ window.Telegram.WebApp.initDataUnsafe.user?.id }
+        `https://qfan-api.qcloud.asia/api/players?populate=qpoint&filters[playerId]=` + 123,
+        {
+            method: "GET",
+            redirect: "follow",
+        }
+    );
+    var data = await response.json();
+    return data;
+}
 </script>
 
 <style scoped>
@@ -321,11 +297,7 @@ export default {
             START TRAINING
         </button>
         <div>
-            <button
-                id="login_button"
-                class="btn-login"
-                v-show="!isTelegramLogin"
-            >
+            <button id="login_button" class="btn-login" v-show="!isTelegramLogin">
                 LOGIN
             </button>
         </div>
@@ -355,11 +327,7 @@ export default {
                         <div class="content">{{ countdown }} to train</div>
                     </div>
                     <div class="box-right">
-                        <button
-                            class="btn-commit_reward"
-                            @click="commit_reward"
-                            :disabled="isCountingDown"
-                        >
+                        <button class="btn-commit_reward" @click="commit_reward" :disabled="isCountingDown">
                             Train
                         </button>
                     </div>
@@ -372,54 +340,30 @@ export default {
         <div class="button-container">
             <div class="row">
                 <button @click="showPopupCoomingSoon">
-                    <img
-                        src="./../public/assets/button-icons/shopping-bag-3744.svg"
-                        class="icon-home"
-                    />
+                    <img src="./../public/assets/button-icons/shopping-bag-3744.svg" class="icon-home" />
                     <span>Shop</span>
                 </button>
                 <button @click="handleReferal">
-                    <img
-                        src="./../public/assets/button-icons/copy-link.svg"
-                        class="icon-home"
-                    />
+                    <img src="./../public/assets/button-icons/copy-link.svg" class="icon-home" />
                     <span>Referal</span>
                 </button>
-                <InviteFrens
-                    :visible="showInvite"
-                    @close="closeInvite"
-                    @invite="handleInvite"
-                    :idUser="idUser"
-                />
+                <InviteFrens :visible="showInvite" @close="closeInvite" @invite="handleInvite" :idUser="idUser" />
             </div>
 
             <div class="row">
                 <button @click="showPopupCoomingSoon">
-                    <img
-                        src="./../public/assets/button-icons/booster.svg"
-                        class="icon-home"
-                    />
+                    <img src="./../public/assets/button-icons/booster.svg" class="icon-home" />
                     <span>Booster</span>
                 </button>
 
                 <button @click="handleMission">
-                    <img
-                        src="./../public/assets/button-icons/mission.svg"
-                        class="icon-home"
-                    />
+                    <img src="./../public/assets/button-icons/mission.svg" class="icon-home" />
                     <span>Mission</span>
                 </button>
-                <MissionList
-                    :visible="showMission"
-                    @close="closeMission"
-                    @invite="handleMission"
-                />
+                <MissionList :visible="showMission" @close="closeMission" @invite="handleMission" />
 
                 <button @click="showPopupCoomingSoon">
-                    <img
-                        src="./../public/assets/button-icons/event.svg"
-                        class="icon-home"
-                    />
+                    <img src="./../public/assets/button-icons/event.svg" class="icon-home" />
                     <span>Event</span>
                 </button>
             </div>
@@ -427,13 +371,10 @@ export default {
         <!-- <span v-text="telegram_bot_link" class="nunito-fonts"></span> -->
 
         <!-- popup coming sooon -->
-        <div
-            :class="[
-                'popup-cooming-soon',
-                { 'closing-popup': !showCoomingSoon },
-            ]"
-            v-if="showCoomingSoon"
-        >
+        <div :class="[
+            'popup-cooming-soon',
+            { 'closing-popup': !showCoomingSoon },
+        ]" v-if="showCoomingSoon">
             <p>Coming soon</p>
             <button @click="hidePopupCoomingSoon" class="btn-close-coming-soon">
                 Close
@@ -444,14 +385,8 @@ export default {
         <div class="popup-referer-code" v-if="isPopupCode">
             <div class="referer-code">Referer code</div>
             <form @submit.prevent="submitCode">
-                <input
-                    class="code-input"
-                    :class="{ 'input-error': errorMessage }"
-                    type="text"
-                    v-model="code"
-                    id="code"
-                    @input="clearError"
-                />
+                <input class="code-input" :class="{ 'input-error': errorMessage }" type="text" v-model="code" id="code"
+                    @input="clearError" />
                 <div v-if="errorMessage" class="text-err-code">
                     {{ errorMessage }}
                 </div>

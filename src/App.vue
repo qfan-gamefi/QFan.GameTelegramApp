@@ -109,6 +109,9 @@ export default {
         },
 
         async register() {
+            if (!window.Telegram.WebApp.initDataUnsafe.user) {
+                return;
+            }
             try {
                 const dataForm = {
                     id: this.idUser,
@@ -323,6 +326,7 @@ export default {
         await this.countdownFunc();
     },
     async updated() {
+        this.updateSence();
     },
 
 };

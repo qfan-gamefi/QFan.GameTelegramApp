@@ -106,8 +106,6 @@ export default {
                 } else {
                     this.inviteData = [];
                 }
-
-                this.inviteData = response?.data;
             } catch (error) {
                 this.inviteData = [];
                 console.error("Error fetching API data:", error);

@@ -171,6 +171,7 @@
 .wrap-commit_reward .box-info {
     display: flex;
     justify-content: space-between;
+    align-items: center;
 }
 
 .wrap-commit_reward .box-left {
@@ -256,11 +257,21 @@
 }
 
 .box-info {
-    margin-bottom: 8px;
+    margin-bottom: 5px;
+}
+
+.box-left-train {
+    font-size: 10px;
+    align-items: center;
+    display: flex;
+}
+
+.box-left-train img {
+    width: 20px;
 }
 
 .icon-home {
-    width: 20px;
+    width: 15px;
 }
 
 .popup-referer-code {

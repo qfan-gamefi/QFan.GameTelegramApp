@@ -232,29 +232,44 @@ export default {
 
         async handleReward() {
             try {
-                const phaserRef: any = this.$refs.phaserRef as
-                    | {
-                        scene?: {
-                            changeScene: () => void;
-                        };
-                    }
-                    | undefined;
-                const scene = toRaw(phaserRef?.scene);
-
-                if (scene) {
-                    const res = await userService.takeReward(this.idUser!);
-                    if (res) {
-                        await this.getInfoUser();
-                        await this.countdownFunc();
-                    }
-
-                    scene.changeScene();
+                const res = await userService.takeReward(this.idUser!);
+                if (res) {
+                    await this.getInfoUser();
+                    await this.countdownFunc();
                 }
+                this.updateSence();
             } catch (error) {
                 this.countdownFunc();
             }
         },
+        async updateSence() {
+            const phaserRef: any = this.$refs.phaserRef as
+                | {
+                    scene?: {
+                        changeScene: () => void;
+                    };
+                }
+                | undefined;
+            const scene = toRaw(phaserRef?.scene);
+            const givenDateTimeString = this.dataQPoint.nextTakeRewardTime;
 
+            // Parse the given date-time string to a Date object
+            const givenDateTime = new Date(givenDateTimeString);
+
+            // Get the current date-time in UTC
+            const currentDateTime = new Date((new Date()).toUTCString());
+
+            // Calculate the difference in milliseconds
+            const differenceInMilliseconds = currentDateTime.getTime() - givenDateTime.getTime();
+
+
+            if (scene.scene.key == 'IdleScene' && differenceInMilliseconds < 0) {
+                scene.changeScene();
+            }
+            else if (scene.scene.key == 'MainScene' && differenceInMilliseconds > 0) {
+                scene.changeScene();
+            }
+        },
         // Phương thức để thêm số 0 vào trước nếu số là một chữ số
         pad(value: any) {
             return value < 10 ? "0" + value : value;

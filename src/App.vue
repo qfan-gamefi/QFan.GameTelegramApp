@@ -13,14 +13,13 @@ const phaserRef: any = ref<{ scene?: PhaserScene }>();
 onMounted(() => {
     // alert(JSON.stringify(window.Telegram.WebApp.initDataUnsafe.user));
 });
-
 </script>
 
 <script lang="ts">
 import InviteFrens from "./components/InviteFrens.vue";
 import MissionList from "./components/MissionsList.vue";
 import userService from "./services/userService";
-const REF_MESS_PREFIX: string = 'start r_'
+const REF_MESS_PREFIX: string = "start r_";
 export default {
     components: {
         InviteFrens,
@@ -49,7 +48,7 @@ export default {
             idUser: window.Telegram.WebApp.initDataUnsafe.user?.id,
             telegram_bot_link:
                 telegram_bot_link +
-                window.Telegram.WebApp.initDataUnsafe.user?.id || "",
+                    window.Telegram.WebApp.initDataUnsafe.user?.id || "",
             showCoomingSoon: false,
             isCopiedToClipboard: false,
             isSuccess: false,
@@ -68,7 +67,7 @@ export default {
             countdown: "",
             isCountingDown: false,
             isPopupCode: false,
-            code: null,
+            code: "",
             errorMessage: "",
             showInvite: false,
             showMission: false,
@@ -130,7 +129,7 @@ export default {
                     setTimeout(() => {
                         this.isSuccess = false;
                     }, 2000);
-                    this.code = null;
+                    this.code = "";
                     this.getInfoUser();
                 } else {
                     alert("Lỗi");
@@ -145,13 +144,16 @@ export default {
             try {
                 var data = await userService.getInfo(this.idUser!);
                 if (data?.data?.length == 0) {
-                    var refcode = window?.Telegram?.WebApp?.initDataUnsafe?.start_param?.replace(REF_MESS_PREFIX, '') ?? '';
+                    var refcode: string =
+                        window?.Telegram?.WebApp?.initDataUnsafe?.start_param?.replace(
+                            REF_MESS_PREFIX,
+                            ""
+                        ) ?? "";
                     // nhập mã code => tự động đăng ký
                     if (await this.isValidRefCode(refcode)) {
                         this.code = refcode;
                         this.register();
-                    }
-                    else {
+                    } else {
                         this.isPopupCode = true;
                     }
                 } else {
@@ -227,24 +229,27 @@ export default {
         },
 
         async handleReward() {
-            const phaserRef: any = this.$refs.phaserRef as
-                | {
-                    scene?: {
-                        changeScene: () => void;
-                    };
-                }
-                | undefined;
-            const scene = toRaw(phaserRef?.scene);
+            try {
+                const phaserRef: any = this.$refs.phaserRef as
+                    | {
+                          scene?: {
+                              changeScene: () => void;
+                          };
+                      }
+                    | undefined;
+                const scene = toRaw(phaserRef?.scene);
 
-            if (scene) {
-                const res = await userService.takeReward(this.idUser!);
-                console.log(res);
-                if (res) {
-                    await this.getInfoUser();
-                    await this.countdownFunc();
-                }
+                if (scene) {
+                    const res = await userService.takeReward(this.idUser!);
+                    if (res) {
+                        await this.getInfoUser();
+                        await this.countdownFunc();
+                    }
 
-                scene.changeScene();
+                    scene.changeScene();
+                }
+            } catch (error) {
+                this.countdownFunc();
             }
         },
         // Phương thức để thêm số 0 vào trước nếu số là một chữ số
@@ -253,7 +258,7 @@ export default {
         },
 
         countdownFunc() {
-            const totalTime = 2 * 60 * 60 * 1000;
+            const totalTime = 1 * 60 * 60 * 1000;
             const rewardTime: any = new Date(
                 this.dataQPoint.nextTakeRewardTime
             ).getTime();
@@ -261,7 +266,9 @@ export default {
             // Cập nhật mỗi giây
             setInterval(() => {
                 const currentTime: any = Date.now();
+
                 const timeDiff = rewardTime - currentTime;
+                // const timeDiff = 1715942661465 - 1715942660465;
 
                 // if (timeDiff > 0) {
                 //     gọi run take
@@ -271,7 +278,9 @@ export default {
 
                 const remainingPercentage = (timeDiff / totalTime) * 100;
                 this.apiDataWidth = 100 - remainingPercentage;
+
                 this.countdown = this.formatTime(timeDiff);
+
                 this.isCountingDown = timeDiff > 0;
             }, 1000);
         },
@@ -310,7 +319,11 @@ export default {
             START TRAINING
         </button>
         <div>
-            <button id="login_button" class="btn-login" v-show="!isTelegramLogin">
+            <button
+                id="login_button"
+                class="btn-login"
+                v-show="!isTelegramLogin"
+            >
                 LOGIN
             </button>
         </div>
@@ -336,12 +349,28 @@ export default {
             <!-- :style="{ width: apiDataWidth + '%' }" -->
             <div class="wrap-commit_reward" :style="beforeStyle">
                 <div class="box-info">
-                    <div class="box-left">
+                    <div
+                        class="box-left"
+                        v-if="countdown !== ('Time expired' || '')"
+                    >
                         <div class="title">Remain:</div>
                         <div class="content">{{ countdown }} to train</div>
                     </div>
+
+                    <div
+                        class="box-left-train"
+                        v-if="countdown === 'Time expired'"
+                    >
+                        Click "Train" to take +
+                        {{ dataQPoint?.rewardAmount }}
+                        <img src="./../public/assets/logo.svg" />
+                    </div>
                     <div class="box-right">
-                        <button class="btn-commit_reward" @click="handleReward" :disabled="isCountingDown">
+                        <button
+                            class="btn-commit_reward"
+                            @click="handleReward"
+                            :disabled="isCountingDown"
+                        >
                             Train
                         </button>
                         <!-- @click="commit_reward" -->
@@ -355,30 +384,54 @@ export default {
         <div class="button-container">
             <div class="row">
                 <button @click="showPopupCoomingSoon">
-                    <img src="./../public/assets/button-icons/shopping-bag-3744.svg" class="icon-home" />
+                    <img
+                        src="./../public/assets/button-icons/shopping-bag-3744.svg"
+                        class="icon-home"
+                    />
                     <span>Shop</span>
                 </button>
                 <button @click="handleReferal">
-                    <img src="./../public/assets/button-icons/copy-link.svg" class="icon-home" />
+                    <img
+                        src="./../public/assets/button-icons/copy-link.svg"
+                        class="icon-home"
+                    />
                     <span>Referal</span>
                 </button>
-                <InviteFrens :visible="showInvite" @close="closeInvite" @invite="handleInvite" :idUser="idUser" />
+                <InviteFrens
+                    :visible="showInvite"
+                    @close="closeInvite"
+                    @invite="handleInvite"
+                    :idUser="idUser"
+                />
             </div>
 
             <div class="row">
                 <button @click="showPopupCoomingSoon">
-                    <img src="./../public/assets/button-icons/booster.svg" class="icon-home" />
+                    <img
+                        src="./../public/assets/button-icons/booster.svg"
+                        class="icon-home"
+                    />
                     <span>Booster</span>
                 </button>
 
                 <button @click="handleMission">
-                    <img src="./../public/assets/button-icons/mission.svg" class="icon-home" />
+                    <img
+                        src="./../public/assets/button-icons/mission.svg"
+                        class="icon-home"
+                    />
                     <span>Mission</span>
                 </button>
-                <MissionList :visible="showMission" @close="closeMission" @invite="handleMission" />
+                <MissionList
+                    :visible="showMission"
+                    @close="closeMission"
+                    @invite="handleMission"
+                />
 
                 <button @click="showPopupCoomingSoon">
-                    <img src="./../public/assets/button-icons/event.svg" class="icon-home" />
+                    <img
+                        src="./../public/assets/button-icons/event.svg"
+                        class="icon-home"
+                    />
                     <span>Event</span>
                 </button>
             </div>
@@ -386,10 +439,13 @@ export default {
         <!-- <span v-text="telegram_bot_link" class="nunito-fonts"></span> -->
 
         <!-- popup coming sooon -->
-        <div :class="[
-            'popup-cooming-soon',
-            { 'closing-popup': !showCoomingSoon },
-        ]" v-if="showCoomingSoon">
+        <div
+            :class="[
+                'popup-cooming-soon',
+                { 'closing-popup': !showCoomingSoon },
+            ]"
+            v-if="showCoomingSoon"
+        >
             <p>Coming soon</p>
             <button @click="hidePopupCoomingSoon" class="btn-close-coming-soon">
                 Close
@@ -400,8 +456,15 @@ export default {
         <div class="popup-referer-code" v-if="isPopupCode">
             <div class="referer-code">Referer code</div>
             <form @submit.prevent="submitCode">
-                <input class="code-input" :class="{ 'input-error': errorMessage }" type="text" v-model="code" id="code"
-                    @input="clearError" placeholder="Enter code" />
+                <input
+                    class="code-input"
+                    :class="{ 'input-error': errorMessage }"
+                    type="text"
+                    v-model="code"
+                    id="code"
+                    @input="clearError"
+                    placeholder="Enter code"
+                />
                 <div v-if="errorMessage" class="text-err-code">
                     {{ errorMessage }}
                 </div>

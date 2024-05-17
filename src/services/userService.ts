@@ -26,7 +26,7 @@ const userService = {
         return res.data;
     },
 
-    async checkCode(code: number) {
+    async checkCode(code: string) {
         const data = {
             data: {
                 refererCode: code,

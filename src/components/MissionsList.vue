@@ -159,6 +159,37 @@ export default {
     overflow-y: auto;
     animation: fadeInDesc 0.1s ease forwards;
 }
+/* Custom Scrollbar */
+.box-desc::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    background-color: #2b2b2b;
+}
+
+.box-desc::-webkit-scrollbar {
+    width: 8px;
+    background-color: #2b2b2b;
+}
+
+.box-desc::-webkit-scrollbar-thumb {
+    background-color: #ff7f50;
+    border-radius: 10px;
+    border: 2px solid #2b2b2b;
+
+    background-image: -webkit-linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.2) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.2) 50%,
+        rgba(255, 255, 255, 0.2) 75%,
+        transparent 75%,
+        transparent
+    );
+}
+.box-desc::-webkit-scrollbar-thumb:hover {
+    background-color: #ffa07a;
+}
+
 @keyframes fadeInDesc {
     0% {
         opacity: 0;
@@ -168,30 +199,6 @@ export default {
         opacity: 1;
         transform: translate(0%, 0%) scale(1);
     }
-}
-
-.box-desc::-webkit-scrollbar {
-    width: 10px; /* Chiều rộng của thanh cuộn */
-}
-
-.box-desc::-webkit-scrollbar-thumb {
-    background-color: #888; /* Màu của phần thumb (thanh cuộn) */
-    border-radius: 5px; /* Độ cong viền của thumb */
-}
-
-/* Thanh cuộn cho trình duyệt Firefox */
-.box-desc {
-    scrollbar-width: thin; /* Chiều rộng của thanh cuộn */
-}
-
-.box-desc::-webkit-scrollbar-thumb {
-    background-color: #888; /* Màu của phần thumb (thanh cuộn) */
-    border-radius: 5px; /* Độ cong viền của thumb */
-}
-
-/* Định dạng thanh cuộn khi được hover */
-.box-desc::-webkit-scrollbar-thumb:hover {
-    background-color: #555; /* Màu của thumb khi hover */
 }
 
 .desc-item {

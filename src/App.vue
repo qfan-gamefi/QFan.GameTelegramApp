@@ -4,21 +4,28 @@ import SampleGame from "./rising-star/SampleGame.vue";
 // import Phaser from "phaser";
 import { ref, toRaw, onMounted } from "vue";
 
-const phaserRef = ref();
+interface PhaserScene {
+    changeScene: () => void;
+}
 
-onMounted(() => {});
+const phaserRef: any = ref<{ scene?: PhaserScene }>();
 
-const commit_reward = () => {
-    const scene = toRaw(phaserRef.value.scene);
-    if (scene) {
-        scene.changeScene();
-    }
-};
+onMounted(() => {
+    // alert(JSON.stringify(window.Telegram.WebApp.initDataUnsafe.user));
+});
+
+// const commit_reward = () => {
+//     const scene = toRaw(phaserRef?.value?.scene);
+//     if (scene) {
+//         scene.changeScene();
+//     }
+// };
 </script>
 
 <script lang="ts">
 import InviteFrens from "./components/InviteFrens.vue";
 import MissionList from "./components/MissionsList.vue";
+import userService from "./services/userService";
 
 export default {
     components: {
@@ -51,7 +58,8 @@ export default {
                     window.Telegram.WebApp.initDataUnsafe.user?.id || "",
             showCoomingSoon: false,
             isCopiedToClipboard: false,
-            apiDataWidth: 10,
+            isSuccess: false,
+            apiDataWidth: 0,
             dataLogin: null,
             dataQPoint: {
                 balance: "",
@@ -105,82 +113,34 @@ export default {
         hidePopupCode() {
             this.isPopupCode = false;
         },
-        fetchApiData() {
-            this.apiDataWidth = 79;
-            // try {
-            //     const response = await fetch("api-url");
-            //     const data = await response.json();
-            //     this.apiDataWidth = data;
-            // } catch (error) {
-            //     console.error("Error fetching API data:", error);
-            // }
-        },
 
-        async loginTele() {
-            try {
-                const response = await fetch(
-                    "https://api.telegram.org/bot7113766207:AAGgpOehwXbbTO83XGak9T5qzbp9p7Wyo8E/getMe",
-                    {
-                        method: "POST",
-                        headers: {
-                            accept: "application/json",
-
-                            "content-type": "application/json",
-                        },
-                    }
-                );
-                const data = await response.json();
-
-                this.idUser = data.result.id;
-
-                if (data.result.id) {
-                    // gọi màn login theo user id
-                    // this.register();
-                    // this.fetchLogin();
-                }
-            } catch (error) {
-                console.error("Error fetching API data:", error);
-            }
-        },
         async register() {
             try {
-                const myHeaders = new Headers();
-                myHeaders.append("Content-Type", "application/json");
-
-                const response = await fetch(
-                    "https://qfan-api.qcloud.asia/api/players",
-                    {
-                        method: "POST",
-                        redirect: "follow",
-                        headers: myHeaders,
-                        body: JSON.stringify({
-                            data: {
-                                playerId:
-                                    window.Telegram.WebApp.initDataUnsafe.user
-                                        ?.id,
-                                firstName:
-                                    window.Telegram.WebApp.initDataUnsafe.user
-                                        ?.first_name,
-                                lastName:
-                                    window.Telegram.WebApp.initDataUnsafe.user
-                                        ?.last_name,
-                                refererCode:
-                                    window.Telegram.WebApp.initDataUnsafe
-                                        .start_param,
-                            },
-                        }),
-                    }
+                const dataForm = {
+                    id: this.idUser,
+                    is_bot: false,
+                    first_name:
+                        window.Telegram.WebApp.initDataUnsafe.user?.first_name,
+                    last_name:
+                        window.Telegram.WebApp.initDataUnsafe.user?.last_name,
+                    language_code: "vi",
+                };
+                const res = await userService.getCallBack(
+                    dataForm,
+                    this?.code!
                 );
-                const data = await response.json();
 
-                if (data?.data) {
-                    this.isPopupCode = true;
+                if (res) {
+                    // thêm thông báo đăng ký thành công
+                    this.isSuccess = true;
+                    setTimeout(() => {
+                        this.isSuccess = false;
+                    }, 2000);
+                    this.code = null;
+                    this.getInfoUser();
                 } else {
-                    alert(data.error.message);
+                    alert("Lỗi");
                 }
-                this.dataLogin = data.data[0];
-                this.dataQPoint =
-                    data.data[0].attributes.qpoint.data.attributes;
             } catch (error) {
                 console.error("Error fetching API data:", error);
             }
@@ -189,16 +149,11 @@ export default {
         // b1: gọi info
         async getInfoUser() {
             try {
-                const response = await fetch(
-                    `https://qfan-api.qcloud.asia/api/players?populate=qpoint&filters[playerId]=${this.idUser}`,
-                    {
-                        method: "GET",
-                        redirect: "follow",
-                    }
-                );
-                var data = await response.json();
-                if (data?.["data"]?.length == 0) {
-                    // this.register(); // tạm ẩn
+                var data = await userService.getInfo(this.idUser!);
+
+                if (data?.data?.length == 0) {
+                    // nhập mã code => tự động đăng ký
+                    this.isPopupCode = true;
                 } else {
                     this.dataLogin = data?.data?.[0];
                     this.dataQPoint =
@@ -211,34 +166,21 @@ export default {
 
         async submitCode() {
             if (!this.code) {
-                console.log(this.code);
                 this.errorMessage = "Code is required!";
                 return;
             }
             try {
-                this.code = null; // Clear the input field after submission
-                this.errorMessage = "";
-                const response = await fetch(
-                    "https://qfan-api.qcloud.asia/api/player/checkRefererCode",
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            refererCode: this.code,
-                        }),
-                    }
-                );
-                const data = await response.json();
+                const data = await userService.checkCode(this.code!);
 
                 if (data) {
-                    console.log(data);
-                    // this.isPopupCode = false; // neu co thi dong popup
+                    this.errorMessage = "";
+                    this.isPopupCode = false;
+
+                    this.register();
                 }
-            } catch (error) {
-                this.register();
-                console.error("Error fetching API data:", error);
+            } catch (error: any) {
+                // this.register();
+                this.errorMessage = error?.response?.data?.error?.message;
             }
         },
         clearError() {
@@ -257,30 +199,52 @@ export default {
                 seconds
             )}`;
         },
+
+        async handleReward() {
+            const phaserRef: any = this.$refs.phaserRef as
+                | {
+                      scene?: {
+                          changeScene: () => void;
+                      };
+                  }
+                | undefined;
+            const scene = toRaw(phaserRef?.scene);
+
+            if (scene) {
+                const res = await userService.takeReward(this.idUser!);
+                console.log(res);
+                if (res) {
+                    await this.getInfoUser();
+                    await this.countdownFunc();
+                }
+
+                scene.changeScene();
+            }
+        },
         // Phương thức để thêm số 0 vào trước nếu số là một chữ số
         pad(value: any) {
             return value < 10 ? "0" + value : value;
         },
 
         countdownFunc() {
-            const currentTime: any = Date.now();
-            // const rewardTime: any = new Date(
-            //     this.dataQPoint.nextTakeRewardTime
-            // ).getTime();
-            const rewardTime = Date.now() + 10000;
+            const totalTime = 2 * 60 * 60 * 1000;
+            const rewardTime: any = new Date(
+                this.dataQPoint.nextTakeRewardTime
+            ).getTime();
 
-            const timeDiff = rewardTime - currentTime;
-
-            if (timeDiff > 0) {
-                //gọi run take
-                // commit_reward();
-            }
-
-            this.countdown = this.formatTime(timeDiff);
             // Cập nhật mỗi giây
             setInterval(() => {
-                const currentTime = Date.now();
+                const currentTime: any = Date.now();
                 const timeDiff = rewardTime - currentTime;
+
+                // if (timeDiff > 0) {
+                //     gọi run take
+                //     commit_reward();
+                //     this.handleReward();
+                // }
+
+                const remainingPercentage = (timeDiff / totalTime) * 100;
+                this.apiDataWidth = 100 - remainingPercentage;
                 this.countdown = this.formatTime(timeDiff);
                 this.isCountingDown = timeDiff > 0;
             }, 1000);
@@ -303,7 +267,6 @@ export default {
         },
     },
     async mounted() {
-        this.fetchApiData();
         await this.getInfoUser();
         await this.countdownFunc();
     },
@@ -348,6 +311,7 @@ export default {
                 </div>
             </div>
 
+            <!-- :style="{ width: apiDataWidth + '%' }" -->
             <div class="wrap-commit_reward" :style="beforeStyle">
                 <div class="box-info">
                     <div class="box-left">
@@ -357,11 +321,12 @@ export default {
                     <div class="box-right">
                         <button
                             class="btn-commit_reward"
-                            @click="commit_reward"
+                            @click="handleReward"
                             :disabled="isCountingDown"
                         >
                             Train
                         </button>
+                        <!-- @click="commit_reward" -->
                     </div>
                 </div>
             </div>
@@ -451,6 +416,7 @@ export default {
                     v-model="code"
                     id="code"
                     @input="clearError"
+                    placeholder="Enter code"
                 />
                 <div v-if="errorMessage" class="text-err-code">
                     {{ errorMessage }}
@@ -466,6 +432,11 @@ export default {
         <!-- copy to clipboard -->
         <div class="copy-success-message" v-if="isCopiedToClipboard">
             <span>Copied to clipboard!</span>
+        </div>
+
+        <!-- đăng ký nhập mã code thành công -->
+        <div class="enter-code-success" v-if="isSuccess">
+            <span>Success!</span>
         </div>
     </div>
 </template>

@@ -32,7 +32,6 @@ export default {
         let first_name = "";
         let last_name = "";
 
-        // Kiểm tra xem Telegram WebApp đã khởi tạo dữ liệu hay chưa
         if (window?.Telegram?.WebApp?.initDataUnsafe) {
             const user = window.Telegram.WebApp.initDataUnsafe.user;
             if (user) {
@@ -90,8 +89,6 @@ export default {
             input.select();
             document.execCommand("copy");
             document.body.removeChild(input);
-            // Thông báo hoặc cập nhật trạng thái sau khi sao chép
-            // alert("Copied to clipboard!");
             this.isCopiedToClipboard = true;
             setTimeout(() => {
                 this.isCopiedToClipboard = false;
@@ -124,7 +121,6 @@ export default {
                 );
 
                 if (res) {
-                    // thêm thông báo đăng ký thành công
                     this.isSuccess = true;
                     setTimeout(() => {
                         this.isSuccess = false;
@@ -139,7 +135,6 @@ export default {
             }
         },
 
-        // b1: gọi info
         async getInfoUser() {
             try {
                 var data = await userService.getInfo(this.idUser!);
@@ -149,7 +144,7 @@ export default {
                             REF_MESS_PREFIX,
                             ""
                         ) ?? "";
-                    // nhập mã code => tự động đăng ký
+
                     if (await this.isValidRefCode(refcode)) {
                         this.code = refcode;
                         this.register();
@@ -252,7 +247,7 @@ export default {
                 this.countdownFunc();
             }
         },
-        // Phương thức để thêm số 0 vào trước nếu số là một chữ số
+
         pad(value: any) {
             return value < 10 ? "0" + value : value;
         },
@@ -263,7 +258,6 @@ export default {
                 this.dataQPoint.nextTakeRewardTime
             ).getTime();
 
-            // Cập nhật mỗi giây
             setInterval(() => {
                 const currentTime: any = Date.now();
 

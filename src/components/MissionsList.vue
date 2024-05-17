@@ -159,7 +159,7 @@ export default {
     overflow-y: auto;
     animation: fadeInDesc 0.1s ease forwards;
 }
-/* Custom Scrollbar */
+
 .box-desc::-webkit-scrollbar-track {
     -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
     background-color: #2b2b2b;

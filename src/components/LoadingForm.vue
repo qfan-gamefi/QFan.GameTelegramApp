@@ -20,24 +20,24 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100px; /* Điều chỉnh kích thước container tùy thuộc vào nhu cầu */
+    height: 100px;
 }
 
 .loading {
-    border: 4px solid #f3f3f3; /* Màu nền của vòng tròn */
-    border-top: 4px solid #3498db; /* Màu của vòng tròn */
-    border-radius: 50%; /* Làm tròn các góc để tạo thành hình tròn */
-    width: 30px; /* Kích thước vòng tròn */
-    height: 30px; /* Kích thước vòng tròn */
-    animation: spin 1s linear infinite; /* Sử dụng animation "spin" trong 1 giây với tốc độ linear và lặp vô hạn */
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
     0% {
         transform: rotate(0deg);
-    } /* Góc quay ban đầu */
+    }
     100% {
         transform: rotate(360deg);
-    } /* Góc quay cuối cùng (một vòng tròn) */
+    }
 }
 </style>

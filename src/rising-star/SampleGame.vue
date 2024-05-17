@@ -4,7 +4,6 @@ import Phaser from "phaser";
 import StartGame from "./main";
 import { EventBus } from "./EventBus";
 
-// Save the current scene instance
 const scene = ref();
 const game = ref();
 
@@ -27,16 +26,6 @@ onUnmounted(() => {
 
 defineExpose({
     scene,
-    game: {
-        value: game.value,
-        isRunning: true,
-        start() {
-            this.isRunning = true;
-        },
-        stop() {
-            this.isRunning = false;
-        },
-    },
 });
 </script>
 

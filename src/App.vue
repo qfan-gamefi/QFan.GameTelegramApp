@@ -4,24 +4,29 @@ import SampleGame from "./rising-star/SampleGame.vue";
 // import Phaser from "phaser";
 import { ref, toRaw, onMounted } from "vue";
 
-const phaserRef = ref();
+interface PhaserScene {
+    changeScene: () => void;
+}
+
+const phaserRef: any = ref<{ scene?: PhaserScene }>();
 
 onMounted(() => {
-    var data = getPlayerInfo();
+    // alert(JSON.stringify(window.Telegram.WebApp.initDataUnsafe.user));
 });
 
-const commit_reward = () => {
-    const scene = toRaw(phaserRef.value.scene);
-    if (scene) {
-        scene.changeScene();
-    }
-};
+// const commit_reward = () => {
+//     const scene = toRaw(phaserRef?.value?.scene);
+//     if (scene) {
+//         scene.changeScene();
+//     }
+// };
 </script>
 
 <script lang="ts">
 import InviteFrens from "./components/InviteFrens.vue";
 import MissionList from "./components/MissionsList.vue";
-const REF_MESS_PREFIX: string = 'start r_'
+import userService from "./services/userService";
+
 export default {
     components: {
         InviteFrens,
@@ -50,10 +55,11 @@ export default {
             idUser: window.Telegram.WebApp.initDataUnsafe.user?.id,
             telegram_bot_link:
                 telegram_bot_link +
-                window.Telegram.WebApp.initDataUnsafe.user?.id || "",
+                    window.Telegram.WebApp.initDataUnsafe.user?.id || "",
             showCoomingSoon: false,
             isCopiedToClipboard: false,
-            apiDataWidth: 10,
+            isSuccess: false,
+            apiDataWidth: 0,
             dataLogin: null,
             dataQPoint: {
                 balance: "",
@@ -107,42 +113,34 @@ export default {
         hidePopupCode() {
             this.isPopupCode = false;
         },
-        fetchApiData() {
-            this.apiDataWidth = 79;
-            // try {
-            //     const response = await fetch("api-url");
-            //     const data = await response.json();
-            //     this.apiDataWidth = data;
-            // } catch (error) {
-            //     console.error("Error fetching API data:", error);
-            // }
-        },
-        async register(code: string) {
+
+        async register() {
             try {
-                const myHeaders = new Headers();
-                myHeaders.append("Content-Type", "application/json");
-
-                const raw = JSON.stringify({
-                    "message": {
-                        "from": {
-                            "id": window?.Telegram?.WebApp?.initDataUnsafe.user?.id,
-                            "first_name": window?.Telegram?.WebApp?.initDataUnsafe.user?.first_name,
-                            "last_name": window?.Telegram?.WebApp?.initDataUnsafe.user?.last_name
-                        },
-                        "text": "/start r_" + code
-                    }
-                });
-
-                const requestOptions: any = {
-                    method: "POST",
-                    headers: myHeaders,
-                    body: raw,
-                    redirect: "follow"
+                const dataForm = {
+                    id: this.idUser,
+                    is_bot: false,
+                    first_name:
+                        window.Telegram.WebApp.initDataUnsafe.user?.first_name,
+                    last_name:
+                        window.Telegram.WebApp.initDataUnsafe.user?.last_name,
+                    language_code: "vi",
                 };
+                const res = await userService.getCallBack(
+                    dataForm,
+                    this?.code!
+                );
 
-                await fetch("https://qfan-api.qcloud.asia/api/player/messageCallback", requestOptions);
-                this.getInfoUser();
-
+                if (res) {
+                    // thêm thông báo đăng ký thành công
+                    this.isSuccess = true;
+                    setTimeout(() => {
+                        this.isSuccess = false;
+                    }, 2000);
+                    this.code = null;
+                    this.getInfoUser();
+                } else {
+                    alert("Lỗi");
+                }
             } catch (error) {
                 console.error("Error fetching API data:", error);
             }
@@ -151,21 +149,19 @@ export default {
         // b1: gọi info
         async getInfoUser() {
             try {
-                var data = await getPlayerInfo();
-                var refcode = window?.Telegram?.WebApp?.initDataUnsafe?.start_param?.replace(REF_MESS_PREFIX, '');
-                if (data?.["data"]?.length == 0) {
-                    if (refcode && await this.isValidRefCode(refcode)) {
-                        this.register(refcode);
-                    }
-                    else {
-                        this.isPopupCode = true;
-                    }
+                var data = await userService.getInfo(this.idUser!);
+
+                if (data?.data?.length == 0) {
+                    // nhập mã code => tự động đăng ký
+                    this.isPopupCode = true;
                 } else {
                     this.dataLogin = data?.data[0];
-                    this.dataQPoint = data?.data[0].attributes.qpoint.data.attributes;
+                    this.dataQPoint =
+                        data?.data[0].attributes.qpoint.data.attributes;
                 }
                 this.dataLogin = data?.data[0];
-                this.dataQPoint = data?.data[0].attributes.qpoint.data.attributes;
+                this.dataQPoint =
+                    data?.data[0].attributes.qpoint.data.attributes;
             } catch (error) {
                 console.error("Error fetching API data:", error);
             }
@@ -176,34 +172,41 @@ export default {
             myHeaders.append("Content-Type", "application/json");
 
             const raw = JSON.stringify({
-                "data": {
-                    "refererCode": referCode
-                }
+                data: {
+                    refererCode: referCode,
+                },
             });
 
             const requestOptions: any = {
                 method: "POST",
                 headers: myHeaders,
                 body: raw,
-                redirect: "follow"
+                redirect: "follow",
             };
 
-            var response = await fetch("https://qfan-api.qcloud.asia/api/player/checkRefererCode", requestOptions);
+            var response = await fetch(
+                "https://qfan-api.qcloud.asia/api/player/checkRefererCode",
+                requestOptions
+            );
             return response.status == 200;
         },
         async submitCode() {
             if (!this.code) {
-                console.log(this.code);
                 this.errorMessage = "Code is required!";
                 return;
             }
             try {
-                if (await this.isValidRefCode(this.code)) {
+                const data = await userService.checkCode(this.code!);
+
+                if (data) {
+                    this.errorMessage = "";
                     this.isPopupCode = false;
-                    this.register(this.code);
+
+                    this.register();
                 }
-            } catch (error) {
-                console.error("Error fetching API data:", error);
+            } catch (error: any) {
+                // this.register();
+                this.errorMessage = error?.response?.data?.error?.message;
             }
         },
         clearError() {
@@ -222,30 +225,52 @@ export default {
                 seconds
             )}`;
         },
+
+        async handleReward() {
+            const phaserRef: any = this.$refs.phaserRef as
+                | {
+                      scene?: {
+                          changeScene: () => void;
+                      };
+                  }
+                | undefined;
+            const scene = toRaw(phaserRef?.scene);
+
+            if (scene) {
+                const res = await userService.takeReward(this.idUser!);
+                console.log(res);
+                if (res) {
+                    await this.getInfoUser();
+                    await this.countdownFunc();
+                }
+
+                scene.changeScene();
+            }
+        },
         // Phương thức để thêm số 0 vào trước nếu số là một chữ số
         pad(value: any) {
             return value < 10 ? "0" + value : value;
         },
 
         countdownFunc() {
-            const currentTime: any = Date.now();
-            // const rewardTime: any = new Date(
-            //     this.dataQPoint.nextTakeRewardTime
-            // ).getTime();
-            const rewardTime = Date.now() + 1000;
+            const totalTime = 2 * 60 * 60 * 1000;
+            const rewardTime: any = new Date(
+                this.dataQPoint.nextTakeRewardTime
+            ).getTime();
 
-            const timeDiff = rewardTime - currentTime;
-
-            if (timeDiff > 0) {
-                //gọi run take
-                // commit_reward();
-            }
-
-            this.countdown = this.formatTime(timeDiff);
             // Cập nhật mỗi giây
             setInterval(() => {
-                const currentTime = Date.now();
+                const currentTime: any = Date.now();
                 const timeDiff = rewardTime - currentTime;
+
+                // if (timeDiff > 0) {
+                //     gọi run take
+                //     commit_reward();
+                //     this.handleReward();
+                // }
+
+                const remainingPercentage = (timeDiff / totalTime) * 100;
+                this.apiDataWidth = 100 - remainingPercentage;
                 this.countdown = this.formatTime(timeDiff);
                 this.isCountingDown = timeDiff > 0;
             }, 1000);
@@ -272,18 +297,6 @@ export default {
         await this.countdownFunc();
     },
 };
-async function getPlayerInfo() {
-    const response = await fetch(
-        // 
-        `https://qfan-api.qcloud.asia/api/players?populate=qpoint&filters[playerId]=${window.Telegram.WebApp.initDataUnsafe.user?.id}`,
-        {
-            method: "GET",
-            redirect: "follow",
-        }
-    );
-    var data = await response.json();
-    return data;
-}
 </script>
 
 <style scoped>
@@ -297,7 +310,11 @@ async function getPlayerInfo() {
             START TRAINING
         </button>
         <div>
-            <button id="login_button" class="btn-login" v-show="!isTelegramLogin">
+            <button
+                id="login_button"
+                class="btn-login"
+                v-show="!isTelegramLogin"
+            >
                 LOGIN
             </button>
         </div>
@@ -320,6 +337,7 @@ async function getPlayerInfo() {
                 </div>
             </div>
 
+            <!-- :style="{ width: apiDataWidth + '%' }" -->
             <div class="wrap-commit_reward" :style="beforeStyle">
                 <div class="box-info">
                     <div class="box-left">
@@ -327,9 +345,14 @@ async function getPlayerInfo() {
                         <div class="content">{{ countdown }} to train</div>
                     </div>
                     <div class="box-right">
-                        <button class="btn-commit_reward" @click="commit_reward" :disabled="isCountingDown">
+                        <button
+                            class="btn-commit_reward"
+                            @click="handleReward"
+                            :disabled="isCountingDown"
+                        >
                             Train
                         </button>
+                        <!-- @click="commit_reward" -->
                     </div>
                 </div>
             </div>
@@ -340,30 +363,54 @@ async function getPlayerInfo() {
         <div class="button-container">
             <div class="row">
                 <button @click="showPopupCoomingSoon">
-                    <img src="./../public/assets/button-icons/shopping-bag-3744.svg" class="icon-home" />
+                    <img
+                        src="./../public/assets/button-icons/shopping-bag-3744.svg"
+                        class="icon-home"
+                    />
                     <span>Shop</span>
                 </button>
                 <button @click="handleReferal">
-                    <img src="./../public/assets/button-icons/copy-link.svg" class="icon-home" />
+                    <img
+                        src="./../public/assets/button-icons/copy-link.svg"
+                        class="icon-home"
+                    />
                     <span>Referal</span>
                 </button>
-                <InviteFrens :visible="showInvite" @close="closeInvite" @invite="handleInvite" :idUser="idUser" />
+                <InviteFrens
+                    :visible="showInvite"
+                    @close="closeInvite"
+                    @invite="handleInvite"
+                    :idUser="idUser"
+                />
             </div>
 
             <div class="row">
                 <button @click="showPopupCoomingSoon">
-                    <img src="./../public/assets/button-icons/booster.svg" class="icon-home" />
+                    <img
+                        src="./../public/assets/button-icons/booster.svg"
+                        class="icon-home"
+                    />
                     <span>Booster</span>
                 </button>
 
                 <button @click="handleMission">
-                    <img src="./../public/assets/button-icons/mission.svg" class="icon-home" />
+                    <img
+                        src="./../public/assets/button-icons/mission.svg"
+                        class="icon-home"
+                    />
                     <span>Mission</span>
                 </button>
-                <MissionList :visible="showMission" @close="closeMission" @invite="handleMission" />
+                <MissionList
+                    :visible="showMission"
+                    @close="closeMission"
+                    @invite="handleMission"
+                />
 
                 <button @click="showPopupCoomingSoon">
-                    <img src="./../public/assets/button-icons/event.svg" class="icon-home" />
+                    <img
+                        src="./../public/assets/button-icons/event.svg"
+                        class="icon-home"
+                    />
                     <span>Event</span>
                 </button>
             </div>
@@ -371,10 +418,13 @@ async function getPlayerInfo() {
         <!-- <span v-text="telegram_bot_link" class="nunito-fonts"></span> -->
 
         <!-- popup coming sooon -->
-        <div :class="[
-            'popup-cooming-soon',
-            { 'closing-popup': !showCoomingSoon },
-        ]" v-if="showCoomingSoon">
+        <div
+            :class="[
+                'popup-cooming-soon',
+                { 'closing-popup': !showCoomingSoon },
+            ]"
+            v-if="showCoomingSoon"
+        >
             <p>Coming soon</p>
             <button @click="hidePopupCoomingSoon" class="btn-close-coming-soon">
                 Close
@@ -385,8 +435,15 @@ async function getPlayerInfo() {
         <div class="popup-referer-code" v-if="isPopupCode">
             <div class="referer-code">Referer code</div>
             <form @submit.prevent="submitCode">
-                <input class="code-input" :class="{ 'input-error': errorMessage }" type="text" v-model="code" id="code"
-                    @input="clearError" />
+                <input
+                    class="code-input"
+                    :class="{ 'input-error': errorMessage }"
+                    type="text"
+                    v-model="code"
+                    id="code"
+                    @input="clearError"
+                    placeholder="Enter code"
+                />
                 <div v-if="errorMessage" class="text-err-code">
                     {{ errorMessage }}
                 </div>
@@ -401,6 +458,11 @@ async function getPlayerInfo() {
         <!-- copy to clipboard -->
         <div class="copy-success-message" v-if="isCopiedToClipboard">
             <span>Copied to clipboard!</span>
+        </div>
+
+        <!-- đăng ký nhập mã code thành công -->
+        <div class="enter-code-success" v-if="isSuccess">
+            <span>Success!</span>
         </div>
     </div>
 </template>

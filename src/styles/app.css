@@ -22,7 +22,21 @@
     top: 50%;
     right: 50%;
     transform: translate(50%, -50%);
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(59, 252, 20, 0.8);
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    animation: slideIn 0.5s forwards;
+    z-index: 1000;
+}
+
+.enter-code-success {
+    position: fixed;
+    top: 30%;
+    right: 50%;
+    transform: translate(50%, -50%);
+    background-color: rgba(59, 252, 20, 0.8);
     color: #fff;
     padding: 10px;
     border-radius: 5px;
@@ -158,18 +172,6 @@
     display: flex;
     justify-content: space-between;
 }
-
-/* .wrap-commit_reward::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 10px;
-    background: red;
-    border-top-left-radius: 20px;
-    z-index: -1;
-    top: 0;
-} */
 
 .wrap-commit_reward .box-left {
     text-shadow: 2px 2px 0 #9f8900, -2px -2px 0 #9f8900, 2px -2px 0 #9f8900,
@@ -311,6 +313,7 @@
 .btn-submit-code {
     margin-top: 20px;
     border-radius: 5px;
+    color: #fff;
 }
 
 @keyframes pulse {

@@ -92,7 +92,7 @@ export default {
         async fetchInviteData() {
             try {
                 this.loading = true;
-                const response = await userService.getListInvite(this.idUser);
+                const response = await userService.getListInvite(this?.idUser);
 
                 const list1 = response?.data?.referalList;
                 const list2 = response?.data?.referalList2;
@@ -162,30 +162,6 @@ export default {
     border-radius: 10px;
     max-height: 66vh;
     overflow-y: auto;
-}
-
-.box-desc::-webkit-scrollbar {
-    width: 10px; /* Chiều rộng của thanh cuộn */
-}
-
-.box-desc::-webkit-scrollbar-thumb {
-    background-color: #888; /* Màu của phần thumb (thanh cuộn) */
-    border-radius: 5px; /* Độ cong viền của thumb */
-}
-
-/* Thanh cuộn cho trình duyệt Firefox */
-.box-desc {
-    scrollbar-width: thin; /* Chiều rộng của thanh cuộn */
-}
-
-.box-desc::-webkit-scrollbar-thumb {
-    background-color: #888; /* Màu của phần thumb (thanh cuộn) */
-    border-radius: 5px; /* Độ cong viền của thumb */
-}
-
-/* Định dạng thanh cuộn khi được hover */
-.box-desc::-webkit-scrollbar-thumb:hover {
-    background-color: #555; /* Màu của thumb khi hover */
 }
 
 .desc-item {

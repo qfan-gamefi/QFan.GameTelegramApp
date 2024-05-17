@@ -13,13 +13,13 @@ const phaserRef: any = ref<{ scene?: PhaserScene }>();
 onMounted(() => {
     // alert(JSON.stringify(window.Telegram.WebApp.initDataUnsafe.user));
 });
-
 </script>
 
 <script lang="ts">
 import InviteFrens from "./components/InviteFrens.vue";
 import MissionList from "./components/MissionsList.vue";
 import userService from "./services/userService";
+
 const REF_MESS_PREFIX: string = 'start r_'
 export default {
     components: {
@@ -46,7 +46,7 @@ export default {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            idUser: window.Telegram.WebApp.initDataUnsafe.user?.id,
+            idUser: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
             telegram_bot_link:
                 telegram_bot_link +
                 window.Telegram.WebApp.initDataUnsafe.user?.id || "",
@@ -144,6 +144,7 @@ export default {
         async getInfoUser() {
             try {
                 var data = await userService.getInfo(this.idUser!);
+                //var data = await userService.getInfo('5314337740');
                 if (data?.data?.length == 0) {
                     var refcode = window?.Telegram?.WebApp?.initDataUnsafe?.start_param?.replace(REF_MESS_PREFIX, '') ?? '';
                     // nhập mã code => tự động đăng ký
@@ -227,6 +228,15 @@ export default {
         },
 
         async handleReward() {
+            const res = await userService.takeReward(this.idUser ?? '');
+            console.log(res);
+            if (res) {
+                await this.getInfoUser();
+                await this.countdownFunc();
+            }
+            this.updateSence();
+        },
+        async updateSence() {
             const phaserRef: any = this.$refs.phaserRef as
                 | {
                     scene?: {
@@ -235,15 +245,22 @@ export default {
                 }
                 | undefined;
             const scene = toRaw(phaserRef?.scene);
+            const givenDateTimeString = this.dataQPoint.nextTakeRewardTime;
 
-            if (scene) {
-                const res = await userService.takeReward(this.idUser!);
-                console.log(res);
-                if (res) {
-                    await this.getInfoUser();
-                    await this.countdownFunc();
-                }
+            // Parse the given date-time string to a Date object
+            const givenDateTime = new Date(givenDateTimeString);
 
+            // Get the current date-time in UTC
+            const currentDateTime = new Date((new Date()).toUTCString());
+
+            // Calculate the difference in milliseconds
+            const differenceInMilliseconds = currentDateTime.getTime() - givenDateTime.getTime();
+
+
+            if (scene.scene.key == 'IdleScene' && differenceInMilliseconds < 0) {
+                scene.changeScene();
+            }
+            else if (scene.scene.key == 'MainScene' && differenceInMilliseconds > 0) {
                 scene.changeScene();
             }
         },
@@ -260,7 +277,7 @@ export default {
 
             // Cập nhật mỗi giây
             setInterval(() => {
-                const currentTime: any = Date.now();
+                const currentTime: any = new Date((new Date()).toUTCString());
                 const timeDiff = rewardTime - currentTime;
 
                 // if (timeDiff > 0) {
@@ -296,6 +313,10 @@ export default {
         await this.getInfoUser();
         await this.countdownFunc();
     },
+    async updated() {
+        await this.updateSence();
+    },
+
 };
 </script>
 
@@ -305,7 +326,7 @@ export default {
 </style>
 
 <template>
-    <div class="container">
+    <div class="container" onload="updateSence">
         <button class="absolute-training-btn button-decoration">
             START TRAINING
         </button>

@@ -155,15 +155,41 @@ export default {
                     // nhập mã code => tự động đăng ký
                     this.isPopupCode = true;
                 } else {
-                    this.dataLogin = data?.data?.[0];
+                    this.dataLogin = data?.data[0];
                     this.dataQPoint =
-                        data?.data?.[0]?.attributes?.qpoint?.data?.attributes;
+                        data?.data[0].attributes.qpoint.data.attributes;
                 }
+                this.dataLogin = data?.data[0];
+                this.dataQPoint =
+                    data?.data[0].attributes.qpoint.data.attributes;
             } catch (error) {
                 console.error("Error fetching API data:", error);
             }
         },
 
+        async isValidRefCode(referCode: string) {
+            const myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+
+            const raw = JSON.stringify({
+                data: {
+                    refererCode: referCode,
+                },
+            });
+
+            const requestOptions: any = {
+                method: "POST",
+                headers: myHeaders,
+                body: raw,
+                redirect: "follow",
+            };
+
+            var response = await fetch(
+                "https://qfan-api.qcloud.asia/api/player/checkRefererCode",
+                requestOptions
+            );
+            return response.status == 200;
+        },
         async submitCode() {
             if (!this.code) {
                 this.errorMessage = "Code is required!";

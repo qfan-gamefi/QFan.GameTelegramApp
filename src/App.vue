@@ -238,6 +238,8 @@ export default {
                     await this.countdownFunc();
                 }
             } catch (error) {
+                console.log(error);
+
                 // this.countdownFunc();
             }
         },

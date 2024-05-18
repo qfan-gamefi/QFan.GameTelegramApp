@@ -157,9 +157,7 @@
 
 .btn-commit_reward:disabled {
     opacity: 0.5;
-    /* làm mờ button khi disabled */
     cursor: not-allowed;
-    /* thay đổi con trỏ khi disabled */
 }
 
 .wrap-commit_reward .box-info {

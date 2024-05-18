@@ -7,7 +7,7 @@ const userService = {
     getListMission() {
         return axiosInstance.get(`/missions`);
     },
-    async getInfo(idUser: number) {
+    async getInfo(idUser: string) {
         const res = await axiosInstance.get(
             `players?populate=qpoint&filters[playerId]=${idUser}`
         );
@@ -35,7 +35,7 @@ const userService = {
         const res = await axiosInstance.post(`player/checkRefererCode`, data);
         return res.data;
     },
-    async takeReward(idUser: number) {
+    async takeReward(idUser: string) {
         const data = {
             data: {
                 playerId: idUser,

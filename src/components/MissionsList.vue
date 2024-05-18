@@ -43,7 +43,7 @@
 
                         <div class="item-right">
                             <a v-bind:href="item?.attributes?.link">
-                                <button class="mission-btn">Claim</button>
+                                <button class="mission-btn">Go</button>
                             </a>
                         </div>
                     </div>
@@ -73,6 +73,7 @@ export default {
         return {
             loading: true,
             missionData: [],
+            iframeSrc: "",
         };
     },
     watch: {
@@ -83,6 +84,9 @@ export default {
         },
     },
     methods: {
+        openInIframe(url) {
+            this.iframeSrc = url;
+        },
         handleMission() {
             this.$emit("mission");
         },
@@ -99,7 +103,7 @@ export default {
             } finally {
                 setTimeout(() => {
                     this.loading = false;
-                }, 500);
+                }, 300);
             }
         },
         async mounted() {

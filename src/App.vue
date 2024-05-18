@@ -19,6 +19,7 @@ onMounted(() => {
 import InviteFrens from "./components/InviteFrens.vue";
 import MissionList from "./components/MissionsList.vue";
 import userService from "./services/userService";
+
 const REF_MESS_PREFIX: string = "start r_";
 export default {
     components: {
@@ -44,7 +45,7 @@ export default {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            idUser: window.Telegram.WebApp.initDataUnsafe.user?.id,
+            idUser: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
             telegram_bot_link:
                 telegram_bot_link +
                     window.Telegram.WebApp.initDataUnsafe.user?.id || "",
@@ -70,6 +71,7 @@ export default {
             errorMessage: "",
             showInvite: false,
             showMission: false,
+            isClaim: false,
         };
     },
     computed: {
@@ -105,6 +107,9 @@ export default {
         },
 
         async register() {
+            if (!window.Telegram.WebApp.initDataUnsafe.user) {
+                return;
+            }
             try {
                 const dataForm = {
                     id: this.idUser,
@@ -138,6 +143,7 @@ export default {
         async getInfoUser() {
             try {
                 var data = await userService.getInfo(this.idUser!);
+                //var data = await userService.getInfo('5314337740');
                 if (data?.data?.length == 0) {
                     var refcode: string =
                         window?.Telegram?.WebApp?.initDataUnsafe?.start_param?.replace(
@@ -225,57 +231,84 @@ export default {
 
         async handleReward() {
             try {
-                const phaserRef: any = this.$refs.phaserRef as
-                    | {
-                          scene?: {
-                              changeScene: () => void;
-                          };
-                      }
-                    | undefined;
-                const scene = toRaw(phaserRef?.scene);
-
-                if (scene) {
-                    const res = await userService.takeReward(this.idUser!);
-                    if (res) {
-                        await this.getInfoUser();
-                        await this.countdownFunc();
-                    }
-
-                    scene.changeScene();
+                const res = await userService.takeReward(this.idUser!);
+                if (res) {
+                    await this.getInfoUser();
+                    this.updateSence();
+                    await this.countdownFunc();
                 }
             } catch (error) {
-                this.countdownFunc();
+                // this.countdownFunc();
+            }
+        },
+        async updateSence() {
+            const phaserRef: any = this.$refs.phaserRef as
+                | {
+                      scene?: {
+                          changeScene: () => void;
+                      };
+                  }
+                | undefined;
+            const scene = toRaw(phaserRef?.scene);
+            const givenDateTimeString = this.dataQPoint.nextTakeRewardTime;
+
+            // Parse the given date-time string to a Date object
+            const givenDateTime = new Date(givenDateTimeString);
+
+            // Get the current date-time in UTC
+            const currentDateTime = new Date(new Date().toUTCString());
+
+            // Calculate the difference in milliseconds
+            const differenceInMilliseconds =
+                currentDateTime.getTime() - givenDateTime.getTime();
+
+            if (
+                scene?.scene?.key == "IdleScene" &&
+                differenceInMilliseconds < 0
+            ) {
+                this.isClaim = false;
+                scene.changeScene();
+            } else if (
+                scene?.scene?.key == "MainScene" &&
+                differenceInMilliseconds > 0
+            ) {
+                this.isClaim = true;
+                scene.changeScene();
             }
         },
 
         pad(value: any) {
             return value < 10 ? "0" + value : value;
         },
-
         countdownFunc() {
             const totalTime = 1 * 60 * 60 * 1000;
             const rewardTime: any = new Date(
                 this.dataQPoint.nextTakeRewardTime
             ).getTime();
 
-            setInterval(() => {
-                const currentTime: any = Date.now();
+            this.isClaim = false;
 
+            const intervalId = setInterval(() => {
+                const currentTime: any = new Date(
+                    new Date().toUTCString()
+                ).getTime();
                 const timeDiff = rewardTime - currentTime;
-                // const timeDiff = 1715942661465 - 1715942660465;
-
-                // if (timeDiff > 0) {
-                //     gọi run take
-                //     commit_reward();
-                //     this.handleReward();
-                // }
 
                 const remainingPercentage = (timeDiff / totalTime) * 100;
+
+                // console.log((timeDiff / totalTime) * 100);
+                // console.log(100 - remainingPercentage);
                 this.apiDataWidth = 100 - remainingPercentage;
 
+                // console.log(this.formatTime(timeDiff));
                 this.countdown = this.formatTime(timeDiff);
 
                 this.isCountingDown = timeDiff > 0;
+
+                if (timeDiff <= 0) {
+                    this.isClaim = true;
+                    clearInterval(intervalId);
+                }
             }, 1000);
         },
 
@@ -299,6 +332,9 @@ export default {
         await this.getInfoUser();
         await this.countdownFunc();
     },
+    async updated() {
+        this.updateSence();
+    },
 };
 </script>
 
@@ -308,7 +344,7 @@ export default {
 </style>
 
 <template>
-    <div class="container">
+    <div class="container" onload="updateSence">
         <button class="absolute-training-btn button-decoration">
             START TRAINING
         </button>
@@ -324,8 +360,6 @@ export default {
 
         <div class="container-game">
             <div class="container-info" v-show="isTelegramLogin">
-                <!-- <div class="wrap-score">SCORE: 0</div> -->
-
                 <div class="wrap-username">
                     {{ first_name }} {{ last_name }}
                 </div>
@@ -333,41 +367,31 @@ export default {
 
             <div class="wrap-score">
                 <div class="content">
-                    <!-- <div>in storage:</div>
-                    <div class="score"></div> -->
                     <img src="./../public/assets/logo.svg" />
                     <div>QFP Balance: {{ dataQPoint?.balance }}</div>
                 </div>
             </div>
 
-            <!-- :style="{ width: apiDataWidth + '%' }" -->
             <div class="wrap-commit_reward" :style="beforeStyle">
                 <div class="box-info">
-                    <div
-                        class="box-left"
-                        v-if="countdown !== ('Time expired' || '')"
-                    >
+                    <div v-if="isClaim" class="box-left-train">
+                        Click "Train" to take + {{ dataQPoint?.rewardAmount }}
+                        <img src="./../public/assets/logo.svg" />
+                    </div>
+
+                    <div v-else class="box-left">
                         <div class="title">Remain:</div>
                         <div class="content">{{ countdown }} to train</div>
                     </div>
 
-                    <div
-                        class="box-left-train"
-                        v-if="countdown === 'Time expired'"
-                    >
-                        Click "Train" to take +
-                        {{ dataQPoint?.rewardAmount }}
-                        <img src="./../public/assets/logo.svg" />
-                    </div>
                     <div class="box-right">
                         <button
                             class="btn-commit_reward"
                             @click="handleReward"
                             :disabled="isCountingDown"
                         >
-                            Train
+                            {{ isClaim ? "Claim" : "Train" }}
                         </button>
-                        <!-- @click="commit_reward" -->
                     </div>
                 </div>
             </div>
@@ -432,7 +456,6 @@ export default {
         </div>
         <!-- <span v-text="telegram_bot_link" class="nunito-fonts"></span> -->
 
-        <!-- popup coming sooon -->
         <div
             :class="[
                 'popup-cooming-soon',
@@ -446,7 +469,6 @@ export default {
             </button>
         </div>
 
-        <!-- popup refere code -->
         <div class="popup-referer-code" v-if="isPopupCode">
             <div class="referer-code">Referer code</div>
             <form @submit.prevent="submitCode">
@@ -470,12 +492,10 @@ export default {
             </button> -->
         </div>
 
-        <!-- copy to clipboard -->
         <div class="copy-success-message" v-if="isCopiedToClipboard">
             <span>Copied to clipboard!</span>
         </div>
 
-        <!-- đăng ký nhập mã code thành công -->
         <div class="enter-code-success" v-if="isSuccess">
             <span>Success!</span>
         </div>

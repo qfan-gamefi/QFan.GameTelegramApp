@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Telegram from "vue-tg";
-import SampleGame from "./rising-star/SampleGame.vue";
+import MainGame from "./rising-star/MainGame.vue";
 // import Phaser from "phaser";
 import { ref, toRaw, onMounted } from "vue";
 
@@ -28,7 +28,7 @@ export default {
     },
     data() {
         const telegram_bot_link =
-            "Invite Link: https://t.me/Sampletwabot?start=r_";
+            "Invite Link: https://t.me/QFanClubBot?start=r_";
 
         let first_name = "";
         let last_name = "";
@@ -396,7 +396,7 @@ export default {
                 </div>
             </div>
 
-            <SampleGame ref="phaserRef" />
+            <MainGame ref="phaserRef" />
         </div>
 
         <div class="button-container">

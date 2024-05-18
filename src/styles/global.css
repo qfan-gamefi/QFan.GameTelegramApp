@@ -55,15 +55,10 @@ button {
 
 button:hover {
     background: rgb(255, 184, 77);
-    /* Màu nền khi hover */
     border-color: rgb(226, 154, 54);
-    /* Màu viền khi hover */
     box-shadow: rgb(163, 112, 41) 0px 6px 0px;
-    /* Hiệu ứng bóng đổ khi hover */
     -webkit-text-fill-color: unset;
-    /* Màu chữ khi hover */
     -webkit-text-stroke: 1px rgb(163, 112, 41);
-    /* Viền chữ khi hover */
 }
 
 button span {

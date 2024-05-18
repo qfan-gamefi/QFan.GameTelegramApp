@@ -43,7 +43,7 @@
 
                         <div class="item-right">
                             <a v-bind:href="item?.attributes?.link">
-                                <button class="mission-btn">Claim</button>
+                                <button class="mission-btn">Go</button>
                             </a>
                         </div>
                     </div>
@@ -73,6 +73,7 @@ export default {
         return {
             loading: true,
             missionData: [],
+            iframeSrc: "",
         };
     },
     watch: {
@@ -83,6 +84,9 @@ export default {
         },
     },
     methods: {
+        openInIframe(url) {
+            this.iframeSrc = url;
+        },
         handleMission() {
             this.$emit("mission");
         },
@@ -99,7 +103,7 @@ export default {
             } finally {
                 setTimeout(() => {
                     this.loading = false;
-                }, 500);
+                }, 300);
             }
         },
         async mounted() {
@@ -159,7 +163,7 @@ export default {
     overflow-y: auto;
     animation: fadeInDesc 0.1s ease forwards;
 }
-/* Custom Scrollbar */
+
 .box-desc::-webkit-scrollbar-track {
     -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
     background-color: #2b2b2b;

@@ -20,7 +20,7 @@ import InviteFrens from "./components/InviteFrens.vue";
 import MissionList from "./components/MissionsList.vue";
 import userService from "./services/userService";
 
-const REF_MESS_PREFIX: string = 'start r_';
+const REF_MESS_PREFIX: string = "start r_";
 export default {
     components: {
         InviteFrens,
@@ -33,7 +33,6 @@ export default {
         let first_name = "";
         let last_name = "";
 
-        // Kiểm tra xem Telegram WebApp đã khởi tạo dữ liệu hay chưa
         if (window?.Telegram?.WebApp?.initDataUnsafe) {
             const user = window.Telegram.WebApp.initDataUnsafe.user;
             if (user) {
@@ -49,7 +48,7 @@ export default {
             idUser: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
             telegram_bot_link:
                 telegram_bot_link +
-                window.Telegram.WebApp.initDataUnsafe.user?.id || "",
+                    window.Telegram.WebApp.initDataUnsafe.user?.id || "",
             showCoomingSoon: false,
             isCopiedToClipboard: false,
             isSuccess: false,
@@ -72,6 +71,7 @@ export default {
             errorMessage: "",
             showInvite: false,
             showMission: false,
+            isClaim: false,
         };
     },
     computed: {
@@ -91,8 +91,6 @@ export default {
             input.select();
             document.execCommand("copy");
             document.body.removeChild(input);
-            // Thông báo hoặc cập nhật trạng thái sau khi sao chép
-            // alert("Copied to clipboard!");
             this.isCopiedToClipboard = true;
             setTimeout(() => {
                 this.isCopiedToClipboard = false;
@@ -128,7 +126,6 @@ export default {
                 );
 
                 if (res) {
-                    // thêm thông báo đăng ký thành công
                     this.isSuccess = true;
                     setTimeout(() => {
                         this.isSuccess = false;
@@ -143,7 +140,6 @@ export default {
             }
         },
 
-        // b1: gọi info
         async getInfoUser() {
             try {
                 var data = await userService.getInfo(this.idUser!);
@@ -154,7 +150,7 @@ export default {
                             REF_MESS_PREFIX,
                             ""
                         ) ?? "";
-                    // nhập mã code => tự động đăng ký
+
                     if (await this.isValidRefCode(refcode)) {
                         this.code = refcode;
                         this.register();
@@ -238,20 +234,22 @@ export default {
                 const res = await userService.takeReward(this.idUser!);
                 if (res) {
                     await this.getInfoUser();
+                    this.updateSence();
                     await this.countdownFunc();
                 }
-                this.updateSence();
             } catch (error) {
-                this.countdownFunc();
+                console.log(error);
+
+                // this.countdownFunc();
             }
         },
         async updateSence() {
             const phaserRef: any = this.$refs.phaserRef as
                 | {
-                    scene?: {
-                        changeScene: () => void;
-                    };
-                }
+                      scene?: {
+                          changeScene: () => void;
+                      };
+                  }
                 | undefined;
             const scene = toRaw(phaserRef?.scene);
             const givenDateTimeString = this.dataQPoint.nextTakeRewardTime;
@@ -260,48 +258,59 @@ export default {
             const givenDateTime = new Date(givenDateTimeString);
 
             // Get the current date-time in UTC
-            const currentDateTime = new Date((new Date()).toUTCString());
+            const currentDateTime = new Date(new Date().toUTCString());
 
             // Calculate the difference in milliseconds
-            const differenceInMilliseconds = currentDateTime.getTime() - givenDateTime.getTime();
+            const differenceInMilliseconds =
+                currentDateTime.getTime() - givenDateTime.getTime();
 
-
-            if (scene.scene.key == 'IdleScene' && differenceInMilliseconds < 0) {
+            if (
+                scene?.scene?.key == "IdleScene" &&
+                differenceInMilliseconds < 0
+            ) {
+                this.isClaim = false;
                 scene.changeScene();
-            }
-            else if (scene.scene.key == 'MainScene' && differenceInMilliseconds > 0) {
+            } else if (
+                scene?.scene?.key == "MainScene" &&
+                differenceInMilliseconds > 0
+            ) {
+                this.isClaim = true;
                 scene.changeScene();
             }
         },
-        // Phương thức để thêm số 0 vào trước nếu số là một chữ số
+
         pad(value: any) {
             return value < 10 ? "0" + value : value;
         },
-
         countdownFunc() {
             const totalTime = 1 * 60 * 60 * 1000;
             const rewardTime: any = new Date(
                 this.dataQPoint.nextTakeRewardTime
             ).getTime();
 
-            // Cập nhật mỗi giây
-            setInterval(() => {
-                const currentTime: any = new Date((new Date()).toUTCString());
-                const timeDiff = rewardTime - currentTime;
-                // const timeDiff = 1715942661465 - 1715942660465;
+            this.isClaim = false;
 
-                // if (timeDiff > 0) {
-                //     gọi run take
-                //     commit_reward();
-                //     this.handleReward();
-                // }
+            const intervalId = setInterval(() => {
+                const currentTime: any = new Date(
+                    new Date().toUTCString()
+                ).getTime();
+                const timeDiff = rewardTime - currentTime;
 
                 const remainingPercentage = (timeDiff / totalTime) * 100;
+
+                // console.log((timeDiff / totalTime) * 100);
+                // console.log(100 - remainingPercentage);
                 this.apiDataWidth = 100 - remainingPercentage;
 
+                // console.log(this.formatTime(timeDiff));
                 this.countdown = this.formatTime(timeDiff);
 
                 this.isCountingDown = timeDiff > 0;
+
+                if (timeDiff <= 0) {
+                    this.isClaim = true;
+                    clearInterval(intervalId);
+                }
             }, 1000);
         },
 
@@ -328,7 +337,6 @@ export default {
     async updated() {
         this.updateSence();
     },
-
 };
 </script>
 
@@ -343,15 +351,17 @@ export default {
             START TRAINING
         </button>
         <div>
-            <button id="login_button" class="btn-login" v-show="!isTelegramLogin">
+            <button
+                id="login_button"
+                class="btn-login"
+                v-show="!isTelegramLogin"
+            >
                 LOGIN
             </button>
         </div>
 
         <div class="container-game">
             <div class="container-info" v-show="isTelegramLogin">
-                <!-- <div class="wrap-score">SCORE: 0</div> -->
-
                 <div class="wrap-username">
                     {{ first_name }} {{ last_name }}
                 </div>
@@ -359,31 +369,31 @@ export default {
 
             <div class="wrap-score">
                 <div class="content">
-                    <!-- <div>in storage:</div>
-                    <div class="score"></div> -->
                     <img src="./../public/assets/logo.svg" />
                     <div>QFP Balance: {{ dataQPoint?.balance }}</div>
                 </div>
             </div>
 
-            <!-- :style="{ width: apiDataWidth + '%' }" -->
             <div class="wrap-commit_reward" :style="beforeStyle">
                 <div class="box-info">
-                    <div class="box-left" v-if="countdown !== ('Time expired' || '')">
+                    <div v-if="isClaim" class="box-left-train">
+                        Click "Train" to take + {{ dataQPoint?.rewardAmount }}
+                        <img src="./../public/assets/logo.svg" />
+                    </div>
+
+                    <div v-else class="box-left">
                         <div class="title">Remain:</div>
                         <div class="content">{{ countdown }} to train</div>
                     </div>
 
-                    <div class="box-left-train" v-if="countdown === 'Time expired'">
-                        Click "Train" to take +
-                        {{ dataQPoint?.rewardAmount }}
-                        <img src="./../public/assets/logo.svg" />
-                    </div>
                     <div class="box-right">
-                        <button class="btn-commit_reward" @click="handleReward" :disabled="isCountingDown">
-                            Train
+                        <button
+                            class="btn-commit_reward"
+                            @click="handleReward"
+                            :disabled="isCountingDown"
+                        >
+                            {{ isClaim ? "Claim" : "Train" }}
                         </button>
-                        <!-- @click="commit_reward" -->
                     </div>
                 </div>
             </div>
@@ -394,53 +404,85 @@ export default {
         <div class="button-container">
             <div class="row">
                 <button @click="showPopupCoomingSoon">
-                    <img src="./../public/assets/button-icons/shopping-bag-3744.svg" class="icon-home" />
+                    <img
+                        src="./../public/assets/button-icons/shopping-bag-3744.svg"
+                        class="icon-home"
+                    />
                     <span>Shop</span>
                 </button>
                 <button @click="handleReferal">
-                    <img src="./../public/assets/button-icons/copy-link.svg" class="icon-home" />
+                    <img
+                        src="./../public/assets/button-icons/copy-link.svg"
+                        class="icon-home"
+                    />
                     <span>Referal</span>
                 </button>
-                <InviteFrens :visible="showInvite" @close="closeInvite" @invite="handleInvite" :idUser="idUser" />
+                <InviteFrens
+                    :visible="showInvite"
+                    @close="closeInvite"
+                    @invite="handleInvite"
+                    :idUser="idUser"
+                />
             </div>
 
             <div class="row">
                 <button @click="showPopupCoomingSoon">
-                    <img src="./../public/assets/button-icons/booster.svg" class="icon-home" />
+                    <img
+                        src="./../public/assets/button-icons/booster.svg"
+                        class="icon-home"
+                    />
                     <span>Booster</span>
                 </button>
 
                 <button @click="handleMission">
-                    <img src="./../public/assets/button-icons/mission.svg" class="icon-home" />
+                    <img
+                        src="./../public/assets/button-icons/mission.svg"
+                        class="icon-home"
+                    />
                     <span>Mission</span>
                 </button>
-                <MissionList :visible="showMission" @close="closeMission" @invite="handleMission" />
+                <MissionList
+                    :visible="showMission"
+                    @close="closeMission"
+                    @invite="handleMission"
+                />
 
                 <button @click="showPopupCoomingSoon">
-                    <img src="./../public/assets/button-icons/event.svg" class="icon-home" />
+                    <img
+                        src="./../public/assets/button-icons/event.svg"
+                        class="icon-home"
+                    />
                     <span>Event</span>
                 </button>
             </div>
         </div>
         <!-- <span v-text="telegram_bot_link" class="nunito-fonts"></span> -->
 
-        <!-- popup coming sooon -->
-        <div :class="[
-            'popup-cooming-soon',
-            { 'closing-popup': !showCoomingSoon },
-        ]" v-if="showCoomingSoon">
+        <div
+            :class="[
+                'popup-cooming-soon',
+                { 'closing-popup': !showCoomingSoon },
+            ]"
+            v-if="showCoomingSoon"
+        >
             <p>Coming soon</p>
             <button @click="hidePopupCoomingSoon" class="btn-close-coming-soon">
                 Close
             </button>
         </div>
 
-        <!-- popup refere code -->
         <div class="popup-referer-code" v-if="isPopupCode">
             <div class="referer-code">Referer code</div>
             <form @submit.prevent="submitCode">
-                <input class="code-input" :class="{ 'input-error': errorMessage }" type="text" v-model="code" id="code"
-                    @input="clearError" placeholder="Enter code" />
+                <input
+                    class="code-input"
+                    :class="{ 'input-error': errorMessage }"
+                    type="text"
+                    v-model="code"
+                    id="code"
+                    @input="clearError"
+                    placeholder="Enter code"
+                />
                 <div v-if="errorMessage" class="text-err-code">
                     {{ errorMessage }}
                 </div>
@@ -452,12 +494,10 @@ export default {
             </button> -->
         </div>
 
-        <!-- copy to clipboard -->
         <div class="copy-success-message" v-if="isCopiedToClipboard">
             <span>Copied to clipboard!</span>
         </div>
 
-        <!-- đăng ký nhập mã code thành công -->
         <div class="enter-code-success" v-if="isSuccess">
             <span>Success!</span>
         </div>

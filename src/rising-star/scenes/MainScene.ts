@@ -73,8 +73,8 @@ export class MainScene extends Scene {
 
         this.cursors = this.input.keyboard?.createCursorKeys();
         this.platforms = this.physics.add.staticGroup();
-        // this.add.image(400, 300, SKY_TEXT);
-        this.platforms.create(192, 468, "ground").setScale(2).refreshBody();
+        // this.add.image(400, 300, SKY_TEXT);468
+        this.platforms.create(192, 521, "ground").setScale(2).refreshBody();
         this.player_run = this.createPlayer();
         this.ball = this.createBall();
         this.physics.add.collider(this.player_run, this.platforms);

@@ -149,7 +149,8 @@
     left: 50%;
     transform: translate(-50%, -50%);
     width: 80%;
-    background: #67bdef;
+    background: #329197d1;
+    /* background: #67bdef; */
     padding: 15px;
     border-radius: 20px;
     overflow: hidden;

@@ -55,10 +55,10 @@ export default {
             apiDataWidth: 0,
             dataLogin: null,
             dataQPoint: {
-                balance: "",
+                balance: 0,
                 lastTakeRewardTime: "",
                 nextTakeRewardTime: "",
-                rewardAmount: "100",
+                rewardAmount: "",
                 createdAt: "",
                 updatedAt: "",
                 publishedAt: "",
@@ -110,6 +110,7 @@ export default {
             if (!window.Telegram.WebApp.initDataUnsafe.user) {
                 return;
             }
+
             try {
                 const dataForm = {
                     id: this.idUser,
@@ -131,6 +132,7 @@ export default {
                         this.isSuccess = false;
                     }, 2000);
                     this.code = "";
+
                     this.getInfoUser();
                 } else {
                     alert("Lỗi");
@@ -143,13 +145,14 @@ export default {
         async getInfoUser() {
             try {
                 var data = await userService.getInfo(this.idUser!);
-                //var data = await userService.getInfo('5314337740');
+
                 if (data?.data?.length == 0) {
                     var refcode: string =
                         window?.Telegram?.WebApp?.initDataUnsafe?.start_param?.replace(
                             REF_MESS_PREFIX,
                             ""
                         ) ?? "";
+                    this.isClaim = true;
 
                     if (await this.isValidRefCode(refcode)) {
                         this.code = refcode;
@@ -158,13 +161,13 @@ export default {
                         this.isPopupCode = true;
                     }
                 } else {
-                    this.dataLogin = data?.data[0];
+                    this.dataLogin = data?.data?.[0];
                     this.dataQPoint =
-                        data?.data[0].attributes.qpoint.data.attributes;
+                        data?.data?.[0]?.attributes?.qpoint?.data?.attributes;
+                    // if (!this.isClaim) {
+                    //     await this.countdownFunc();
+                    // }
                 }
-                this.dataLogin = data?.data[0];
-                this.dataQPoint =
-                    data?.data[0].attributes.qpoint.data.attributes;
             } catch (error) {
                 console.error("Error fetching API data:", error);
             }
@@ -194,10 +197,12 @@ export default {
             return response.status == 200;
         },
         async submitCode() {
+            this.isClaim = true;
             if (!this.code) {
                 this.errorMessage = "Code is required!";
                 return;
             }
+
             try {
                 const data = await userService.checkCode(this.code!);
 
@@ -234,8 +239,8 @@ export default {
                 const res = await userService.takeReward(this.idUser!);
                 if (res) {
                     await this.getInfoUser();
-                    this.updateSence();
-                    await this.countdownFunc();
+                    // await this.countdownFunc();
+                    await this.updateSence();
                 }
             } catch (error) {
                 console.log(error);
@@ -256,25 +261,36 @@ export default {
 
             // Parse the given date-time string to a Date object
             const givenDateTime = new Date(givenDateTimeString);
-
             // Get the current date-time in UTC
             const currentDateTime = new Date(new Date().toUTCString());
-
             // Calculate the difference in milliseconds
             const differenceInMilliseconds =
                 currentDateTime.getTime() - givenDateTime.getTime();
+
+            const rewardTime = new Date(
+                this.dataQPoint.nextTakeRewardTime
+            ).getTime();
+            const currentTime = new Date(new Date().toUTCString()).getTime();
+            const timeDiff = rewardTime - currentTime;
+            if (timeDiff > 0) {
+                this.isClaim = false;
+                await this.countdownFunc();
+            } else {
+                this.isClaim = true;
+            }
 
             if (
                 scene?.scene?.key == "IdleScene" &&
                 differenceInMilliseconds < 0
             ) {
-                this.isClaim = false;
+                // this.isClaim = false;
                 scene.changeScene();
+                // await this.countdownFunc();
             } else if (
                 scene?.scene?.key == "MainScene" &&
                 differenceInMilliseconds > 0
             ) {
-                this.isClaim = true;
+                // this.isClaim = true;
                 scene.changeScene();
             }
         },
@@ -284,34 +300,33 @@ export default {
         },
         countdownFunc() {
             const totalTime = 1 * 60 * 60 * 1000;
-            const rewardTime: any = new Date(
+            const rewardTime = new Date(
                 this.dataQPoint.nextTakeRewardTime
             ).getTime();
 
-            this.isClaim = false;
+            if (!this.isClaim) {
+                const intervalId = setInterval(() => {
+                    const currentTime = new Date(
+                        new Date().toUTCString()
+                    ).getTime();
+                    const timeDiff = rewardTime - currentTime;
 
-            const intervalId = setInterval(() => {
-                const currentTime: any = new Date(
-                    new Date().toUTCString()
-                ).getTime();
-                const timeDiff = rewardTime - currentTime;
+                    const remainingPercentage = (timeDiff / totalTime) * 100;
 
-                const remainingPercentage = (timeDiff / totalTime) * 100;
+                    // console.log((timeDiff / totalTime) * 100);
+                    // console.log(100 - remainingPercentage);
+                    this.apiDataWidth = 100 - remainingPercentage;
 
-                // console.log((timeDiff / totalTime) * 100);
-                // console.log(100 - remainingPercentage);
-                this.apiDataWidth = 100 - remainingPercentage;
+                    this.countdown = this.formatTime(timeDiff);
 
-                // console.log(this.formatTime(timeDiff));
-                this.countdown = this.formatTime(timeDiff);
+                    this.isCountingDown = timeDiff > 0;
 
-                this.isCountingDown = timeDiff > 0;
-
-                if (timeDiff <= 0) {
-                    this.isClaim = true;
-                    clearInterval(intervalId);
-                }
-            }, 1000);
+                    if (timeDiff <= 0) {
+                        this.isClaim = true;
+                        clearInterval(intervalId);
+                    }
+                }, 1000);
+            }
         },
 
         handleReferal() {
@@ -332,7 +347,7 @@ export default {
     },
     async mounted() {
         await this.getInfoUser();
-        await this.countdownFunc();
+        // await this.countdownFunc();
     },
     async updated() {
         this.updateSence();
@@ -445,6 +460,7 @@ export default {
                     :visible="showMission"
                     @close="closeMission"
                     @invite="handleMission"
+                    :idUser="idUser"
                 />
 
                 <button @click="showPopupCoomingSoon">

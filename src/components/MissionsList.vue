@@ -42,14 +42,20 @@
                         </div>
 
                         <div class="item-right">
-                            <a v-bind:href="item?.attributes?.link">
-                                <button class="mission-btn">Go</button>
+                            <a
+                                v-bind:href="item?.attributes?.link"
+                                target="_blank"
+                                @click.prevent="goToMission(item?.id, index)"
+                            >
+                                <button class="mission-btn">
+                                    {{ buttonText[index] }}
+                                </button>
                             </a>
                         </div>
                     </div>
                 </div>
 
-                <EmptyForm v-if="showEmptyForm" />
+                <EmptyForm v-if="showEmptyFormMission" />
             </div>
         </div>
     </div>
@@ -65,15 +71,23 @@ export default {
             type: Boolean,
             default: false,
         },
+        idUser: {
+            type: String,
+            required: true,
+        },
     },
     components: {
         Loading,
+    },
+    created() {
+        this.buttonText = [];
     },
     data() {
         return {
             loading: true,
             missionData: [],
             iframeSrc: "",
+            buttonText: [],
         };
     },
     watch: {
@@ -90,13 +104,27 @@ export default {
         handleMission() {
             this.$emit("mission");
         },
-        handleClaim() {},
+        async goToMission(idMission, index) {
+            try {
+                const res = await userService.claimMission(
+                    this.idUser,
+                    idMission
+                );
+                if (res) {
+                    this.buttonText[index] = "Claim after 2 minutes";
+                }
+            } catch (error) {
+                console.error("Error fetching API data:", error);
+            }
+        },
         async fetchMissionData() {
             try {
                 this.loading = true;
                 const response = await userService.getListMission();
 
+                console.log(response?.data?.data);
                 this.missionData = response?.data?.data;
+                this.buttonText = response?.data?.data?.map(() => "Go");
             } catch (error) {
                 this.missionData = [];
                 console.error("Error fetching API data:", error);
@@ -111,8 +139,8 @@ export default {
         },
     },
     computed: {
-        showEmptyForm() {
-            return this.missionData.length === 0;
+        showEmptyFormMission() {
+            return this.missionData.length == 0;
         },
     },
 };
@@ -238,7 +266,6 @@ export default {
 .item-left .item-img {
     width: 30px;
     height: 30px;
-    background: #fff;
     clip-path: polygon(
         30% 0%,
         70% 0%,

@@ -47,6 +47,19 @@ const userService = {
         );
         return res.data;
     },
+    async claimMission(userId: string, missionId: number) {
+        const dataForm = {
+            data: {
+                playerId: userId,
+                missionId: missionId,
+            },
+        };
+        const res = await axiosInstance.post(
+            `qpoint-transaction/claimMissionReward`,
+            dataForm
+        );
+        return res.data;
+    },
 };
 
 export default userService;

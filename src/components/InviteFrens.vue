@@ -40,7 +40,7 @@
                     </div>
                 </div>
 
-                <EmptyForm v-if="showEmptyForm" />
+                <EmptyForm v-if="showEmptyForm && !loading" />
             </div>
         </div>
 
@@ -112,7 +112,7 @@ export default {
             } finally {
                 setTimeout(() => {
                     this.loading = false;
-                }, 500);
+                }, 300);
             }
         },
         async mounted() {
@@ -184,7 +184,6 @@ export default {
 .item-left .item-img {
     width: 30px;
     height: 30px;
-    background: #fff;
     clip-path: polygon(
         30% 0%,
         70% 0%,

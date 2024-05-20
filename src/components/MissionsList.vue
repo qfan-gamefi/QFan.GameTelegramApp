@@ -45,8 +45,8 @@
                             <a
                                 v-bind:href="item?.attributes?.link"
                                 target="_blank"
-                                @click.prevent="goToMission(item?.id, index)"
                             >
+                                <!-- @click.prevent="goToMission(item?.id, index)" -->
                                 <button class="mission-btn">
                                     {{ buttonText[index] }}
                                 </button>
@@ -105,17 +105,17 @@ export default {
             this.$emit("mission");
         },
         async goToMission(idMission, index) {
-            try {
-                const res = await userService.claimMission(
-                    this.idUser,
-                    idMission
-                );
-                if (res) {
-                    this.buttonText[index] = "Claim after 2 minutes";
-                }
-            } catch (error) {
-                console.error("Error fetching API data:", error);
-            }
+            // try {
+            //     const res = await userService.claimMission(
+            //         this.idUser,
+            //         idMission
+            //     );
+            //     if (res) {
+            //         this.buttonText[index] = "Claim after 2 minutes";
+            //     }
+            // } catch (error) {
+            //     console.error("Error fetching API data:", error);
+            // }
         },
         async fetchMissionData() {
             try {

@@ -29,14 +29,14 @@
                     >
                         <div class="item-left">
                             <div class="item-img">
-                                <img src="./../../public/assets/logo.svg" />
+                                <img src="./../../public/assets/logo.jpg" />
                             </div>
 
                             <div class="item-left-content">
                                 <div>{{ item?.attributes?.title }}</div>
                                 <div class="left-desc">
                                     +{{ item?.attributes?.rewardAmount }}
-                                    <img src="./../../public/assets/logo.svg" />
+                                    <img src="./../../public/assets/logo.jpg" />
                                 </div>
                             </div>
                         </div>
@@ -49,29 +49,15 @@
                             >
                                 <button
                                     class="mission-btn"
-                                    @click="goToMission(item?.id, index)"
+                                    @click="fetchMission(item?.id, index)"
                                 >
                                     {{ buttonText[index] }}
                                 </button>
                             </a>
 
-                            <a v-else-if="buttonText[index] === 'Claim'">
-                                <button
-                                    class="mission-btn"
-                                    @click="goToMission(item?.id, index)"
-                                >
-                                    {{ buttonText[index] }}
-                                </button>
-                            </a>
-
-                            <a v-else>
-                                <button
-                                    class="mission-btn"
-                                    :disabled="
-                                        buttonText[index] !== 'Go' &&
-                                        buttonText[index] !== 'Claim'
-                                    "
-                                >
+                            <a v-if="buttonText[index] !== 'Go'">
+                                <button class="verifying-btn">
+                                    <i class="fa fa-spinner fa-pulse"></i>
                                     {{ buttonText[index] }}
                                 </button>
                             </a>
@@ -122,6 +108,7 @@ export default {
             iframeSrc: "",
             buttonText: [],
             missionRewardData: [],
+            loadingBtn: [],
         };
     },
     watch: {
@@ -145,37 +132,38 @@ export default {
         handleMission() {
             this.$emit("mission");
         },
-        async goToMission(idMission, index) {
-            if (this.buttonText[index] !== "Claim") {
-                let randomSeconds = Math.floor(Math.random() * 31) + 60;
-                this.buttonText[index] = `Claim in ${randomSeconds} s`;
-
-                const countdown = setInterval(() => {
-                    if (randomSeconds > 0) {
-                        this.buttonText[index] = `Claim in ${randomSeconds} s`;
-                        randomSeconds--;
-                    } else {
-                        clearInterval(countdown);
-                        this.buttonText[index] = "Claim";
-                    }
-                }, 1000);
-            } else {
-                try {
-                    const res = await userService.claimMission(
-                        this.idUser,
-                        idMission
-                    );
-                    if (res) {
-                        await this.fetchMissionData();
-                        await this.fetchListMissionReward();
-                        // show success
-                        // this.buttonText[index] = "Done!";
-                    }
-                } catch (error) {
-                    console.error("Error fetching API data:", error);
+        async autoClaim(idMission) {
+            try {
+                const res = await userService.claimMission(
+                    this.idUser,
+                    idMission
+                );
+                if (res) {
+                    await this.fetchMissionData();
+                    await this.fetchListMissionReward();
                 }
+            } catch (error) {
+                console.error("Error fetching API data:", error);
             }
         },
+        async fetchMission(idMission, index) {
+            let randomSeconds = Math.floor(Math.random() * 31) + 60;
+            this.buttonText[index] = `Verifying`;
+            this.loadingBtn[index] = true;
+
+            const countdown = setInterval(() => {
+                if (randomSeconds > 0) {
+                    this.loadingBtn[index] = true;
+                    this.buttonText[index] = `Verifying`;
+                    randomSeconds--;
+                } else {
+                    this.loadingBtn[index] = false;
+                    clearInterval(countdown);
+                    this.autoClaim(idMission);
+                }
+            }, 1000);
+        },
+
         async fetchMissionData() {
             try {
                 this.loading = true;
@@ -206,7 +194,7 @@ export default {
                         const matchingReward = toRaw(
                             this.missionRewardData
                         ).find(
-                            (reward) => reward.attributes.refId == mission.id
+                            (reward) => reward?.attributes?.refId == mission?.id
                         );
                         if (matchingReward) {
                             mission.status = true;
@@ -222,7 +210,7 @@ export default {
     },
     computed: {
         showEmptyFormMission() {
-            return this.missionData.length == 0;
+            return this.missionData?.length == 0;
         },
     },
 };
@@ -343,12 +331,14 @@ export default {
 }
 .item-left-content .left-desc img {
     width: 12px;
+    border-radius: 5px;
+    margin-left: 3px;
 }
 
 .item-left .item-img {
     width: 30px;
     height: 30px;
-    clip-path: polygon(
+    /* clip-path: polygon(
         30% 0%,
         70% 0%,
         100% 30%,
@@ -357,9 +347,10 @@ export default {
         30% 100%,
         0% 70%,
         0% 30%
-    );
+    ); */
 }
 .item-left img {
+    border-radius: 5px;
     width: 30px;
 }
 
@@ -379,24 +370,63 @@ export default {
     align-items: center;
     font-size: 13px;
     border-bottom: 1px solid #fff;
-    padding-bottom: 10px;
+    padding-bottom: 20px;
     margin: 0 -20px;
 }
 .close-btn svg {
     margin-left: 20px;
 }
 
-.box-btn-mission {
-    position: absolute;
-    bottom: 5%;
-    width: calc(100% - 40px);
-    padding: 0 20px;
-}
 .mission-btn {
     border-radius: 10px;
 }
 .btn-mission-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+/*  */
+.verifying-btn {
+    border-radius: 10px;
+    background-color: #e29a36;
+    border: none;
+    color: white;
+    padding: 10px 15px !important;
+}
+.fa {
+    margin-left: -12px;
+    margin-right: 8px;
+}
+section.loaders .loader {
+    display: inline-block;
+}
+.loader {
+    border: 16px solid #f3f3f3;
+    border-top: 16px solid blue;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    margin: 25px;
+    animation: spin 2s linear infinite;
+}
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+.colors2 {
+    border-bottom: 16px solid blue;
+}
+.colors3 {
+    border-bottom: 16px solid red;
+    border-right: 16px solid green;
+}
+.colors4 {
+    border-bottom: 16px solid red;
+    border-right: 16px solid green;
+    border-left: 16px solid pink;
 }
 </style>

@@ -41,8 +41,7 @@ button {
     -webkit-text-fill-color: unset;
     -webkit-text-stroke: 1px rgb(139, 129, 116);
     background: rgb(226, 154, 54);
-    border: 2px solid rgb(163, 112, 41);
-    /* box-shadow: rgb(163, 112, 41) 0px 4px 0px; */
+    border: 1px solid rgb(163, 112, 41);
     position: relative;
     display: flex;
     -webkit-box-align: center;

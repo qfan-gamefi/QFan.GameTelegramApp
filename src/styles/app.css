@@ -67,7 +67,7 @@
     transform: translate(-50%, -50%);
     background: white;
     padding: 30px;
-    border: 2px solid #ccc;
+    border: 1px solid #ccc;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     animation: slideIn 0.5s forwards;
     border-radius: 10px;
@@ -141,6 +141,7 @@
     font-size: 13px;
     width: auto;
     margin: 0 auto;
+    border-radius: 5px;
 }
 
 .wrap-commit_reward {
@@ -214,7 +215,9 @@
 }
 
 .wrap-score .content img {
-    width: 45px;
+    width: 50px;
+    height: 50px;
+    border-radius: 5px;
 }
 
 .content .score {
@@ -222,9 +225,10 @@
 }
 
 .btn-commit_reward {
-    border-radius: 20px;
+    border-radius: 10px;
     border: none;
     width: auto;
+    font-size: 14px;
 }
 
 .wrap-commit_reward::after {
@@ -261,6 +265,8 @@
 
 .box-left-train img {
     width: 20px;
+    border-radius: 5px;
+    margin-left: 3px;
 }
 
 .icon-home {
@@ -274,7 +280,7 @@
     transform: translate(-50%, -50%);
     background: white;
     padding: 20px;
-    border: 2px solid #ccc;
+    border: 1px solid #ccc;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     animation: slideIn 0.5s forwards;
     border-radius: 10px;
@@ -294,9 +300,9 @@
 .code-input {
     margin-top: 20px;
     padding: 5px;
-    border: 2px solid #ccc;
+    border: 1px solid #ccc;
     transition: border-color 0.3s ease;
-    border: 2px solid #ccc;
+    border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 16px;
     background-color: #f0f0f0;
@@ -330,4 +336,25 @@
     100% {
         transform: scale(1);
     }
+}
+
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
+.popup-referer-code {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    padding: 20px;
+    z-index: 1000;
+    border-radius: 8px;
 }

@@ -41,21 +41,49 @@
                             </div>
                         </div>
 
-                        <div class="item-right">
+                        <div class="item-right" v-if="!item.status">
                             <a
+                                v-if="buttonText[index] === 'Go'"
                                 v-bind:href="item?.attributes?.link"
-                                target="_blank"
+                                target="'_blank"
                             >
-                                <!-- @click.prevent="goToMission(item?.id, index)" -->
-                                <button class="mission-btn">
+                                <button
+                                    class="mission-btn"
+                                    @click="goToMission(item?.id, index)"
+                                >
                                     {{ buttonText[index] }}
                                 </button>
                             </a>
+
+                            <a v-else-if="buttonText[index] === 'Claim'">
+                                <button
+                                    class="mission-btn"
+                                    @click="goToMission(item?.id, index)"
+                                >
+                                    {{ buttonText[index] }}
+                                </button>
+                            </a>
+
+                            <a v-else>
+                                <button
+                                    class="mission-btn"
+                                    :disabled="
+                                        buttonText[index] !== 'Go' &&
+                                        buttonText[index] !== 'Claim'
+                                    "
+                                >
+                                    {{ buttonText[index] }}
+                                </button>
+                            </a>
+                        </div>
+                        <div class="item-right" v-else>
+                            <img src="./../../public/assets/tick.svg" />
                         </div>
                     </div>
                 </div>
 
                 <EmptyForm v-if="showEmptyFormMission" />
+                <Toast />
             </div>
         </div>
     </div>
@@ -64,6 +92,7 @@
 <script>
 import userService from "../services/userService";
 import Loading from "./LoadingForm.vue";
+import { toRaw } from "vue";
 
 export default {
     props: {
@@ -81,21 +110,33 @@ export default {
     },
     created() {
         this.buttonText = [];
+        if (this.visible) {
+            this.fetchMissionData();
+            this.fetchListMissionReward();
+        }
     },
     data() {
         return {
             loading: true,
-            missionData: [],
+            missionData: null,
             iframeSrc: "",
             buttonText: [],
+            missionRewardData: [],
         };
     },
     watch: {
         visible(newVal) {
             if (newVal) {
                 this.fetchMissionData();
+                this.fetchListMissionReward();
             }
         },
+    },
+    async mounted() {
+        if (this.visible) {
+            await this.fetchMissionData();
+            await this.fetchListMissionReward();
+        }
     },
     methods: {
         openInIframe(url) {
@@ -105,37 +146,78 @@ export default {
             this.$emit("mission");
         },
         async goToMission(idMission, index) {
-            // try {
-            //     const res = await userService.claimMission(
-            //         this.idUser,
-            //         idMission
-            //     );
-            //     if (res) {
-            //         this.buttonText[index] = "Claim after 2 minutes";
-            //     }
-            // } catch (error) {
-            //     console.error("Error fetching API data:", error);
-            // }
+            if (this.buttonText[index] !== "Claim") {
+                let randomSeconds = Math.floor(Math.random() * 31) + 60;
+                this.buttonText[index] = `Claim in ${randomSeconds} s`;
+
+                const countdown = setInterval(() => {
+                    if (randomSeconds > 0) {
+                        this.buttonText[index] = `Claim in ${randomSeconds} s`;
+                        randomSeconds--;
+                    } else {
+                        clearInterval(countdown);
+                        this.buttonText[index] = "Claim";
+                    }
+                }, 1000);
+            } else {
+                try {
+                    const res = await userService.claimMission(
+                        this.idUser,
+                        idMission
+                    );
+                    if (res) {
+                        await this.fetchMissionData();
+                        await this.fetchListMissionReward();
+                        // show success
+                        // this.buttonText[index] = "Done!";
+                    }
+                } catch (error) {
+                    console.error("Error fetching API data:", error);
+                }
+            }
         },
         async fetchMissionData() {
             try {
                 this.loading = true;
-                const response = await userService.getListMission();
+                const res = await userService.getListMission();
 
-                console.log(response?.data?.data);
-                this.missionData = response?.data?.data;
-                this.buttonText = response?.data?.data?.map(() => "Go");
+                if (res?.data) {
+                    this.missionData = res?.data;
+
+                    this.buttonText = res?.data?.map(() => "Go");
+                }
             } catch (error) {
                 this.missionData = [];
-                console.error("Error fetching API data:", error);
             } finally {
                 setTimeout(() => {
                     this.loading = false;
                 }, 300);
             }
         },
-        async mounted() {
-            await this.fetchMissionData();
+        async fetchListMissionReward() {
+            try {
+                const res = await userService.getListMissionReward(this.idUser);
+                this.missionRewardData = res.data;
+
+                if (res) {
+                    // const lissMiss = this.missionData;
+
+                    toRaw(this.missionData).forEach((mission) => {
+                        const matchingReward = toRaw(
+                            this.missionRewardData
+                        ).find(
+                            (reward) => reward.attributes.refId == mission.id
+                        );
+                        if (matchingReward) {
+                            mission.status = true;
+                        } else {
+                            mission.status = false;
+                        }
+                    });
+                }
+            } catch (error) {
+                this.missionRewardData = [];
+            }
         },
     },
     computed: {
@@ -312,5 +394,9 @@ export default {
 }
 .mission-btn {
     border-radius: 10px;
+}
+.btn-mission-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 </style>

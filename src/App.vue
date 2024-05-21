@@ -332,14 +332,16 @@ export default {
         handleReferal() {
             this.showInvite = true;
         },
-        closeInvite() {
+        async closeInvite() {
             this.showInvite = false;
+            await this.getInfoUser();
         },
         handleInvite() {
             this.copyToClipboard();
         },
-        handleMission() {
+        async handleMission() {
             this.showMission = true;
+            await this.getInfoUser();
         },
         closeMission() {
             this.showMission = false;

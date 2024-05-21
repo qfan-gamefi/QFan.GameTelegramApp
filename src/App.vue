@@ -476,7 +476,6 @@ export default {
                 </button>
             </div>
         </div>
-        <!-- <span v-text="telegram_bot_link" class="nunito-fonts"></span> -->
 
         <div
             :class="[
@@ -490,27 +489,6 @@ export default {
                 Close
             </button>
         </div>
-
-        <!-- <div class="popup-referer-code" v-if="isPopupCode">
-            <div class="referer-code">Referer code</div>
-            <form @submit.prevent="submitCode">
-                <input
-                    class="code-input"
-                    :class="{ 'input-error': errorMessage }"
-                    type="text"
-                    v-model="code"
-                    id="code"
-                    @input="clearError"
-                    placeholder="Enter code"
-                />
-                <div v-if="errorMessage" class="text-err-code">
-                    {{ errorMessage }}
-                </div>
-                <button class="btn-submit-code" type="submit">
-                    <span>Submit</span>
-                </button>
-            </form>
-        </div> -->
 
         <div v-if="isPopupCode">
             <div class="popup-overlay"></div>

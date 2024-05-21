@@ -29,13 +29,13 @@
                     >
                         <div class="item-left">
                             <div class="item-img">
-                                <img src="./../../public/assets/logo.svg" />
+                                <img src="./../../public/assets/logo.jpg" />
                             </div>
                             <div>{{ el?.firstName }} {{ el?.lastName }}</div>
                         </div>
                         <div class="item-right">
                             {{ el?.qpoint?.balance }}
-                            <img src="./../../public/assets/logo.svg" />
+                            <img src="./../../public/assets/logo.jpg" />
                         </div>
                     </div>
                 </div>
@@ -184,7 +184,7 @@ export default {
 .item-left .item-img {
     width: 30px;
     height: 30px;
-    clip-path: polygon(
+    /* clip-path: polygon(
         30% 0%,
         70% 0%,
         100% 30%,
@@ -193,10 +193,11 @@ export default {
         30% 100%,
         0% 70%,
         0% 30%
-    );
+    ); */
 }
 .item-left img {
     width: 30px;
+    border-radius: 5px;
 }
 
 .item-right {
@@ -208,6 +209,8 @@ export default {
 }
 .item-right img {
     width: 15px;
+    margin-left: 3px;
+    border-radius: 5px;
 }
 .close-btn {
     cursor: pointer;
@@ -225,7 +228,7 @@ export default {
 .box-btn-invite {
     position: absolute;
     bottom: 5%;
-    /* width: calc(100% - 40px); */
+    width: calc(100% - 40px);
     padding: 0 20px;
 }
 .invite-btn {

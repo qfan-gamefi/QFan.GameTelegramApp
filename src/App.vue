@@ -332,8 +332,9 @@ export default {
         handleReferal() {
             this.showInvite = true;
         },
-        closeInvite() {
+        async closeInvite() {
             this.showInvite = false;
+            await this.getInfoUser();
         },
         handleInvite() {
             this.copyToClipboard();
@@ -341,8 +342,9 @@ export default {
         handleMission() {
             this.showMission = true;
         },
-        closeMission() {
+        async closeMission() {
             this.showMission = false;
+            await this.getInfoUser();
         },
     },
     async mounted() {
@@ -384,7 +386,7 @@ export default {
 
             <div class="wrap-score">
                 <div class="content">
-                    <img src="./../public/assets/logo.svg" />
+                    <img src="./../public/assets/logo.jpg" />
                     <div>QFP Balance: {{ dataQPoint?.balance }}</div>
                 </div>
             </div>
@@ -393,7 +395,7 @@ export default {
                 <div class="box-info">
                     <div v-if="isClaim" class="box-left-train">
                         Click "Train" to take + {{ dataQPoint?.rewardAmount }}
-                        <img src="./../public/assets/logo.svg" />
+                        <img src="./../public/assets/logo.jpg" />
                     </div>
 
                     <div v-else class="box-left">
@@ -425,13 +427,15 @@ export default {
                     />
                     <span>Shop</span>
                 </button>
-                <button @click="handleReferal">
+
+                <button @click="showPopupCoomingSoon">
                     <img
-                        src="./../public/assets/button-icons/copy-link.svg"
+                        src="./../public/assets/button-icons/booster.svg"
                         class="icon-home"
                     />
-                    <span>Referal</span>
+                    <span>Booster</span>
                 </button>
+
                 <InviteFrens
                     :visible="showInvite"
                     @close="closeInvite"
@@ -441,12 +445,12 @@ export default {
             </div>
 
             <div class="row">
-                <button @click="showPopupCoomingSoon">
+                <button @click="handleReferal">
                     <img
-                        src="./../public/assets/button-icons/booster.svg"
+                        src="./../public/assets/button-icons/copy-link.svg"
                         class="icon-home"
                     />
-                    <span>Booster</span>
+                    <span>Referal</span>
                 </button>
 
                 <button @click="handleMission">
@@ -487,7 +491,7 @@ export default {
             </button>
         </div>
 
-        <div class="popup-referer-code" v-if="isPopupCode">
+        <!-- <div class="popup-referer-code" v-if="isPopupCode">
             <div class="referer-code">Referer code</div>
             <form @submit.prevent="submitCode">
                 <input
@@ -502,12 +506,34 @@ export default {
                 <div v-if="errorMessage" class="text-err-code">
                     {{ errorMessage }}
                 </div>
-                <button class="btn-submit-code" type="submit">Submit</button>
+                <button class="btn-submit-code" type="submit">
+                    <span>Submit</span>
+                </button>
             </form>
+        </div> -->
 
-            <!-- <button @click="hidePopupCode" class="btn-close-coming-soon">
-                Close
-            </button> -->
+        <div v-if="isPopupCode">
+            <div class="popup-overlay"></div>
+            <div class="popup-referer-code">
+                <div class="referer-code">Referer code</div>
+                <form @submit.prevent="submitCode">
+                    <input
+                        class="code-input"
+                        :class="{ 'input-error': errorMessage }"
+                        type="text"
+                        v-model="code"
+                        id="code"
+                        @input="clearError"
+                        placeholder="Enter code"
+                    />
+                    <div v-if="errorMessage" class="text-err-code">
+                        {{ errorMessage }}
+                    </div>
+                    <button class="btn-submit-code" type="submit">
+                        <span>Submit</span>
+                    </button>
+                </form>
+            </div>
         </div>
 
         <div class="copy-success-message" v-if="isCopiedToClipboard">

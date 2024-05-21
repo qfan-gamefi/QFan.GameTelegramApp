@@ -83,6 +83,9 @@ export default {
                 "--pseudo-width": `${this.apiDataWidth}%`,
             };
         },
+        linkUrlCheckin() {
+            return ``;
+        },
     },
     methods: {
         copyToClipboard() {
@@ -395,6 +398,15 @@ export default {
                     <img src="./../public/assets/logo.jpg" />
                     <div>QFP Balance: {{ dataQPoint?.balance }}</div>
                 </div>
+            </div>
+
+            <div class="link-checkin">
+                <a
+                    v-bind:href="`https://qfan-dapp.qcloud.asia/?playerId=${idUser}`"
+                    target="'_blank"
+                >
+                    <button>Checkin</button>
+                </a>
             </div>
 
             <div class="wrap-commit_reward" :style="beforeStyle">

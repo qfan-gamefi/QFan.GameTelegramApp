@@ -225,7 +225,7 @@ export default {
 .box-btn-invite {
     position: absolute;
     bottom: 5%;
-    width: calc(100% - 40px);
+    /* width: calc(100% - 40px); */
     padding: 0 20px;
 }
 .invite-btn {

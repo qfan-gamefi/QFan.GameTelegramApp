@@ -4,8 +4,17 @@ const userService = {
     getListInvite(userId: string) {
         return axiosInstance.get(`/player/getReferalList?playerId=${userId}`);
     },
-    getListMission() {
-        return axiosInstance.get(`/missions`);
+    async getListMission() {
+        const res = await axiosInstance.get(`/missions`);
+
+        return res.data;
+    },
+    async getListMissionReward(playId: string) {
+        const res = await axiosInstance.get(
+            `/qpoint-transactions?filters[player][playerId]=${playId}&filters[tranType]=MISSION_REWARD&populate=*`
+        );
+
+        return res.data;
     },
     async getInfo(idUser: string) {
         const res = await axiosInstance.get(

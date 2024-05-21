@@ -26,6 +26,7 @@
                         class="desc-item"
                         v-for="(item, index) in missionData"
                         :key="index"
+                        :class="{ 'blur-background': item.status }"
                     >
                         <div class="item-left">
                             <div class="item-img">
@@ -316,6 +317,12 @@ export default {
     border-bottom: none;
 }
 
+.blur-background {
+    background: rgba(0, 0, 0, 25%);
+    /* filter: blur(5px); */
+    opacity: 0.6;
+}
+
 .item-left {
     display: flex;
     align-items: center;
@@ -331,7 +338,7 @@ export default {
 }
 .item-left-content .left-desc img {
     width: 12px;
-    border-radius: 5px;
+    border-radius: 3px;
     margin-left: 3px;
 }
 

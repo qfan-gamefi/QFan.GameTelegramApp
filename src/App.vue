@@ -80,9 +80,6 @@ export default {
                 "--pseudo-width": `${this.apiDataWidth}%`,
             };
         },
-        linkUrlCheckin() {
-            return ``;
-        },
     },
     methods: {
         copyToClipboard() {

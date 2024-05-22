@@ -69,6 +69,11 @@ const userService = {
         );
         return res.data;
     },
+
+    async getEvent() {
+        const res = await axiosInstance.get(`events?populate=*`);
+        return res.data;
+    },
 };
 
 export default userService;

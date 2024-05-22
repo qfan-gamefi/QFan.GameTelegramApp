@@ -43,12 +43,12 @@ export default {
                 last_name = user.last_name || "";
             }
         }
-
+        window.Telegram.WebApp.initDataUnsafe.user?.id.toString()
         return {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            idUser: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
+            idUser: 5314337740,
             telegram_bot_link:
                 telegram_bot_link +
                 window.Telegram.WebApp.initDataUnsafe.user?.id || "",

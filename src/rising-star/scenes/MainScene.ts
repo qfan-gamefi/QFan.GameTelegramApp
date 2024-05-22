@@ -158,7 +158,6 @@ export class MainScene extends Scene {
         }
     }
     createPoints(x: number, y: number): Phaser.Types.Physics.Arcade.SpriteWithDynamicBody[] {
-        console.log('x:' + x + '|y:' + y);
         const points = [this.physics.add.sprite(x - 15, y, SYMBOL_P).setGravity(0, -500),
         this.physics.add.sprite(x, y, NUMBER_0).setGravity(0, -500),
         this.physics.add.sprite(x + 15, y, SYMBOL_C).setGravity(0, -500),

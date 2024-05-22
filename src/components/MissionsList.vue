@@ -2,16 +2,9 @@
     <div class="popup-mission" v-if="visible">
         <div class="box-mission">
             <div @click="$emit('close')" class="close-btn">
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        fill="#ffffff"
-                        d="M16 5v2h-2V5zm-4 4V7h2v2zm-2 2V9h2v2zm0 2H8v-2h2zm2 2v-2h-2v2zm0 0h2v2h-2zm4 4v-2h-2v2z"
-                    />
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+                    <path fill="#ffffff"
+                        d="M16 5v2h-2V5zm-4 4V7h2v2zm-2 2V9h2v2zm0 2H8v-2h2zm2 2v-2h-2v2zm0 0h2v2h-2zm4 4v-2h-2v2z" />
                 </svg>
                 Back
             </div>
@@ -22,12 +15,8 @@
                 <Loading :loading="loading" />
 
                 <div class="box-desc" v-if="!loading">
-                    <div
-                        class="desc-item"
-                        v-for="(item, index) in missionData"
-                        :key="index"
-                        :class="{ 'blur-background': item.status }"
-                    >
+                    <div class="desc-item" v-for="(item, index) in missionData" :key="index"
+                        :class="{ 'blur-background': item.status }">
                         <div class="item-left-mission">
                             <div class="item-img-mission">
                                 <img src="./../../public/assets/logo.jpg" />
@@ -45,15 +34,8 @@
                         </div>
 
                         <div class="item-right" v-if="!item.status">
-                            <a
-                                v-if="buttonText[index] === 'Go'"
-                                v-bind:href="item?.attributes?.link"
-                                target="'_blank"
-                            >
-                                <button
-                                    class="mission-btn"
-                                    @click="autoClaim(item?.id, index)"
-                                >
+                            <a v-if="buttonText[index] === 'Go'" v-bind:href="item?.attributes?.link" target="'_blank">
+                                <button class="mission-btn" @click="autoClaim(item?.id, index)">
                                     {{ buttonText[index] }}
                                 </button>
                             </a>
@@ -145,7 +127,7 @@ export default {
             });
         },
         async fetchMission(idMission, index) {
-            let randomSeconds = Math.floor(Math.random() * 31) + 60;
+            let randomSeconds = Math.floor(Math.random() * 5);
             this.buttonText[index] = `Verifying`;
             this.loadingBtn[index] = true;
 
@@ -227,11 +209,13 @@ export default {
     z-index: 999;
     animation: fadeIn 0.1s ease forwards;
 }
+
 @keyframes fadeIn {
     0% {
         opacity: 0;
         transform: translate(-50%, -50%) scale(0.5);
     }
+
     100% {
         opacity: 1;
         transform: translate(-50%, -50%) scale(1);
@@ -275,17 +259,16 @@ export default {
     border-radius: 10px;
     border: 2px solid #2b2b2b;
 
-    background-image: -webkit-linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0.2) 25%,
-        transparent 25%,
-        transparent 50%,
-        rgba(255, 255, 255, 0.2) 50%,
-        rgba(255, 255, 255, 0.2) 75%,
-        transparent 75%,
-        transparent
-    );
+    background-image: -webkit-linear-gradient(90deg,
+            rgba(255, 255, 255, 0.2) 25%,
+            transparent 25%,
+            transparent 50%,
+            rgba(255, 255, 255, 0.2) 50%,
+            rgba(255, 255, 255, 0.2) 75%,
+            transparent 75%,
+            transparent);
 }
+
 .box-desc::-webkit-scrollbar-thumb:hover {
     background-color: #ffa07a;
 }
@@ -295,6 +278,7 @@ export default {
         opacity: 0;
         transform: translate(50%, 50%) scale(0.5);
     }
+
     100% {
         opacity: 1;
         transform: translate(0%, 0%) scale(1);
@@ -310,6 +294,7 @@ export default {
     font-family: monospace;
     border-bottom: 1px solid #ccc;
 }
+
 .desc-item:last-child {
     border-bottom: none;
 }
@@ -326,17 +311,21 @@ export default {
     gap: 10px;
     font-weight: bolder;
 }
+
 .item-left-content {
     display: block;
 }
+
 .item-title-mission {
     font-size: 13px;
     margin-bottom: 5px;
 }
+
 .left-desc {
     display: flex;
     font-size: 10px;
 }
+
 .item-left-content .left-desc img {
     width: 12px;
     border-radius: 3px;
@@ -348,9 +337,11 @@ export default {
     gap: 10px;
     align-items: center;
 }
+
 .item-img-mission {
     display: flex;
 }
+
 .item-img-mission img {
     width: 35px;
     height: 35px;
@@ -361,6 +352,7 @@ export default {
     text-decoration: none;
     color: #fff;
 }
+
 .item-right button {
     font-size: 10px;
     padding: 10px 5px;
@@ -376,6 +368,7 @@ export default {
     padding-bottom: 20px;
     margin: 0 -20px;
 }
+
 .close-btn svg {
     margin-left: 20px;
 }
@@ -383,6 +376,7 @@ export default {
 .mission-btn {
     border-radius: 10px;
 }
+
 .btn-mission-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -396,13 +390,16 @@ export default {
     color: white;
     padding: 10px 15px !important;
 }
+
 .fa {
     margin-left: -12px;
     margin-right: 8px;
 }
+
 section.loaders .loader {
     display: inline-block;
 }
+
 .loader {
     border: 16px solid #f3f3f3;
     border-top: 16px solid blue;
@@ -412,21 +409,26 @@ section.loaders .loader {
     margin: 25px;
     animation: spin 2s linear infinite;
 }
+
 @keyframes spin {
     0% {
         transform: rotate(0deg);
     }
+
     100% {
         transform: rotate(360deg);
     }
 }
+
 .colors2 {
     border-bottom: 16px solid blue;
 }
+
 .colors3 {
     border-bottom: 16px solid red;
     border-right: 16px solid green;
 }
+
 .colors4 {
     border-bottom: 16px solid red;
     border-right: 16px solid green;

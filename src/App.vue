@@ -18,6 +18,7 @@ onMounted(() => {
 <script lang="ts">
 import InviteFrens from "./components/InviteFrens.vue";
 import MissionList from "./components/MissionsList.vue";
+import EventList from "./components/EventList.vue";
 import userService from "./services/userService";
 
 const REF_MESS_PREFIX: string = "start r_";
@@ -25,6 +26,7 @@ export default {
     components: {
         InviteFrens,
         MissionList,
+        EventList,
     },
     data() {
         const telegram_bot_link =
@@ -71,6 +73,7 @@ export default {
             errorMessage: "",
             showInvite: false,
             showMission: false,
+            showEvent: false,
             isClaim: false,
         };
     },
@@ -342,8 +345,15 @@ export default {
         handleMission() {
             this.showMission = true;
         },
+        handleEvent() {
+            this.showEvent = true;
+        },
         async closeMission() {
             this.showMission = false;
+            await this.getInfoUser();
+        },
+        async closeEvent() {
+            this.showEvent = false;
             await this.getInfoUser();
         },
     },
@@ -476,13 +486,20 @@ export default {
                     :idUser="idUser"
                 />
 
-                <button @click="showPopupCoomingSoon">
+                <button @click="handleEvent">
                     <img
                         src="./../public/assets/button-icons/event.svg"
                         class="icon-home"
                     />
                     <span>Event</span>
                 </button>
+                <EventList
+                    :visible="showEvent"
+                    @close="closeEvent"
+                    @invite="handleEvent"
+                    :idUser="idUser"
+                    @openCoomSoon="showPopupCoomingSoon"
+                />
             </div>
         </div>
 

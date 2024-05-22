@@ -9,6 +9,11 @@ const userService = {
 
         return res.data;
     },
+    async getListEvent() {
+        const res = await axiosInstance.get(`/events?populate=*`);
+
+        return res.data;
+    },
     async getListMissionReward(playId: string) {
         const res = await axiosInstance.get(
             `/qpoint-transactions?filters[player][playerId]=${playId}&filters[tranType]=MISSION_REWARD&populate=*`

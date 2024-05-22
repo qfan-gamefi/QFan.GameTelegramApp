@@ -28,13 +28,15 @@
                         :key="index"
                         :class="{ 'blur-background': item.status }"
                     >
-                        <div class="item-left">
-                            <div class="item-img">
+                        <div class="item-left-mission">
+                            <div class="item-img-mission">
                                 <img src="./../../public/assets/logo.jpg" />
                             </div>
 
                             <div class="item-left-content">
-                                <div>{{ item?.attributes?.title }}</div>
+                                <div class="item-title-mission">
+                                    {{ item?.attributes?.title }}
+                                </div>
                                 <div class="left-desc">
                                     +{{ item?.attributes?.rewardAmount }}
                                     <img src="./../../public/assets/logo.jpg" />
@@ -50,7 +52,7 @@
                             >
                                 <button
                                     class="mission-btn"
-                                    @click="fetchMission(item?.id, index)"
+                                    @click="autoClaim(item?.id, index)"
                                 >
                                     {{ buttonText[index] }}
                                 </button>
@@ -133,19 +135,14 @@ export default {
         handleMission() {
             this.$emit("mission");
         },
-        async autoClaim(idMission) {
-            try {
-                const res = await userService.claimMission(
-                    this.idUser,
-                    idMission
-                );
-                if (res) {
-                    await this.fetchMissionData();
-                    await this.fetchListMissionReward();
-                }
-            } catch (error) {
-                console.error("Error fetching API data:", error);
-            }
+        async autoClaim(idMission, index) {
+            this.buttonText[index] = `Verifying`;
+            this.loadingBtn[index] = true;
+
+            userService.claimMission(this.idUser, idMission).then(async () => {
+                await this.fetchMissionData();
+                await this.fetchListMissionReward();
+            });
         },
         async fetchMission(idMission, index) {
             let randomSeconds = Math.floor(Math.random() * 31) + 60;
@@ -332,6 +329,10 @@ export default {
 .item-left-content {
     display: block;
 }
+.item-title-mission {
+    font-size: 13px;
+    margin-bottom: 5px;
+}
 .left-desc {
     display: flex;
     font-size: 10px;
@@ -342,23 +343,18 @@ export default {
     margin-left: 3px;
 }
 
-.item-left .item-img {
-    width: 30px;
-    height: 30px;
-    /* clip-path: polygon(
-        30% 0%,
-        70% 0%,
-        100% 30%,
-        100% 70%,
-        70% 100%,
-        30% 100%,
-        0% 70%,
-        0% 30%
-    ); */
+.item-left-mission {
+    display: flex;
+    gap: 10px;
+    align-items: center;
 }
-.item-left img {
+.item-img-mission {
+    display: flex;
+}
+.item-img-mission img {
+    width: 35px;
+    height: 35px;
     border-radius: 5px;
-    width: 30px;
 }
 
 .item-right a {

@@ -1,45 +1,56 @@
 <template>
-    <div class="popup-mission" v-if="visible">
-        <div class="box-mission">
-            <div @click="$emit('close')" class="close-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
-                    <path fill="#ffffff"
-                        d="M16 5v2h-2V5zm-4 4V7h2v2zm-2 2V9h2v2zm0 2H8v-2h2zm2 2v-2h-2v2zm0 0h2v2h-2zm4 4v-2h-2v2z" />
-                </svg>
+    <div class="popup-event" v-if="visible">
+        <div class="box-event">
+            <div @click="$emit('close')" class="close-event">
+                <img src="./../../public/assets/back.svg" />
                 Back
             </div>
 
-            <div class="box-content">
-                <div class="box-title">Events</div>
+            <div class="box-content-event">
+                <div class="title-event">Events</div>
 
                 <Loading :loading="loading" />
 
-                <div class="box-desc" v-if="!loading">
-                    <div class="desc-item" v-for="(item, index) in missionData" :key="index">
-                        <div class="item-left">
+                <div
+                    class="box-desc-event"
+                    v-if="!loading"
+                    @click="$emit('openCoomSoon')"
+                >
+                    <div
+                        class="item-event"
+                        v-for="(item, index) in eventData"
+                        :key="index"
+                    >
+                        <div class="item-left-event">
                             <div class="item-img">
                                 <img
-                                    v-bind:src="`https://qfan-api.qcloud.asia${item?.attributes?.banner.data.attributes.formats.small.url}`" />
+                                    v-bind:src="`https://qfan-api.qcloud.asia${item?.attributes?.banner?.data?.attributes?.formats?.small?.url}`"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="item-right-event">
+                            <div class="title-item-right-event">
+                                {{ item?.attributes?.title }}
                             </div>
 
-                            <div class="item-left-content">
-                                <div>{{ item?.attributes?.title }}</div>
-                                <div class="left-desc">
-                                    {{ item?.attributes?.description }}
-                                </div>
-                                <div v-for="(itemChild, indexChild) in item?.attributes?.content" :key="indexChild">
-                                    <span>
-                                        {{ itemChild.children[0].text }}
-                                    </span>
-                                </div>
-
+                            <div class="desc-item-right-event">
+                                {{ item?.attributes?.description }}
                             </div>
 
+                            <div
+                                class="desc-item-right-event"
+                                v-for="(itemChild, indexChild) in item
+                                    ?.attributes?.content"
+                                :key="indexChild"
+                            >
+                                <span>{{ itemChild.children[0].text }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <EmptyForm v-if="showEmptyFormMission" />
+                <EmptyForm v-if="showEmptyFormEvent" />
                 <Toast />
             </div>
         </div>
@@ -49,7 +60,6 @@
 <script>
 import userService from "../services/userService";
 import Loading from "./LoadingForm.vue";
-import { toRaw } from "vue";
 
 export default {
     props: {
@@ -57,16 +67,11 @@ export default {
             type: Boolean,
             default: false,
         },
-        idUser: {
-            type: String,
-            required: true,
-        },
     },
     components: {
         Loading,
     },
     created() {
-        this.buttonText = [];
         if (this.visible) {
             this.fetchEventData();
         }
@@ -74,10 +79,8 @@ export default {
     data() {
         return {
             loading: true,
-            missionData: null,
-            iframeSrc: "",
+            eventData: null,
             buttonText: [],
-            missionRewardData: [],
             loadingBtn: [],
         };
     },
@@ -94,22 +97,16 @@ export default {
         }
     },
     methods: {
-        openInIframe(url) {
-            this.iframeSrc = url;
-        },
-        handleMission() {
-            this.$emit("mission");
-        },
         async fetchEventData() {
             try {
                 this.loading = true;
                 const res = await userService.getListEvent();
 
                 if (res?.data) {
-                    this.missionData = res?.data;
+                    this.eventData = res?.data;
                 }
             } catch (error) {
-                this.missionData = [];
+                this.eventData = [];
             } finally {
                 setTimeout(() => {
                     this.loading = false;
@@ -118,15 +115,15 @@ export default {
         },
     },
     computed: {
-        showEmptyFormMission() {
-            return this.missionData?.length == 0;
+        showEmptyFormEvent() {
+            return this.eventData?.length == 0;
         },
     },
 };
 </script>
 
 <style>
-.popup-mission {
+.popup-event {
     height: 100%;
     position: absolute;
     width: 100%;
@@ -151,21 +148,21 @@ export default {
     }
 }
 
-.box-mission {
+.box-event {
     padding: 20px;
 }
 
-.box-content .box-title {
-    margin: 10px 0;
+.box-content-event {
 }
 
-.box-title {
+.title-event {
+    margin: 10px 0;
     text-shadow: 1px 1px 0 #9f8900, -1px -1px 0 #9f8900, 1px -1px 0 #9f8900,
         -1px 1px 0 #9f8900, 1px 0 0 #9f8900, -1px 0 0 #9f8900, 0 1px 0 #9f8900,
         0 -1px 0 #9f8900;
 }
 
-.box-desc {
+.box-desc-event {
     background: #67bdef;
     border-radius: 10px;
     max-height: 66vh;
@@ -173,32 +170,34 @@ export default {
     animation: fadeInDesc 0.1s ease forwards;
 }
 
-.box-desc::-webkit-scrollbar-track {
+.box-desc-event::-webkit-scrollbar-track {
     -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
     background-color: #2b2b2b;
 }
 
-.box-desc::-webkit-scrollbar {
+.box-desc-event::-webkit-scrollbar {
     width: 8px;
     background-color: #2b2b2b;
 }
 
-.box-desc::-webkit-scrollbar-thumb {
+.box-desc-event::-webkit-scrollbar-thumb {
     background-color: #ff7f50;
     border-radius: 10px;
     border: 2px solid #2b2b2b;
 
-    background-image: -webkit-linear-gradient(90deg,
-            rgba(255, 255, 255, 0.2) 25%,
-            transparent 25%,
-            transparent 50%,
-            rgba(255, 255, 255, 0.2) 50%,
-            rgba(255, 255, 255, 0.2) 75%,
-            transparent 75%,
-            transparent);
+    background-image: -webkit-linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.2) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.2) 50%,
+        rgba(255, 255, 255, 0.2) 75%,
+        transparent 75%,
+        transparent
+    );
 }
 
-.box-desc::-webkit-scrollbar-thumb:hover {
+.box-desc-event::-webkit-scrollbar-thumb:hover {
     background-color: #ffa07a;
 }
 
@@ -214,9 +213,9 @@ export default {
     }
 }
 
-.desc-item {
+.item-event {
     display: flex;
-    justify-content: space-between;
+    gap: 10px;
     align-items: center;
     padding: 10px;
     font-size: 12px;
@@ -224,64 +223,11 @@ export default {
     border-bottom: 1px solid #ccc;
 }
 
-.desc-item:last-child {
+.item-event:last-child {
     border-bottom: none;
 }
 
-.item-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: bolder;
-}
-
-.item-left-content {
-    display: block;
-}
-
-.left-desc {
-    display: flex;
-    font-size: 10px;
-}
-
-.item-left-content .left-desc img {
-    width: 12px;
-    border-radius: 5px;
-    margin-left: 3px;
-}
-
-.item-left .item-img {
-    width: 30px;
-    height: 30px;
-    /* clip-path: polygon(
-        30% 0%,
-        70% 0%,
-        100% 30%,
-        100% 70%,
-        70% 100%,
-        30% 100%,
-        0% 70%,
-        0% 30%
-    ); */
-}
-
-.item-left img {
-    border-radius: 5px;
-    width: 30px;
-}
-
-.item-right a {
-    text-decoration: none;
-    color: #fff;
-}
-
-.item-right button {
-    font-size: 10px;
-    padding: 10px 5px;
-    border: none;
-}
-
-.close-btn {
+.close-event {
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -291,69 +237,26 @@ export default {
     margin: 0 -20px;
 }
 
-.close-btn svg {
+.close-event img {
     margin-left: 20px;
 }
 
-.mission-btn {
-    border-radius: 10px;
+.item-left-event .item-img {
+    display: flex;
 }
 
-.btn-mission-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/*  */
-.verifying-btn {
-    border-radius: 10px;
-    background-color: #e29a36;
-    border: none;
-    color: white;
-    padding: 10px 15px !important;
-}
-
-.fa {
-    margin-left: -12px;
-    margin-right: 8px;
-}
-
-section.loaders .loader {
-    display: inline-block;
-}
-
-.loader {
-    border: 16px solid #f3f3f3;
-    border-top: 16px solid blue;
-    border-radius: 50%;
+.item-left-event .item-img img {
     width: 50px;
     height: 50px;
-    margin: 25px;
-    animation: spin 2s linear infinite;
+    border-radius: 5px;
 }
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
+.item-right-event {
+    font-weight: bolder;
 }
-
-.colors2 {
-    border-bottom: 16px solid blue;
+.title-item-right-event {
+    font-size: 13px;
 }
-
-.colors3 {
-    border-bottom: 16px solid red;
-    border-right: 16px solid green;
-}
-
-.colors4 {
-    border-bottom: 16px solid red;
-    border-right: 16px solid green;
-    border-left: 16px solid pink;
+.desc-item-right-event {
+    font-size: 10px;
 }
 </style>

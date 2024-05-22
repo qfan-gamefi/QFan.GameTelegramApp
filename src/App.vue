@@ -26,7 +26,7 @@ export default {
     components: {
         InviteFrens,
         MissionList,
-        EventList
+        EventList,
     },
     data() {
         const telegram_bot_link =
@@ -50,7 +50,7 @@ export default {
             idUser: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
             telegram_bot_link:
                 telegram_bot_link +
-                window.Telegram.WebApp.initDataUnsafe.user?.id || "",
+                    window.Telegram.WebApp.initDataUnsafe.user?.id || "",
             showCoomingSoon: false,
             isCopiedToClipboard: false,
             isSuccess: false,
@@ -82,9 +82,6 @@ export default {
             return {
                 "--pseudo-width": `${this.apiDataWidth}%`,
             };
-        },
-        linkUrlCheckin() {
-            return ``;
         },
     },
     methods: {
@@ -257,10 +254,10 @@ export default {
         async updateSence() {
             const phaserRef: any = this.$refs.phaserRef as
                 | {
-                    scene?: {
-                        changeScene: () => void;
-                    };
-                }
+                      scene?: {
+                          changeScene: () => void;
+                      };
+                  }
                 | undefined;
             const scene = toRaw(phaserRef?.scene);
             const givenDateTimeString = this.dataQPoint.nextTakeRewardTime;
@@ -381,7 +378,11 @@ export default {
             START TRAINING
         </button>
         <div>
-            <button id="login_button" class="btn-login" v-show="!isTelegramLogin">
+            <button
+                id="login_button"
+                class="btn-login"
+                v-show="!isTelegramLogin"
+            >
                 LOGIN
             </button>
         </div>
@@ -422,7 +423,11 @@ export default {
                     </div>
 
                     <div class="box-right">
-                        <button class="btn-commit_reward" @click="handleReward" :disabled="isCountingDown">
+                        <button
+                            class="btn-commit_reward"
+                            @click="handleReward"
+                            :disabled="isCountingDown"
+                        >
                             {{ isClaim ? "Claim" : "Train" }}
                         </button>
                     </div>
@@ -435,42 +440,76 @@ export default {
         <div class="button-container">
             <div class="row">
                 <button @click="showPopupCoomingSoon">
-                    <img src="./../public/assets/button-icons/shopping-bag-3744.svg" class="icon-home" />
+                    <img
+                        src="./../public/assets/button-icons/shopping-bag-3744.svg"
+                        class="icon-home"
+                    />
                     <span>Shop</span>
                 </button>
 
                 <button @click="showPopupCoomingSoon">
-                    <img src="./../public/assets/button-icons/booster.svg" class="icon-home" />
+                    <img
+                        src="./../public/assets/button-icons/booster.svg"
+                        class="icon-home"
+                    />
                     <span>Booster</span>
                 </button>
 
-                <InviteFrens :visible="showInvite" @close="closeInvite" @invite="handleInvite" :idUser="idUser" />
+                <InviteFrens
+                    :visible="showInvite"
+                    @close="closeInvite"
+                    @invite="handleInvite"
+                    :idUser="idUser"
+                />
             </div>
 
             <div class="row">
                 <button @click="handleReferal">
-                    <img src="./../public/assets/button-icons/copy-link.svg" class="icon-home" />
+                    <img
+                        src="./../public/assets/button-icons/copy-link.svg"
+                        class="icon-home"
+                    />
                     <span>Referal</span>
                 </button>
 
                 <button @click="handleMission">
-                    <img src="./../public/assets/button-icons/mission.svg" class="icon-home" />
+                    <img
+                        src="./../public/assets/button-icons/mission.svg"
+                        class="icon-home"
+                    />
                     <span>Mission</span>
                 </button>
-                <MissionList :visible="showMission" @close="closeMission" @invite="handleMission" :idUser="idUser" />
+                <MissionList
+                    :visible="showMission"
+                    @close="closeMission"
+                    @invite="handleMission"
+                    :idUser="idUser"
+                />
 
                 <button @click="handleEvent">
-                    <img src="./../public/assets/button-icons/event.svg" class="icon-home" />
+                    <img
+                        src="./../public/assets/button-icons/event.svg"
+                        class="icon-home"
+                    />
                     <span>Event</span>
                 </button>
-                <EventList :visible="showEvent" @close="closeEvent" @invite="handleEvent" :idUser="idUser" />
+                <EventList
+                    :visible="showEvent"
+                    @close="closeEvent"
+                    @invite="handleEvent"
+                    :idUser="idUser"
+                    @openCoomSoon="showPopupCoomingSoon"
+                />
             </div>
         </div>
 
-        <div :class="[
-            'popup-cooming-soon',
-            { 'closing-popup': !showCoomingSoon },
-        ]" v-if="showCoomingSoon">
+        <div
+            :class="[
+                'popup-cooming-soon',
+                { 'closing-popup': !showCoomingSoon },
+            ]"
+            v-if="showCoomingSoon"
+        >
             <p>Coming soon</p>
             <button @click="hidePopupCoomingSoon" class="btn-close-coming-soon">
                 Close
@@ -482,8 +521,15 @@ export default {
             <div class="popup-referer-code">
                 <div class="referer-code">Referer code</div>
                 <form @submit.prevent="submitCode">
-                    <input class="code-input" :class="{ 'input-error': errorMessage }" type="text" v-model="code"
-                        id="code" @input="clearError" placeholder="Enter code" />
+                    <input
+                        class="code-input"
+                        :class="{ 'input-error': errorMessage }"
+                        type="text"
+                        v-model="code"
+                        id="code"
+                        @input="clearError"
+                        placeholder="Enter code"
+                    />
                     <div v-if="errorMessage" class="text-err-code">
                         {{ errorMessage }}
                     </div>

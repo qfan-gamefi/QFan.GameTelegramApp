@@ -1,18 +1,8 @@
 <template>
     <div class="popup-invite" v-if="visible">
         <div class="box-invite">
-            <div @click="$emit('close')" class="close-btn">
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        fill="#ffffff"
-                        d="M16 5v2h-2V5zm-4 4V7h2v2zm-2 2V9h2v2zm0 2H8v-2h2zm2 2v-2h-2v2zm0 0h2v2h-2zm4 4v-2h-2v2z"
-                    />
-                </svg>
+            <div @click="$emit('close')" class="close-invite">
+                <img src="./../../public/assets/back.svg" />
                 Back
             </div>
 
@@ -75,7 +65,22 @@ export default {
     data() {
         return {
             loading: true,
-            inviteData: [],
+            inviteData: [
+                // {
+                //     firstName: "1111",
+                //     lastName: "lastName",
+                //     qpoint: {
+                //         balance: 123,
+                //     },
+                // },
+                // {
+                //     firstName: "1111",
+                //     lastName: "lastName",
+                //     qpoint: {
+                //         balance: 123,
+                //     },
+                // },
+            ],
         };
     },
     watch: {
@@ -182,18 +187,9 @@ export default {
     font-weight: bolder;
 }
 .item-left .item-img {
+    display: flex;
     width: 30px;
     height: 30px;
-    /* clip-path: polygon(
-        30% 0%,
-        70% 0%,
-        100% 30%,
-        100% 70%,
-        70% 100%,
-        30% 100%,
-        0% 70%,
-        0% 30%
-    ); */
 }
 .item-left img {
     width: 30px;
@@ -203,16 +199,13 @@ export default {
 .item-right {
     display: flex;
     align-items: center;
-    text-shadow: 1px 1px 0 #9f8900, -1px -1px 0 #9f8900, 1px -1px 0 #9f8900,
-        -1px 1px 0 #9f8900, 1px 0 0 #9f8900, -1px 0 0 #9f8900, 0 1px 0 #9f8900,
-        0 -1px 0 #9f8900;
 }
 .item-right img {
     width: 15px;
     margin-left: 3px;
-    border-radius: 5px;
+    border-radius: 3px;
 }
-.close-btn {
+.close-invite {
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -221,7 +214,7 @@ export default {
     padding-bottom: 10px;
     margin: 0 -20px;
 }
-.close-btn svg {
+.close-invite img {
     margin-left: 20px;
 }
 

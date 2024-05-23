@@ -62,7 +62,6 @@
                 </div>
 
                 <EmptyForm v-if="showEmptyFormMission" />
-                <Toast />
             </div>
         </div>
     </div>
@@ -185,8 +184,9 @@ export default {
 
                 if (res) {
                     // const lissMiss = this.missionData;
+                    const rawMissions = toRaw(this.missionData);
 
-                    toRaw(this.missionData).forEach((mission) => {
+                    rawMissions.forEach((mission) => {
                         const matchingReward = toRaw(
                             this.missionRewardData
                         ).find(
@@ -199,12 +199,14 @@ export default {
                                 "COMPLETED"
                             ) {
                                 mission.isStatus = true;
+                                mission.status = "COMPLETED";
                             } else if (
                                 matchingReward?.attributes?.status ===
                                 "PROCESSING"
                             ) {
                                 mission.isStatus = false;
                                 this.buttonText[mission.id] = `Verifying`;
+                                mission.status = "PROCESSING";
                             } else {
                                 mission.isStatus = false;
                             }
@@ -212,6 +214,34 @@ export default {
                             mission.isStatus = false;
                         }
                     });
+
+                    const sortedMissions = rawMissions.sort((a, b) => {
+                        if (
+                            a.status === "COMPLETED" &&
+                            b.status !== "COMPLETED"
+                        ) {
+                            return 1;
+                        } else if (
+                            a.status !== "COMPLETED" &&
+                            b.status === "COMPLETED"
+                        ) {
+                            return -1;
+                        } else if (
+                            a.status === "PROCESSING" &&
+                            b.status !== "PROCESSING"
+                        ) {
+                            return 1;
+                        } else if (
+                            a.status !== "PROCESSING" &&
+                            b.status === "PROCESSING"
+                        ) {
+                            return -1;
+                        } else {
+                            return 0;
+                        }
+                    });
+
+                    this.missionData = sortedMissions;
                 }
             } catch (error) {
                 this.missionRewardData = [];

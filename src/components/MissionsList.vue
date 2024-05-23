@@ -2,10 +2,7 @@
     <div class="popup-mission" v-if="visible">
         <div class="box-mission">
             <div @click="$emit('close')" class="close-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
-                    <path fill="#ffffff"
-                        d="M16 5v2h-2V5zm-4 4V7h2v2zm-2 2V9h2v2zm0 2H8v-2h2zm2 2v-2h-2v2zm0 0h2v2h-2zm4 4v-2h-2v2z" />
-                </svg>
+                <img src="./../../public/assets/back.svg" />
                 Back
             </div>
 
@@ -15,8 +12,12 @@
                 <Loading :loading="loading" />
 
                 <div class="box-desc" v-if="!loading">
-                    <div class="desc-item" v-for="(item, index) in missionData" :key="index"
-                        :class="{ 'blur-background': item.status }">
+                    <div
+                        class="desc-item"
+                        v-for="item in missionData"
+                        :key="item?.id"
+                        :class="{ 'blur-background': item.isStatus }"
+                    >
                         <div class="item-left-mission">
                             <div class="item-img-mission">
                                 <img src="./../../public/assets/logo.jpg" />
@@ -33,17 +34,24 @@
                             </div>
                         </div>
 
-                        <div class="item-right" v-if="!item.status">
-                            <a v-if="buttonText[index] === 'Go'" v-bind:href="item?.attributes?.link" target="'_blank">
-                                <button class="mission-btn" @click="autoClaim(item?.id, index)">
-                                    {{ buttonText[index] }}
+                        <div class="item-right" v-if="!item.isStatus">
+                            <a
+                                v-if="buttonText[item?.id] === 'Go'"
+                                v-bind:href="item?.attributes?.link"
+                                target="'_blank"
+                            >
+                                <button
+                                    class="mission-btn"
+                                    @click="autoClaim(item?.id, item?.id)"
+                                >
+                                    {{ buttonText[item?.id] }}
                                 </button>
                             </a>
 
-                            <a v-if="buttonText[index] !== 'Go'">
+                            <a v-if="buttonText[item?.id] !== 'Go'">
                                 <button class="verifying-btn">
                                     <i class="fa fa-spinner fa-pulse"></i>
-                                    {{ buttonText[index] }}
+                                    {{ buttonText[item?.id] }}
                                 </button>
                             </a>
                         </div>
@@ -79,11 +87,11 @@ export default {
     components: {
         Loading,
     },
-    created() {
+    async created() {
         this.buttonText = [];
         if (this.visible) {
-            this.fetchMissionData();
-            this.fetchListMissionReward();
+            await this.fetchMissionData();
+            await this.fetchListMissionReward();
         }
     },
     data() {
@@ -97,10 +105,10 @@ export default {
         };
     },
     watch: {
-        visible(newVal) {
+        async visible(newVal) {
             if (newVal) {
-                this.fetchMissionData();
-                this.fetchListMissionReward();
+                await this.fetchMissionData();
+                await this.fetchListMissionReward();
             }
         },
     },
@@ -117,32 +125,37 @@ export default {
         handleMission() {
             this.$emit("mission");
         },
-        async autoClaim(idMission, index) {
-            this.buttonText[index] = `Verifying`;
-            this.loadingBtn[index] = true;
+        async autoClaim(idMission, id) {
+            this.buttonText[id] = `Verifying`;
+            this.loadingBtn[id] = true;
 
-            userService.claimMission(this.idUser, idMission).then(async () => {
-                await this.fetchMissionData();
-                await this.fetchListMissionReward();
-            });
+            userService
+                .claimMission(this.idUser, idMission)
+                .then(async () => {
+                    await this.fetchMissionData();
+                    await this.fetchListMissionReward();
+                })
+                .catch((error) => {
+                    console.error("Error claiming mission:", error);
+                });
         },
-        async fetchMission(idMission, index) {
-            let randomSeconds = Math.floor(Math.random() * 5);
-            this.buttonText[index] = `Verifying`;
-            this.loadingBtn[index] = true;
+        // async fetchMission(idMission, index) {
+        //     let randomSeconds = Math.floor(Math.random() * 5);
+        //     this.buttonText[index] = `Verifying`;
+        //     this.loadingBtn[index] = true;
 
-            const countdown = setInterval(() => {
-                if (randomSeconds > 0) {
-                    this.loadingBtn[index] = true;
-                    this.buttonText[index] = `Verifying`;
-                    randomSeconds--;
-                } else {
-                    this.loadingBtn[index] = false;
-                    clearInterval(countdown);
-                    this.autoClaim(idMission);
-                }
-            }, 1000);
-        },
+        //     const countdown = setInterval(() => {
+        //         if (randomSeconds > 0) {
+        //             this.loadingBtn[index] = true;
+        //             this.buttonText[index] = `Verifying`;
+        //             randomSeconds--;
+        //         } else {
+        //             this.loadingBtn[index] = false;
+        //             clearInterval(countdown);
+        //             this.autoClaim(idMission);
+        //         }
+        //     }, 1000);
+        // },
 
         async fetchMissionData() {
             try {
@@ -152,7 +165,10 @@ export default {
                 if (res?.data) {
                     this.missionData = res?.data;
 
-                    this.buttonText = res?.data?.map(() => "Go");
+                    res?.data.forEach((item) => {
+                        this.buttonText[item?.id] = "Go";
+                    });
+                    // this.buttonText = res?.data?.map(() => "Go");
                 }
             } catch (error) {
                 this.missionData = [];
@@ -176,10 +192,24 @@ export default {
                         ).find(
                             (reward) => reward?.attributes?.refId == mission?.id
                         );
+
                         if (matchingReward) {
-                            mission.status = true;
+                            if (
+                                matchingReward?.attributes?.status ==
+                                "COMPLETED"
+                            ) {
+                                mission.isStatus = true;
+                            } else if (
+                                matchingReward?.attributes?.status ===
+                                "PROCESSING"
+                            ) {
+                                mission.isStatus = false;
+                                this.buttonText[mission.id] = `Verifying`;
+                            } else {
+                                mission.isStatus = false;
+                            }
                         } else {
-                            mission.status = false;
+                            mission.isStatus = false;
                         }
                     });
                 }
@@ -259,14 +289,16 @@ export default {
     border-radius: 10px;
     border: 2px solid #2b2b2b;
 
-    background-image: -webkit-linear-gradient(90deg,
-            rgba(255, 255, 255, 0.2) 25%,
-            transparent 25%,
-            transparent 50%,
-            rgba(255, 255, 255, 0.2) 50%,
-            rgba(255, 255, 255, 0.2) 75%,
-            transparent 75%,
-            transparent);
+    background-image: -webkit-linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.2) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.2) 50%,
+        rgba(255, 255, 255, 0.2) 75%,
+        transparent 75%,
+        transparent
+    );
 }
 
 .box-desc::-webkit-scrollbar-thumb:hover {
@@ -369,7 +401,7 @@ export default {
     margin: 0 -20px;
 }
 
-.close-btn svg {
+.close-btn img {
     margin-left: 20px;
 }
 

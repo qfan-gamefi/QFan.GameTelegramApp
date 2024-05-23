@@ -70,14 +70,14 @@ export default {
                 //     firstName: "1111",
                 //     lastName: "lastName",
                 //     qpoint: {
-                //         balance: 123,
+                //         balance: 100,
                 //     },
                 // },
                 // {
                 //     firstName: "1111",
                 //     lastName: "lastName",
                 //     qpoint: {
-                //         balance: 123,
+                //         balance: 800,
                 //     },
                 // },
             ],
@@ -103,6 +103,7 @@ export default {
                 const list2 = response?.data?.referalList2;
 
                 if (Array.isArray(list1) && Array.isArray(list2)) {
+                    //    const data = [...list1, ...list2];
                     this.inviteData = [...list1, ...list2];
                 } else if (Array.isArray(list1)) {
                     this.inviteData = [...list1];

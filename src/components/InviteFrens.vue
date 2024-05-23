@@ -65,22 +65,7 @@ export default {
     data() {
         return {
             loading: true,
-            inviteData: [
-                // {
-                //     firstName: "1111",
-                //     lastName: "lastName",
-                //     qpoint: {
-                //         balance: 100,
-                //     },
-                // },
-                // {
-                //     firstName: "1111",
-                //     lastName: "lastName",
-                //     qpoint: {
-                //         balance: 800,
-                //     },
-                // },
-            ],
+            inviteData: [],
         };
     },
     watch: {
@@ -103,7 +88,6 @@ export default {
                 const list2 = response?.data?.referalList2;
 
                 if (Array.isArray(list1) && Array.isArray(list2)) {
-                    //    const data = [...list1, ...list2];
                     this.inviteData = [...list1, ...list2];
                 } else if (Array.isArray(list1)) {
                     this.inviteData = [...list1];
@@ -112,6 +96,12 @@ export default {
                 } else {
                     this.inviteData = [];
                 }
+
+                const sortData = this.inviteData.sort(
+                    (a, b) => b?.qpoint?.balance - a?.qpoint?.balance
+                );
+
+                this.inviteData = sortData;
             } catch (error) {
                 this.inviteData = [];
                 console.error("Error fetching API data:", error);

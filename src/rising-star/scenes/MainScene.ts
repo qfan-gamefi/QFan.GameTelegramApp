@@ -122,15 +122,17 @@ export class MainScene extends Scene {
         const ball_position = this.ball.getCenter();
         // this.bg.tilePositionX +=
         //     3 * (this.player_run.anims ? this.player_run.anims.timeScale : 1);
-        let removePoints: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody[];
         if (this.points && this.points.length > 0) {
             this.points?.forEach((value) => {
                 if (!value) { return; }
                 const alpha = Math.max(0, Math.min(1, (255 - ((Math.abs(KICK_POINT_Y - value.getCenter().y)) / 100) * 255) / 255))
                 value.alpha = alpha;
+                if(alpha == 0){
+                    value.destroy();
+                }
             });
             this.points = this.points.filter((value) => {
-                return value && value.alpha > 0;
+                return value && value.active;
             })
         }
         if (

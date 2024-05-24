@@ -65,22 +65,7 @@ export default {
     data() {
         return {
             loading: true,
-            inviteData: [
-                // {
-                //     firstName: "1111",
-                //     lastName: "lastName",
-                //     qpoint: {
-                //         balance: 123,
-                //     },
-                // },
-                // {
-                //     firstName: "1111",
-                //     lastName: "lastName",
-                //     qpoint: {
-                //         balance: 123,
-                //     },
-                // },
-            ],
+            inviteData: [],
         };
     },
     watch: {
@@ -111,6 +96,12 @@ export default {
                 } else {
                     this.inviteData = [];
                 }
+
+                const sortData = this.inviteData.sort(
+                    (a, b) => b?.qpoint?.balance - a?.qpoint?.balance
+                );
+
+                this.inviteData = sortData;
             } catch (error) {
                 this.inviteData = [];
                 console.error("Error fetching API data:", error);

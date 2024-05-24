@@ -48,26 +48,87 @@ export class MainScene extends Scene {
     preload() {
         this.loaded = true;
         this.load.image(GROUND_TEXT, "./assets/platform.png");
-        this.load.image(SKY_TEXT, "./assets/test-bg.jpg");
+        this.load.image(SKY_TEXT, "./assets/background.jpg");
         this.load.spritesheet(DUDE_RUN, "./assets/dude_run.png", {
             frameWidth: 92,
-            frameHeight: 125
+            frameHeight: 125,
         });
         this.load.spritesheet(BALL, "./assets/balls.png", {
-            frameWidth: 32, frameHeight: 32
+            frameWidth: 32,
+            frameHeight: 32,
         });
-        this.load.spritesheet(NUMBER_0, "./assets/Number0.png", { frameWidth: 13, frameHeight: 15, startFrame: 0, endFrame: 0 });
-        this.load.spritesheet(NUMBER_1, "./assets/Number1.png", { frameWidth: 13, frameHeight: 15, startFrame: 0, endFrame: 0 });
-        this.load.spritesheet(NUMBER_2, "./assets/Number2.png", { frameWidth: 13, frameHeight: 15, startFrame: 0, endFrame: 0 });
-        this.load.spritesheet(NUMBER_3, "./assets/Number3.png", { frameWidth: 13, frameHeight: 15, startFrame: 0, endFrame: 0 });
-        this.load.spritesheet(NUMBER_4, "./assets/Number4.png", { frameWidth: 13, frameHeight: 15, startFrame: 0, endFrame: 0 });
-        this.load.spritesheet(NUMBER_5, "./assets/Number5.png", { frameWidth: 13, frameHeight: 15, startFrame: 0, endFrame: 0 });
-        this.load.spritesheet(NUMBER_6, "./assets/Number6.png", { frameWidth: 13, frameHeight: 15, startFrame: 0, endFrame: 0 });
-        this.load.spritesheet(NUMBER_7, "./assets/Number7.png", { frameWidth: 13, frameHeight: 15, startFrame: 0, endFrame: 0 });
-        this.load.spritesheet(NUMBER_8, "./assets/Number8.png", { frameWidth: 13, frameHeight: 15, startFrame: 0, endFrame: 0 });
-        this.load.spritesheet(NUMBER_9, "./assets/Number9.png", { frameWidth: 13, frameHeight: 15, startFrame: 0, endFrame: 0 });
-        this.load.spritesheet(SYMBOL_P, "./assets/SymbolPlus.png", { frameWidth: 13, frameHeight: 15, startFrame: 0, endFrame: 0 });
-        this.load.spritesheet(SYMBOL_C, "./assets/SymbolComma.png", { frameWidth: 13, frameHeight: 15, startFrame: 0, endFrame: 0 });
+        this.load.spritesheet(NUMBER_0, "./assets/Number0.png", {
+            frameWidth: 13,
+            frameHeight: 15,
+            startFrame: 0,
+            endFrame: 0,
+        });
+        this.load.spritesheet(NUMBER_1, "./assets/Number1.png", {
+            frameWidth: 13,
+            frameHeight: 15,
+            startFrame: 0,
+            endFrame: 0,
+        });
+        this.load.spritesheet(NUMBER_2, "./assets/Number2.png", {
+            frameWidth: 13,
+            frameHeight: 15,
+            startFrame: 0,
+            endFrame: 0,
+        });
+        this.load.spritesheet(NUMBER_3, "./assets/Number3.png", {
+            frameWidth: 13,
+            frameHeight: 15,
+            startFrame: 0,
+            endFrame: 0,
+        });
+        this.load.spritesheet(NUMBER_4, "./assets/Number4.png", {
+            frameWidth: 13,
+            frameHeight: 15,
+            startFrame: 0,
+            endFrame: 0,
+        });
+        this.load.spritesheet(NUMBER_5, "./assets/Number5.png", {
+            frameWidth: 13,
+            frameHeight: 15,
+            startFrame: 0,
+            endFrame: 0,
+        });
+        this.load.spritesheet(NUMBER_6, "./assets/Number6.png", {
+            frameWidth: 13,
+            frameHeight: 15,
+            startFrame: 0,
+            endFrame: 0,
+        });
+        this.load.spritesheet(NUMBER_7, "./assets/Number7.png", {
+            frameWidth: 13,
+            frameHeight: 15,
+            startFrame: 0,
+            endFrame: 0,
+        });
+        this.load.spritesheet(NUMBER_8, "./assets/Number8.png", {
+            frameWidth: 13,
+            frameHeight: 15,
+            startFrame: 0,
+            endFrame: 0,
+        });
+        this.load.spritesheet(NUMBER_9, "./assets/Number9.png", {
+            frameWidth: 13,
+            frameHeight: 15,
+            startFrame: 0,
+            endFrame: 0,
+        });
+        this.load.spritesheet(SYMBOL_P, "./assets/SymbolPlus.png", {
+            frameWidth: 13,
+            frameHeight: 15,
+            startFrame: 0,
+            endFrame: 0,
+        });
+        this.load.spritesheet(SYMBOL_C, "./assets/SymbolComma.png", {
+            frameWidth: 13,
+            frameHeight: 15,
+            startFrame: 0,
+            endFrame: 0,
+        });
     }
 
     create() {
@@ -116,7 +177,6 @@ export class MainScene extends Scene {
         EventBus.emit("current-scene-ready", this);
     }
 
-
     update() {
         const player_position = this.player_run.getCenter();
         const ball_position = this.ball.getCenter();
@@ -124,16 +184,28 @@ export class MainScene extends Scene {
         //     3 * (this.player_run.anims ? this.player_run.anims.timeScale : 1);
         if (this.points && this.points.length > 0) {
             this.points?.forEach((value) => {
-                if (!value) { return; }
-                const alpha = Math.max(0, Math.min(1, (255 - ((Math.abs(KICK_POINT_Y - value.getCenter().y)) / 100) * 255) / 255))
+                if (!value) {
+                    return;
+                }
+                const alpha = Math.max(
+                    0,
+                    Math.min(
+                        1,
+                        (255 -
+                            (Math.abs(KICK_POINT_Y - value.getCenter().y) /
+                                100) *
+                                255) /
+                            255
+                    )
+                );
                 value.alpha = alpha;
-                if(alpha == 0){
+                if (alpha == 0) {
                     value.destroy();
                 }
             });
             this.points = this.points.filter((value) => {
                 return value && value.active;
-            })
+            });
         }
         if (
             Phaser.Math.Distance.Between(
@@ -159,11 +231,16 @@ export class MainScene extends Scene {
             this.ball.setVelocityX(-80);
         }
     }
-    createPoints(x: number, y: number): Phaser.Types.Physics.Arcade.SpriteWithDynamicBody[] {
-        const points = [this.physics.add.sprite(x - 15, y, SYMBOL_P).setGravity(0, -500),
-        this.physics.add.sprite(x, y, NUMBER_0).setGravity(0, -500),
-        this.physics.add.sprite(x + 15, y, SYMBOL_C).setGravity(0, -500),
-        this.physics.add.sprite(x + 30, y, NUMBER_2).setGravity(0, -500)];
+    createPoints(
+        x: number,
+        y: number
+    ): Phaser.Types.Physics.Arcade.SpriteWithDynamicBody[] {
+        const points = [
+            this.physics.add.sprite(x - 15, y, SYMBOL_P).setGravity(0, -500),
+            this.physics.add.sprite(x, y, NUMBER_0).setGravity(0, -500),
+            this.physics.add.sprite(x + 15, y, SYMBOL_C).setGravity(0, -500),
+            this.physics.add.sprite(x + 30, y, NUMBER_2).setGravity(0, -500),
+        ];
 
         return points;
     }
@@ -226,9 +303,15 @@ export class MainScene extends Scene {
                 Phaser.Math.FloatBetween(MIN_KICK_POWER_Y, MAX_KICK_POWER_Y)
             );
             if (!this.isBallImpactProcessingDone) {
-                this.points = Array.prototype.concat(this.points, this.createPoints(this.ball.getTopLeft().x, this.ball.getTopLeft().y + 5));
+                this.points = Array.prototype.concat(
+                    this.points,
+                    this.createPoints(
+                        this.ball.getTopLeft().x,
+                        this.ball.getTopLeft().y + 5
+                    )
+                );
             }
-            this.isBallImpactProcessingDone = true
+            this.isBallImpactProcessingDone = true;
         }
     }
     changeScene() {

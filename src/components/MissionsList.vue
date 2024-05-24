@@ -6,12 +6,12 @@
                 Back
             </div>
 
-            <div class="box-content">
+            <div class="box-content-mission">
                 <div class="box-title">Missions</div>
 
                 <Loading :loading="loading" />
 
-                <div class="box-desc" v-if="!loading">
+                <div class="box-desc-mission" v-dragscroll v-if="!loading">
                     <div
                         class="desc-item"
                         v-for="item in missionData"
@@ -284,9 +284,10 @@ export default {
 
 .box-mission {
     padding: 20px;
+    height: calc(100% - 40px);
 }
 
-.box-content .box-title {
+.box-content-mission .box-title {
     margin: 10px 0;
 }
 
@@ -296,15 +297,24 @@ export default {
         0 -1px 0 #9f8900;
 }
 
-.box-desc {
-    background: #67bdef;
-    border-radius: 10px;
-    max-height: 66vh;
-    overflow-y: auto;
-    animation: fadeInDesc 0.1s ease forwards;
+.box-content-mission {
+    height: calc(100% - 35px);
 }
 
-.box-desc::-webkit-scrollbar-track {
+.box-desc-mission {
+    background: #67bdef;
+    border-radius: 10px;
+    max-height: calc(100% - 75px);
+    overflow-y: auto;
+    animation: fadeInDesc 0.1s ease forwards;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.box-desc-mission::-webkit-scrollbar {
+    display: none;
+}
+
+/* .box-desc::-webkit-scrollbar-track {
     -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
     background-color: #2b2b2b;
 }
@@ -333,7 +343,7 @@ export default {
 
 .box-desc::-webkit-scrollbar-thumb:hover {
     background-color: #ffa07a;
-}
+} */
 
 @keyframes fadeInDesc {
     0% {
@@ -363,7 +373,6 @@ export default {
 
 .blur-background {
     background: rgba(0, 0, 0, 25%);
-    /* filter: blur(5px); */
     opacity: 0.6;
 }
 

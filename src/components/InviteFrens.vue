@@ -104,7 +104,6 @@ export default {
                 this.inviteData = sortData;
             } catch (error) {
                 this.inviteData = [];
-                console.error("Error fetching API data:", error);
             } finally {
                 setTimeout(() => {
                     this.loading = false;
@@ -139,12 +138,15 @@ export default {
 
 .box-invite {
     padding: 20px;
+    height: calc(100% - 40px);
 }
 
+.box-content {
+    height: calc(100% - 35px);
+}
 .box-content .box-title {
     margin: 10px 0;
 }
-
 .box-title {
     text-shadow: 1px 1px 0 #9f8900, -1px -1px 0 #9f8900, 1px -1px 0 #9f8900,
         -1px 1px 0 #9f8900, 1px 0 0 #9f8900, -1px 0 0 #9f8900, 0 1px 0 #9f8900,
@@ -154,8 +156,14 @@ export default {
 .box-desc {
     background: #67bdef;
     border-radius: 10px;
-    max-height: 66vh;
+    max-height: calc(100% - 95px);
     overflow-y: auto;
+    animation: fadeInDesc 0.1s ease forwards;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.box-desc::-webkit-scrollbar {
+    display: none;
 }
 
 .desc-item {

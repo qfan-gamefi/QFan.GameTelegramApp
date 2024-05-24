@@ -25,7 +25,7 @@ export class IdleScene extends Scene {
     preload() {
         this.loaded = true;
         this.load.image(GROUND_TEXT, "./assets/platform.png");
-        this.load.image(SKY_TEXT, "./assets/test-bg.jpg");
+        this.load.image(SKY_TEXT, "./assets/background.jpg");
         this.load.spritesheet(DUDE_IDLE, "./assets/dude_idle.png", {
             frameWidth: 67,
             frameHeight: 129,

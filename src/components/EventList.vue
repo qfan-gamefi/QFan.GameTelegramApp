@@ -150,9 +150,11 @@ export default {
 
 .box-event {
     padding: 20px;
+    height: calc(100% - 40px);
 }
 
 .box-content-event {
+    height: calc(100% - 35px);
 }
 
 .title-event {
@@ -165,40 +167,14 @@ export default {
 .box-desc-event {
     background: #67bdef;
     border-radius: 10px;
-    max-height: 66vh;
+    max-height: calc(100% - 75px);
     overflow-y: auto;
     animation: fadeInDesc 0.1s ease forwards;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
-
-.box-desc-event::-webkit-scrollbar-track {
-    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-    background-color: #2b2b2b;
-}
-
 .box-desc-event::-webkit-scrollbar {
-    width: 8px;
-    background-color: #2b2b2b;
-}
-
-.box-desc-event::-webkit-scrollbar-thumb {
-    background-color: #ff7f50;
-    border-radius: 10px;
-    border: 2px solid #2b2b2b;
-
-    background-image: -webkit-linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0.2) 25%,
-        transparent 25%,
-        transparent 50%,
-        rgba(255, 255, 255, 0.2) 50%,
-        rgba(255, 255, 255, 0.2) 75%,
-        transparent 75%,
-        transparent
-    );
-}
-
-.box-desc-event::-webkit-scrollbar-thumb:hover {
-    background-color: #ffa07a;
+    display: none;
 }
 
 @keyframes fadeInDesc {

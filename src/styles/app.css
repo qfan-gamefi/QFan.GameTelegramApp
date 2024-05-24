@@ -147,14 +147,14 @@
 
 .wrap-commit_reward {
     position: absolute;
-    top: 40%;
+    top: 30%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: 80%;
-    background: #329197d1;
-    /* background: #67bdef; */
+    background: rgb(0 31 63 / 40%);
+    /* background: #1a1a1a; */
     padding: 15px;
-    border-radius: 20px;
+    border-radius: 15px;
     overflow: hidden;
 }
 
@@ -170,16 +170,16 @@
 }
 
 .wrap-commit_reward .box-left {
-    text-shadow: 2px 2px 0 #9f8900, -2px -2px 0 #9f8900, 2px -2px 0 #9f8900,
-        -2px 2px 0 #9f8900, 2px 0 0 #9f8900, -2px 0 0 #9f8900, 0 2px 0 #9f8900,
-        0 -2px 0 #9f8900;
+    text-shadow: 1px 1px 0 #9f8900, -1px -1px 0 #9f8900, 1px -1px 0 #9f8900,
+        -1px 1px 0 #9f8900, 1px 0 0 #9f8900, -1px 0 0 #9f8900, 0 1px 0 #9f8900,
+        0 -1px 0 #9f8900;
 }
 
-.wrap-commit_reward .box-right {
+/* .wrap-commit_reward .box-right {
     text-shadow: 2px 2px 0 #9f8900, -2px -2px 0 #9f8900, 2px -2px 0 #9f8900,
         -2px 2px 0 #9f8900, 2px 0 0 #9f8900, -2px 0 0 #9f8900, 0 2px 0 #9f8900,
         0 -2px 0 #9f8900;
-}
+} */
 
 .box-left .content {
     font-size: 12px;
@@ -205,11 +205,16 @@
 .wrap-score {
     width: 70%;
     position: absolute;
-    top: 16%;
+    top: 13%;
     left: 50%;
     transform: translate(-50%, -50%);
-    padding: 30px;
+    /* padding: 30px; */
     border-radius: 10px;
+}
+
+.wrap-score .balance {
+    /* transition: all 1s ease-in-out; */
+    animation: counter 5s infinite alternate ease-in-out;
 }
 
 .wrap-score::before {
@@ -227,9 +232,9 @@
 
 .wrap-score .content {
     text-align: center;
-    text-shadow: 2px 2px 0 #9f8900, -2px -2px 0 #9f8900, 2px -2px 0 #9f8900,
-        -2px 2px 0 #9f8900, 2px 0 0 #9f8900, -2px 0 0 #9f8900, 0 2px 0 #9f8900,
-        0 -2px 0 #9f8900;
+    text-shadow: 1px 1px 0 #9f8900, -1px -1px 0 #9f8900, 1px -1px 0 #9f8900,
+        -1px 1px 0 #9f8900, 1px 0 0 #9f8900, -1px 0 0 #9f8900, 0 1px 0 #9f8900,
+        0 -1px 0 #9f8900;
 }
 
 .wrap-score .content img {

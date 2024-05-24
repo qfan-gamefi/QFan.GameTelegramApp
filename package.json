@@ -31,6 +31,7 @@
         "fortawesome": "^0.0.1-security",
         "phaser": "^3.80.1",
         "vue": "^3.4.20",
+        "vue-dragscroll": "^4.0.5",
         "vue-tg": "^0.6.1"
     },
     "devDependencies": {

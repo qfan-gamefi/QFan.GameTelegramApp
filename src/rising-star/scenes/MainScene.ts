@@ -16,6 +16,7 @@ const NUMBER_8 = "NUMBER_8";
 const NUMBER_9 = "NUMBER_9";
 const SYMBOL_P = "SYMBOL_P";
 const SYMBOL_C = "SYMBOL_C";
+const FIELD = "FIELD";
 const DUDE_RUN = "dude_run";
 const BALL = "ball";
 const MIN_KICK_POWER_X = 100;
@@ -26,6 +27,10 @@ const BALL_THRESH_HOLD = 200;
 const KICK_POWER_X_TEXT = "kick_power_x";
 const KICK_POWER_Y_TEXT = "kick_power_y";
 const KICK_POINT_Y = 460;
+const FIELDSPPED : integer = 50;
+const SIZE_PER_FRAME : integer = 736;
+const MAX_FIELD_WIDTH : integer = 2944;
+const MAX_FIELD_HEIGHT : integer = 348;
 
 export class MainScene extends Scene {
     background: GameObjects.Image;
@@ -41,6 +46,9 @@ export class MainScene extends Scene {
     loaded: Boolean = false;
     points: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody[];
     isBallImpactProcessingDone = false;
+    field : Phaser.GameObjects.TileSprite;
+    fieldSpeed : integer = 50;
+    currentFieldX : integer = 0;
     constructor() {
         super("MainScene");
     }
@@ -49,6 +57,7 @@ export class MainScene extends Scene {
         this.loaded = true;
         this.load.image(GROUND_TEXT, "./assets/platform.png");
         this.load.image(SKY_TEXT, "./assets/background.jpg");
+        this.load.image(FIELD, "./assets/field.jpg");
         this.load.spritesheet(DUDE_RUN, "./assets/dude_run.png", {
             frameWidth: 92,
             frameHeight: 125,
@@ -138,6 +147,7 @@ export class MainScene extends Scene {
 
         const backgroundImage = this.add.image(0, 0, SKY_TEXT);
 
+
         // Calculate the scaling factors for width and height to fit the viewport
         const scaleX = this.cameras.main.width / backgroundImage.width;
         const scaleY = this.cameras.main.height / backgroundImage.height;
@@ -150,17 +160,22 @@ export class MainScene extends Scene {
             backgroundImage.width * scale,
             backgroundImage.height * scale
         );
-
         // Center the background image
         backgroundImage.setPosition(
             this.cameras.main.width / 2,
             this.cameras.main.height / 2
         );
+        // this.field.width *  scale
+        this.field = this.add.tileSprite(0,445,MAX_FIELD_WIDTH,MAX_FIELD_HEIGHT, FIELD);
+        this.field.setScale(384*4/MAX_FIELD_WIDTH,84/MAX_FIELD_HEIGHT);
+
 
         this.cursors = this.input.keyboard?.createCursorKeys();
         this.platforms = this.physics.add.staticGroup();
+
         // this.add.image(400, 300, SKY_TEXT);468
-        this.platforms.create(192, 521, "ground").setScale(2).refreshBody();
+        this.platforms.create(192, 515, "ground").setScale(2).refreshBody();
+        this.platforms.setAlpha(0);
         this.player_run = this.createPlayer();
         this.ball = this.createBall();
         this.physics.add.collider(this.player_run, this.platforms);
@@ -178,6 +193,15 @@ export class MainScene extends Scene {
     }
 
     update() {
+        this.currentFieldX += FIELDSPPED;
+        if(this.currentFieldX > SIZE_PER_FRAME){
+            this.field.tilePositionX += SIZE_PER_FRAME;
+            this.currentFieldX = 0;
+            if (this.field.tilePositionX >= MAX_FIELD_WIDTH*2){
+                this.field.tilePositionX = 0;
+            }
+        }
+        
         const player_position = this.player_run.getCenter();
         const ball_position = this.ball.getCenter();
         // this.bg.tilePositionX +=

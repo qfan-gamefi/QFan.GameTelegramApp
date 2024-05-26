@@ -52,6 +52,8 @@ export default {
             telegram_bot_link:
                 telegram_bot_link +
                     window.Telegram.WebApp.initDataUnsafe.user?.id || "",
+            // idUser: "2123800227",
+            // telegram_bot_link: telegram_bot_link + 2123800227 || "",
 
             showCoomingSoon: false,
             isCopiedToClipboard: false,
@@ -403,7 +405,7 @@ export default {
 
             <div class="wrap-score">
                 <div class="content">
-                    <img src="./../public/assets/logo.jpg" />
+                    <img src="./../public/assets/logo.svg" />
                     <div class="balance">
                         <!-- QFP Balance: {{ dataQPoint?.balance }} -->
                         QFP Balance: {{ animatedBalance }}
@@ -416,7 +418,9 @@ export default {
                     v-bind:href="`https://qfan-dapp.qcloud.asia/?playerId=${idUser}`"
                     target="'_blank"
                 >
-                    <button>Checkin</button>
+                    <button>
+                        <i class="fa-solid fa-calendar-days"></i> Checkin
+                    </button>
                 </a>
             </div>
 
@@ -424,7 +428,7 @@ export default {
                 <div class="box-info">
                     <div v-if="isClaim" class="box-left-train">
                         Click "Train" to take + {{ dataQPoint?.rewardAmount }}
-                        <img src="./../public/assets/logo.jpg" />
+                        <img src="./../public/assets/logo.svg" />
                     </div>
 
                     <div v-else class="box-left">
@@ -447,83 +451,39 @@ export default {
             <MainGame ref="phaserRef" />
         </div>
 
-        <div class="button-container">
-            <div class="row">
-                <button @click="showPopupCoomingSoon">
-                    <img
-                        src="./../public/assets/button-icons/shopping-bag-3744.svg"
-                        class="icon-home"
-                    />
-                    <span>Shop</span>
-                </button>
-
-                <button @click="showPopupCoomingSoon">
-                    <img
-                        src="./../public/assets/button-icons/booster.svg"
-                        class="icon-home"
-                    />
-                    <span>Booster</span>
-                </button>
-
-                <InviteFrens
-                    :visible="showInvite"
-                    @close="closeInvite"
-                    @invite="handleInvite"
-                    :idUser="idUser"
-                />
+        <div class="box-button">
+            <div class="btn-item" @click="handleMission">
+                <div class="item-img">
+                    <img src="./../public/assets/button-icons/mission.svg" />
+                </div>
+                <div class="item-title">Mission</div>
             </div>
-
-            <div class="row">
-                <button @click="handleReferal">
-                    <img
-                        src="./../public/assets/button-icons/copy-link.svg"
-                        class="icon-home"
-                    />
-                    <span>Referal</span>
-                </button>
-
-                <button @click="handleMission">
-                    <img
-                        src="./../public/assets/button-icons/mission.svg"
-                        class="icon-home"
-                    />
-                    <span>Mission</span>
-                </button>
-                <MissionList
-                    :visible="showMission"
-                    @close="closeMission"
-                    @invite="handleMission"
-                    :idUser="idUser"
-                />
-
-                <button @click="handleEvent">
-                    <img
-                        src="./../public/assets/button-icons/event.svg"
-                        class="icon-home"
-                    />
-                    <span>Event</span>
-                </button>
-                <EventList
-                    :visible="showEvent"
-                    @close="closeEvent"
-                    @invite="handleEvent"
-                    :idUser="idUser"
-                    @openCoomSoon="showPopupCoomingSoon"
-                />
+            <div class="btn-item" @click="handleEvent">
+                <div class="item-img">
+                    <img src="./../public/assets/button-icons/event.svg" />
+                </div>
+                <div class="item-title">Event</div>
             </div>
-        </div>
-
-        <div
-            :class="[
-                'popup-cooming-soon',
-                { 'closing-popup': !showCoomingSoon },
-            ]"
-            v-if="showCoomingSoon"
-        >
-            <p>Coming soon</p>
-            <button @click="hidePopupCoomingSoon" class="btn-close-coming-soon">
-                Close
-            </button>
+            <div class="btn-item booster" @click="showPopupCoomingSoon">
+                <div class="item-img">
+                    <img src="./../public/assets/button-icons/booster.svg" />
+                </div>
+                <div class="item-title">Booster</div>
+            </div>
+            <div class="btn-item" @click="handleReferal">
+                <div class="item-img">
+                    <img
+                        src="./../public/assets/button-icons/invite-friend.svg"
+                    />
+                </div>
+                <div class="item-title">Invite Friend</div>
+            </div>
+            <div class="btn-item" @click="showPopupCoomingSoon">
+                <div class="item-img">
+                    <img src="./../public/assets/button-icons/shop.svg" />
+                </div>
+                <div class="item-title">Shop</div>
+            </div>
         </div>
 
         <div v-if="isPopupCode">
@@ -548,6 +508,41 @@ export default {
                     </button>
                 </form>
             </div>
+        </div>
+
+        <MissionList
+            :visible="showMission"
+            @close="closeMission"
+            @invite="handleMission"
+            :idUser="idUser"
+        />
+
+        <EventList
+            :visible="showEvent"
+            @close="closeEvent"
+            @invite="handleEvent"
+            :idUser="idUser"
+            @openCoomSoon="showPopupCoomingSoon"
+        />
+
+        <InviteFrens
+            :visible="showInvite"
+            @close="closeInvite"
+            @invite="handleInvite"
+            :idUser="idUser"
+        />
+
+        <div
+            :class="[
+                'popup-cooming-soon',
+                { 'closing-popup': !showCoomingSoon },
+            ]"
+            v-if="showCoomingSoon"
+        >
+            <p>Coming soon</p>
+            <button @click="hidePopupCoomingSoon" class="btn-close-coming-soon">
+                Close
+            </button>
         </div>
 
         <div class="copy-success-message" v-if="isCopiedToClipboard">

@@ -60,6 +60,8 @@ export class IdleScene extends Scene {
 
         this.cursors = this.input.keyboard?.createCursorKeys();
         this.platforms = this.physics.add.staticGroup();
+        this.platforms.create(192, 500, "ground").setScale(2).refreshBody();
+        this.platforms.setAlpha(0);
         // this.add.image(400, 300, SKY_TEXT);
         // this.platforms.create(192, 468, "ground").setScale(2).refreshBody();
         this.player_idle = this.createPlayer();
@@ -68,7 +70,7 @@ export class IdleScene extends Scene {
         EventBus.emit("current-scene-ready", this);
     }
 
-    update() {}
+    update() { }
     createPlayer() {
         const player = this.physics.add.sprite(192, 245, DUDE_IDLE);
 

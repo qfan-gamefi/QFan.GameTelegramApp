@@ -48,7 +48,6 @@ button {
     align-items: center;
     flex-direction: row;
     padding: 14px 22px;
-    /* border-radius: 20px; */
     gap: 8px;
 }
 

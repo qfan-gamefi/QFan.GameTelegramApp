@@ -20,6 +20,7 @@ onMounted(() => {
 import InviteFrens from "./components/InviteFrens.vue";
 import MissionList from "./components/MissionsList.vue";
 import EventList from "./components/EventList.vue";
+import BoosterForm from "./components/BoosterForm.vue";
 import userService from "./services/userService";
 
 const REF_MESS_PREFIX: string = "start r_";
@@ -48,12 +49,12 @@ export default {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            idUser: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
-            telegram_bot_link:
-                telegram_bot_link +
-                    window.Telegram.WebApp.initDataUnsafe.user?.id || "",
-            // idUser: "2123800227",
-            // telegram_bot_link: telegram_bot_link + 2123800227 || "",
+            // idUser: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
+            // telegram_bot_link:
+            //     telegram_bot_link +
+            //         window.Telegram.WebApp.initDataUnsafe.user?.id || "",
+            idUser: "2123800227",
+            telegram_bot_link: telegram_bot_link + 2123800227 || "",
 
             showCoomingSoon: false,
             isCopiedToClipboard: false,
@@ -78,6 +79,7 @@ export default {
             code: "",
             errorMessage: "",
             showInvite: false,
+            showBooster: false,
             showMission: false,
             showEvent: false,
             isClaim: false,
@@ -348,8 +350,14 @@ export default {
             this.showInvite = false;
             await this.getInfoUser();
         },
+        closeBooster() {
+            this.showBooster = false;
+        },
         handleInvite() {
             this.copyToClipboard();
+        },
+        handleBooster() {
+            this.showBooster = true;
         },
         handleMission() {
             this.showMission = true;
@@ -464,7 +472,7 @@ export default {
                 </div>
                 <div class="item-title">Event</div>
             </div>
-            <div class="btn-item booster" @click="showPopupCoomingSoon">
+            <div class="btn-item booster" @click="handleBooster">
                 <div class="item-img">
                     <img src="./../public/assets/button-icons/booster.svg" />
                 </div>
@@ -530,6 +538,13 @@ export default {
             @close="closeInvite"
             @invite="handleInvite"
             :idUser="idUser"
+        />
+
+        <BoosterForm
+            :visible="showBooster"
+            @close="closeBooster"
+            @invite="handleBooster"
+            :balance="dataQPoint.balance"
         />
 
         <div

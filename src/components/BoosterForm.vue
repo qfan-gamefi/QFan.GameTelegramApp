@@ -184,7 +184,6 @@ export default {
 }
 
 .popup-booster {
-    /* height: 100%; */
     height: 90%;
     position: absolute;
     width: 100%;

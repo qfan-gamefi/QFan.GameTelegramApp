@@ -5,6 +5,8 @@ import { EventBus } from "../EventBus";
 const SKY_TEXT = "sky";
 const GROUND_TEXT = "ground";
 const DUDE_IDLE = "dude_idle";
+const CLOUD = "CLOUD";
+const SIZE_CLOUD_PER_FRAME: integer = 768;
 
 export class IdleScene extends Scene {
     background: GameObjects.Image;
@@ -17,7 +19,10 @@ export class IdleScene extends Scene {
     cursors: Phaser.Types.Input.Keyboard.CursorKeys | undefined;
     player_idle: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
     ball: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+    clouds: Phaser.GameObjects.TileSprite;
     loaded: Boolean = false;
+    fieldSpeed: integer = 50;
+    currentFieldX: integer = 0;
 
     constructor() {
         super("IdleScene");
@@ -26,6 +31,7 @@ export class IdleScene extends Scene {
         this.loaded = true;
         this.load.image(GROUND_TEXT, "./assets/platform.png");
         this.load.image(SKY_TEXT, "./assets/background.jpg");
+        this.load.image(CLOUD, "./assets/clouds.png");
         this.load.spritesheet(DUDE_IDLE, "./assets/dude_idle.png", {
             frameWidth: 67,
             frameHeight: 129,
@@ -38,7 +44,7 @@ export class IdleScene extends Scene {
         }
         // this.bg = this.add.tileSprite(192, 245, 384, 490, SKY_TEXT);
         const backgroundImage = this.add.image(0, 0, SKY_TEXT);
-
+        this.clouds = this.add.tileSprite(0, 40, 768, 174, CLOUD);
         // Calculate the scaling factors for width and height to fit the viewport
         const scaleX = this.cameras.main.width / backgroundImage.width;
         const scaleY = this.cameras.main.height / backgroundImage.height;
@@ -70,7 +76,12 @@ export class IdleScene extends Scene {
         EventBus.emit("current-scene-ready", this);
     }
 
-    update() { }
+    update() {
+        this.clouds.tilePositionX += 1;
+        if (this.clouds.tilePositionX >= SIZE_CLOUD_PER_FRAME) {
+            this.clouds.tilePositionX = 0;
+        }
+     }
     createPlayer() {
         const player = this.physics.add.sprite(192, 245, DUDE_IDLE);
 

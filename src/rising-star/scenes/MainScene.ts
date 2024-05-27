@@ -170,9 +170,14 @@ export class MainScene extends Scene {
             this.cameras.main.height / 2
         );
         // this.field.width *  scale
-        this.field = this.add.tileSprite(0, 445, MAX_FIELD_WIDTH, MAX_FIELD_HEIGHT, FIELD);
-        this.field.setScale(384 * 4 / MAX_FIELD_WIDTH, 84 / MAX_FIELD_HEIGHT);
-
+        this.field = this.add.tileSprite(
+            0,
+            445,
+            MAX_FIELD_WIDTH,
+            MAX_FIELD_HEIGHT,
+            FIELD
+        );
+        this.field.setScale((384 * 4) / MAX_FIELD_WIDTH, 84 / MAX_FIELD_HEIGHT);
 
         this.cursors = this.input.keyboard?.createCursorKeys();
         this.platforms = this.physics.add.staticGroup();
@@ -225,8 +230,8 @@ export class MainScene extends Scene {
                         (255 -
                             (Math.abs(KICK_POINT_Y - value.getCenter().y) /
                                 100) *
-                            255) /
-                        255
+                                255) /
+                            255
                     )
                 );
                 value.alpha = alpha;

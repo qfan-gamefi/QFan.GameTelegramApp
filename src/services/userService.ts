@@ -79,6 +79,10 @@ const userService = {
         const res = await axiosInstance.get(`events?populate=*`);
         return res.data;
     },
+    async getListBooster() {
+        const res = await axiosInstance.get(`bootsters?populate=*`);
+        return res.data;
+    },
 };
 
 export default userService;

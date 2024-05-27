@@ -1,3 +1,4 @@
+$primary-color: #ffe500;
 @font-face {
     font-family: "GAMERIA";
     src: url("../../public/assets/fonts/GAMERIA.ttf");
@@ -70,4 +71,14 @@ button span {
             rgb(208, 204, 200) 115.91%
         )
         text;
+}
+
+.text-outline-black {
+    color: white;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
+        1px 1px 0 #000;
+}
+
+.t-primary-color {
+    color: $primary-color;
 }

@@ -1,15 +1,18 @@
 <template>
     <div class="popup-booster" v-if="visible">
         <div class="box-booster">
-            <div @click="$emit('close')" class="close-booster">
+            <!-- <div @click="$emit('close')" class="close-booster">
                 <img src="./../../public/assets/back.svg" />
                 Back
-            </div>
+            </div> -->
 
-            <div class="box-content-booster">
+            <Loading :loading="loading" />
+            <EmptyForm v-if="showEmptyForm" />
+
+            <div class="box-content-booster" v-if="!loading">
                 <div class="your-balance">
                     <div class="title-your-balance">Your Balance</div>
-                    <div class="point-balance">
+                    <div class="point-balance t-primary-color">
                         <img src="./../../public/assets/logo.svg" />
                         {{ balance }}
                     </div>
@@ -18,56 +21,69 @@
                     </div>
                 </div>
 
-                <div class="stadium">Stadium</div>
-
-                <div class="container-stadium">
+                <div class="stadium text-outline-black">Stadium</div>
+                <div
+                    class="container-stadium"
+                    v-for="item in stadiumItems"
+                    :key="item.id"
+                >
                     <div class="logo-stadium">
                         <img
-                            src="./../../public/assets/booster/logo-stadium1.svg"
+                            :src="`https://qfan-api.qcloud.asia${item?.attributes?.image?.data?.attributes?.url}`"
                         />
                     </div>
 
                     <div class="box-stadium">
                         <div class="stadium-left">
-                            <div class="lv-stadium">Level 1</div>
-                            <div class="content-stadium">School Stadium</div>
+                            <div class="lv-stadium t-primary-color">
+                                Level {{ item.attributes.level }}
+                            </div>
+                            <div class="content-stadium">
+                                {{ item.attributes.name }}
+                            </div>
                             <div class="desc-stadium">
-                                Increase the fill time to claim less often
+                                {{ item.attributes.description }}
                             </div>
                         </div>
 
-                        <div class="stadium-right">
-                            10 <img src="./../../public/assets/logo.svg" />
+                        <div class="stadium-right t-primary-color">
+                            {{ item.attributes.price }}
+                            <img src="./../../public/assets/logo.svg" />
                         </div>
                     </div>
                 </div>
 
-                <div class="stadium">Training room</div>
-
-                <div class="container-stadium">
+                <div class="stadium text-outline-black">Training room</div>
+                <div
+                    class="container-stadium"
+                    v-for="item in trainingItems"
+                    :key="item.id"
+                >
                     <div class="logo-stadium">
                         <img
-                            src="./../../public/assets/booster/training-room.svg"
+                            :src="`https://qfan-api.qcloud.asia${item?.attributes?.image?.data?.attributes?.url}`"
                         />
                     </div>
 
                     <div class="box-stadium">
                         <div class="stadium-left">
-                            <div class="lv-stadium">Level 1</div>
-                            <div class="content-stadium">Standard</div>
+                            <div class="lv-stadium t-primary-color">
+                                Level {{ item.attributes.level }}
+                            </div>
+                            <div class="content-stadium">
+                                {{ item.attributes.name }}
+                            </div>
                             <div class="desc-stadium">
-                                Increase the fill time to claim less often
+                                {{ item.attributes.description }}
                             </div>
                         </div>
 
-                        <div class="stadium-right">
-                            10 <img src="./../../public/assets/logo.svg" />
+                        <div class="stadium-right t-primary-color">
+                            {{ item.attributes.price }}
+                            <img src="./../../public/assets/logo.svg" />
                         </div>
                     </div>
                 </div>
-
-                <Loading :loading="loading" />
-                <EmptyForm v-if="showEmptyFormEvent" />
             </div>
         </div>
     </div>
@@ -100,6 +116,8 @@ export default {
         return {
             loading: true,
             listData: null,
+            stadiumItems: null,
+            trainingItems: null,
         };
     },
     watch: {
@@ -121,6 +139,16 @@ export default {
                 const res = await userService.getListBooster();
 
                 if (res?.data) {
+                    const stadiumItems = res?.data.filter(
+                        (item) => item.attributes.type == "SPEED"
+                    );
+                    this.stadiumItems = stadiumItems;
+
+                    const trainingItems = res?.data.filter(
+                        (item) => item.attributes.type == "AMOUNT"
+                    );
+                    this.trainingItems = trainingItems;
+
                     this.listData = res?.data;
                 }
             } catch (error) {
@@ -133,7 +161,7 @@ export default {
         },
     },
     computed: {
-        showEmptyFormEvent() {
+        showEmptyForm() {
             return this.listData?.length == 0;
         },
     },
@@ -156,14 +184,14 @@ export default {
 }
 
 .popup-booster {
-    height: 100%;
+    /* height: 100%; */
+    height: 90%;
     position: absolute;
     width: 100%;
-    top: 50%;
+    /* top: 50%; */
+    top: 45%;
     left: 50%;
-    transform: translate(-50%, -50%);
-    /* background-color: #0085d2; */
-    /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); */
+    /* transform: translate(-50%, -50%); */
     z-index: 999;
     animation: fadeIn 0.1s ease forwards;
 
@@ -186,10 +214,15 @@ export default {
 }
 
 .box-booster {
-    padding: 5px 20px 20px;
+    padding: 0 20px;
     height: calc(100% - 25px);
 }
 
+.box-content-booster {
+    height: calc(100% - 35px);
+    color: #fff;
+    animation: fadeInDesc 0.1s ease forwards;
+}
 @keyframes fadeInDesc {
     0% {
         opacity: 0;
@@ -201,11 +234,16 @@ export default {
         transform: translate(0%, 0%) scale(1);
     }
 }
-
-.box-content-booster {
-    height: calc(100% - 35px);
-    color: #fff;
+/* scroll box  */
+/* .box-desc-event {
+    background: #67bdef;
+    border-radius: 10px;
+    max-height: calc(100% - 75px);
+    overflow-y: auto;
 }
+.box-desc-event::-webkit-scrollbar {
+    display: none;
+} */
 
 .your-balance {
     margin-top: 15px;
@@ -229,6 +267,7 @@ export default {
 .point-balance img {
     width: 40px;
     height: 40px;
+    margin-right: 5px;
 }
 .desc-your-balance {
     font-family: monospace;
@@ -262,7 +301,6 @@ export default {
 }
 .lv-stadium {
     font-size: 12px;
-    color: #ffe500;
 }
 .desc-stadium {
     font-size: 10px;
@@ -276,18 +314,5 @@ export default {
     width: 25px;
     height: 25px;
     margin-left: 5px;
-}
-/* scroll box  */
-.box-desc-event {
-    background: #67bdef;
-    border-radius: 10px;
-    max-height: calc(100% - 75px);
-    overflow-y: auto;
-    animation: fadeInDesc 0.1s ease forwards;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-}
-.box-desc-event::-webkit-scrollbar {
-    display: none;
 }
 </style>

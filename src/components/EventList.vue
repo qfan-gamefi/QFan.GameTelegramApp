@@ -1,13 +1,13 @@
 <template>
     <div class="popup-event" v-if="visible">
         <div class="box-event">
-            <div @click="$emit('close')" class="close-event">
+            <!-- <div @click="$emit('close')" class="close-event">
                 <img src="./../../public/assets/back.svg" />
                 Back
-            </div>
+            </div> -->
 
             <div class="box-content-event">
-                <div class="title-event">Events</div>
+                <!-- <div class="title-event">Events</div> -->
 
                 <Loading :loading="loading" />
 
@@ -124,16 +124,21 @@ export default {
 
 <style>
 .popup-event {
-    height: 100%;
+    height: 90%;
     position: absolute;
     width: 100%;
-    top: 50%;
+    top: 45%;
     left: 50%;
     transform: translate(-50%, -50%);
     background-color: #0085d2;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     z-index: 999;
     animation: fadeIn 0.1s ease forwards;
+
+    background-image: url("./../../public/assets/event/background-event.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
 }
 
 @keyframes fadeIn {

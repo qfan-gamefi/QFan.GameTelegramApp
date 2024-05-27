@@ -49,12 +49,12 @@ export default {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            // idUser: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
-            // telegram_bot_link:
-            //     telegram_bot_link +
-            //         window.Telegram.WebApp.initDataUnsafe.user?.id || "",
-            idUser: "2123800227",
-            telegram_bot_link: telegram_bot_link + 2123800227 || "",
+            idUser: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
+            telegram_bot_link:
+                telegram_bot_link +
+                    window.Telegram.WebApp.initDataUnsafe.user?.id || "",
+            // idUser: "2123800227",
+            // telegram_bot_link: telegram_bot_link + 2123800227 || "",
 
             showCoomingSoon: false,
             isCopiedToClipboard: false,
@@ -345,6 +345,10 @@ export default {
         },
 
         handleReferal() {
+            this.showEvent = false;
+            this.showMission = false;
+            this.showBooster = false;
+            this.activeButton = "invite";
             this.showInvite = true;
         },
         async closeInvite() {
@@ -352,6 +356,7 @@ export default {
             await this.getInfoUser();
         },
         closeBooster() {
+            this.activeButton = "";
             this.showBooster = false;
         },
         handleInvite() {
@@ -383,6 +388,7 @@ export default {
             await this.getInfoUser();
         },
         async closeEvent() {
+            this.activeButton = "";
             this.showEvent = false;
             await this.getInfoUser();
         },
@@ -571,6 +577,8 @@ export default {
             @close="closeBooster"
             @invite="handleBooster"
             :balance="dataQPoint.balance"
+            :rewardAmount="dataQPoint.rewardAmount"
+            :rewardScheduleHour="dataQPoint.rewardScheduleHour"
         />
 
         <div

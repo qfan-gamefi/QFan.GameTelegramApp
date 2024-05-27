@@ -5,6 +5,9 @@
                 <img src="./../../public/assets/back.svg" />
                 Back
             </div> -->
+            <div @click="$emit('close')" class="close-home">
+                <i class="fa-solid fa-xmark"></i>
+            </div>
 
             <Loading :loading="loading" />
             <EmptyForm v-if="showEmptyForm" />
@@ -17,7 +20,11 @@
                         {{ balance }}
                     </div>
                     <div class="desc-your-balance">
-                        Mining Speed: 0.15 QUAI/hour
+                        Mining Speed: {{ rewardAmount }}
+                        <img src="./../../public/assets/logo.svg" /> /{{
+                            rewardScheduleHour
+                        }}
+                        hour
                     </div>
                 </div>
 
@@ -53,7 +60,7 @@
                     </div>
                 </div>
 
-                <div class="stadium text-outline-black">Training room</div>
+                <div class="stadium text-outline-black">Training time</div>
                 <div
                     class="container-stadium"
                     v-for="item in trainingItems"
@@ -100,6 +107,14 @@ export default {
             default: false,
         },
         balance: {
+            type: String,
+            default: "",
+        },
+        rewardAmount: {
+            type: String,
+            default: "",
+        },
+        rewardScheduleHour: {
             type: String,
             default: "",
         },
@@ -270,6 +285,12 @@ export default {
 }
 .desc-your-balance {
     font-family: monospace;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.desc-your-balance img {
+    width: 15px;
 }
 
 .stadium {

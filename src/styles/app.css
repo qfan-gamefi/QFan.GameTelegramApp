@@ -44,7 +44,11 @@
 }
 
 .btn-item.active {
-    background-color: #00256c9e;
+    background-color: #ffa53a;
+    z-index: 1000;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    margin-top: -5px;
 }
 
 .item-img img {

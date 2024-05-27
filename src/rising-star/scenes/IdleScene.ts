@@ -6,7 +6,7 @@ const SKY_TEXT = "sky";
 const GROUND_TEXT = "ground";
 const DUDE_IDLE = "dude_idle";
 const CLOUD = "CLOUD";
-const SIZE_CLOUD_PER_FRAME: integer = 736;
+const SIZE_CLOUD_PER_FRAME: integer = 768;
 
 export class IdleScene extends Scene {
     background: GameObjects.Image;

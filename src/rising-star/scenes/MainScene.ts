@@ -32,7 +32,7 @@ const SIZE_PER_FRAME: integer = 736;
 const MAX_FIELD_WIDTH: integer = 2944;
 const MAX_FIELD_HEIGHT: integer = 348;
 const CLOUD = "CLOUD";
-const SIZE_CLOUD_PER_FRAME: integer = 736;
+const SIZE_CLOUD_PER_FRAME: integer = 768;
 
 export class MainScene extends Scene {
     background: GameObjects.Image;

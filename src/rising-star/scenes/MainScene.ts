@@ -31,6 +31,8 @@ const FIELDSPPED: integer = 50;
 const SIZE_PER_FRAME: integer = 736;
 const MAX_FIELD_WIDTH: integer = 2944;
 const MAX_FIELD_HEIGHT: integer = 348;
+const CLOUD = "CLOUD";
+const SIZE_CLOUD_PER_FRAME: integer = 736;
 
 export class MainScene extends Scene {
     background: GameObjects.Image;
@@ -47,6 +49,7 @@ export class MainScene extends Scene {
     points: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody[];
     isBallImpactProcessingDone = false;
     field: Phaser.GameObjects.TileSprite;
+    clouds: Phaser.GameObjects.TileSprite;
     fieldSpeed: integer = 50;
     currentFieldX: integer = 0;
     constructor() {
@@ -58,6 +61,7 @@ export class MainScene extends Scene {
         this.load.image(GROUND_TEXT, "./assets/platform.png");
         this.load.image(SKY_TEXT, "./assets/background.jpg");
         this.load.image(FIELD, "./assets/field.jpg");
+        this.load.image(CLOUD, "./assets/clouds.png");
         this.load.spritesheet(DUDE_RUN, "./assets/dude_run.png", {
             frameWidth: 92,
             frameHeight: 125,
@@ -146,7 +150,7 @@ export class MainScene extends Scene {
         }
 
         const backgroundImage = this.add.image(0, 0, SKY_TEXT);
-
+        this.clouds = this.add.tileSprite(0, 40, 768, 174, CLOUD);
 
         // Calculate the scaling factors for width and height to fit the viewport
         const scaleX = this.cameras.main.width / backgroundImage.width;
@@ -201,7 +205,10 @@ export class MainScene extends Scene {
                 this.field.tilePositionX = 0;
             }
         }
-
+        this.clouds.tilePositionX += 1;
+        if (this.clouds.tilePositionX >= SIZE_CLOUD_PER_FRAME) {
+            this.clouds.tilePositionX = 0;
+        }
         const player_position = this.player_run.getCenter();
         const ball_position = this.ball.getCenter();
         // this.bg.tilePositionX +=

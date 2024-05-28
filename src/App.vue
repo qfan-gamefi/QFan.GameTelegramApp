@@ -12,7 +12,6 @@ const phaserRef: any = ref<{ scene?: PhaserScene }>();
 
 onMounted(() => {
     window.Telegram.WebApp.expand();
-    // alert(JSON.stringify(window.Telegram.WebApp.initDataUnsafe.user));
 });
 </script>
 
@@ -21,6 +20,7 @@ import InviteFrens from "./components/InviteFrens.vue";
 import MissionList from "./components/MissionsList.vue";
 import EventList from "./components/EventList.vue";
 import BoosterForm from "./components/BoosterForm.vue";
+// import TemplatePopup from "./components/TemplatePopup.vue";
 import userService from "./services/userService";
 
 const REF_MESS_PREFIX: string = "start r_";
@@ -29,6 +29,8 @@ export default {
         InviteFrens,
         MissionList,
         EventList,
+        BoosterForm,
+        // TemplatePopup,
     },
     data() {
         const telegram_bot_link =
@@ -49,12 +51,12 @@ export default {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            idUser: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
-            telegram_bot_link:
-                telegram_bot_link +
-                    window.Telegram.WebApp.initDataUnsafe.user?.id || "",
-            // idUser: "2123800227",
-            // telegram_bot_link: telegram_bot_link + 2123800227 || "",
+            // idUser: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
+            // telegram_bot_link:
+            //     telegram_bot_link +
+            //         window.Telegram.WebApp.initDataUnsafe.user?.id || "",
+            idUser: "2123800227",
+            telegram_bot_link: telegram_bot_link + 2123800227 || "",
 
             showCoomingSoon: false,
             isCopiedToClipboard: false,
@@ -345,13 +347,14 @@ export default {
         },
 
         handleReferal() {
-            this.showEvent = false;
             this.showMission = false;
+            this.showEvent = false;
             this.showBooster = false;
             this.activeButton = "invite";
             this.showInvite = true;
         },
         async closeInvite() {
+            this.activeButton = "";
             this.showInvite = false;
             await this.getInfoUser();
         },
@@ -363,27 +366,28 @@ export default {
             this.copyToClipboard();
         },
         handleBooster() {
-            this.showEvent = false;
             this.showMission = false;
+            this.showEvent = false;
             this.showInvite = false;
             this.activeButton = "booster";
             this.showBooster = true;
         },
         handleMission() {
             this.showEvent = false;
-            this.showInvite = false;
             this.showBooster = false;
+            this.showInvite = false;
             this.activeButton = "mission";
             this.showMission = true;
         },
         handleEvent() {
-            this.showBooster = false;
             this.showMission = false;
+            this.showBooster = false;
             this.showInvite = false;
             this.activeButton = "event";
             this.showEvent = true;
         },
         async closeMission() {
+            this.activeButton = "";
             this.showMission = false;
             await this.getInfoUser();
         },
@@ -413,7 +417,7 @@ export default {
         <button class="absolute-training-btn button-decoration">
             START TRAINING
         </button>
-        <div>
+        <!-- <div>
             <button
                 id="login_button"
                 class="btn-login"
@@ -421,7 +425,7 @@ export default {
             >
                 LOGIN
             </button>
-        </div>
+        </div> -->
 
         <div class="container-game">
             <div class="container-info" v-show="isTelegramLogin">

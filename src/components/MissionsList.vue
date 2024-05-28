@@ -258,12 +258,10 @@ export default {
 
 <style>
 .popup-mission {
-    height: 100%;
+    height: calc(100% - 57px);
     position: absolute;
     width: 100%;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    top: 0%;
     background-color: #0085d2;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     z-index: 999;

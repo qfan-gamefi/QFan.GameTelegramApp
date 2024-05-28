@@ -20,6 +20,7 @@ onMounted(() => {
 import InviteFrens from "./components/InviteFrens.vue";
 import MissionList from "./components/MissionsList.vue";
 import EventList from "./components/EventList.vue";
+import BoosterForm from "./components/BoosterForm.vue";
 import userService from "./services/userService";
 
 const REF_MESS_PREFIX: string = "start r_";
@@ -78,9 +79,11 @@ export default {
             code: "",
             errorMessage: "",
             showInvite: false,
+            showBooster: false,
             showMission: false,
             showEvent: false,
             isClaim: false,
+            activeButton: "",
         };
     },
     computed: {
@@ -342,19 +345,42 @@ export default {
         },
 
         handleReferal() {
+            this.showEvent = false;
+            this.showMission = false;
+            this.showBooster = false;
+            this.activeButton = "invite";
             this.showInvite = true;
         },
         async closeInvite() {
             this.showInvite = false;
             await this.getInfoUser();
         },
+        closeBooster() {
+            this.activeButton = "";
+            this.showBooster = false;
+        },
         handleInvite() {
             this.copyToClipboard();
         },
+        handleBooster() {
+            this.showEvent = false;
+            this.showMission = false;
+            this.showInvite = false;
+            this.activeButton = "booster";
+            this.showBooster = true;
+        },
         handleMission() {
+            this.showEvent = false;
+            this.showInvite = false;
+            this.showBooster = false;
+            this.activeButton = "mission";
             this.showMission = true;
         },
         handleEvent() {
+            this.showBooster = false;
+            this.showMission = false;
+            this.showInvite = false;
+            this.activeButton = "event";
             this.showEvent = true;
         },
         async closeMission() {
@@ -362,6 +388,7 @@ export default {
             await this.getInfoUser();
         },
         async closeEvent() {
+            this.activeButton = "";
             this.showEvent = false;
             await this.getInfoUser();
         },
@@ -377,7 +404,7 @@ export default {
 </script>
 
 <style scoped>
-@import "./styles/global.css";
+@import "./styles/global.scss";
 @import "./styles/app.css";
 </style>
 
@@ -458,17 +485,30 @@ export default {
                 </div>
                 <div class="item-title">Mission</div>
             </div>
-            <div class="btn-item" @click="handleEvent">
+            <div
+                class="btn-item"
+                @click="handleEvent"
+                :class="{ active: activeButton === 'event' }"
+            >
                 <div class="item-img">
                     <img src="./../public/assets/button-icons/event.svg" />
                 </div>
                 <div class="item-title">Event</div>
             </div>
-            <div class="btn-item booster" @click="showPopupCoomingSoon">
+            <div
+                class="btn-item"
+                @click="handleBooster"
+                :class="{ active: activeButton === 'booster' }"
+            >
                 <div class="item-img">
                     <img src="./../public/assets/button-icons/booster.svg" />
                 </div>
-                <div class="item-title">Booster</div>
+                <div
+                    class="item-title"
+                    :class="{ active: activeButton === 'booster' }"
+                >
+                    Booster
+                </div>
             </div>
             <div class="btn-item" @click="handleReferal">
                 <div class="item-img">
@@ -530,6 +570,15 @@ export default {
             @close="closeInvite"
             @invite="handleInvite"
             :idUser="idUser"
+        />
+
+        <BoosterForm
+            :visible="showBooster"
+            @close="closeBooster"
+            @invite="handleBooster"
+            :balance="dataQPoint.balance"
+            :rewardAmount="dataQPoint.rewardAmount"
+            :rewardScheduleHour="dataQPoint.rewardScheduleHour"
         />
 
         <div

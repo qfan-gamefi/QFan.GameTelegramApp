@@ -1,27 +1,67 @@
 <template>
     <div class="popup-event" v-if="visible">
         <div class="box-event">
-            <div @click="$emit('close')" class="close-event">
+            <!-- <div @click="$emit('close')" class="close-event">
                 <img src="./../../public/assets/back.svg" />
                 Back
+            </div> -->
+            <div @click="$emit('close')" class="close-home">
+                <i class="fa-solid fa-xmark"></i>
             </div>
 
-            <div class="box-content-event">
-                <div class="title-event">Events</div>
+            <!-- <div class="box-content-event"> -->
+            <!-- <div class="title-event">Events</div> -->
 
-                <Loading :loading="loading" />
+            <Loading :loading="loading" />
 
+            <div
+                class="box-desc-event"
+                v-if="!loading"
+                @click="$emit('openCoomSoon')"
+            >
                 <div
-                    class="box-desc-event"
-                    v-if="!loading"
-                    @click="$emit('openCoomSoon')"
+                    class="item-event"
+                    v-for="(item, index) in eventData"
+                    :key="index"
+                    :style="{
+                        backgroundImage: `url(https://qfan-api.qcloud.asia${item?.attributes?.banner?.data?.attributes?.formats?.small?.url})`,
+                    }"
                 >
-                    <div
-                        class="item-event"
-                        v-for="(item, index) in eventData"
-                        :key="index"
-                    >
-                        <div class="item-left-event">
+                    <div class="box-content-event">
+                        <div class="title-item">
+                            {{ item?.attributes?.title }}
+                        </div>
+                        <div class="box-pool">
+                            <div class="text-pool">Prize Pool:</div>
+                            <div class="img-pool t-primary-color">
+                                {{
+                                    extractNumber(
+                                        item?.attributes?.content?.[0]
+                                            ?.children?.[0]?.text
+                                    )
+                                }}
+                                <img
+                                    src="./../../public/assets/logo-quai.svg"
+                                />
+                            </div>
+                        </div>
+                        <div class="btn-join-now">
+                            <button>Join Now</button>
+                        </div>
+                        <div class="box-time">
+                            <span
+                                ><i class="fa-solid fa-clock"></i>
+                                {{
+                                    item?.attributes?.content?.[1]?.children?.[0]?.text?.replace(
+                                        "Time: ",
+                                        ""
+                                    )
+                                }}</span
+                            >
+                        </div>
+                    </div>
+
+                    <!-- <div class="item-left-event">
                             <div class="item-img">
                                 <img
                                     v-bind:src="`https://qfan-api.qcloud.asia${item?.attributes?.banner?.data?.attributes?.formats?.small?.url}`"
@@ -46,15 +86,15 @@
                             >
                                 <span>{{ itemChild.children[0].text }}</span>
                             </div>
-                        </div>
-                    </div>
+                        </div> -->
                 </div>
-
-                <EmptyForm v-if="showEmptyFormEvent" />
-                <Toast />
             </div>
+
+            <EmptyForm v-if="showEmptyFormEvent" />
+            <!-- <Toast /> -->
         </div>
     </div>
+    <!-- </div> -->
 </template>
 
 <script>
@@ -97,6 +137,15 @@ export default {
         }
     },
     methods: {
+        extractNumber(text) {
+            const regex = /\d{1,3}(?:,\d{3})*/; // Bổ sung regex để loại bỏ dấu phân tách
+            const match = text?.match(regex);
+            if (match) {
+                return match[0];
+            } else {
+                return "";
+            }
+        },
         async fetchEventData() {
             try {
                 this.loading = true;
@@ -124,16 +173,21 @@ export default {
 
 <style>
 .popup-event {
-    height: 100%;
+    height: calc(100% - 57px);
     position: absolute;
     width: 100%;
-    top: 50%;
+    top: 45%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    /* transform: translate(-50%, -50%); */
     background-color: #0085d2;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); */
     z-index: 999;
     animation: fadeIn 0.1s ease forwards;
+
+    background-image: url("./../../public/assets/event/background-event.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
 }
 
 @keyframes fadeIn {
@@ -153,21 +207,22 @@ export default {
     height: calc(100% - 40px);
 }
 
-.box-content-event {
+/* .box-content-event {
     height: calc(100% - 35px);
-}
+} */
 
-.title-event {
+/* .title-event {
     margin: 10px 0;
     text-shadow: 1px 1px 0 #9f8900, -1px -1px 0 #9f8900, 1px -1px 0 #9f8900,
         -1px 1px 0 #9f8900, 1px 0 0 #9f8900, -1px 0 0 #9f8900, 0 1px 0 #9f8900,
         0 -1px 0 #9f8900;
-}
+} */
 
 .box-desc-event {
-    background: #67bdef;
-    border-radius: 10px;
-    max-height: calc(100% - 75px);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-height: calc(100% - 5px);
     overflow-y: auto;
     animation: fadeInDesc 0.1s ease forwards;
     scrollbar-width: none;
@@ -190,6 +245,50 @@ export default {
 }
 
 .item-event {
+    width: 100%;
+    height: 100%;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    border-radius: 10px;
+}
+.box-content-event {
+    height: calc(100% - 20px);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+}
+.title-item {
+    font-size: 12px;
+    font-family: monospace;
+}
+.box-pool img {
+    margin-left: 3px;
+    width: 15px;
+}
+.text-pool {
+    font-size: 12px;
+}
+.img-pool {
+    display: flex;
+    align-items: center;
+}
+.btn-join-now button {
+    width: auto;
+    border-radius: 10px;
+    font-size: 12px;
+}
+.box-time {
+    font-size: 10px;
+    font-family: monospace;
+    background-color: #000000;
+    padding: 5px;
+    border-radius: 15px;
+    width: max-content;
+}
+/* .item-event {
     display: flex;
     gap: 10px;
     align-items: center;
@@ -201,8 +300,13 @@ export default {
 
 .item-event:last-child {
     border-bottom: none;
-}
+} */
 
+.close-home {
+    position: absolute;
+    top: 1%;
+    right: 1%;
+}
 .close-event {
     cursor: pointer;
     display: flex;
@@ -217,7 +321,7 @@ export default {
     margin-left: 20px;
 }
 
-.item-left-event .item-img {
+/* .item-left-event .item-img {
     display: flex;
 }
 
@@ -234,5 +338,5 @@ export default {
 }
 .desc-item-right-event {
     font-size: 10px;
-}
+} */
 </style>

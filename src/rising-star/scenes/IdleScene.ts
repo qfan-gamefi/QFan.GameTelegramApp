@@ -85,6 +85,9 @@ export class IdleScene extends Scene {
     createPlayer() {
         const player = this.physics.add.sprite(192, 245, DUDE_IDLE);
 
+        player.setBounce(0.2);
+        player.setCollideWorldBounds(true);
+
         this.anims.create({
             key: "right-idle",
             frames: this.anims.generateFrameNumbers(DUDE_IDLE, {
@@ -95,8 +98,6 @@ export class IdleScene extends Scene {
             repeat: -1,
         });
 
-        player.setBounce(0.2);
-        player.setCollideWorldBounds(true);
         return player;
     }
     changeScene() {

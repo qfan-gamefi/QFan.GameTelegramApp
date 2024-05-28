@@ -83,6 +83,10 @@ const userService = {
         const res = await axiosInstance.get(`bootsters?populate=*`);
         return res.data;
     },
+    async getConfiguration() {
+        const res = await axiosInstance.get(`configuration`);
+        return res.data;
+    },
 };
 
 export default userService;

@@ -107,8 +107,8 @@ export default {
             default: false,
         },
         balance: {
-            type: String,
-            default: "",
+            type: Number,
+            default: 0,
         },
         rewardAmount: {
             type: String,
@@ -199,15 +199,12 @@ export default {
 }
 
 .popup-booster {
-    height: 90%;
+    height: calc(100% - 57px);
     position: absolute;
     width: 100%;
-    /* top: 50%; */
-    top: 45%;
-    left: 50%;
-    /* transform: translate(-50%, -50%); */
+    top: 0;
     z-index: 999;
-    animation: fadeIn 0.1s ease forwards;
+    animation: fadeInBooster 0.1s ease forwards;
 
     background-image: url("./../../public/assets/booster/background-booster.png");
     background-position: center;
@@ -215,7 +212,7 @@ export default {
     background-size: cover;
 }
 
-@keyframes fadeIn {
+@keyframes fadeInBooster {
     0% {
         opacity: 0;
         transform: translate(-50%, -50%) scale(0.5);
@@ -223,24 +220,24 @@ export default {
 
     100% {
         opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
+        transform: translate(0%, 0%) scale(1);
     }
 }
 
 .box-booster {
-    padding: 0 20px;
-    height: calc(100% - 25px);
+    padding: 20px;
+    height: calc(100% - 40px);
 }
 
 .box-content-booster {
-    height: calc(100% - 35px);
+    height: 100%;
     color: #fff;
     animation: fadeInDesc 0.1s ease forwards;
 }
 @keyframes fadeInDesc {
     0% {
         opacity: 0;
-        transform: translate(50%, 50%) scale(0.5);
+        transform: translate(-50%, -50%) scale(0.5);
     }
 
     100% {
@@ -260,7 +257,6 @@ export default {
 } */
 
 .your-balance {
-    margin-top: 15px;
     background-color: #00256c;
     border-radius: 15px;
     text-align: center;

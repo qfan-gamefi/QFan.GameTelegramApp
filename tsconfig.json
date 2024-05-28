@@ -1,11 +1,22 @@
 {
-  "files": [],
-  "references": [
-    {
-      "path": "./tsconfig.node.json"
+    "files": [],
+    "references": [
+        {
+            "path": "./tsconfig.node.json"
+        },
+        {
+            "path": "./tsconfig.app.json"
+        }
+    ],
+    "compilerOptions": {
+        "allowJs": true,
+        "noImplicitAny": false
     },
-    {
-      "path": "./tsconfig.app.json"
-    }
-  ]
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "src/**/*.vue",
+        "tests/**/*.ts",
+        "tests/**/*.tsx"
+    ]
 }

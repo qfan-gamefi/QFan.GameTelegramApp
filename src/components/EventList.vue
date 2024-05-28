@@ -178,7 +178,7 @@ export default {
     width: 100%;
     top: 0%;
     z-index: 999;
-    animation: fadeIn 0.1s ease forwards;
+    animation: fadeInEvent 0.1s ease forwards;
 
     background-image: url("./../../public/assets/event/background-event.png");
     background-position: center;
@@ -186,15 +186,15 @@ export default {
     background-size: cover;
 }
 
-@keyframes fadeIn {
+@keyframes fadeInEvent {
     0% {
         opacity: 0;
-        transform: translate(50%, 50%) scale(0.5);
+        transform: translate(-50%, -50%) scale(0.5);
     }
 
     100% {
         opacity: 1;
-        transform: translate(-0%, -0%) scale(1);
+        transform: translate(0%, 0%) scale(1);
     }
 }
 

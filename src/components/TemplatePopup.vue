@@ -6,7 +6,13 @@
             </div>
 
             <Loading :loading="loading" />
-            <component :is="contentComponent"></component>
+
+            <component
+                :is="contentComponent"
+                v-bind="contentProps"
+                v-on="contentEvents"
+            ></component>
+
             <EmptyForm v-if="showEmptyFormEvent" />
         </div>
     </div>
@@ -23,6 +29,14 @@ export default {
             type: [Object, Function],
             required: true,
         },
+        contentProps: {
+            type: Object,
+            default: () => ({}),
+        },
+        contentEvents: {
+            type: Object,
+            default: () => ({}),
+        },
     },
 };
 </script>
@@ -32,8 +46,7 @@ export default {
     height: calc(100% - 57px);
     position: absolute;
     width: 100%;
-    top: 45%;
-    left: 50%;
+    top: 0%;
     z-index: 999;
     animation: fadeInTemplate 0.1s ease forwards;
 
@@ -46,12 +59,12 @@ export default {
 @keyframes fadeInTemplate {
     0% {
         opacity: 0;
-        transform: translate(-50%, -50%) scale(0.5);
+        transform: translate(50%, 50%) scale(0.5);
     }
 
     100% {
         opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
+        transform: translate(0%, 0%) scale(1);
     }
 }
 

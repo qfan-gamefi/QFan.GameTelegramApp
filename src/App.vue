@@ -55,8 +55,8 @@ export default {
             // telegram_bot_link:
             //     telegram_bot_link +
             //         window.Telegram.WebApp.initDataUnsafe.user?.id || "",
-            idUser: "2123800227",
-            telegram_bot_link: telegram_bot_link + 2123800227 || "",
+            idUser: "1927324767",
+            telegram_bot_link: telegram_bot_link + 1927324767 || "",
 
             showCoomingSoon: false,
             isCopiedToClipboard: false,
@@ -94,6 +94,13 @@ export default {
                 "--pseudo-width": `${this.apiDataWidth}%`,
             };
         },
+        // contentEventHandlers() {
+        //     return {
+        //         close: this.closeEvent,
+        //         invite: this.handleEvent,
+        //         openCoomSoon: this.showPopupCoomingSoon,
+        //     };
+        // },
     },
     methods: {
         copyToClipboard() {
@@ -346,45 +353,43 @@ export default {
             }
         },
 
-        handleReferal() {
-            this.showMission = false;
-            this.showEvent = false;
-            this.showBooster = false;
-            this.activeButton = "invite";
-            this.showInvite = true;
-        },
-        async closeInvite() {
-            this.activeButton = "";
-            this.showInvite = false;
-            await this.getInfoUser();
-        },
-        closeBooster() {
-            this.activeButton = "";
-            this.showBooster = false;
-        },
-        handleInvite() {
+        handleCopy() {
             this.copyToClipboard();
         },
-        handleBooster() {
-            this.showMission = false;
-            this.showEvent = false;
-            this.showInvite = false;
-            this.activeButton = "booster";
-            this.showBooster = true;
-        },
-        handleMission() {
-            this.showEvent = false;
-            this.showBooster = false;
-            this.showInvite = false;
-            this.activeButton = "mission";
-            this.showMission = true;
-        },
-        handleEvent() {
-            this.showMission = false;
-            this.showBooster = false;
-            this.showInvite = false;
-            this.activeButton = "event";
-            this.showEvent = true;
+
+        handleButtonTab(tab) {
+            const tabMappings = {
+                mission: {
+                    showEvent: false,
+                    showBooster: false,
+                    showInvite: false,
+                    activeButton: "mission",
+                    showMission: true,
+                },
+                event: {
+                    showMission: false,
+                    showBooster: false,
+                    showInvite: false,
+                    activeButton: "event",
+                    showEvent: true,
+                },
+                booster: {
+                    showMission: false,
+                    showEvent: false,
+                    showInvite: false,
+                    activeButton: "booster",
+                    showBooster: true,
+                },
+                invite: {
+                    showMission: false,
+                    showEvent: false,
+                    showBooster: false,
+                    activeButton: "invite",
+                    showInvite: true,
+                },
+            };
+
+            Object.assign(this, tabMappings[tab]);
         },
         async closeMission() {
             this.activeButton = "";
@@ -395,6 +400,15 @@ export default {
             this.activeButton = "";
             this.showEvent = false;
             await this.getInfoUser();
+        },
+        async closeInvite() {
+            this.activeButton = "";
+            this.showInvite = false;
+            await this.getInfoUser();
+        },
+        closeBooster() {
+            this.activeButton = "";
+            this.showBooster = false;
         },
     },
     async mounted() {
@@ -483,7 +497,11 @@ export default {
         </div>
 
         <div class="box-button">
-            <div class="btn-item" @click="handleMission">
+            <div
+                class="btn-item"
+                @click="handleButtonTab('mission')"
+                :class="{ active: activeButton === 'mission' }"
+            >
                 <div class="item-img">
                     <img src="./../public/assets/button-icons/mission.svg" />
                 </div>
@@ -491,7 +509,7 @@ export default {
             </div>
             <div
                 class="btn-item"
-                @click="handleEvent"
+                @click="handleButtonTab('event')"
                 :class="{ active: activeButton === 'event' }"
             >
                 <div class="item-img">
@@ -501,7 +519,7 @@ export default {
             </div>
             <div
                 class="btn-item"
-                @click="handleBooster"
+                @click="handleButtonTab('booster')"
                 :class="{ active: activeButton === 'booster' }"
             >
                 <div class="item-img">
@@ -514,7 +532,11 @@ export default {
                     Booster
                 </div>
             </div>
-            <div class="btn-item" @click="handleReferal">
+            <div
+                class="btn-item"
+                @click="handleButtonTab('invite')"
+                :class="{ active: activeButton === 'invite' }"
+            >
                 <div class="item-img">
                     <img
                         src="./../public/assets/button-icons/invite-friend.svg"
@@ -557,29 +579,37 @@ export default {
         <MissionList
             :visible="showMission"
             @close="closeMission"
-            @invite="handleMission"
+            @invite="handleButtonTab('mission')"
             :idUser="idUser"
         />
 
         <EventList
             :visible="showEvent"
             @close="closeEvent"
-            @invite="handleEvent"
+            @invite="handleButtonTab('event')"
             :idUser="idUser"
             @openCoomSoon="showPopupCoomingSoon"
         />
+        <!-- <TemplatePopup
+            :visible="showEvent"
+            :contentComponent="EventList"
+            :contentProps="{ idUser: idUser, visible: showEvent }"
+            :contentEvents="contentEventHandlers"
+            @close="closeEvent"
+        /> -->
 
         <InviteFrens
             :visible="showInvite"
             @close="closeInvite"
-            @invite="handleInvite"
+            @invite="handleCopy"
             :idUser="idUser"
+            :rewardAmount="dataQPoint.rewardAmount"
         />
 
         <BoosterForm
             :visible="showBooster"
             @close="closeBooster"
-            @invite="handleBooster"
+            @invite="handleButtonTab('booster')"
             :balance="dataQPoint.balance"
             :rewardAmount="dataQPoint.rewardAmount"
             :rewardScheduleHour="dataQPoint.rewardScheduleHour"

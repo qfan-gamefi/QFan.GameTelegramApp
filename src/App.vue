@@ -51,12 +51,11 @@ export default {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            // idUser: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
-            // telegram_bot_link:
-            //     telegram_bot_link +
-            //         window.Telegram.WebApp.initDataUnsafe.user?.id || "",
-            idUser: "1927324767",
-            telegram_bot_link: telegram_bot_link + 1927324767 || "",
+            idUser: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
+            telegram_bot_link:
+                telegram_bot_link +
+                window.Telegram.WebApp.initDataUnsafe.user?.id || "",
+
 
             showCoomingSoon: false,
             isCopiedToClipboard: false,
@@ -276,10 +275,10 @@ export default {
         async updateSence() {
             const phaserRef: any = this.$refs.phaserRef as
                 | {
-                      scene?: {
-                          changeScene: () => void;
-                      };
-                  }
+                    scene?: {
+                        changeScene: () => void;
+                    };
+                }
                 | undefined;
             const scene = toRaw(phaserRef?.scene);
             const givenDateTimeString = this.dataQPoint.nextTakeRewardTime;
@@ -459,10 +458,7 @@ export default {
             </div>
 
             <div class="link-checkin">
-                <a
-                    v-bind:href="`https://qfan-dapp.qcloud.asia/?playerId=${idUser}`"
-                    target="'_blank"
-                >
+                <a v-bind:href="`https://qfan-dapp.qcloud.asia/?playerId=${idUser}`" target="'_blank">
                     <button>
                         <i class="fa-solid fa-calendar-days"></i> Checkin
                     </button>
@@ -482,11 +478,7 @@ export default {
                     </div>
 
                     <div class="box-right">
-                        <button
-                            class="btn-commit_reward"
-                            @click="handleReward"
-                            :disabled="isCountingDown"
-                        >
+                        <button class="btn-commit_reward" @click="handleReward" :disabled="isCountingDown">
                             {{ isClaim ? "Claim" : "Train" }}
                         </button>
                     </div>
@@ -497,50 +489,29 @@ export default {
         </div>
 
         <div class="box-button">
-            <div
-                class="btn-item"
-                @click="handleButtonTab('mission')"
-                :class="{ active: activeButton === 'mission' }"
-            >
+            <div class="btn-item" @click="handleButtonTab('mission')" :class="{ active: activeButton === 'mission' }">
                 <div class="item-img">
                     <img src="./../public/assets/button-icons/mission.svg" />
                 </div>
                 <div class="item-title">Mission</div>
             </div>
-            <div
-                class="btn-item"
-                @click="handleButtonTab('event')"
-                :class="{ active: activeButton === 'event' }"
-            >
+            <div class="btn-item" @click="handleButtonTab('event')" :class="{ active: activeButton === 'event' }">
                 <div class="item-img">
                     <img src="./../public/assets/button-icons/event.svg" />
                 </div>
                 <div class="item-title">Event</div>
             </div>
-            <div
-                class="btn-item"
-                @click="handleButtonTab('booster')"
-                :class="{ active: activeButton === 'booster' }"
-            >
+            <div class="btn-item" @click="handleButtonTab('booster')" :class="{ active: activeButton === 'booster' }">
                 <div class="item-img">
                     <img src="./../public/assets/button-icons/booster.svg" />
                 </div>
-                <div
-                    class="item-title"
-                    :class="{ active: activeButton === 'booster' }"
-                >
+                <div class="item-title" :class="{ active: activeButton === 'booster' }">
                     Booster
                 </div>
             </div>
-            <div
-                class="btn-item"
-                @click="handleButtonTab('invite')"
-                :class="{ active: activeButton === 'invite' }"
-            >
+            <div class="btn-item" @click="handleButtonTab('invite')" :class="{ active: activeButton === 'invite' }">
                 <div class="item-img">
-                    <img
-                        src="./../public/assets/button-icons/invite-friend.svg"
-                    />
+                    <img src="./../public/assets/button-icons/invite-friend.svg" />
                 </div>
                 <div class="item-title">Invite Friend</div>
             </div>
@@ -557,15 +528,8 @@ export default {
             <div class="popup-referer-code">
                 <div class="referer-code">Referer code</div>
                 <form @submit.prevent="submitCode">
-                    <input
-                        class="code-input"
-                        :class="{ 'input-error': errorMessage }"
-                        type="text"
-                        v-model="code"
-                        id="code"
-                        @input="clearError"
-                        placeholder="Enter code"
-                    />
+                    <input class="code-input" :class="{ 'input-error': errorMessage }" type="text" v-model="code"
+                        id="code" @input="clearError" placeholder="Enter code" />
                     <div v-if="errorMessage" class="text-err-code">
                         {{ errorMessage }}
                     </div>
@@ -576,20 +540,11 @@ export default {
             </div>
         </div>
 
-        <MissionList
-            :visible="showMission"
-            @close="closeMission"
-            @invite="handleButtonTab('mission')"
-            :idUser="idUser"
-        />
+        <MissionList :visible="showMission" @close="closeMission" @invite="handleButtonTab('mission')"
+            :idUser="idUser" />
 
-        <EventList
-            :visible="showEvent"
-            @close="closeEvent"
-            @invite="handleButtonTab('event')"
-            :idUser="idUser"
-            @openCoomSoon="showPopupCoomingSoon"
-        />
+        <EventList :visible="showEvent" @close="closeEvent" @invite="handleButtonTab('event')" :idUser="idUser"
+            @openCoomSoon="showPopupCoomingSoon" />
         <!-- <TemplatePopup
             :visible="showEvent"
             :contentComponent="EventList"
@@ -598,30 +553,17 @@ export default {
             @close="closeEvent"
         /> -->
 
-        <InviteFrens
-            :visible="showInvite"
-            @close="closeInvite"
-            @invite="handleCopy"
-            :idUser="idUser"
-            :rewardAmount="dataQPoint.rewardAmount"
-        />
+        <InviteFrens :visible="showInvite" @close="closeInvite" @invite="handleCopy" :idUser="idUser"
+            :rewardAmount="dataQPoint.rewardAmount" />
 
-        <BoosterForm
-            :visible="showBooster"
-            @close="closeBooster"
-            @invite="handleButtonTab('booster')"
-            :balance="dataQPoint.balance"
-            :rewardAmount="dataQPoint.rewardAmount"
-            :rewardScheduleHour="dataQPoint.rewardScheduleHour"
-        />
+        <BoosterForm :visible="showBooster" @close="closeBooster" @invite="handleButtonTab('booster')"
+            :balance="dataQPoint.balance" :rewardAmount="dataQPoint.rewardAmount"
+            :rewardScheduleHour="dataQPoint.rewardScheduleHour" />
 
-        <div
-            :class="[
-                'popup-cooming-soon',
-                { 'closing-popup': !showCoomingSoon },
-            ]"
-            v-if="showCoomingSoon"
-        >
+        <div :class="[
+            'popup-cooming-soon',
+            { 'closing-popup': !showCoomingSoon },
+        ]" v-if="showCoomingSoon">
             <p>Coming soon</p>
             <button @click="hidePopupCoomingSoon" class="btn-close-coming-soon">
                 Close

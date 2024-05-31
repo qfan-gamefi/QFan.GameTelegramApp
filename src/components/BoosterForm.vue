@@ -16,7 +16,8 @@
                         }}<img src="./../../public/assets/logo.svg" />
                     </div>
                     <div class="desc-your-balance">
-                        Mining Speed: {{ rewardAmount }}  <img src="./../../public/assets/logo.svg" />/hour
+                        Mining Speed: {{ rewardAmount }}
+                        <img src="./../../public/assets/logo.svg" />/hour
                     </div>
                 </div>
 
@@ -219,7 +220,7 @@ export default {
 
                 if (res?.data?.length === 0) {
                     this.stadiumItems = toRaw(this.stadiumItems)?.find(
-                        (el) => el?.attributes?.applyLevel === 1
+                        (el) => el?.attributes?.applyLevel === 0
                     );
                 } else {
                     const dataStadiumCurrent = res?.data?.find(

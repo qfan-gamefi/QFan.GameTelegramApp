@@ -51,12 +51,12 @@ export default {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            // idUser: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
-            // telegram_bot_link:
-            //     telegram_bot_link +
-            //         window.Telegram.WebApp.initDataUnsafe.user?.id || "",
-            idUser: "1927324767",
-            telegram_bot_link: telegram_bot_link + 1927324767 || "",
+            idUser: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
+            telegram_bot_link:
+                telegram_bot_link +
+                    window.Telegram.WebApp.initDataUnsafe.user?.id || "",
+            // idUser: "1927324767",
+            // telegram_bot_link: telegram_bot_link + 1927324767 || "",
 
             showCoomingSoon: false,
             isCopiedToClipboard: false,
@@ -479,12 +479,17 @@ export default {
             <div class="wrap-commit_reward" :style="beforeStyle">
                 <div class="box-info">
                     <div v-if="isClaim" class="box-left-train">
-                        Click "Claim" to take +{{ dataQPoint?.rewardAmount *  dataQPoint?.rewardScheduleHour}}
+                        Click "Claim" to take +{{
+                            dataQPoint?.rewardAmount *
+                            dataQPoint?.rewardScheduleHour
+                        }}
                         <img src="./../public/assets/logo.svg" />
                     </div>
 
                     <div v-else class="box-left">
-                        <div class="content">Remain [{{ countdown }}] to claim</div>
+                        <div class="content">
+                            Remain [{{ countdown }}] to claim
+                        </div>
                     </div>
 
                     <div class="box-right">

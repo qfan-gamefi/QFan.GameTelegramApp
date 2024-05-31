@@ -50,12 +50,12 @@ export default {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            idUser: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
-            telegram_bot_link:
-                telegram_bot_link +
-                    window.Telegram.WebApp.initDataUnsafe.user?.id || "",
-            // idUser: "2123800227",
-            // telegram_bot_link: telegram_bot_link + 2123800227 || "",
+            // idUser: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
+            // telegram_bot_link:
+            //     telegram_bot_link +
+            //         window.Telegram.WebApp.initDataUnsafe.user?.id || "",
+            idUser: "2123800227",
+            telegram_bot_link: telegram_bot_link + 2123800227 || "",
 
             showCoomingSoon: false,
             isCopiedToClipboard: false,
@@ -355,15 +355,14 @@ export default {
 
         handleButtonTab(tab) {
             if (this.showMission) {
-                Telegram.WebApp.ready();
+                // Telegram.WebApp.ready();
                 // Telegram.WebApp.setHeaderColor("bg_color", "#ffffff");
                 Telegram.WebApp.BackButton.show();
                 Telegram.WebApp.BackButton.onClick(() => {
-                    this.$emit("close");
+                    // this.$emit("close");
+                    this.activeButton = "";
+                    this.showMission = false;
                 });
-
-                this.activeButton = "";
-                this.showMission = false;
             }
             EventBus.emit("close-detail-event");
             if (tab !== "booster") {
@@ -425,6 +424,8 @@ export default {
         },
     },
     async mounted() {
+        Telegram.WebApp.ready();
+        Telegram.WebApp.setHeaderColor("ffffff");
         await this.getInfoUser();
         // await this.countdownFunc();
     },

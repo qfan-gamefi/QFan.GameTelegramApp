@@ -113,12 +113,12 @@ export default {
             await this.fetchMissionData();
             await this.fetchListMissionReward();
         }
-        Telegram.WebApp.ready();
-        Telegram.WebApp.setHeaderColor("bg_color", "#ffffff");
-        Telegram.WebApp.BackButton.show();
-        Telegram.WebApp.BackButton.onClick(() => {
-            this.$emit("close");
-        });
+        // Telegram.WebApp.ready();
+        // Telegram.WebApp.setHeaderColor("bg_color", "#ffffff");
+        // Telegram.WebApp.BackButton.show();
+        // Telegram.WebApp.BackButton.onClick(() => {
+        //     this.$emit("close");
+        // });
     },
     methods: {
         openInIframe(url) {

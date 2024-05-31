@@ -12,8 +12,8 @@
                 <div class="your-balance">
                     <div class="title-your-balance">Your Balance</div>
                     <div class="point-balance t-primary-color">
-                        {{ animatedBalance
-                        }}<img src="./../../public/assets/logo.svg" />
+                        {{ animatedBalance }}
+                        <img src="./../../public/assets/logo.svg" />
                     </div>
                     <div class="desc-your-balance">
                         Mining Speed: {{ rewardAmount }}
@@ -127,10 +127,7 @@ export default {
             type: Boolean,
             default: false,
         },
-        rewardAmount: {
-            type: String,
-            default: "",
-        },
+
         rewardScheduleHour: {
             type: Number,
             default: 0,
@@ -156,15 +153,16 @@ export default {
             isMax: false,
             typeBooster: "SPEED",
             animatedBalance: 0,
+            rewardAmount: 0,
         };
     },
     watch: {
         async visible(newVal) {
             if (newVal) {
+                await this.getInfoUser();
                 await this.fetchListData();
                 await this.fetchBoosterTransaction();
                 await this.fetchBoosterAmount();
-                await this.getInfoUser();
             }
         },
     },
@@ -182,6 +180,9 @@ export default {
                 const resData = data?.data?.[0];
                 this.animatedBalance = Number(
                     resData.attributes?.qpoint?.data?.attributes?.balance
+                );
+                this.rewardAmount = Number(
+                    resData.attributes?.qpoint?.data?.attributes?.rewardAmount
                 );
             } catch (error) {
                 console.log(error);
@@ -220,7 +221,7 @@ export default {
 
                 if (res?.data?.length === 0) {
                     this.stadiumItems = toRaw(this.stadiumItems)?.find(
-                        (el) => el?.attributes?.applyLevel === 0
+                        (el) => el?.attributes?.applyLevel === 1
                     );
                 } else {
                     const dataStadiumCurrent = res?.data?.find(
@@ -232,7 +233,7 @@ export default {
                             dataStadiumCurrent?.attributes?.booster?.data;
                     } else {
                         this.stadiumItems = toRaw(this.stadiumItems)?.find(
-                            (el) => el?.attributes?.applyLevel === 0
+                            (el) => el?.attributes?.applyLevel === 1
                         );
                     }
                 }
@@ -249,7 +250,7 @@ export default {
 
                 if (res?.data?.length === 0) {
                     this.trainingItems = toRaw(this.trainingItems)?.find(
-                        (el) => el?.attributes?.applyLevel === 0
+                        (el) => el?.attributes?.applyLevel === 1
                     );
                 } else {
                     const dataTrainingCurrent = res?.data?.find(
@@ -260,7 +261,7 @@ export default {
                             dataTrainingCurrent?.attributes?.booster?.data;
                     } else {
                         this.trainingItems = toRaw(this.trainingItems)?.find(
-                            (el) => el?.attributes?.applyLevel === 0
+                            (el) => el?.attributes?.applyLevel === 1
                         );
                     }
                 }
@@ -329,10 +330,10 @@ export default {
         async closeStadium() {
             this.isShowStadium = false;
             this.isShowTraining = false;
+            await this.getInfoUser();
             await this.fetchListData();
             await this.fetchBoosterTransaction();
             await this.fetchBoosterAmount();
-            await this.getInfoUser();
         },
     },
     computed: {

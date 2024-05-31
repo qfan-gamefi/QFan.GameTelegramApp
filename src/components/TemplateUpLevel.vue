@@ -37,7 +37,8 @@
                         </div>
                         <div class="content-lv" v-if="typeBooster === 'AMOUNT'">
                             Speed {{ dataNext?.attributes?.applyQtty }}
-                            <img src="./../../public/assets/logo.svg" /> per hour
+                            <img src="./../../public/assets/logo.svg" /> per
+                            hour
                         </div>
                     </div>
                 </div>
@@ -72,8 +73,9 @@
                             {{ items?.attributes?.applyQtty }} hour
                         </div>
                         <div class="content-lv" v-if="typeBooster === 'AMOUNT'">
-                           Speed {{ items?.attributes?.applyQtty }}
-                            <img src="./../../public/assets/logo.svg" /> per hour
+                            Speed {{ items?.attributes?.applyQtty }}
+                            <img src="./../../public/assets/logo.svg" /> per
+                            hour
                         </div>
                     </div>
                 </div>
@@ -170,16 +172,12 @@ export default {
     },
     methods: {
         async handleUplevel() {
+            // this.showSuccessNotification();
             try {
                 this.loading = true;
-                const response = await userService.postUplevel(
-                    this.idUser,
-                    this.typeBooster
-                );
-                if (response) {
-                    this.showSuccessNotification();
-                    this.$emit("close");
-                }
+                await userService.postUplevel(this.idUser, this.typeBooster);
+                await this.showSuccessNotification();
+                await this.$emit("close");
             } catch (error) {
                 this.showErrorNotification();
                 this.loading = false;

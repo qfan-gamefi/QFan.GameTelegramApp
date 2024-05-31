@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Telegram from "vue-tg";
 import MainGame from "./rising-star/MainGame.vue";
 // import Phaser from "phaser";
 import { ref, toRaw, onMounted } from "vue";
@@ -55,8 +54,8 @@ export default {
             telegram_bot_link:
                 telegram_bot_link +
                     window.Telegram.WebApp.initDataUnsafe.user?.id || "",
-            // idUser: "1927324767",
-            // telegram_bot_link: telegram_bot_link + 1927324767 || "",
+            // idUser: "2123800227",
+            // telegram_bot_link: telegram_bot_link + 2123800227 || "",
 
             showCoomingSoon: false,
             isCopiedToClipboard: false,
@@ -264,7 +263,6 @@ export default {
                 const res = await userService.takeReward(this.idUser!);
                 if (res) {
                     await this.getInfoUser();
-                    // await this.countdownFunc();
                     await this.updateSence();
                 }
             } catch (error) {
@@ -308,14 +306,11 @@ export default {
                 scene?.scene?.key == "IdleScene" &&
                 differenceInMilliseconds < 0
             ) {
-                // this.isClaim = false;
                 scene.changeScene();
-                // await this.countdownFunc();
             } else if (
                 scene?.scene?.key == "MainScene" &&
                 differenceInMilliseconds > 0
             ) {
-                // this.isClaim = true;
                 scene.changeScene();
             }
         },
@@ -324,7 +319,7 @@ export default {
             return value < 10 ? "0" + value : value;
         },
         countdownFunc() {
-            const nextTime = this.dataQPoint.rewardScheduleHour;
+            const nextTime = this.dataQPoint?.rewardScheduleHour;
             const totalTime = nextTime * 60 * 60 * 1000;
 
             const rewardTime = new Date(
@@ -359,6 +354,17 @@ export default {
         },
 
         handleButtonTab(tab) {
+            if (this.showMission) {
+                Telegram.WebApp.ready();
+                // Telegram.WebApp.setHeaderColor("bg_color", "#ffffff");
+                Telegram.WebApp.BackButton.show();
+                Telegram.WebApp.BackButton.onClick(() => {
+                    this.$emit("close");
+                });
+
+                this.activeButton = "";
+                this.showMission = false;
+            }
             EventBus.emit("close-detail-event");
             if (tab !== "booster") {
                 EventBus.emit("close-stadium");
@@ -480,7 +486,7 @@ export default {
                 <div class="box-info">
                     <div v-if="isClaim" class="box-left-train">
                         Click "Claim" to take +{{
-                            dataQPoint?.rewardAmount *
+                            Number(dataQPoint?.rewardAmount) *
                             dataQPoint?.rewardScheduleHour
                         }}
                         <img src="./../public/assets/logo.svg" />
@@ -612,7 +618,6 @@ export default {
         <BoosterForm
             :visible="showBooster"
             @close="closeBooster"
-            :rewardAmount="dataQPoint.rewardAmount"
             :rewardScheduleHour="dataQPoint.rewardScheduleHour"
             :idUser="idUser"
         />

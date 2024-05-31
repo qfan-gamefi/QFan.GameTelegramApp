@@ -1,24 +1,14 @@
 <template>
     <div class="popup-event" v-if="visible">
         <div class="box-event">
-            <!-- <div @click="$emit('close')" class="close-event">
-                <img src="./../../public/assets/back.svg" />
-                Back
-            </div> -->
             <div @click="$emit('close')" class="close-home">
-                <i class="fa-solid fa-xmark"></i>
+                <i class="fa-solid fa-rectangle-xmark"></i>
             </div>
-
-            <!-- <div class="box-content-event"> -->
-            <!-- <div class="title-event">Events</div> -->
 
             <Loading :loading="loading" />
 
-            <div
-                class="box-desc-event"
-                v-if="!loading"
-                @click="$emit('openCoomSoon')"
-            >
+            <div class="box-desc-event" v-if="!loading">
+                <!--  @click="$emit('openCoomSoon')" -->
                 <div
                     class="item-event"
                     v-for="(item, index) in eventData"
@@ -46,7 +36,7 @@
                             </div>
                         </div>
                         <div class="btn-join-now">
-                            <button>Join Now</button>
+                            <button @click="handleJoin(item)">Join Now</button>
                         </div>
                         <div class="box-time">
                             <span
@@ -60,46 +50,25 @@
                             >
                         </div>
                     </div>
-
-                    <!-- <div class="item-left-event">
-                            <div class="item-img">
-                                <img
-                                    v-bind:src="`https://qfan-api.qcloud.asia${item?.attributes?.banner?.data?.attributes?.formats?.small?.url}`"
-                                />
-                            </div>
-                        </div>
-
-                        <div class="item-right-event">
-                            <div class="title-item-right-event">
-                                {{ item?.attributes?.title }}
-                            </div>
-
-                            <div class="desc-item-right-event">
-                                {{ item?.attributes?.description }}
-                            </div>
-
-                            <div
-                                class="desc-item-right-event"
-                                v-for="(itemChild, indexChild) in item
-                                    ?.attributes?.content"
-                                :key="indexChild"
-                            >
-                                <span>{{ itemChild.children[0].text }}</span>
-                            </div>
-                        </div> -->
                 </div>
             </div>
 
+            <DetailEvent
+                :isDetailEvent="isJoinNow"
+                :detailEvent="detailEvent"
+                @close="isJoinNow = false"
+            />
+
             <EmptyForm v-if="showEmptyFormEvent" />
-            <!-- <Toast /> -->
         </div>
     </div>
-    <!-- </div> -->
 </template>
 
 <script>
 import userService from "../services/userService";
 import Loading from "./LoadingForm.vue";
+import DetailEvent from "./DetailEvent.vue";
+import EventBus from "./../utils/eventBus";
 
 export default {
     props: {
@@ -110,11 +79,21 @@ export default {
     },
     components: {
         Loading,
+        DetailEvent,
+    },
+    async mounted() {
+        EventBus.on("close-detail-event", this.closeDetailEvent);
+        if (this.visible) {
+            await this.fetchEventData();
+        }
     },
     created() {
         if (this.visible) {
             this.fetchEventData();
         }
+    },
+    beforeUnmount() {
+        EventBus.off("close-detail-event", this.closeDetailEvent);
     },
     data() {
         return {
@@ -122,6 +101,8 @@ export default {
             eventData: null,
             buttonText: [],
             loadingBtn: [],
+            isJoinNow: false,
+            detailEvent: null,
         };
     },
     watch: {
@@ -131,14 +112,10 @@ export default {
             }
         },
     },
-    async mounted() {
-        if (this.visible) {
-            await this.fetchEventData();
-        }
-    },
+
     methods: {
         extractNumber(text) {
-            const regex = /\d{1,3}(?:,\d{3})*/; // Bổ sung regex để loại bỏ dấu phân tách
+            const regex = /\d{1,3}(?:,\d{3})*/;
             const match = text?.match(regex);
             if (match) {
                 return match[0];
@@ -157,10 +134,15 @@ export default {
             } catch (error) {
                 this.eventData = [];
             } finally {
-                setTimeout(() => {
-                    this.loading = false;
-                }, 300);
+                this.loading = false;
             }
+        },
+        handleJoin(item) {
+            this.detailEvent = item;
+            this.isJoinNow = true;
+        },
+        closeDetailEvent() {
+            this.isJoinNow = false;
         },
     },
     computed: {
@@ -173,13 +155,13 @@ export default {
 
 <style>
 .popup-event {
-    height: calc(100% - 57px);
+    height: calc(100% - 56px);
     position: absolute;
     width: 100%;
     top: 0%;
     z-index: 999;
     animation: fadeInEvent 0.1s ease forwards;
-
+    color: #fff;
     background-image: url("./../../public/assets/event/background-event.png");
     background-position: center;
     background-repeat: no-repeat;
@@ -202,17 +184,6 @@ export default {
     padding: 20px;
     height: calc(100% - 40px);
 }
-
-/* .box-content-event {
-    height: calc(100% - 35px);
-} */
-
-/* .title-event {
-    margin: 10px 0;
-    text-shadow: 1px 1px 0 #9f8900, -1px -1px 0 #9f8900, 1px -1px 0 #9f8900,
-        -1px 1px 0 #9f8900, 1px 0 0 #9f8900, -1px 0 0 #9f8900, 0 1px 0 #9f8900,
-        0 -1px 0 #9f8900;
-} */
 
 .box-desc-event {
     display: flex;
@@ -284,55 +255,10 @@ export default {
     border-radius: 15px;
     width: max-content;
 }
-/* .item-event {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    padding: 10px;
-    font-size: 12px;
-    font-family: monospace;
-    border-bottom: 1px solid #ccc;
-}
-
-.item-event:last-child {
-    border-bottom: none;
-} */
 
 .close-home {
     position: absolute;
     top: 1%;
-    right: 1%;
+    right: 2%;
 }
-.close-event {
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    font-size: 13px;
-    border-bottom: 1px solid #fff;
-    padding-bottom: 20px;
-    margin: 0 -20px;
-}
-
-.close-event img {
-    margin-left: 20px;
-}
-
-/* .item-left-event .item-img {
-    display: flex;
-}
-
-.item-left-event .item-img img {
-    width: 50px;
-    height: 50px;
-    border-radius: 5px;
-}
-.item-right-event {
-    font-weight: bolder;
-}
-.title-item-right-event {
-    font-size: 13px;
-}
-.desc-item-right-event {
-    font-size: 10px;
-} */
 </style>

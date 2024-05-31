@@ -170,15 +170,15 @@ export class MainScene extends Scene {
             this.cameras.main.height / 2
         );
         // this.field.width *  scale
-        const screenHeight = this.scale.height;
-        const platformY = screenHeight - 80;
+        // const screenHeight = this.scale.height;
+        // const platformY = screenHeight - 80;
 
         this.field = this.add.tileSprite(
             0,
             445,
             MAX_FIELD_WIDTH,
-            MAX_FIELD_HEIGHT
-            // FIELD
+            MAX_FIELD_HEIGHT,
+            FIELD
         );
         this.field.setScale((384 * 4) / MAX_FIELD_WIDTH, 84 / MAX_FIELD_HEIGHT);
 
@@ -187,7 +187,7 @@ export class MainScene extends Scene {
 
         // this.add.image(400, 300, SKY_TEXT);468
         this.platforms
-            .create(192, platformY, "ground") //500
+            .create(192, 500, "ground") //500
             .setScale(2)
             .refreshBody();
         this.platforms.setAlpha(0);

@@ -64,15 +64,12 @@ export class IdleScene extends Scene {
             this.cameras.main.height / 2
         );
 
-        const screenHeight = this.scale.height;
-        const platformY = screenHeight - 80; //500
+        // const screenHeight = this.scale.height;
+        // const platformY = screenHeight - 80; //500
 
         this.cursors = this.input.keyboard?.createCursorKeys();
         this.platforms = this.physics.add.staticGroup();
-        this.platforms
-            .create(192, platformY, "ground")
-            .setScale(2)
-            .refreshBody();
+        this.platforms.create(192, 500, "ground").setScale(2).refreshBody();
         this.platforms.setAlpha(0);
         // this.add.image(400, 300, SKY_TEXT);
         // this.platforms.create(192, 468, "ground").setScale(2).refreshBody();

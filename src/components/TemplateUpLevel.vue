@@ -176,8 +176,8 @@ export default {
             try {
                 this.loading = true;
                 await userService.postUplevel(this.idUser, this.typeBooster);
-                await this.showSuccessNotification();
-                await this.$emit("close");
+                this.showSuccessNotification();
+                this.$emit("close");
             } catch (error) {
                 this.showErrorNotification();
                 this.loading = false;

@@ -6,7 +6,7 @@
                 Back
             </div> -->
             <div @click="$emit('close')" class="close-home">
-                <i class="fa-solid fa-xmark"></i>
+                <i class="fa-solid fa-rectangle-xmark"></i>
             </div>
 
             <div class="friend-info">
@@ -138,9 +138,7 @@ export default {
             } catch (error) {
                 this.inviteData = [];
             } finally {
-                setTimeout(() => {
-                    this.loading = false;
-                }, 300);
+                this.loading = false;
             }
         },
         // async mounted() {
@@ -181,7 +179,7 @@ export default {
     margin: 10px 0;
 }
 .popup-invite {
-    height: calc(100% - 57px);
+    height: calc(100% - 56px);
     position: absolute;
     width: 100%;
     top: 0%;

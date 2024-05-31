@@ -41,7 +41,7 @@ button {
     letter-spacing: 1px;
     -webkit-text-fill-color: unset;
     -webkit-text-stroke: 1px rgb(139, 129, 116);
-    background: rgb(226, 154, 54);
+    background: #ffa53a; //background: rgb(226, 154, 54);
     border: 1px solid rgb(163, 112, 41);
     position: relative;
     display: flex;
@@ -75,8 +75,6 @@ button span {
 
 .text-outline-black {
     color: white;
-    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
-        1px 1px 0 #000;
 }
 
 .t-primary-color {

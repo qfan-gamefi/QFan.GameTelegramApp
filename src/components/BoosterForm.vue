@@ -1,12 +1,8 @@
 <template>
     <div class="popup-booster" v-if="visible">
         <div class="box-booster">
-            <!-- <div @click="$emit('close')" class="close-booster">
-                <img src="./../../public/assets/back.svg" />
-                Back
-            </div> -->
             <div @click="$emit('close')" class="close-home">
-                <i class="fa-solid fa-xmark"></i>
+                <i class="fa-solid fa-rectangle-xmark"></i>
             </div>
 
             <Loading :loading="loading" />
@@ -16,14 +12,14 @@
                 <div class="your-balance">
                     <div class="title-your-balance">Your Balance</div>
                     <div class="point-balance t-primary-color">
-                        <img src="./../../public/assets/logo.svg" />
-                        {{ balance }}
+                        {{ animatedBalance
+                        }}<img src="./../../public/assets/logo.svg" />
                     </div>
                     <div class="desc-your-balance">
-                        Mining Speed: {{ rewardAmount }}
-                        <img src="./../../public/assets/logo.svg" /> /{{
-                            rewardScheduleHour
-                        }}
+                        Mining Speed: {{ rewardAmount }} QUAI
+                        <!-- <img src="./../../public/assets/logo.svg" />  -->
+                        /
+                        {{ rewardScheduleHour }}
                         hour
                     </div>
                 </div>
@@ -31,74 +27,102 @@
                 <div class="stadium text-outline-black">Stadium</div>
                 <div
                     class="container-stadium"
-                    v-for="item in stadiumItems"
-                    :key="item.id"
+                    :key="stadiumItems?.id"
+                    @click="handleStadium(stadiumItems)"
                 >
                     <div class="logo-stadium">
                         <img
-                            :src="`https://qfan-api.qcloud.asia${item?.attributes?.image?.data?.attributes?.url}`"
+                            :src="`https://qfan-api.qcloud.asia${stadiumItems?.attributes?.image?.data?.attributes?.url}`"
                         />
                     </div>
 
                     <div class="box-stadium">
                         <div class="stadium-left">
                             <div class="lv-stadium t-primary-color">
-                                Level {{ item.attributes.level }}
+                                Level {{ stadiumItems?.attributes?.applyLevel }}
                             </div>
                             <div class="content-stadium">
-                                {{ item.attributes.name }}
+                                {{ stadiumItems?.attributes?.name }}
                             </div>
                             <div class="desc-stadium">
-                                {{ item.attributes.description }}
+                                {{ stadiumItems?.attributes?.description }}
                             </div>
                         </div>
 
                         <div class="stadium-right t-primary-color">
-                            {{ item.attributes.price }}
+                            {{ stadiumItems?.attributes?.price }}
                             <img src="./../../public/assets/logo.svg" />
                         </div>
                     </div>
                 </div>
 
-                <div class="stadium text-outline-black">Training time</div>
+                <div class="stadium text-outline-black">Training Room</div>
                 <div
                     class="container-stadium"
-                    v-for="item in trainingItems"
-                    :key="item.id"
+                    :key="trainingItems.id"
+                    @click="handleTraining"
                 >
                     <div class="logo-stadium">
                         <img
-                            :src="`https://qfan-api.qcloud.asia${item?.attributes?.image?.data?.attributes?.url}`"
+                            :src="`https://qfan-api.qcloud.asia${trainingItems?.attributes?.image?.data?.attributes?.url}`"
                         />
                     </div>
 
                     <div class="box-stadium">
                         <div class="stadium-left">
                             <div class="lv-stadium t-primary-color">
-                                Level {{ item.attributes.level }}
+                                Level
+                                {{ trainingItems?.attributes?.applyLevel }}
                             </div>
                             <div class="content-stadium">
-                                {{ item.attributes.name }}
+                                {{ trainingItems?.attributes?.name }}
                             </div>
                             <div class="desc-stadium">
-                                {{ item.attributes.description }}
+                                {{ trainingItems?.attributes?.description }}
                             </div>
                         </div>
 
                         <div class="stadium-right t-primary-color">
-                            {{ item.attributes.price }}
+                            {{ trainingItems?.attributes?.price }}
                             <img src="./../../public/assets/logo.svg" />
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <TemplateUpLevel
+            :showPopup="isShowStadium"
+            @close="closeStadium"
+            :items="stadiumItems"
+            :dataNext="dataNext"
+            :idUser="idUser"
+            :isMax="isMax"
+            :titleUpload="'Stadium'"
+            :descUpload="'Better storage holds more QUAI and you can claim it less often'"
+            :typeBooster="typeBooster"
+        />
+
+        <TemplateUpLevel
+            :showPopup="isShowTraining"
+            @close="closeStadium"
+            :items="trainingItems"
+            :dataNext="dataNext"
+            :idUser="idUser"
+            :isMax="isMax"
+            :titleUpload="'Training Room'"
+            :descUpload="'Better boots minings speed'"
+            :typeBooster="typeBooster"
+        />
     </div>
 </template>
 
 <script>
 import userService from "../services/userService";
 import Loading from "./LoadingForm.vue";
+import TemplateUpLevel from "./TemplateUpLevel.vue";
+import EventBus from "./../utils/eventBus";
+import { toRaw } from "vue";
 
 export default {
     props: {
@@ -106,48 +130,66 @@ export default {
             type: Boolean,
             default: false,
         },
-        balance: {
-            type: Number,
-            default: 0,
-        },
         rewardAmount: {
             type: String,
             default: "",
         },
         rewardScheduleHour: {
+            type: Number,
+            default: 0,
+        },
+        idUser: {
             type: String,
             default: "",
         },
     },
     components: {
         Loading,
+        TemplateUpLevel,
     },
-    // created() {
-    //     if (this.visible) {
-    //         this.fetchEventData();
-    //     }
-    // },
     data() {
         return {
             loading: true,
             listData: null,
-            stadiumItems: null,
-            trainingItems: null,
+            stadiumItems: {},
+            trainingItems: {},
+            isShowStadium: false,
+            isShowTraining: false,
+            dataNext: {},
+            isMax: false,
+            typeBooster: "SPEED",
+            animatedBalance: 0,
         };
     },
     watch: {
-        visible(newVal) {
+        async visible(newVal) {
             if (newVal) {
-                this.fetchListData();
+                await this.fetchListData();
+                await this.fetchBoosterTransaction();
+                await this.fetchBoosterAmount();
+                await this.getInfoUser();
             }
         },
     },
-    // async mounted() {
-    //     if (this.visible) {
-    //         await this.fetchEventData();
-    //     }
+    mounted() {
+        EventBus.on("close-stadium", this.closeStadium);
+    },
+    // created() {
+    //     EventBus.on("close-stadium", this.closeStadium);
     // },
+
     methods: {
+        async getInfoUser() {
+            try {
+                const data = await userService.getInfo(this.idUser);
+                const resData = data?.data?.[0];
+                this.animatedBalance = Number(
+                    resData.attributes?.qpoint?.data?.attributes?.balance
+                );
+            } catch (error) {
+                console.log(error);
+            }
+        },
         async fetchListData() {
             try {
                 this.loading = true;
@@ -169,16 +211,140 @@ export default {
             } catch (error) {
                 this.listData = [];
             } finally {
-                setTimeout(() => {
-                    this.loading = false;
-                }, 300);
+                this.loading = false;
             }
+        },
+        async fetchBoosterTransaction() {
+            try {
+                this.loading = true;
+                const res = await userService.getBoosterTransaction(
+                    this.idUser
+                );
+
+                if (res?.data?.length === 0) {
+                    this.stadiumItems = toRaw(this.stadiumItems)?.find(
+                        (el) => el?.attributes?.applyLevel === 1
+                    );
+                } else {
+                    const dataStadiumCurrent = res?.data?.find(
+                        (el) => el?.attributes?.boosterType === "SPEED"
+                    );
+
+                    if (dataStadiumCurrent) {
+                        this.stadiumItems =
+                            dataStadiumCurrent?.attributes?.booster?.data;
+                    } else {
+                        this.stadiumItems = toRaw(this.stadiumItems)?.find(
+                            (el) => el?.attributes?.applyLevel === 0
+                        );
+                    }
+                }
+            } catch (error) {
+                // this.listData = [];
+            } finally {
+                this.loading = false;
+            }
+        },
+        async fetchBoosterAmount() {
+            try {
+                this.loading = true;
+                const res = await userService.getBoosterAmount(this.idUser);
+
+                if (res?.data?.length === 0) {
+                    this.trainingItems = toRaw(this.trainingItems)?.find(
+                        (el) => el?.attributes?.applyLevel === 0
+                    );
+                } else {
+                    const dataTrainingCurrent = res?.data?.find(
+                        (el) => el?.attributes?.boosterType === "AMOUNT"
+                    );
+                    if (dataTrainingCurrent) {
+                        this.trainingItems =
+                            dataTrainingCurrent?.attributes?.booster?.data;
+                    } else {
+                        this.trainingItems = toRaw(this.trainingItems)?.find(
+                            (el) => el?.attributes?.applyLevel === 0
+                        );
+                    }
+                }
+            } catch (error) {
+                // this.listData = [];
+            } finally {
+                this.loading = false;
+            }
+        },
+        handleStadium(stadiumItems) {
+            this.isShowStadium = true;
+            this.typeBooster = "SPEED";
+            //check stadium
+            const speedItems = toRaw(this.listData).filter(
+                (item) => item.attributes.type === "SPEED"
+            );
+            const lvCurrentStadium =
+                toRaw(stadiumItems)?.attributes?.applyLevel;
+            const maxLevelStadiumItem = speedItems.reduce(
+                (maxItem, currentItem) => {
+                    return currentItem.attributes.applyLevel >
+                        maxItem.attributes.applyLevel
+                        ? currentItem
+                        : maxItem;
+                },
+                speedItems[0]
+            );
+
+            const checkMaxStadium =
+                maxLevelStadiumItem?.attributes?.applyLevel ===
+                lvCurrentStadium;
+            if (checkMaxStadium) {
+                this.isMax = true;
+            } else {
+                this.dataNext = speedItems.find(
+                    (el) => el?.attributes?.applyLevel === lvCurrentStadium + 1
+                );
+                this.isMax = false;
+            }
+        },
+        handleTraining() {
+            this.isShowTraining = true;
+            this.typeBooster = "AMOUNT";
+            //check training
+            const amountItems = toRaw(this.listData).filter(
+                (item) => item.attributes.type === "AMOUNT"
+            );
+            const lvCurrent = toRaw(this.trainingItems)?.attributes?.applyLevel;
+            const maxLevel = amountItems.reduce((maxItem, currentItem) => {
+                return currentItem.attributes.applyLevel >
+                    maxItem.attributes.applyLevel
+                    ? currentItem
+                    : maxItem;
+            }, amountItems[0]);
+
+            const checkMax = maxLevel?.attributes?.applyLevel === lvCurrent;
+            if (checkMax) {
+                this.isMax = true;
+            } else {
+                this.dataNext = amountItems.find(
+                    (el) => el?.attributes?.applyLevel === lvCurrent + 1
+                );
+                this.isMax = false;
+            }
+        },
+        async closeStadium() {
+            this.isShowStadium = false;
+            this.isShowTraining = false;
+            await this.fetchListData();
+            await this.fetchBoosterTransaction();
+            await this.fetchBoosterAmount();
+            await this.getInfoUser();
         },
     },
     computed: {
         showEmptyForm() {
-            return this.listData?.length == 0;
+            return this.listData?.length === 0;
         },
+    },
+    beforeUnmount() {
+        EventBus.off("close-stadium", this.closeStadium);
     },
 };
 </script>
@@ -199,13 +365,13 @@ export default {
 }
 
 .popup-booster {
-    height: calc(100% - 57px);
+    height: calc(100% - 56px);
     position: absolute;
     width: 100%;
     top: 0;
     z-index: 999;
     animation: fadeInBooster 0.1s ease forwards;
-
+    color: #fff;
     background-image: url("./../../public/assets/booster/background-booster.png");
     background-position: center;
     background-repeat: no-repeat;
@@ -231,7 +397,6 @@ export default {
 
 .box-content-booster {
     height: 100%;
-    color: #fff;
     animation: fadeInDesc 0.1s ease forwards;
 }
 @keyframes fadeInDesc {
@@ -245,16 +410,6 @@ export default {
         transform: translate(0%, 0%) scale(1);
     }
 }
-/* scroll box  */
-/* .box-desc-event {
-    background: #67bdef;
-    border-radius: 10px;
-    max-height: calc(100% - 75px);
-    overflow-y: auto;
-}
-.box-desc-event::-webkit-scrollbar {
-    display: none;
-} */
 
 .your-balance {
     background-color: #00256c;
@@ -273,11 +428,11 @@ export default {
     align-items: center;
     padding: 10px;
     font-size: 20px;
+    gap: 10px;
 }
 .point-balance img {
-    width: 40px;
-    height: 40px;
-    margin-right: 5px;
+    width: 35px;
+    height: 35px;
 }
 .desc-your-balance {
     font-family: monospace;
@@ -302,12 +457,18 @@ export default {
     gap: 10px;
 }
 
+.logo-stadium {
+    display: flex;
+}
 .logo-stadium img {
     width: 50px;
+    height: 50px;
 }
 .box-stadium {
     display: flex;
     gap: 10px;
+    justify-content: space-between;
+    width: 100%;
 }
 .stadium-left {
     display: flex;

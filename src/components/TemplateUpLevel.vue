@@ -33,12 +33,11 @@
                         </div>
                         <div class="content-lv" v-if="typeBooster === 'SPEED'">
                             Claim every
-                            {{ dataNext?.attributes?.applyQtty }} h
+                            {{ dataNext?.attributes?.applyQtty }} hour
                         </div>
                         <div class="content-lv" v-if="typeBooster === 'AMOUNT'">
-                            {{ dataNext?.attributes?.applyQtty }}
-                            <img src="./../../public/assets/logo.svg" /> per
-                            hour
+                            Speed {{ dataNext?.attributes?.applyQtty }}
+                            <img src="./../../public/assets/logo.svg" /> per hour
                         </div>
                     </div>
                 </div>
@@ -70,12 +69,11 @@
                         </div>
                         <div class="content-lv" v-if="typeBooster === 'SPEED'">
                             Claim every
-                            {{ items?.attributes?.applyQtty }} h
+                            {{ items?.attributes?.applyQtty }} hour
                         </div>
                         <div class="content-lv" v-if="typeBooster === 'AMOUNT'">
-                            {{ items?.attributes?.applyQtty }}
-                            <img src="./../../public/assets/logo.svg" /> per
-                            hour
+                           Speed {{ items?.attributes?.applyQtty }}
+                            <img src="./../../public/assets/logo.svg" /> per hour
                         </div>
                     </div>
                 </div>
@@ -84,7 +82,7 @@
                     class="box-point-up t-primary-color"
                     :class="{ 'disabled-button': isMax }"
                 >
-                    {{ items?.attributes?.price }}
+                    {{ dataNext?.attributes?.price }}
                     <img src="./../../public/assets/logo.svg" />
                 </div>
 

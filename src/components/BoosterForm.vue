@@ -45,10 +45,10 @@
                             </div>
                         </div>
 
-                        <div class="stadium-right t-primary-color">
+                        <!-- <div class="stadium-right t-primary-color">
                             {{ stadiumItems?.attributes?.price }}
                             <img src="./../../public/assets/logo.svg" />
-                        </div>
+                        </div> -->
                     </div>
                 </div>
 
@@ -78,10 +78,10 @@
                             </div>
                         </div>
 
-                        <div class="stadium-right t-primary-color">
+                        <!-- <div class="stadium-right t-primary-color">
                             {{ trainingItems?.attributes?.price }}
                             <img src="./../../public/assets/logo.svg" />
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>

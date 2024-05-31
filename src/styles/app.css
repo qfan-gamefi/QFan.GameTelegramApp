@@ -264,7 +264,7 @@
 } */
 
 .box-left .content {
-    font-size: 12px;
+    font-size: 13px;
 }
 
 .link-checkin {
@@ -364,13 +364,13 @@
 }
 
 .box-left-train {
-    font-size: 10px;
+    font-size: 13px;
     align-items: center;
     display: flex;
 }
 
 .box-left-train img {
-    width: 20px;
+    width: 18px;
     border-radius: 5px;
     margin-left: 3px;
 }

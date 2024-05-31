@@ -51,12 +51,12 @@ export default {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            idUser: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
-            telegram_bot_link:
-                telegram_bot_link +
-                    window.Telegram.WebApp.initDataUnsafe.user?.id || "",
-            // idUser: "2123800227",
-            // telegram_bot_link: telegram_bot_link + 2123800227 || "",
+            // idUser: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
+            // telegram_bot_link:
+            //     telegram_bot_link +
+            //         window.Telegram.WebApp.initDataUnsafe.user?.id || "",
+            idUser: "1927324767",
+            telegram_bot_link: telegram_bot_link + 1927324767 || "",
 
             showCoomingSoon: false,
             isCopiedToClipboard: false,
@@ -460,7 +460,7 @@ export default {
                     <img src="./../public/assets/logo.svg" />
                     <div class="balance">
                         <!-- QFP Balance: {{ dataQPoint?.balance }} -->
-                        QFP Balance: {{ animatedBalance }}
+                        Balance: {{ animatedBalance }}
                     </div>
                 </div>
             </div>
@@ -479,13 +479,12 @@ export default {
             <div class="wrap-commit_reward" :style="beforeStyle">
                 <div class="box-info">
                     <div v-if="isClaim" class="box-left-train">
-                        Click "Train" to take + {{ dataQPoint?.rewardAmount }}
+                        Click "Claim" to take +{{ dataQPoint?.rewardAmount *  dataQPoint?.rewardScheduleHour}}
                         <img src="./../public/assets/logo.svg" />
                     </div>
 
                     <div v-else class="box-left">
-                        <div class="title">Remain:</div>
-                        <div class="content">{{ countdown }} to train</div>
+                        <div class="content">Remain [{{ countdown }}] to claim</div>
                     </div>
 
                     <div class="box-right">
@@ -494,7 +493,7 @@ export default {
                             @click="handleReward"
                             :disabled="isCountingDown"
                         >
-                            {{ isClaim ? "Claim" : "Train" }}
+                            {{ isClaim ? "Claim" : "Training..." }}
                         </button>
                     </div>
                 </div>

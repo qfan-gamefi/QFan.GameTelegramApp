@@ -16,11 +16,7 @@
                         }}<img src="./../../public/assets/logo.svg" />
                     </div>
                     <div class="desc-your-balance">
-                        Mining Speed: {{ rewardAmount }} QUAI
-                        <!-- <img src="./../../public/assets/logo.svg" />  -->
-                        /
-                        {{ rewardScheduleHour }}
-                        hour
+                        Mining Speed: {{ rewardAmount }}  <img src="./../../public/assets/logo.svg" />/hour
                     </div>
                 </div>
 

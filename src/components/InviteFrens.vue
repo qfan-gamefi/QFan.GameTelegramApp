@@ -1,13 +1,9 @@
 <template>
     <div class="popup-invite" v-if="visible">
         <div class="box-invite">
-            <!-- <div @click="$emit('close')" class="close-invite">
-                <img src="./../../public/assets/back.svg" />
-                Back
-            </div> -->
-            <div @click="$emit('close')" class="close-home">
+            <!-- <div @click="$emit('close')" class="close-home">
                 <i class="fa-solid fa-rectangle-xmark"></i>
-            </div>
+            </div> -->
 
             <div class="friend-info">
                 <div class="friend-info-text">

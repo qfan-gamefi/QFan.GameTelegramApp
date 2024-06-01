@@ -264,7 +264,7 @@
 } */
 
 .box-left .content {
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .link-checkin {
@@ -334,7 +334,7 @@
     border-radius: 10px;
     border: none;
     width: auto;
-    font-size: 14px;
+    font-size: 10px;
 }
 
 .wrap-commit_reward::after {

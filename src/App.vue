@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import MainGame from "./rising-star/MainGame.vue";
-// import Phaser from "phaser";
+import Phaser from "phaser";
 import { ref, toRaw, onMounted } from "vue";
 
 interface PhaserScene {
@@ -181,6 +181,8 @@ export default {
                         this.isPopupCode = true;
                     }
                 } else {
+                    console.log(data);
+
                     const resData = data?.data?.[0];
                     this.dataLogin = resData;
                     this.dataQPoint =
@@ -267,8 +269,6 @@ export default {
                 }
             } catch (error) {
                 console.log(error);
-
-                // this.countdownFunc();
             }
         },
         async updateSence() {
@@ -282,11 +282,8 @@ export default {
             const scene = toRaw(phaserRef?.scene);
             const givenDateTimeString = this.dataQPoint.nextTakeRewardTime;
 
-            // Parse the given date-time string to a Date object
             const givenDateTime = new Date(givenDateTimeString);
-            // Get the current date-time in UTC
             const currentDateTime = new Date(new Date().toUTCString());
-            // Calculate the difference in milliseconds
             const differenceInMilliseconds =
                 currentDateTime.getTime() - givenDateTime.getTime();
 
@@ -319,14 +316,13 @@ export default {
             return value < 10 ? "0" + value : value;
         },
         countdownFunc() {
-            const nextTime = this.dataQPoint?.rewardScheduleHour;
-            const totalTime = nextTime * 60 * 60 * 1000;
-
-            const rewardTime = new Date(
-                this.dataQPoint.nextTakeRewardTime
-            ).getTime();
-
             if (!this.isClaim) {
+                const nextTime = this.dataQPoint?.rewardScheduleHour;
+                const totalTime = nextTime * 60 * 60 * 1000;
+
+                const rewardTime = new Date(
+                    this.dataQPoint.nextTakeRewardTime
+                ).getTime();
                 const intervalId = setInterval(() => {
                     const currentTime = new Date(
                         new Date().toUTCString()
@@ -354,20 +350,22 @@ export default {
         },
 
         handleButtonTab(tab) {
-            if (this.showMission) {
-                // Telegram.WebApp.ready();
-                // Telegram.WebApp.setHeaderColor("bg_color", "#ffffff");
-                Telegram.WebApp.BackButton.show();
-                Telegram.WebApp.BackButton.onClick(() => {
-                    // this.$emit("close");
-                    this.activeButton = "";
-                    this.showMission = false;
-                });
-            }
+            Telegram.WebApp.BackButton.show();
+            // if (tab === "booster" || tab === "event") {
+            //     Telegram.WebApp.BackButton.hide();
+            // }
+
+            Telegram.WebApp.BackButton.onClick(() => {
+                this.showMission = false;
+                this.showEvent = false;
+                this.showBooster = false;
+                this.showInvite = false;
+
+                this.activeButton = "";
+                Telegram.WebApp.BackButton.hide();
+            });
             EventBus.emit("close-detail-event");
-            if (tab !== "booster") {
-                EventBus.emit("close-stadium");
-            }
+            EventBus.emit("close-stadium");
 
             const tabMappings = {
                 mission: {
@@ -427,7 +425,6 @@ export default {
         Telegram.WebApp.ready();
         Telegram.WebApp.setHeaderColor("ffffff");
         await this.getInfoUser();
-        // await this.countdownFunc();
     },
     async updated() {
         this.updateSence();
@@ -495,7 +492,7 @@ export default {
 
                     <div v-else class="box-left">
                         <div class="content">
-                            Remain [{{ countdown }}] to claim
+                            Remain {{ countdown }} to claim
                         </div>
                     </div>
 

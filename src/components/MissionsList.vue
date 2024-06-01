@@ -1,9 +1,9 @@
 <template>
     <div class="popup-mission" v-if="visible">
         <div class="box-mission">
-            <div @click="$emit('close')" class="close-home">
+            <!-- <div @click="$emit('close')" class="close-home">
                 <i class="fa-solid fa-rectangle-xmark"></i>
-            </div>
+            </div> -->
 
             <div class="box-content-mission">
                 <Loading :loading="loading" />

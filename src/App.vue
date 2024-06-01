@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import MainGame from "./rising-star/MainGame.vue";
-// import Phaser from "phaser";
+import Phaser from "phaser";
 import { ref, toRaw, onMounted } from "vue";
 
 interface PhaserScene {
@@ -53,7 +53,7 @@ export default {
             idUser: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
             telegram_bot_link:
                 telegram_bot_link +
-                window.Telegram.WebApp.initDataUnsafe.user?.id || "",
+                    window.Telegram.WebApp.initDataUnsafe.user?.id || "",
             // idUser: "2123800227",
             // telegram_bot_link: telegram_bot_link + 2123800227 || "",
 
@@ -181,6 +181,8 @@ export default {
                         this.isPopupCode = true;
                     }
                 } else {
+                    console.log(data);
+
                     const resData = data?.data?.[0];
                     this.dataLogin = resData;
                     this.dataQPoint =
@@ -267,26 +269,21 @@ export default {
                 }
             } catch (error) {
                 console.log(error);
-
-                // this.countdownFunc();
             }
         },
         async updateSence() {
             const phaserRef: any = this.$refs.phaserRef as
                 | {
-                    scene?: {
-                        changeScene: () => void;
-                    };
-                }
+                      scene?: {
+                          changeScene: () => void;
+                      };
+                  }
                 | undefined;
             const scene = toRaw(phaserRef?.scene);
             const givenDateTimeString = this.dataQPoint.nextTakeRewardTime;
 
-            // Parse the given date-time string to a Date object
             const givenDateTime = new Date(givenDateTimeString);
-            // Get the current date-time in UTC
             const currentDateTime = new Date(new Date().toUTCString());
-            // Calculate the difference in milliseconds
             const differenceInMilliseconds =
                 currentDateTime.getTime() - givenDateTime.getTime();
 
@@ -319,14 +316,13 @@ export default {
             return value < 10 ? "0" + value : value;
         },
         countdownFunc() {
-            const nextTime = this.dataQPoint?.rewardScheduleHour;
-            const totalTime = nextTime * 60 * 60 * 1000;
-
-            const rewardTime = new Date(
-                this.dataQPoint.nextTakeRewardTime
-            ).getTime();
-
             if (!this.isClaim) {
+                const nextTime = this.dataQPoint?.rewardScheduleHour;
+                const totalTime = nextTime * 60 * 60 * 1000;
+
+                const rewardTime = new Date(
+                    this.dataQPoint.nextTakeRewardTime
+                ).getTime();
                 const intervalId = setInterval(() => {
                     const currentTime = new Date(
                         new Date().toUTCString()
@@ -354,20 +350,22 @@ export default {
         },
 
         handleButtonTab(tab) {
-            if (this.showMission) {
-                // Telegram.WebApp.ready();
-                // Telegram.WebApp.setHeaderColor("bg_color", "#ffffff");
-                Telegram.WebApp.BackButton.show();
-                Telegram.WebApp.BackButton.onClick(() => {
-                    // this.$emit("close");
-                    this.activeButton = "";
-                    this.showMission = false;
-                });
-            }
+            Telegram.WebApp.BackButton.show();
+            // if (tab === "booster" || tab === "event") {
+            //     Telegram.WebApp.BackButton.hide();
+            // }
+
+            Telegram.WebApp.BackButton.onClick(() => {
+                this.showMission = false;
+                this.showEvent = false;
+                this.showBooster = false;
+                this.showInvite = false;
+
+                this.activeButton = "";
+                Telegram.WebApp.BackButton.hide();
+            });
             EventBus.emit("close-detail-event");
-            if (tab !== "booster") {
-                EventBus.emit("close-stadium");
-            }
+            EventBus.emit("close-stadium");
 
             const tabMappings = {
                 mission: {
@@ -427,7 +425,6 @@ export default {
         Telegram.WebApp.ready();
         Telegram.WebApp.setHeaderColor("ffffff");
         await this.getInfoUser();
-        // await this.countdownFunc();
     },
     async updated() {
         this.updateSence();
@@ -473,7 +470,10 @@ export default {
             </div>
 
             <div class="link-checkin">
-                <a v-bind:href="`https://qfan-dapp.qcloud.asia/?playerId=${idUser}`" target="'_blank">
+                <a
+                    v-bind:href="`https://qfan-dapp.qcloud.asia/?playerId=${idUser}`"
+                    target="'_blank"
+                >
                     <button>
                         <i class="fa-solid fa-calendar-days"></i> Checkin
                     </button>
@@ -492,12 +492,16 @@ export default {
 
                     <div v-else class="box-left">
                         <div class="content">
-                            Remain [{{ countdown }}] to claim
+                            Remain {{ countdown }} to claim
                         </div>
                     </div>
 
                     <div class="box-right">
-                        <button class="btn-commit_reward" @click="handleReward" :disabled="isCountingDown">
+                        <button
+                            class="btn-commit_reward"
+                            @click="handleReward"
+                            :disabled="isCountingDown"
+                        >
                             {{ isClaim ? "Claim" : "Training..." }}
                         </button>
                     </div>
@@ -508,29 +512,50 @@ export default {
         </div>
 
         <div class="box-button">
-            <div class="btn-item" @click="handleButtonTab('mission')" :class="{ active: activeButton === 'mission' }">
+            <div
+                class="btn-item"
+                @click="handleButtonTab('mission')"
+                :class="{ active: activeButton === 'mission' }"
+            >
                 <div class="item-img">
                     <img src="./../public/assets/button-icons/mission.svg" />
                 </div>
                 <div class="item-title">Mission</div>
             </div>
-            <div class="btn-item" @click="handleButtonTab('event')" :class="{ active: activeButton === 'event' }">
+            <div
+                class="btn-item"
+                @click="handleButtonTab('event')"
+                :class="{ active: activeButton === 'event' }"
+            >
                 <div class="item-img">
                     <img src="./../public/assets/button-icons/event.svg" />
                 </div>
                 <div class="item-title">Event</div>
             </div>
-            <div class="btn-item" @click="handleButtonTab('booster')" :class="{ active: activeButton === 'booster' }">
+            <div
+                class="btn-item"
+                @click="handleButtonTab('booster')"
+                :class="{ active: activeButton === 'booster' }"
+            >
                 <div class="item-img">
                     <img src="./../public/assets/button-icons/booster.svg" />
                 </div>
-                <div class="item-title" :class="{ active: activeButton === 'booster' }">
+                <div
+                    class="item-title"
+                    :class="{ active: activeButton === 'booster' }"
+                >
                     Booster
                 </div>
             </div>
-            <div class="btn-item" @click="handleButtonTab('invite')" :class="{ active: activeButton === 'invite' }">
+            <div
+                class="btn-item"
+                @click="handleButtonTab('invite')"
+                :class="{ active: activeButton === 'invite' }"
+            >
                 <div class="item-img">
-                    <img src="./../public/assets/button-icons/invite-friend.svg" />
+                    <img
+                        src="./../public/assets/button-icons/invite-friend.svg"
+                    />
                 </div>
                 <div class="item-title">Invite Friend</div>
             </div>
@@ -547,8 +572,15 @@ export default {
             <div class="popup-referer-code">
                 <div class="referer-code">Referer code</div>
                 <form @submit.prevent="submitCode">
-                    <input class="code-input" :class="{ 'input-error': errorMessage }" type="text" v-model="code"
-                        id="code" @input="clearError" placeholder="Enter code" />
+                    <input
+                        class="code-input"
+                        :class="{ 'input-error': errorMessage }"
+                        type="text"
+                        v-model="code"
+                        id="code"
+                        @input="clearError"
+                        placeholder="Enter code"
+                    />
                     <div v-if="errorMessage" class="text-err-code">
                         {{ errorMessage }}
                     </div>
@@ -559,22 +591,43 @@ export default {
             </div>
         </div>
 
-        <MissionList :visible="showMission" @close="closeMission" :idUser="idUser" />
+        <MissionList
+            :visible="showMission"
+            @close="closeMission"
+            :idUser="idUser"
+        />
         <!-- @invite="handleButtonTab('mission')" -->
 
-        <EventList :visible="showEvent" @close="closeEvent" :idUser="idUser" @openCoomSoon="showPopupCoomingSoon" />
+        <EventList
+            :visible="showEvent"
+            @close="closeEvent"
+            :idUser="idUser"
+            @openCoomSoon="showPopupCoomingSoon"
+        />
         <!-- @invite="handleButtonTab('event')" -->
-        <InviteFrens :visible="showInvite" @close="closeInvite" @invite="handleCopy" :idUser="idUser"
-            :rewardAmount="dataQPoint.rewardAmount" />
+        <InviteFrens
+            :visible="showInvite"
+            @close="closeInvite"
+            @invite="handleCopy"
+            :idUser="idUser"
+            :rewardAmount="dataQPoint.rewardAmount"
+        />
 
-        <BoosterForm :visible="showBooster" @close="closeBooster" :rewardScheduleHour="dataQPoint.rewardScheduleHour"
-            :idUser="idUser" />
+        <BoosterForm
+            :visible="showBooster"
+            @close="closeBooster"
+            :rewardScheduleHour="dataQPoint.rewardScheduleHour"
+            :idUser="idUser"
+        />
         <!-- @invite="handleButtonTab('booster')" -->
 
-        <div :class="[
-            'popup-cooming-soon',
-            { 'closing-popup': !showCoomingSoon },
-        ]" v-if="showCoomingSoon">
+        <div
+            :class="[
+                'popup-cooming-soon',
+                { 'closing-popup': !showCoomingSoon },
+            ]"
+            v-if="showCoomingSoon"
+        >
             <p>Coming soon</p>
             <button @click="hidePopupCoomingSoon" class="btn-close-coming-soon">
                 Close

@@ -1,9 +1,9 @@
 <template>
     <div class="popup-booster" v-if="visible">
         <div class="box-booster">
-            <div @click="$emit('close')" class="close-home">
+            <!-- <div @click="$emit('close')" class="close-home">
                 <i class="fa-solid fa-rectangle-xmark"></i>
-            </div>
+            </div> -->
 
             <Loading :loading="loading" />
             <EmptyForm v-if="showEmptyForm" />
@@ -342,7 +342,7 @@ export default {
         },
     },
     beforeUnmount() {
-        EventBus.off("close-stadium", this.closeStadium);
+        EventBus.off("close-stadium", this.closeStadium); //
     },
 };
 </script>

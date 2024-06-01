@@ -1,9 +1,9 @@
 <template>
     <div class="popup-event" v-if="visible">
         <div class="box-event">
-            <div @click="$emit('close')" class="close-home">
+            <!-- <div @click="$emit('close')" class="close-home">
                 <i class="fa-solid fa-rectangle-xmark"></i>
-            </div>
+            </div> -->
 
             <Loading :loading="loading" />
 
@@ -82,6 +82,9 @@ export default {
         DetailEvent,
     },
     async mounted() {
+        // Telegram.WebApp.ready();
+        // Telegram.WebApp.setHeaderColor("ffffff");
+        // Telegram.WebApp.BackButton.show();
         EventBus.on("close-detail-event", this.closeDetailEvent);
         if (this.visible) {
             await this.fetchEventData();

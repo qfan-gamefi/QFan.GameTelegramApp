@@ -93,13 +93,6 @@ export default {
                 "--pseudo-width": `${this.apiDataWidth}%`,
             };
         },
-        // contentEventHandlers() {
-        //     return {
-        //         close: this.closeEvent,
-        //         invite: this.handleEvent,
-        //         openCoomSoon: this.showPopupCoomingSoon,
-        //     };
-        // },
     },
     methods: {
         copyToClipboard() {
@@ -361,6 +354,7 @@ export default {
                 this.showBooster = false;
                 this.showInvite = false;
 
+                this.getInfoUser();
                 this.activeButton = "";
                 Telegram.WebApp.BackButton.hide();
             });
@@ -423,7 +417,7 @@ export default {
     },
     async mounted() {
         Telegram.WebApp.ready();
-        Telegram.WebApp.setHeaderColor("ffffff");
+        Telegram.WebApp.setHeaderColor("#ffffff");
         await this.getInfoUser();
     },
     async updated() {

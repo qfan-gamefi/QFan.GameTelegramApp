@@ -16,7 +16,7 @@
                         <img src="./../../public/assets/logo.svg" />
                     </div>
                     <div class="desc-your-balance">
-                        Mining Speed: {{ rewardAmount }}
+                        Training Speed: {{ rewardAmount }}
                         <img src="./../../public/assets/logo.svg" />/hour
                     </div>
                 </div>
@@ -96,7 +96,7 @@
             :idUser="idUser"
             :isMax="isMax"
             :titleUpload="'Stadium'"
-            :descUpload="'Better storage holds more QUAI and you can claim it less often'"
+            :descUpload="'Better Stadium holds more QFAN and you can claim it less often'"
             :typeBooster="typeBooster"
         />
 
@@ -108,7 +108,7 @@
             :idUser="idUser"
             :isMax="isMax"
             :titleUpload="'Training Room'"
-            :descUpload="'Better boots minings speed'"
+            :descUpload="'Better boots training speed'"
             :typeBooster="typeBooster"
         />
     </div>

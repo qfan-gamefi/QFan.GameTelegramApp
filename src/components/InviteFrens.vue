@@ -7,14 +7,14 @@
 
             <div class="friend-info">
                 <div class="friend-info-text">
-                    {{ referalList1?.length }} Friends
+                    {{ inviteData?.length }} Friends
                 </div>
                 <div class="friend-info-number t-primary-color">
                     ~{{ perHour }}
                     <img src="./../../public/assets/logo.svg" /> per hour
                 </div>
                 <div class="friend-info-desc">
-                    <div>Score 10% from buddies +2.5% from their fererrals</div>
+                    <div>Score +{{referalRewardLv1Percent}}% from buddies and +{{referalRewardLv2Percent}}% from their fererrals</div>
                     <div class="friend-info-desc-img">
                         Get a <img src="./../../public/assets/logo.svg" />
                         play pass for each fren
@@ -39,7 +39,12 @@
                             <div class="item-img">
                                 <img src="./../../public/assets/logo.jpg" />
                             </div>
-                            <div>{{ el?.firstName }} {{ el?.lastName }}</div>
+                            <div>
+                                <p class="friend-name">{{ el?.firstName }} {{ el?.lastName }}</p>
+                                <p v-if="el?.children?.length > 0" class="friend-user-info">
+                                    <img class="icon-svg" src="./../../public/assets/user.svg" /> <span class="child-text">+{{ el?.children?.length }}</span>
+                                </p>
+                            </div>
                         </div>
                         <div class="item-right">
                             {{ el?.qpoint?.balance }}
@@ -91,6 +96,8 @@ export default {
             referalList2: [],
             referalList1: [],
             perHour: 0,
+            referalRewardLv1Percent: 10,
+            referalRewardLv2Percent: 5,
         };
     },
     watch: {
@@ -109,28 +116,32 @@ export default {
             try {
                 this.loading = true;
                 const response = await userService.getListInvite(this?.idUser);
+                const referalList1 = response?.data?.referalList;
+                const referalList2 = response?.data?.referalList2;
 
-                const list1 = response?.data?.referalList;
-                const list2 = response?.data?.referalList2;
+                if(Array.isArray(referalList1))
+                    this.inviteData = [...referalList1];  
 
-                this.referalList2 = list2;
-                this.referalList1 = list1;
-
-                if (Array.isArray(list1) && Array.isArray(list2)) {
-                    this.inviteData = [...list1, ...list2];
-                } else if (Array.isArray(list1)) {
-                    this.inviteData = [...list1];
-                } else if (Array.isArray(list2)) {
-                    this.inviteData = [...list2];
-                } else {
-                    this.inviteData = [];
-                }
-
-                const sortData = this.inviteData.sort(
+                const sortedInviteData = this.inviteData.sort(
                     (a, b) => b?.qpoint?.balance - a?.qpoint?.balance
                 );
 
-                this.inviteData = sortData;
+                // //add list 2 to children of level 1 by refererCode
+                this.inviteData = sortedInviteData.map((el) => {
+                    if (el?.refererCode) {
+                        const children = referalList2.filter(
+                            (item) => item?.refererCode === el?.playerId
+                        );
+                        if(children.length > 0)
+                            el.children = children;
+                        else 
+                            el.children = [];
+                    }
+                    return el;
+                });
+
+                console.log("inviteData", this.inviteData);
+                
             } catch (error) {
                 this.inviteData = [];
             } finally {
@@ -148,6 +159,8 @@ export default {
                     response?.data?.attributes?.referalRewardLv1Percent;
                 const dataLV2 =
                     response?.data?.attributes?.referalRewardLv2Percent;
+                this.referalRewardLv1Percent = dataLV1;
+                this.referalRewardLv2Percent = dataLV2;
 
                 const lv1 = (Number(this.rewardAmount) * dataLV1) / 100;
                 const lv2 = (Number(this.rewardAmount) * dataLV2) / 100;
@@ -321,4 +334,21 @@ export default {
 .friend-info-desc-img img {
     margin: 0 3px;
 }
+.friend-user-info {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.friend-user-info{
+    margin: 0;
+}
+.friend-user-info span.child-text {
+    font-size: 14px;
+    font-weight: normal;
+}
+.friend-name {
+    font-size: 14px;
+    margin: 5px 0;
+}
+
 </style>

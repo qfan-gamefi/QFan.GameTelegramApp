@@ -423,7 +423,7 @@ export default {
     },
     async mounted() {
         Telegram.WebApp.ready();
-        Telegram.WebApp.setHeaderColor("ffffff");
+        Telegram.WebApp.setHeaderColor("#ffffff");
         await this.getInfoUser();
     },
     async updated() {

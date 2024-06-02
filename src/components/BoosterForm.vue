@@ -96,7 +96,7 @@
             :idUser="idUser"
             :isMax="isMax"
             :titleUpload="'Stadium'"
-            :descUpload="'Better storage holds more QUAI and you can claim it less often'"
+            :descUpload="'Better Stadium holds more QFAN and you can claim it less often'"
             :typeBooster="typeBooster"
         />
 

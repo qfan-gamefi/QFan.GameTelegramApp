@@ -54,8 +54,8 @@ export default {
             telegram_bot_link:
                 telegram_bot_link +
                     window.Telegram.WebApp.initDataUnsafe.user?.id || "",
-            // idUser: "1927324767",
-            // telegram_bot_link: telegram_bot_link + 1927324767 || "",
+            // idUser: "2123800227",
+            // telegram_bot_link: telegram_bot_link + 2123800227 || "",
 
             showCoomingSoon: false,
             isCopiedToClipboard: false,
@@ -93,13 +93,6 @@ export default {
                 "--pseudo-width": `${this.apiDataWidth}%`,
             };
         },
-        // contentEventHandlers() {
-        //     return {
-        //         close: this.closeEvent,
-        //         invite: this.handleEvent,
-        //         openCoomSoon: this.showPopupCoomingSoon,
-        //     };
-        // },
     },
     methods: {
         copyToClipboard() {
@@ -361,6 +354,7 @@ export default {
                 this.showBooster = false;
                 this.showInvite = false;
 
+                this.getInfoUser();
                 this.activeButton = "";
                 Telegram.WebApp.BackButton.hide();
             });

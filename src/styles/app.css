@@ -4,9 +4,15 @@
     justify-content: space-around;
     background-color: #69769c;
     /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
-    /* z-index: 1000;
-    position: absolute;
-    bottom: 0; */
+    /* position: absolute;
+    bottom: 2%;
+    left: 0%; */
+}
+
+.container {
+    /* width: 100%; */
+    max-width: 384px;
+    position: relative;
 }
 
 .btn-item {
@@ -188,11 +194,6 @@
 
 .full-width {
     width: 100%;
-}
-
-.container {
-    max-width: 384px;
-    position: relative;
 }
 
 .wOne3rd {

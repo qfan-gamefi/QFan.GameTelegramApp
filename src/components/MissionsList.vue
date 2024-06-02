@@ -66,6 +66,7 @@
 
 <script>
 import userService from "../services/userService";
+import { sortMissions } from "../utils";
 import Loading from "./LoadingForm.vue";
 import { toRaw } from "vue";
 
@@ -94,7 +95,6 @@ export default {
         return {
             loading: true,
             missionData: null,
-            iframeSrc: "",
             buttonText: [],
             missionRewardData: [],
             loadingBtn: [],
@@ -113,17 +113,8 @@ export default {
             await this.fetchMissionData();
             await this.fetchListMissionReward();
         }
-        // Telegram.WebApp.ready();
-        // Telegram.WebApp.setHeaderColor("bg_color", "#ffffff");
-        // Telegram.WebApp.BackButton.show();
-        // Telegram.WebApp.BackButton.onClick(() => {
-        //     this.$emit("close");
-        // });
     },
     methods: {
-        openInIframe(url) {
-            this.iframeSrc = url;
-        },
         handleMission() {
             this.$emit("mission");
         },
@@ -169,12 +160,10 @@ export default {
                     const rawMissions = toRaw(this.missionData);
 
                     rawMissions.forEach((mission) => {
-                        const matchingReward = toRaw(
-                            this.missionRewardData
-                        ).find(
-                            (reward) => reward?.attributes?.refId == mission?.id
+                        const matchingReward = res.data.find(
+                            (reward) =>
+                                Number(reward?.attributes?.refId) == mission?.id
                         );
-
                         if (matchingReward) {
                             if (
                                 matchingReward?.attributes?.status ==
@@ -197,33 +186,8 @@ export default {
                         }
                     });
 
-                    const sortedMissions = rawMissions.sort((a, b) => {
-                        if (
-                            a.status === "COMPLETED" &&
-                            b.status !== "COMPLETED"
-                        ) {
-                            return 1;
-                        } else if (
-                            a.status !== "COMPLETED" &&
-                            b.status === "COMPLETED"
-                        ) {
-                            return -1;
-                        } else if (
-                            a.status === "PROCESSING" &&
-                            b.status !== "PROCESSING"
-                        ) {
-                            return 1;
-                        } else if (
-                            a.status !== "PROCESSING" &&
-                            b.status === "PROCESSING"
-                        ) {
-                            return -1;
-                        } else {
-                            return 0;
-                        }
-                    });
-
-                    this.missionData = sortedMissions;
+                    const sortedMissions = sortMissions(rawMissions);
+                    this.missionData = [...sortedMissions];
                 }
             } catch (error) {
                 this.missionRewardData = [];

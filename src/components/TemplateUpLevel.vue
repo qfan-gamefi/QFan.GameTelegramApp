@@ -172,14 +172,13 @@ export default {
     },
     methods: {
         async handleUplevel() {
-            // this.showSuccessNotification();
             try {
                 this.loading = true;
                 await userService.postUplevel(this.idUser, this.typeBooster);
                 this.showSuccessNotification();
                 this.$emit("close");
             } catch (error) {
-                this.showErrorNotification();
+                this.showErrorNotification(error?.response?.data?.error?.message);
                 this.loading = false;
             } finally {
                 this.loading = false;
@@ -192,8 +191,8 @@ export default {
             this.notificationType = "success";
             this.showNotification = true;
         },
-        showErrorNotification() {
-            this.notificationMessage = "An error occurred!";
+        showErrorNotification(errorMessage) {
+            this.notificationMessage = errorMessage ||  "An error occurred!";
             this.notificationType = "error";
             this.showNotification = true;
         },

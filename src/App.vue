@@ -174,8 +174,6 @@ export default {
                         this.isPopupCode = true;
                     }
                 } else {
-                    console.log(data);
-
                     const resData = data?.data?.[0];
                     this.dataLogin = resData;
                     this.dataQPoint =
@@ -343,10 +341,14 @@ export default {
         },
 
         handleButtonTab(tab) {
+            if (this.activeButton === "booster") {
+                EventBus.emit("close-stadium");
+            }
+            if (this.activeButton === "event") {
+                EventBus.emit("close-detail-event");
+            }
+
             Telegram.WebApp.BackButton.show();
-            // if (tab === "booster" || tab === "event") {
-            //     Telegram.WebApp.BackButton.hide();
-            // }
 
             Telegram.WebApp.BackButton.onClick(() => {
                 this.showMission = false;
@@ -358,8 +360,6 @@ export default {
                 this.activeButton = "";
                 Telegram.WebApp.BackButton.hide();
             });
-            EventBus.emit("close-detail-event");
-            EventBus.emit("close-stadium");
 
             const tabMappings = {
                 mission: {

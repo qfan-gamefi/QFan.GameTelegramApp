@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const axiosBetInstance = axios.create({
-    baseURL: "http://localhost:3000/",
+    baseURL: "https://e994-171-224-178-243.ngrok-free.app/",
     headers: {
         "Content-Type": "application/json",
     },

@@ -9,14 +9,9 @@
 
             <div class="box-desc-event" v-if="!loading">
                 <!--  @click="$emit('openCoomSoon')" -->
-                <div
-                    class="item-event"
-                    v-for="(item, index) in eventData"
-                    :key="index"
-                    :style="{
-                        backgroundImage: `url(https://qfan-api.qcloud.asia${item?.attributes?.banner?.data?.attributes?.formats?.small?.url})`,
-                    }"
-                >
+                <div class="item-event" v-for="(item, index) in eventData" :key="index" :style="{
+                    backgroundImage: `url(https://qfan-api.qcloud.asia${item?.attributes?.banner?.data?.attributes?.formats?.small?.url})`,
+                }">
                     <div class="box-content-event">
                         <div class="title-item">
                             {{ item?.attributes?.title }}
@@ -30,34 +25,27 @@
                                             ?.children?.[0]?.text
                                     )
                                 }}
-                                <img
-                                    src="./../../public/assets/logo-quai.svg"
-                                />
+                                <img src="./../../public/assets/logo-quai.svg" />
                             </div>
                         </div>
                         <div class="btn-join-now">
                             <button @click="handleJoin(item)">Join Now</button>
                         </div>
                         <div class="box-time">
-                            <span
-                                ><i class="fa-solid fa-clock"></i>
+                            <span><i class="fa-solid fa-clock"></i>
                                 {{
                                     item?.attributes?.content?.[1]?.children?.[0]?.text?.replace(
                                         "Time: ",
                                         ""
                                     )
-                                }}</span
-                            >
+                                }}</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <DetailEvent
-                :isDetailEvent="isJoinNow"
-                :detailEvent="detailEvent"
-                @close="isJoinNow = false"
-            />
+            <DetailEvent :isDetailEvent="isJoinNow" :detailEvent="detailEvent" :idUser="idUser"
+                @close="isJoinNow = false" />
 
             <EmptyForm v-if="showEmptyFormEvent" />
         </div>
@@ -76,6 +64,10 @@ export default {
             type: Boolean,
             default: false,
         },
+        idUser: {
+            type: String,
+            required: true,
+        }
     },
     components: {
         Loading,
@@ -198,6 +190,7 @@ export default {
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
+
 .box-desc-event::-webkit-scrollbar {
     display: none;
 }
@@ -222,6 +215,7 @@ export default {
     background-position: center;
     border-radius: 10px;
 }
+
 .box-content-event {
     height: calc(100% - 20px);
     padding: 10px;
@@ -230,26 +224,32 @@ export default {
     justify-content: space-between;
     gap: 10px;
 }
+
 .title-item {
     font-size: 12px;
     font-family: monospace;
 }
+
 .box-pool img {
     margin-left: 3px;
     width: 15px;
 }
+
 .text-pool {
     font-size: 12px;
 }
+
 .img-pool {
     display: flex;
     align-items: center;
 }
+
 .btn-join-now button {
     width: auto;
     border-radius: 10px;
     font-size: 12px;
 }
+
 .box-time {
     font-size: 10px;
     font-family: monospace;

@@ -13,6 +13,10 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    /* background-image: url("./assets/background1.jpg");
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat; */
 }
 
 .spritePosition {

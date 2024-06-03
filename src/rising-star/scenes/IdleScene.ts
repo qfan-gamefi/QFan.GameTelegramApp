@@ -6,6 +6,7 @@ const SKY_TEXT = "sky";
 const GROUND_TEXT = "ground";
 const DUDE_IDLE = "dude_idle";
 const CLOUD = "CLOUD";
+const FIELD = "FIELD";
 const SIZE_CLOUD_PER_FRAME: integer = 768;
 
 export class IdleScene extends Scene {
@@ -20,6 +21,7 @@ export class IdleScene extends Scene {
     player_idle: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
     ball: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
     clouds: Phaser.GameObjects.TileSprite;
+    field: Phaser.GameObjects.TileSprite;
     loaded: Boolean = false;
     fieldSpeed: integer = 50;
     currentFieldX: integer = 0;
@@ -32,6 +34,7 @@ export class IdleScene extends Scene {
         this.load.image(GROUND_TEXT, "./assets/platform.png");
         this.load.image(SKY_TEXT, "./assets/background.jpg");
         this.load.image(CLOUD, "./assets/clouds.png");
+        // this.load.image(FIELD, "./assets/test-co.jpg");
         this.load.spritesheet(DUDE_IDLE, "./assets/dude_idle.png", {
             frameWidth: 67,
             frameHeight: 129,
@@ -43,7 +46,13 @@ export class IdleScene extends Scene {
             this.preload();
         }
         // this.bg = this.add.tileSprite(192, 245, 384, 490, SKY_TEXT);
+        // const windowHeight = window.innerHeight;
+        // const newHeight = windowHeight - windowHeight * 0.25;
         const backgroundImage = this.add.image(0, 0, SKY_TEXT);
+
+        // const newHeightField = windowHeight * 0.25;
+        // const backgroundField = this.add.image(0, 0, FIELD);
+
         this.clouds = this.add.tileSprite(0, 40, 768, 174, CLOUD);
         // Calculate the scaling factors for width and height to fit the viewport
         const scaleX = this.cameras.main.width / backgroundImage.width;
@@ -64,8 +73,15 @@ export class IdleScene extends Scene {
             this.cameras.main.height / 2
         );
 
-        // const screenHeight = this.scale.height;
-        // const platformY = screenHeight - 80; //500
+        // backgroundImage.setOrigin(0, 0);x
+        // backgroundImage.setDisplaySize(window.innerWidth, newHeight);
+
+        // backgroundField.setOrigin(0, 0);
+        // backgroundField.setDisplaySize(window.innerWidth, newHeightField);
+        // backgroundField.y = window.innerHeight - backgroundField.displayHeight;x
+
+        const screenHeight = this.scale.height;
+        const platformY = screenHeight - 80; //500
 
         this.cursors = this.input.keyboard?.createCursorKeys();
         this.platforms = this.physics.add.staticGroup();

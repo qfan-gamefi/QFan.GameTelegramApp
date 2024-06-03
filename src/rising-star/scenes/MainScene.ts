@@ -148,7 +148,8 @@ export class MainScene extends Scene {
         if (!this.loaded) {
             this.preload();
         }
-
+        // const windowHeight = window.innerHeight;
+        // const newHeight = windowHeight - windowHeight * 0.25;
         const backgroundImage = this.add.image(0, 0, SKY_TEXT);
         this.clouds = this.add.tileSprite(0, 40, 768, 174, CLOUD);
 
@@ -169,6 +170,9 @@ export class MainScene extends Scene {
             this.cameras.main.width / 2,
             this.cameras.main.height / 2
         );
+        // backgroundImage.setOrigin(0, 0);x
+        // backgroundImage.setDisplaySize(window.innerWidth, newHeight); x
+
         // this.field.width *  scale
         // const screenHeight = this.scale.height;
         // const platformY = screenHeight - 80;

@@ -64,6 +64,9 @@ export class IdleScene extends Scene {
             this.cameras.main.height / 2
         );
 
+        // const screenHeight = this.scale.height;
+        // const platformY = screenHeight - 80; //500
+
         this.cursors = this.input.keyboard?.createCursorKeys();
         this.platforms = this.physics.add.staticGroup();
         this.platforms.create(192, 500, "ground").setScale(2).refreshBody();
@@ -81,7 +84,7 @@ export class IdleScene extends Scene {
         if (this.clouds.tilePositionX >= SIZE_CLOUD_PER_FRAME) {
             this.clouds.tilePositionX = 0;
         }
-     }
+    }
     createPlayer() {
         const player = this.physics.add.sprite(192, 245, DUDE_IDLE);
 

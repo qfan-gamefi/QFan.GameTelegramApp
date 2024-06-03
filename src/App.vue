@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import Telegram from "vue-tg";
 import MainGame from "./rising-star/MainGame.vue";
-// import Phaser from "phaser";
+import Phaser from "phaser";
 import { ref, toRaw, onMounted } from "vue";
 
 interface PhaserScene {
@@ -12,7 +11,6 @@ const phaserRef: any = ref<{ scene?: PhaserScene }>();
 
 onMounted(() => {
     window.Telegram.WebApp.expand();
-    // alert(JSON.stringify(window.Telegram.WebApp.initDataUnsafe.user));
 });
 </script>
 
@@ -22,6 +20,7 @@ import MissionList from "./components/MissionsList.vue";
 import EventList from "./components/EventList.vue";
 import BoosterForm from "./components/BoosterForm.vue";
 import userService from "./services/userService";
+import EventBus from "./utils/eventBus";
 
 const REF_MESS_PREFIX: string = "start r_";
 export default {
@@ -29,6 +28,8 @@ export default {
         InviteFrens,
         MissionList,
         EventList,
+        BoosterForm,
+        // TemplatePopup,
     },
     data() {
         const telegram_bot_link =
@@ -69,7 +70,7 @@ export default {
                 createdAt: "",
                 updatedAt: "",
                 publishedAt: "",
-                rewardScheduleHour: "",
+                rewardScheduleHour: 0,
             },
             increasePerSecond: 0,
             animatedBalance: 0,
@@ -173,6 +174,8 @@ export default {
                         this.isPopupCode = true;
                     }
                 } else {
+                    console.log(data);
+
                     const resData = data?.data?.[0];
                     this.dataLogin = resData;
                     this.dataQPoint =
@@ -255,13 +258,10 @@ export default {
                 const res = await userService.takeReward(this.idUser!);
                 if (res) {
                     await this.getInfoUser();
-                    // await this.countdownFunc();
                     await this.updateSence();
                 }
             } catch (error) {
                 console.log(error);
-
-                // this.countdownFunc();
             }
         },
         async updateSence() {
@@ -275,11 +275,8 @@ export default {
             const scene = toRaw(phaserRef?.scene);
             const givenDateTimeString = this.dataQPoint.nextTakeRewardTime;
 
-            // Parse the given date-time string to a Date object
             const givenDateTime = new Date(givenDateTimeString);
-            // Get the current date-time in UTC
             const currentDateTime = new Date(new Date().toUTCString());
-            // Calculate the difference in milliseconds
             const differenceInMilliseconds =
                 currentDateTime.getTime() - givenDateTime.getTime();
 
@@ -299,14 +296,11 @@ export default {
                 scene?.scene?.key == "IdleScene" &&
                 differenceInMilliseconds < 0
             ) {
-                // this.isClaim = false;
                 scene.changeScene();
-                // await this.countdownFunc();
             } else if (
                 scene?.scene?.key == "MainScene" &&
                 differenceInMilliseconds > 0
             ) {
-                // this.isClaim = true;
                 scene.changeScene();
             }
         },
@@ -315,13 +309,13 @@ export default {
             return value < 10 ? "0" + value : value;
         },
         countdownFunc() {
-            const totalTime = 1 * 60 * 60 * 1000;
-
-            const rewardTime = new Date(
-                this.dataQPoint.nextTakeRewardTime
-            ).getTime();
-
             if (!this.isClaim) {
+                const nextTime = this.dataQPoint?.rewardScheduleHour;
+                const totalTime = nextTime * 60 * 60 * 1000;
+
+                const rewardTime = new Date(
+                    this.dataQPoint.nextTakeRewardTime
+                ).getTime();
                 const intervalId = setInterval(() => {
                     const currentTime = new Date(
                         new Date().toUTCString()
@@ -344,46 +338,64 @@ export default {
             }
         },
 
-        handleReferal() {
-            this.showEvent = false;
-            this.showMission = false;
-            this.showBooster = false;
-            this.activeButton = "invite";
-            this.showInvite = true;
-        },
-        async closeInvite() {
-            this.showInvite = false;
-            await this.getInfoUser();
-        },
-        closeBooster() {
-            this.activeButton = "";
-            this.showBooster = false;
-        },
-        handleInvite() {
+        handleCopy() {
             this.copyToClipboard();
         },
-        handleBooster() {
-            this.showEvent = false;
-            this.showMission = false;
-            this.showInvite = false;
-            this.activeButton = "booster";
-            this.showBooster = true;
-        },
-        handleMission() {
-            this.showEvent = false;
-            this.showInvite = false;
-            this.showBooster = false;
-            this.activeButton = "mission";
-            this.showMission = true;
-        },
-        handleEvent() {
-            this.showBooster = false;
-            this.showMission = false;
-            this.showInvite = false;
-            this.activeButton = "event";
-            this.showEvent = true;
+
+        handleButtonTab(tab) {
+            Telegram.WebApp.BackButton.show();
+            // if (tab === "booster" || tab === "event") {
+            //     Telegram.WebApp.BackButton.hide();
+            // }
+
+            Telegram.WebApp.BackButton.onClick(() => {
+                this.showMission = false;
+                this.showEvent = false;
+                this.showBooster = false;
+                this.showInvite = false;
+
+                this.getInfoUser();
+                this.activeButton = "";
+                Telegram.WebApp.BackButton.hide();
+            });
+            EventBus.emit("close-detail-event");
+            EventBus.emit("close-stadium");
+
+            const tabMappings = {
+                mission: {
+                    showEvent: false,
+                    showBooster: false,
+                    showInvite: false,
+                    activeButton: "mission",
+                    showMission: true,
+                },
+                event: {
+                    showMission: false,
+                    showBooster: false,
+                    showInvite: false,
+                    activeButton: "event",
+                    showEvent: true,
+                },
+                booster: {
+                    showMission: false,
+                    showEvent: false,
+                    showInvite: false,
+                    activeButton: "booster",
+                    showBooster: true,
+                },
+                invite: {
+                    showMission: false,
+                    showEvent: false,
+                    showBooster: false,
+                    activeButton: "invite",
+                    showInvite: true,
+                },
+            };
+
+            Object.assign(this, tabMappings[tab]);
         },
         async closeMission() {
+            this.activeButton = "";
             this.showMission = false;
             await this.getInfoUser();
         },
@@ -392,10 +404,21 @@ export default {
             this.showEvent = false;
             await this.getInfoUser();
         },
+        async closeInvite() {
+            this.activeButton = "";
+            this.showInvite = false;
+            await this.getInfoUser();
+        },
+        closeBooster() {
+            this.activeButton = "";
+            this.showBooster = false;
+            this.getInfoUser();
+        },
     },
     async mounted() {
+        Telegram.WebApp.ready();
+        Telegram.WebApp.setHeaderColor("#ffffff");
         await this.getInfoUser();
-        // await this.countdownFunc();
     },
     async updated() {
         this.updateSence();
@@ -413,7 +436,7 @@ export default {
         <button class="absolute-training-btn button-decoration">
             START TRAINING
         </button>
-        <div>
+        <!-- <div>
             <button
                 id="login_button"
                 class="btn-login"
@@ -421,7 +444,7 @@ export default {
             >
                 LOGIN
             </button>
-        </div>
+        </div> -->
 
         <div class="container-game">
             <div class="container-info" v-show="isTelegramLogin">
@@ -435,7 +458,7 @@ export default {
                     <img src="./../public/assets/logo.svg" />
                     <div class="balance">
                         <!-- QFP Balance: {{ dataQPoint?.balance }} -->
-                        QFP Balance: {{ animatedBalance }}
+                        Balance: {{ animatedBalance }}
                     </div>
                 </div>
             </div>
@@ -454,13 +477,17 @@ export default {
             <div class="wrap-commit_reward" :style="beforeStyle">
                 <div class="box-info">
                     <div v-if="isClaim" class="box-left-train">
-                        Click "Train" to take + {{ dataQPoint?.rewardAmount }}
+                        Click "Claim" to take +{{
+                            Number(dataQPoint?.rewardAmount) *
+                            dataQPoint?.rewardScheduleHour
+                        }}
                         <img src="./../public/assets/logo.svg" />
                     </div>
 
                     <div v-else class="box-left">
-                        <div class="title">Remain:</div>
-                        <div class="content">{{ countdown }} to train</div>
+                        <div class="content">
+                            Remain {{ countdown }} to claim
+                        </div>
                     </div>
 
                     <div class="box-right">
@@ -469,7 +496,7 @@ export default {
                             @click="handleReward"
                             :disabled="isCountingDown"
                         >
-                            {{ isClaim ? "Claim" : "Train" }}
+                            {{ isClaim ? "Claim" : "Training..." }}
                         </button>
                     </div>
                 </div>
@@ -479,7 +506,11 @@ export default {
         </div>
 
         <div class="box-button">
-            <div class="btn-item" @click="handleMission">
+            <div
+                class="btn-item"
+                @click="handleButtonTab('mission')"
+                :class="{ active: activeButton === 'mission' }"
+            >
                 <div class="item-img">
                     <img src="./../public/assets/button-icons/mission.svg" />
                 </div>
@@ -487,7 +518,7 @@ export default {
             </div>
             <div
                 class="btn-item"
-                @click="handleEvent"
+                @click="handleButtonTab('event')"
                 :class="{ active: activeButton === 'event' }"
             >
                 <div class="item-img">
@@ -497,7 +528,7 @@ export default {
             </div>
             <div
                 class="btn-item"
-                @click="handleBooster"
+                @click="handleButtonTab('booster')"
                 :class="{ active: activeButton === 'booster' }"
             >
                 <div class="item-img">
@@ -510,7 +541,11 @@ export default {
                     Booster
                 </div>
             </div>
-            <div class="btn-item" @click="handleReferal">
+            <div
+                class="btn-item"
+                @click="handleButtonTab('invite')"
+                :class="{ active: activeButton === 'invite' }"
+            >
                 <div class="item-img">
                     <img
                         src="./../public/assets/button-icons/invite-friend.svg"
@@ -553,33 +588,32 @@ export default {
         <MissionList
             :visible="showMission"
             @close="closeMission"
-            @invite="handleMission"
             :idUser="idUser"
         />
+        <!-- @invite="handleButtonTab('mission')" -->
 
         <EventList
             :visible="showEvent"
             @close="closeEvent"
-            @invite="handleEvent"
             :idUser="idUser"
             @openCoomSoon="showPopupCoomingSoon"
         />
-
+        <!-- @invite="handleButtonTab('event')" -->
         <InviteFrens
             :visible="showInvite"
             @close="closeInvite"
-            @invite="handleInvite"
+            @invite="handleCopy"
             :idUser="idUser"
+            :rewardAmount="dataQPoint.rewardAmount"
         />
 
         <BoosterForm
             :visible="showBooster"
             @close="closeBooster"
-            @invite="handleBooster"
-            :balance="dataQPoint.balance"
-            :rewardAmount="dataQPoint.rewardAmount"
             :rewardScheduleHour="dataQPoint.rewardScheduleHour"
+            :idUser="idUser"
         />
+        <!-- @invite="handleButtonTab('booster')" -->
 
         <div
             :class="[

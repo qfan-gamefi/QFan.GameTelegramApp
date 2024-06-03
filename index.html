@@ -1,20 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/png" href="/favicon.png" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="/style.css" />
 
-<head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/style.css" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap"
+            rel="stylesheet"
+        />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap"
-        rel="stylesheet" />
-
-    <title>Phaser Vue Template</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script>
+        <title>Phaser Vue Template</title>
+        <script src="https://telegram.org/js/telegram-web-app.js"></script>
+        <!-- <script>
         const myHeaders = new Headers();
         myHeaders.append("Content-Type", "application/json");
 
@@ -30,24 +31,32 @@
         };
 
         fetch(
-            "https://api.telegram.org/bot6815564492:AAHq_HhL8PDPvreGid0pBoCt6MssEWyyyxo/sendMessage",
-            requestOptions
-        )
+                "https://api.telegram.org/bot:AAHq_HhL8PDPvreGid0pBoCt6MssEWyyyxo/sendMessage",
+                requestOptions
+            )
             .then((response) => response.text())
             .then((result) => console.log(result))
             .catch((error) => console.error(error));
-    </script>
-</head>
+    </script> -->
+    </head>
 
-<body>
-    <span
-        style="position: absolute; top: 65px; left: 310px; z-index: 999; font-size: 8px; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;">Version:
-        24.5.27.1.1(Beta)
-    </span>
-    <div id="app">
-        <div id="game-container"></div>
-    </div>
-    <script type="module" src="src/main.ts"></script>
-</body>
-
+    <body>
+        <span
+            style="
+                position: absolute;
+                top: 1%;
+                right: 1%;
+                z-index: 999;
+                font-size: 8px;
+                font-family: system-ui, -apple-system, BlinkMacSystemFont,
+                    'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans',
+                    'Helvetica Neue', sans-serif;
+            "
+            >Version: 24.5.1.1(Beta)
+        </span>
+        <div id="app">
+            <div id="game-container"></div>
+        </div>
+        <script type="module" src="src/main.ts"></script>
+    </body>
 </html>

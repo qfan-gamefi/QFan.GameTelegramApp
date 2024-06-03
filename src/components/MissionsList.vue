@@ -1,19 +1,16 @@
 <template>
     <div class="popup-mission" v-if="visible">
         <div class="box-mission">
-            <div @click="$emit('close')" class="close-btn">
-                <img src="./../../public/assets/back.svg" />
-                Back
-            </div>
+            <!-- <div @click="$emit('close')" class="close-home">
+                <i class="fa-solid fa-rectangle-xmark"></i>
+            </div> -->
 
             <div class="box-content-mission">
-                <div class="box-title">Missions</div>
-
                 <Loading :loading="loading" />
 
                 <div class="box-desc-mission" v-dragscroll v-if="!loading">
                     <div
-                        class="desc-item"
+                        class="desc-item-mission"
                         v-for="item in missionData"
                         :key="item?.id"
                         :class="{ 'blur-background': item.isStatus }"
@@ -27,9 +24,9 @@
                                 <div class="item-title-mission">
                                     {{ item?.attributes?.title }}
                                 </div>
-                                <div class="left-desc">
+                                <div class="left-desc t-primary-color">
                                     +{{ item?.attributes?.rewardAmount }}
-                                    <img src="./../../public/assets/logo.jpg" />
+                                    <img src="./../../public/assets/logo.svg" />
                                 </div>
                             </div>
                         </div>
@@ -69,6 +66,7 @@
 
 <script>
 import userService from "../services/userService";
+import { sortMissions } from "../utils";
 import Loading from "./LoadingForm.vue";
 import { toRaw } from "vue";
 
@@ -97,7 +95,6 @@ export default {
         return {
             loading: true,
             missionData: null,
-            iframeSrc: "",
             buttonText: [],
             missionRewardData: [],
             loadingBtn: [],
@@ -118,9 +115,6 @@ export default {
         }
     },
     methods: {
-        openInIframe(url) {
-            this.iframeSrc = url;
-        },
         handleMission() {
             this.$emit("mission");
         },
@@ -138,23 +132,6 @@ export default {
                     console.error("Error claiming mission:", error);
                 });
         },
-        // async fetchMission(idMission, index) {
-        //     let randomSeconds = Math.floor(Math.random() * 5);
-        //     this.buttonText[index] = `Verifying`;
-        //     this.loadingBtn[index] = true;
-
-        //     const countdown = setInterval(() => {
-        //         if (randomSeconds > 0) {
-        //             this.loadingBtn[index] = true;
-        //             this.buttonText[index] = `Verifying`;
-        //             randomSeconds--;
-        //         } else {
-        //             this.loadingBtn[index] = false;
-        //             clearInterval(countdown);
-        //             this.autoClaim(idMission);
-        //         }
-        //     }, 1000);
-        // },
 
         async fetchMissionData() {
             try {
@@ -167,14 +144,11 @@ export default {
                     res?.data.forEach((item) => {
                         this.buttonText[item?.id] = "Go";
                     });
-                    // this.buttonText = res?.data?.map(() => "Go");
                 }
             } catch (error) {
                 this.missionData = [];
             } finally {
-                setTimeout(() => {
-                    this.loading = false;
-                }, 300);
+                this.loading = false;
             }
         },
         async fetchListMissionReward() {
@@ -183,16 +157,13 @@ export default {
                 this.missionRewardData = res.data;
 
                 if (res) {
-                    // const lissMiss = this.missionData;
                     const rawMissions = toRaw(this.missionData);
 
                     rawMissions.forEach((mission) => {
-                        const matchingReward = toRaw(
-                            this.missionRewardData
-                        ).find(
-                            (reward) => reward?.attributes?.refId == mission?.id
+                        const matchingReward = res.data.find(
+                            (reward) =>
+                                Number(reward?.attributes?.refId) == mission?.id
                         );
-
                         if (matchingReward) {
                             if (
                                 matchingReward?.attributes?.status ==
@@ -215,33 +186,8 @@ export default {
                         }
                     });
 
-                    const sortedMissions = rawMissions.sort((a, b) => {
-                        if (
-                            a.status === "COMPLETED" &&
-                            b.status !== "COMPLETED"
-                        ) {
-                            return 1;
-                        } else if (
-                            a.status !== "COMPLETED" &&
-                            b.status === "COMPLETED"
-                        ) {
-                            return -1;
-                        } else if (
-                            a.status === "PROCESSING" &&
-                            b.status !== "PROCESSING"
-                        ) {
-                            return 1;
-                        } else if (
-                            a.status !== "PROCESSING" &&
-                            b.status === "PROCESSING"
-                        ) {
-                            return -1;
-                        } else {
-                            return 0;
-                        }
-                    });
-
-                    this.missionData = sortedMissions;
+                    const sortedMissions = sortMissions(rawMissions);
+                    this.missionData = [...sortedMissions];
                 }
             } catch (error) {
                 this.missionRewardData = [];
@@ -258,19 +204,20 @@ export default {
 
 <style>
 .popup-mission {
-    height: 100%;
+    height: calc(100% - 56px);
     position: absolute;
     width: 100%;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: #0085d2;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    top: 0%;
     z-index: 999;
-    animation: fadeIn 0.1s ease forwards;
+    animation: fadeInMission 0.1s ease forwards;
+    color: #fff;
+    background-image: url("./../../public/assets/event/background-event.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
 }
 
-@keyframes fadeIn {
+@keyframes fadeInMission {
     0% {
         opacity: 0;
         transform: translate(-50%, -50%) scale(0.5);
@@ -278,7 +225,7 @@ export default {
 
     100% {
         opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
+        transform: translate(0%, 0%) scale(1);
     }
 }
 
@@ -287,63 +234,24 @@ export default {
     height: calc(100% - 40px);
 }
 
-.box-content-mission .box-title {
-    margin: 10px 0;
-}
-
-.box-title {
-    text-shadow: 1px 1px 0 #9f8900, -1px -1px 0 #9f8900, 1px -1px 0 #9f8900,
-        -1px 1px 0 #9f8900, 1px 0 0 #9f8900, -1px 0 0 #9f8900, 0 1px 0 #9f8900,
-        0 -1px 0 #9f8900;
-}
-
 .box-content-mission {
-    height: calc(100% - 35px);
+    height: 100%;
 }
 
 .box-desc-mission {
-    background: #67bdef;
-    border-radius: 10px;
-    max-height: calc(100% - 75px);
+    max-height: 100%;
     overflow-y: auto;
     animation: fadeInDesc 0.1s ease forwards;
     scrollbar-width: none;
     -ms-overflow-style: none;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 .box-desc-mission::-webkit-scrollbar {
     display: none;
 }
-
-/* .box-desc::-webkit-scrollbar-track {
-    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-    background-color: #2b2b2b;
-}
-
-.box-desc::-webkit-scrollbar {
-    width: 8px;
-    background-color: #2b2b2b;
-}
-
-.box-desc::-webkit-scrollbar-thumb {
-    background-color: #ff7f50;
-    border-radius: 10px;
-    border: 2px solid #2b2b2b;
-
-    background-image: -webkit-linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0.2) 25%,
-        transparent 25%,
-        transparent 50%,
-        rgba(255, 255, 255, 0.2) 50%,
-        rgba(255, 255, 255, 0.2) 75%,
-        transparent 75%,
-        transparent
-    );
-}
-
-.box-desc::-webkit-scrollbar-thumb:hover {
-    background-color: #ffa07a;
-} */
 
 @keyframes fadeInDesc {
     0% {
@@ -357,23 +265,20 @@ export default {
     }
 }
 
-.desc-item {
+.desc-item-mission {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px;
+    padding: 15px;
     font-size: 12px;
     font-family: monospace;
-    border-bottom: 1px solid #ccc;
-}
-
-.desc-item:last-child {
-    border-bottom: none;
+    border-radius: 10px;
+    background-color: #00256c;
 }
 
 .blur-background {
-    background: rgba(0, 0, 0, 25%);
-    opacity: 0.6;
+    background: #00256c;
+    opacity: 0.8;
 }
 
 .item-left {
@@ -423,27 +328,14 @@ export default {
     text-decoration: none;
     color: #fff;
 }
-
+.item-right img {
+    width: 20px;
+}
 .item-right button {
     font-size: 10px;
     padding: 10px 5px;
     border: none;
 }
-
-.close-btn {
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    font-size: 13px;
-    border-bottom: 1px solid #fff;
-    padding-bottom: 20px;
-    margin: 0 -20px;
-}
-
-.close-btn img {
-    margin-left: 20px;
-}
-
 .mission-btn {
     border-radius: 10px;
 }

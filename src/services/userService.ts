@@ -80,7 +80,33 @@ const userService = {
         return res.data;
     },
     async getListBooster() {
-        const res = await axiosInstance.get(`bootsters?populate=*`);
+        const res = await axiosInstance.get(`boosters?populate=*`);
+        return res.data;
+    },
+    async getConfiguration() {
+        const res = await axiosInstance.get(`configuration`);
+        return res.data;
+    },
+    async getBoosterTransaction(id: string) {
+        const res = await axiosInstance.get(
+            `booster-transactions?populate[booster][populate]=*&populate[player][populate]=*&filters[player][playerId]=${id}&filters[boosterType]=SPEED&sort[1]=id:desc&pagination[pageSize]=1`
+        );
+        return res.data;
+    },
+    async getBoosterAmount(id: string) {
+        const res = await axiosInstance.get(
+            `booster-transactions?populate[booster][populate]=*&populate[player][populate]=*&filters[player][playerId]=${id}&filters[boosterType]=AMOUNT&sort[1]=id:desc&pagination[pageSize]=1`
+        );
+        return res.data;
+    },
+    async postUplevel(id: string, type: string) {
+        const dataForm = {
+            data: {
+                playerId: id,
+                boosterType: type,
+            },
+        };
+        const res = await axiosInstance.post(`booster/upLevel`, dataForm);
         return res.data;
     },
 };

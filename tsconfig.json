@@ -1,11 +1,19 @@
 {
-  "files": [],
-  "references": [
-    {
-      "path": "./tsconfig.node.json"
+    "files": [],
+    "references": [
+        {
+            "path": "./tsconfig.node.json"
+        },
+        {
+            "path": "./tsconfig.app.json"
+        }
+    ],
+    "compilerOptions": {
+        "allowJs": true,
+        "noImplicitAny": false,
+        "noEmit": true,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true
     },
-    {
-      "path": "./tsconfig.app.json"
-    }
-  ]
+    "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"]
 }

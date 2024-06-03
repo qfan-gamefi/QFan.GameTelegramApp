@@ -3,7 +3,16 @@
     width: 100%;
     justify-content: space-around;
     background-color: #69769c;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
+    /* position: absolute;
+    bottom: 2%;
+    left: 0%; */
+}
+
+.container {
+    /* width: 100%; */
+    max-width: 384px;
+    position: relative;
 }
 
 .btn-item {
@@ -18,8 +27,6 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    /* box-shadow: inset 2px 2px 3px #21305ad9, inset -2px -2px 3px #21305ad9,
-        inset -2px 2px 3px #21305ad9, inset 2px -2px 3px #21305ad9; */
 }
 
 .btn-item:last-child {
@@ -49,6 +56,7 @@
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
     margin-top: -5px;
+    border-top: 1px solid #8c8181;
 }
 
 .item-img img {
@@ -62,6 +70,12 @@
     text-shadow: 1px 1px 0 #9f8900, -1px -1px 0 #9f8900, 1px -1px 0 #9f8900,
         -1px 1px 0 #9f8900, 1px 0 0 #9f8900, -1px 0 0 #9f8900, 0 1px 0 #9f8900,
         0 -1px 0 #9f8900;
+}
+
+@media screen and (max-width: 360px) {
+    .box-button .item-title {
+        font-size: 8px;
+    }
 }
 
 .booster {
@@ -130,10 +144,6 @@
     font-size: 13px;
 }
 
-.wrap-score {
-    margin: 5px;
-}
-
 .wrap-username {
     margin: 5px;
 }
@@ -184,11 +194,6 @@
 
 .full-width {
     width: 100%;
-}
-
-.container {
-    width: 384px;
-    position: relative;
 }
 
 .wOne3rd {
@@ -284,10 +289,10 @@
 .wrap-score {
     width: 70%;
     position: absolute;
-    top: 13%;
+    top: 15%;
     left: 50%;
     transform: translate(-50%, -50%);
-    /* padding: 30px; */
+    margin: 5px;
     border-radius: 10px;
 }
 
@@ -330,7 +335,7 @@
     border-radius: 10px;
     border: none;
     width: auto;
-    font-size: 14px;
+    font-size: 10px;
 }
 
 .wrap-commit_reward::after {
@@ -360,13 +365,13 @@
 }
 
 .box-left-train {
-    font-size: 10px;
+    font-size: 13px;
     align-items: center;
     display: flex;
 }
 
 .box-left-train img {
-    width: 20px;
+    width: 18px;
     border-radius: 5px;
     margin-left: 3px;
 }

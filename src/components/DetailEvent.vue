@@ -88,7 +88,7 @@
                                     'bet-lose': indexSide === 2,
                                 }"
                             >
-                                <v-btn @click="handleJoin(indexSide)">{{
+                                <v-btn @click="handleIndex(indexSide)">{{
                                     side
                                 }}</v-btn>
                             </v-btn-toggle>
@@ -97,7 +97,7 @@
                         <div class="team-predict">Team Predict</div>
                         <div class="predict-point">
                             <button
-                                @click="handleJoin(item)"
+                                @click="handleJoin"
                                 class="predict-point-content"
                             >
                                 Predict 200
@@ -196,6 +196,7 @@ export default {
             games: [],
             leaderboard: [],
             history: [],
+            indexBtn: null,
         };
     },
     async mounted() {
@@ -207,8 +208,14 @@ export default {
         },
     },
     methods: {
-        handleJoin(index) {
-            console.log(index); // đây là index 0 1 2
+        handleIndex(index) {
+            this.indexBtn = index;
+        },
+        handleJoin() {
+            console.log(this.indexBtn);
+            // nếu k đc thì toRaw(this.indexBtn) import { toRaw } from "vue";
+            // đây là index 0 1 2
+
             // Thêm giúp a a cái side nó là index của cái item.BidSideNames.split(',') xong call add bidding
             // const data = {
             //     gameId: 1,

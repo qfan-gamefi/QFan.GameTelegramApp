@@ -2,13 +2,9 @@
     <div class="popup-detail-event" v-if="isDetailEvent">
         <Loading :loading="loading" />
         <div class="box-detail-event">
-            <div
-                class="banner-event"
-                :key="index"
-                :style="{
-                    backgroundImage: `url(https://qfan-api.qcloud.asia${detailEvent?.attributes?.banner?.data?.attributes?.formats?.small?.url})`,
-                }"
-            >
+            <div class="banner-event" :key="index" :style="{
+                backgroundImage: `url(https://qfan-api.qcloud.asia${detailEvent?.attributes?.banner?.data?.attributes?.formats?.small?.url})`,
+            }">
                 <div class="text-banner">
                     <div class="title-banner">
                         {{ detailEvent?.attributes?.title }}
@@ -26,37 +22,29 @@
                         </div>
                     </div>
                     <div class="box-time">
-                        <span
-                            ><i class="fa-solid fa-clock"></i>
+                        <span><i class="fa-solid fa-clock"></i>
                             {{
                                 detailEvent?.attributes?.content?.[1]?.children?.[0]?.text?.replace(
                                     "Time: ",
                                     ""
                                 )
-                            }}</span
-                        >
+                            }}</span>
+                    </div>
+                    <div class="box-time">
+                        <span>Your Points:{{ this.userPoint }}</span>
                     </div>
                 </div>
                 <div class="btn-banner">
-                    <div
-                        class="btn-item-banner"
-                        :class="{ active: activeButton === 'Predict' }"
-                        @click="setActiveButton('Predict')"
-                    >
+                    <div class="btn-item-banner" :class="{ active: activeButton === 'Predict' }"
+                        @click="setActiveButton('Predict')">
                         Predict
                     </div>
-                    <div
-                        class="btn-item-banner"
-                        :class="{ active: activeButton === 'Leaderboard' }"
-                        @click="setActiveButton('Leaderboard')"
-                    >
+                    <div class="btn-item-banner" :class="{ active: activeButton === 'Leaderboard' }"
+                        @click="setActiveButton('Leaderboard')">
                         Leaderboard
                     </div>
-                    <div
-                        class="btn-item-banner"
-                        :class="{ active: activeButton === 'HistoryReward' }"
-                        @click="setActiveButton('HistoryReward')"
-                    >
+                    <div class="btn-item-banner" :class="{ active: activeButton === 'HistoryReward' }"
+                        @click="setActiveButton('HistoryReward')">
                         History & Reward
                     </div>
                 </div>
@@ -64,11 +52,7 @@
 
             <div class="list-matches" v-if="activeButton === 'Predict'">
                 <div class="box-matches">
-                    <div
-                        class="matches-item"
-                        v-for="(item, index) in games"
-                        :key="index"
-                    >
+                    <div class="matches-item" v-for="(item, index) in games" :key="index">
                         <div class="matches-title">
                             {{ item.Description }}
                         </div>
@@ -77,18 +61,14 @@
                         </div>
 
                         <div class="box-btn-bet">
-                            <v-btn-toggle
-                                v-for="(
+                            <v-btn-toggle v-for="(
                                     side, indexSide
-                                ) in item.BidSideNames.split(',')"
-                                :key="indexSide"
-                                :class="{
+                                ) in item.BidSideNames.split(',')" :key="indexSide" :class="{
                                     'bet-win': indexSide === 0,
                                     'bet-draw': indexSide === 1,
                                     'bet-lose': indexSide === 2,
-                                }"
-                            >
-                                <v-btn @click="handleJoin(indexSide)">{{
+                                }">
+                                <v-btn @click="handleSelectBid(indexSide, item)">{{
                                     side
                                 }}</v-btn>
                             </v-btn-toggle>
@@ -96,10 +76,7 @@
 
                         <div class="team-predict">Team Predict</div>
                         <div class="predict-point">
-                            <button
-                                @click="handleJoin(item)"
-                                class="predict-point-content"
-                            >
+                            <button @click="handleJoin(item)" class="predict-point-content">
                                 Predict 200
                                 <img src="./../../public/assets/logo.svg" />
                             </button>
@@ -109,11 +86,7 @@
             </div>
 
             <div class="list-leaderboard" v-if="activeButton === 'Leaderboard'">
-                <div
-                    class="box-leaderboard"
-                    v-for="(item, index) in leaderboard"
-                    :key="index"
-                >
+                <div class="box-leaderboard" v-for="(item, index) in leaderboard" :key="index">
                     <div class="leaderboard-item">
                         <div class="content-your-rank">
                             <div class="your-rank-lv position-1">
@@ -145,18 +118,14 @@
                 </div> -->
             </div>
             <div class="list-matches" v-if="activeButton === 'HistoryReward'">
-                <div
-                    class="box-leaderboard"
-                    v-for="(item, index) in history"
-                    :key="index"
-                >
+                <div class="box-matches" v-for="(item, index) in history" :key="index">
                     <div class="matches-item">
                         <div class="your-name">
                             CreatedAt : {{ item.createdAt }} UserId :
-                            {{ item.UserId }} Value : {{ item.Value }} Status :
-                            {{ item.Status }} GameId : {{ item.GameId }} Side :
+                            {{ item.UserId }} GameId : {{ item.GameId }} Side :
                             {{ item.Side }} ValueType : {{ item.ValueType }}
                         </div>
+                        <span>Value : {{ item.Value }} Status : {{ item.Status }}</span>
                     </div>
                 </div>
             </div>
@@ -196,6 +165,7 @@ export default {
             games: [],
             leaderboard: [],
             history: [],
+            userPoint: 0
         };
     },
     async mounted() {
@@ -207,17 +177,24 @@ export default {
         },
     },
     methods: {
-        handleJoin(index) {
-            console.log(index); // đây là index 0 1 2
+        handleSelectBid(index, item) {
+            item['selectedSide'] = index;
+        },
+        handleJoin(item) {
             // Thêm giúp a a cái side nó là index của cái item.BidSideNames.split(',') xong call add bidding
-            // const data = {
-            //     gameId: 1,
-            //     userId: this.idUser,
-            //     value: 200,
-            //     valueType: "QFC",
-            //     side: 0
-            // }
-            //this.games = betService.addBidding(data);
+            if (item['selectedSide'] !== undefined) {
+                const data = {
+                    gameId: item.id,
+                    userId: this.idUser,
+                    value: 200,
+                    valueType: "QFC",
+                    side: item['selectedSide']
+                }
+                this.games = betService.addBidding(data);
+            }
+            else {
+                alert('Choose your side');
+            }
         },
         extractNumber(text) {
             const regex = /\d{1,3}(?:,\d{3})*/;
@@ -240,7 +217,11 @@ export default {
                     where: { UserId: this.idUser },
                     order: [["createdAt", "DESC"]],
                 });
-                console.log(JSON.stringify(this.leadersboard));
+                const userPointdata = await betService.getFilterData(
+                    "balancePoints",
+                    { where: { UserId: this.idUser } }
+                );
+                this.userPoint = userPointdata && userPointdata.length != 0 ? userPointdata[0]['Balance'] : 0;
             } catch (error) {
                 console.error("Error fetching data:", error);
             } finally {
@@ -387,6 +368,7 @@ export default {
     justify-content: center;
     gap: 10px;
 }
+
 .bet-win {
     width: min-content;
     background-color: #04cc00;

@@ -36,6 +36,9 @@
                             }}</span
                         >
                     </div>
+                    <div class="box-time">
+                        <span>Your Points:{{ this.userPoint }}</span>
+                    </div>
                 </div>
                 <div class="btn-banner">
                     <div
@@ -86,29 +89,31 @@
                                     'bet-win': indexSide === 0,
                                     'bet-draw': indexSide === 1,
                                     'bet-lose': indexSide === 2,
+                                    selected: selectedIndex === indexSide,
                                 }"
                             >
-                                <v-btn @click="handleIndex(indexSide)">{{
-                                    side
-                                }}</v-btn>
+                                <v-btn
+                                    @click="handleSelectBid(indexSide, item)"
+                                    >{{ side }}</v-btn
+                                >
                             </v-btn-toggle>
                         </div>
 
-                        <div class="team-predict">Team Predict</div>
+                        <!-- <div class="team-predict">Team Predict</div> -->
                         <div class="predict-point">
-                            <button
-                                @click="handleJoin"
+                            <div
+                                @click="handleJoin(item)"
                                 class="predict-point-content"
                             >
                                 Predict 200
                                 <img src="./../../public/assets/logo.svg" />
-                            </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="list-leaderboard" v-if="activeButton === 'Leaderboard'">
+            <div class="list-matches" v-if="activeButton === 'Leaderboard'">
                 <div
                     class="box-leaderboard"
                     v-for="(item, index) in leaderboard"
@@ -145,18 +150,21 @@
                 </div> -->
             </div>
             <div class="list-matches" v-if="activeButton === 'HistoryReward'">
-                <div
-                    class="box-leaderboard"
-                    v-for="(item, index) in history"
-                    :key="index"
-                >
-                    <div class="matches-item">
+                <div class="box-matches">
+                    <div
+                        class="matches-item"
+                        v-for="(item, index) in history"
+                        :key="index"
+                    >
                         <div class="your-name">
                             CreatedAt : {{ item.createdAt }} UserId :
-                            {{ item.UserId }} Value : {{ item.Value }} Status :
-                            {{ item.Status }} GameId : {{ item.GameId }} Side :
+                            {{ item.UserId }} GameId : {{ item.GameId }} Side :
                             {{ item.Side }} ValueType : {{ item.ValueType }}
                         </div>
+                        <span
+                            >Value : {{ item.Value }} Status :
+                            {{ item.Status }}</span
+                        >
                     </div>
                 </div>
             </div>
@@ -197,6 +205,8 @@ export default {
             leaderboard: [],
             history: [],
             indexBtn: null,
+            userPoint: 0,
+            selectedIndex: null,
         };
     },
     async mounted() {
@@ -208,23 +218,24 @@ export default {
         },
     },
     methods: {
-        handleIndex(index) {
-            this.indexBtn = index;
+        handleSelectBid(index, item) {
+            item["selectedSide"] = index;
+            this.selectedIndex = index;
         },
-        handleJoin() {
-            console.log(this.indexBtn);
-            // nếu k đc thì toRaw(this.indexBtn) import { toRaw } from "vue";
-            // đây là index 0 1 2
-
+        async handleJoin(item) {
             // Thêm giúp a a cái side nó là index của cái item.BidSideNames.split(',') xong call add bidding
-            // const data = {
-            //     gameId: 1,
-            //     userId: this.idUser,
-            //     value: 200,
-            //     valueType: "QFC",
-            //     side: 0
-            // }
-            //this.games = betService.addBidding(data);
+            if (item["selectedSide"] !== undefined) {
+                const data = {
+                    gameId: item.id,
+                    userId: this.idUser,
+                    value: 200,
+                    valueType: "QFC",
+                    side: item["selectedSide"],
+                };
+                this.games = betService.addBidding(data);
+            } else {
+                alert("Choose your side");
+            }
         },
         extractNumber(text) {
             const regex = /\d{1,3}(?:,\d{3})*/;
@@ -247,7 +258,14 @@ export default {
                     where: { UserId: this.idUser },
                     order: [["createdAt", "DESC"]],
                 });
-                console.log(JSON.stringify(this.leadersboard));
+                const userPointdata = await betService.getFilterData(
+                    "balancePoints",
+                    { where: { UserId: this.idUser } }
+                );
+                this.userPoint =
+                    userPointdata && userPointdata.length != 0
+                        ? userPointdata[0]["Balance"]
+                        : 0;
             } catch (error) {
                 console.error("Error fetching data:", error);
             } finally {
@@ -331,7 +349,7 @@ export default {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 10px;
+    gap: 5px;
 }
 
 .title-banner {
@@ -357,7 +375,7 @@ export default {
 
 .list-matches {
     padding: 10px 20px;
-    height: calc(100% - 164px);
+    height: calc(100% - 200px);
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -394,6 +412,7 @@ export default {
     justify-content: center;
     gap: 10px;
 }
+
 .bet-win {
     width: min-content;
     background-color: #04cc00;
@@ -414,6 +433,10 @@ export default {
     background-color: #d40000;
     padding: 5px 10px;
     border-radius: 5px;
+}
+.selected {
+    /* border: 2px solid #000; */
+    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5);
 }
 
 .team-predict {

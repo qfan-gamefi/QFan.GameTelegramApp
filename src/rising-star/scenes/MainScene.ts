@@ -148,8 +148,9 @@ export class MainScene extends Scene {
         if (!this.loaded) {
             this.preload();
         }
-        // const windowHeight = window.innerHeight;
-        // const newHeight = windowHeight - windowHeight * 0.25;
+
+        const windowHeight = window.innerHeight;
+        const newHeight = windowHeight - windowHeight * 0.27;
         const backgroundImage = this.add.image(0, 0, SKY_TEXT);
         this.clouds = this.add.tileSprite(0, 40, 768, 174, CLOUD);
 
@@ -166,32 +167,46 @@ export class MainScene extends Scene {
             backgroundImage.height * scale
         );
         // Center the background image
-        backgroundImage.setPosition(
-            this.cameras.main.width / 2,
-            this.cameras.main.height / 2
-        );
-        // backgroundImage.setOrigin(0, 0);x
-        // backgroundImage.setDisplaySize(window.innerWidth, newHeight); x
+        // backgroundImage.setPosition(
+        //     this.cameras.main.width / 2,
+        //     this.cameras.main.height / 2
+        // );
+        backgroundImage.setOrigin(0, 0);
+        backgroundImage.setDisplaySize(window.innerWidth, window.innerHeight);
 
         // this.field.width *  scale
         // const screenHeight = this.scale.height;
         // const platformY = screenHeight - 80;
 
+        // this.field = this.add.tileSprite(
+        //     0,
+        //     445,
+        //     MAX_FIELD_WIDTH,
+        //     MAX_FIELD_HEIGHT,
+        //     FIELD
+        // );
+        // this.field.setScale((384 * 4) / MAX_FIELD_WIDTH, 84 / MAX_FIELD_HEIGHT);
+        const newFieldHeight = window.innerHeight * 0.27;
+        const scaleX1 = (window.innerWidth * 4) / MAX_FIELD_WIDTH;
+        const scaleY1 = newFieldHeight / MAX_FIELD_HEIGHT;
+        const bottomY = window.innerHeight - newFieldHeight / 2;
         this.field = this.add.tileSprite(
-            0,
-            445,
+            window.innerWidth,
+            bottomY,
             MAX_FIELD_WIDTH,
             MAX_FIELD_HEIGHT,
             FIELD
         );
-        this.field.setScale((384 * 4) / MAX_FIELD_WIDTH, 84 / MAX_FIELD_HEIGHT);
+        this.field.setScale(scaleX1, scaleY1);
+        this.field.setAlpha(1);
 
         this.cursors = this.input.keyboard?.createCursorKeys();
         this.platforms = this.physics.add.staticGroup();
 
         // this.add.image(400, 300, SKY_TEXT);468
+
         this.platforms
-            .create(192, 500, "ground") //500
+            .create(500, windowHeight - windowHeight * 0.1, "ground") //500
             .setScale(2)
             .refreshBody();
         this.platforms.setAlpha(0);
@@ -291,7 +306,8 @@ export class MainScene extends Scene {
         return points;
     }
     createBall() {
-        const ball = this.physics.add.sprite(400, 100, BALL);
+        const ballX = window.innerWidth;
+        const ball = this.physics.add.sprite(ballX - ballX * 0.1, 245, BALL);
         ball.setBounce(0.5);
         this.anims.create({
             key: "right-ball",
@@ -303,7 +319,13 @@ export class MainScene extends Scene {
         return ball;
     }
     createPlayer() {
-        const player = this.physics.add.sprite(132, 245, DUDE_RUN);
+        const playX = window.innerWidth;
+        // const player = this.physics.add.sprite(132, 245, DUDE_RUN);
+        const player = this.physics.add.sprite(
+            playX - playX * 0.6,
+            245,
+            DUDE_RUN
+        );
 
         this.anims.create({
             key: "left",

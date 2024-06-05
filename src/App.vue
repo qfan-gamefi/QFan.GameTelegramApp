@@ -50,12 +50,15 @@ export default {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            idUser: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
-            telegram_bot_link:
-                telegram_bot_link +
-                    window.Telegram.WebApp.initDataUnsafe.user?.id || "",
-            // idUser: "5314337740",
-            // telegram_bot_link: telegram_bot_link + 5314337740 || "",
+            // idUser: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
+            // telegram_bot_link:
+            //     telegram_bot_link +
+            //         window.Telegram.WebApp.initDataUnsafe.user?.id || "",
+            idUser: "1927324767",
+            telegram_bot_link: telegram_bot_link + 1927324767 || "",
+
+            // 1927324767 a
+            //2123800227
 
             showCoomingSoon: false,
             isCopiedToClipboard: false,

@@ -7,7 +7,7 @@ const GROUND_TEXT = "ground";
 const DUDE_IDLE = "dude_idle";
 const CLOUD = "CLOUD";
 const FIELD = "FIELD";
-const SIZE_CLOUD_PER_FRAME: integer = 768;
+const SIZE_CLOUD_PER_FRAME: integer = 2000;
 
 export class IdleScene extends Scene {
     background: GameObjects.Image;
@@ -46,14 +46,16 @@ export class IdleScene extends Scene {
             this.preload();
         }
         // this.bg = this.add.tileSprite(192, 245, 384, 490, SKY_TEXT);
-        // const windowHeight = window.innerHeight;
-        // const newHeight = windowHeight - windowHeight * 0.25;
+        const windowHeight = window.innerHeight;
+        const windowWidth = window.innerWidth;
+
+        const newHeight = windowHeight - windowHeight * 0.27;
         const backgroundImage = this.add.image(0, 0, SKY_TEXT);
 
-        // const newHeightField = windowHeight * 0.25;
+        // const newHeightField = windowHeight * 0.27;
         // const backgroundField = this.add.image(0, 0, FIELD);
 
-        this.clouds = this.add.tileSprite(0, 40, 768, 174, CLOUD);
+        this.clouds = this.add.tileSprite(0, 40, 2000, 174, CLOUD);
         // Calculate the scaling factors for width and height to fit the viewport
         const scaleX = this.cameras.main.width / backgroundImage.width;
         const scaleY = this.cameras.main.height / backgroundImage.height;
@@ -68,24 +70,24 @@ export class IdleScene extends Scene {
         );
 
         // Center the background image
-        backgroundImage.setPosition(
-            this.cameras.main.width / 2,
-            this.cameras.main.height / 2
-        );
+        // backgroundImage.setPosition(
+        //     this.cameras.main.width / 2,
+        //     this.cameras.main.height / 2
+        // );
 
-        // backgroundImage.setOrigin(0, 0);x
-        // backgroundImage.setDisplaySize(window.innerWidth, newHeight);
+        backgroundImage.setOrigin(0, 0);
+        backgroundImage.setDisplaySize(windowWidth, windowHeight);
 
         // backgroundField.setOrigin(0, 0);
         // backgroundField.setDisplaySize(window.innerWidth, newHeightField);
-        // backgroundField.y = window.innerHeight - backgroundField.displayHeight;x
-
-        const screenHeight = this.scale.height;
-        const platformY = screenHeight - 80; //500
+        // backgroundField.y = window.innerHeight - backgroundField.displayHeight;
 
         this.cursors = this.input.keyboard?.createCursorKeys();
         this.platforms = this.physics.add.staticGroup();
-        this.platforms.create(192, 500, "ground").setScale(2).refreshBody();
+        this.platforms
+            .create(192, windowHeight - windowHeight * 0.1, "ground")
+            .setScale(2)
+            .refreshBody();
         this.platforms.setAlpha(0);
         // this.add.image(400, 300, SKY_TEXT);
         // this.platforms.create(192, 468, "ground").setScale(2).refreshBody();
@@ -102,7 +104,12 @@ export class IdleScene extends Scene {
         }
     }
     createPlayer() {
-        const player = this.physics.add.sprite(192, 245, DUDE_IDLE);
+        const windowWidth = window.innerWidth;
+        const player = this.physics.add.sprite(
+            windowWidth - windowWidth * 0.5,
+            245,
+            DUDE_IDLE
+        );
 
         player.setBounce(0.2);
         player.setCollideWorldBounds(true);

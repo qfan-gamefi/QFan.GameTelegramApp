@@ -1,17 +1,20 @@
 .box-button {
     display: flex;
-    width: 100%;
+    width: 94%;
     justify-content: space-around;
     background-color: #69769c;
     /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
-    /* position: absolute;
+    position: absolute;
     bottom: 2%;
-    left: 0%; */
+    left: 3%;
+    z-index: 9999;
+    border-radius: 10px;
 }
 
 .container {
-    /* width: 100%; */
-    max-width: 384px;
+    width: 100%;
+    /* max-width: 384px; */
+    /* max-width: 430px; */
     position: relative;
 }
 
@@ -142,6 +145,8 @@
     display: flex;
     justify-content: space-between;
     font-size: 13px;
+    top: 2%;
+    left: 2%;
 }
 
 .wrap-username {

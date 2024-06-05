@@ -166,7 +166,8 @@ export default {
 
 <style>
 .popup-event {
-    height: calc(100% - 56px);
+    /* height: calc(100% - 56px); */
+    height: 100%;
     position: absolute;
     width: 100%;
     top: 0%;
@@ -193,7 +194,8 @@ export default {
 
 .box-event {
     padding: 20px;
-    height: calc(100% - 40px);
+    /* height: calc(100% - 40px); */
+    height: calc(100% - 105px);
 }
 
 .box-desc-event {

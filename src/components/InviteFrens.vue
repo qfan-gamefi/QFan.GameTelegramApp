@@ -14,7 +14,10 @@
                     <img src="./../../public/assets/logo.svg" /> per hour
                 </div>
                 <div class="friend-info-desc">
-                    <div>Score +{{referalRewardLv1Percent}}% from buddies and +{{referalRewardLv2Percent}}% from their fererrals</div>
+                    <div>
+                        Score +{{ referalRewardLv1Percent }}% from buddies and
+                        +{{ referalRewardLv2Percent }}% from their fererrals
+                    </div>
                     <div class="friend-info-desc-img">
                         Get a <img src="./../../public/assets/logo.svg" />
                         play pass for each fren
@@ -40,9 +43,20 @@
                                 <img src="./../../public/assets/logo.jpg" />
                             </div>
                             <div>
-                                <p class="friend-name">{{ el?.firstName }} {{ el?.lastName }}</p>
-                                <p v-if="el?.children?.length > 0" class="friend-user-info">
-                                    <img class="icon-svg" src="./../../public/assets/user.svg" /> <span class="child-text">+{{ el?.children?.length }}</span>
+                                <p class="friend-name">
+                                    {{ el?.firstName }} {{ el?.lastName }}
+                                </p>
+                                <p
+                                    v-if="el?.children?.length > 0"
+                                    class="friend-user-info"
+                                >
+                                    <img
+                                        class="icon-svg"
+                                        src="./../../public/assets/user.svg"
+                                    />
+                                    <span class="child-text"
+                                        >+{{ el?.children?.length }}</span
+                                    >
                                 </p>
                             </div>
                         </div>
@@ -119,8 +133,8 @@ export default {
                 const referalList1 = response?.data?.referalList;
                 const referalList2 = response?.data?.referalList2;
 
-                if(Array.isArray(referalList1))
-                    this.inviteData = [...referalList1];  
+                if (Array.isArray(referalList1))
+                    this.inviteData = [...referalList1];
 
                 const sortedInviteData = this.inviteData.sort(
                     (a, b) => b?.qpoint?.balance - a?.qpoint?.balance
@@ -132,16 +146,11 @@ export default {
                         const children = referalList2.filter(
                             (item) => item?.refererCode === el?.playerId
                         );
-                        if(children.length > 0)
-                            el.children = children;
-                        else 
-                            el.children = [];
+                        if (children.length > 0) el.children = children;
+                        else el.children = [];
                     }
                     return el;
                 });
-
-                console.log("inviteData", this.inviteData);
-                
             } catch (error) {
                 this.inviteData = [];
             } finally {
@@ -188,7 +197,8 @@ export default {
     margin: 10px 0;
 }
 .popup-invite {
-    height: calc(100% - 56px);
+    height: 100%;
+    /* height: calc(100% - 56px); */
     position: absolute;
     width: 100%;
     top: 0%;
@@ -214,11 +224,11 @@ export default {
 
 .box-invite {
     padding: 20px;
-    height: calc(100% - 40px);
+    height: calc(100% - 110px);
 }
 
 .box-content {
-    height: calc(100% - 200px);
+    height: calc(100% - 215px);
     color: #fff;
 }
 
@@ -287,7 +297,7 @@ export default {
 
 .box-btn-invite {
     position: absolute;
-    bottom: 5%;
+    bottom: 90px;
     width: calc(100% - 40px);
     padding: 0 20px;
 }
@@ -339,7 +349,7 @@ export default {
     align-items: center;
     gap: 5px;
 }
-.friend-user-info{
+.friend-user-info {
     margin: 0;
 }
 .friend-user-info span.child-text {
@@ -350,5 +360,4 @@ export default {
     font-size: 14px;
     margin: 5px 0;
 }
-
 </style>

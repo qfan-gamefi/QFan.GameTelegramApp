@@ -204,7 +204,8 @@ export default {
 
 <style>
 .popup-mission {
-    height: calc(100% - 56px);
+    height: 100%;
+    /* height: calc(100% - 56px); */
     position: absolute;
     width: 100%;
     top: 0%;
@@ -231,7 +232,8 @@ export default {
 
 .box-mission {
     padding: 20px;
-    height: calc(100% - 40px);
+    /* height: calc(100% - 40px); */
+    height: calc(100% - 105px);
 }
 
 .box-content-mission {

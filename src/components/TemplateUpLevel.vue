@@ -178,7 +178,9 @@ export default {
                 this.showSuccessNotification();
                 this.$emit("close");
             } catch (error) {
-                this.showErrorNotification(error?.response?.data?.error?.message);
+                this.showErrorNotification(
+                    error?.response?.data?.error?.message
+                );
                 this.loading = false;
             } finally {
                 this.loading = false;
@@ -192,7 +194,7 @@ export default {
             this.showNotification = true;
         },
         showErrorNotification(errorMessage) {
-            this.notificationMessage = errorMessage ||  "An error occurred!";
+            this.notificationMessage = errorMessage || "An error occurred!";
             this.notificationType = "error";
             this.showNotification = true;
         },
@@ -235,7 +237,7 @@ export default {
 }
 
 .box-template {
-    padding: 20px;
+    padding: 20px 20px 100px;
     height: calc(100% - 40px);
     color: #fff;
     font-family: monospace;

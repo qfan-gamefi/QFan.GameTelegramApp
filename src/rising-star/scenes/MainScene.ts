@@ -26,7 +26,6 @@ const MAX_KICK_POWER_Y = -150;
 const BALL_THRESH_HOLD = 200;
 const KICK_POWER_X_TEXT = "kick_power_x";
 const KICK_POWER_Y_TEXT = "kick_power_y";
-const KICK_POINT_Y = 460;
 const FIELDSPPED: integer = 50;
 const SIZE_PER_FRAME: integer = 736;
 const MAX_FIELD_WIDTH: integer = 2944;
@@ -152,7 +151,8 @@ export class MainScene extends Scene {
         const windowHeight = window.innerHeight;
         const newHeight = windowHeight - windowHeight * 0.27;
         const backgroundImage = this.add.image(0, 0, SKY_TEXT);
-        this.clouds = this.add.tileSprite(0, 40, 768, 174, CLOUD);
+        this.clouds = this.add.tileSprite(this.cameras.main.width / 2, this.cameras.main.height * 0.15,
+            this.cameras.main.width * 1.1, 174, CLOUD);
 
         // Calculate the scaling factors for width and height to fit the viewport
         const scaleX = this.cameras.main.width / backgroundImage.width;
@@ -206,8 +206,8 @@ export class MainScene extends Scene {
         // this.add.image(400, 300, SKY_TEXT);468
 
         this.platforms
-            .create(500, windowHeight - windowHeight * 0.1, "ground") //500
-            .setScale(2)
+            .create(0, windowHeight - windowHeight * 0.1, "ground") //500
+            .setScale(this.cameras.main.width / 100, 1)
             .refreshBody();
         this.platforms.setAlpha(0);
         this.player_run = this.createPlayer();
@@ -253,10 +253,10 @@ export class MainScene extends Scene {
                     Math.min(
                         1,
                         (255 -
-                            (Math.abs(KICK_POINT_Y - value.getCenter().y) /
-                                100) *
-                                255) /
-                            255
+                            (Math.abs(this.cameras.main.height * 0.75 - value.getCenter().y) /
+                                250) *
+                            255) /
+                        255
                     )
                 );
                 value.alpha = alpha;
@@ -307,7 +307,7 @@ export class MainScene extends Scene {
     }
     createBall() {
         const ballX = window.innerWidth;
-        const ball = this.physics.add.sprite(ballX - ballX * 0.1, 245, BALL);
+        const ball = this.physics.add.sprite(ballX - ballX * 0.1, this.cameras.main.height * 0.75, BALL);
         ball.setBounce(0.5);
         this.anims.create({
             key: "right-ball",
@@ -323,7 +323,7 @@ export class MainScene extends Scene {
         // const player = this.physics.add.sprite(132, 245, DUDE_RUN);
         const player = this.physics.add.sprite(
             playX - playX * 0.6,
-            245,
+            this.cameras.main.height * 0.75,
             DUDE_RUN
         );
 
@@ -375,7 +375,7 @@ export class MainScene extends Scene {
                     this.points,
                     this.createPoints(
                         this.ball.getTopLeft().x,
-                        this.ball.getTopLeft().y + 5
+                        this.ball.getTopLeft().y - 100
                     )
                 );
             }

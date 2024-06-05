@@ -108,7 +108,7 @@
             :idUser="idUser"
             :isMax="isMax"
             :titleUpload="'Training Room'"
-            :descUpload="'Better boots training speed'"
+            :descUpload="'Better boosts training speed'"
             :typeBooster="typeBooster"
         />
     </div>

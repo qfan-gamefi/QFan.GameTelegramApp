@@ -388,6 +388,7 @@ export default {
     flex-direction: column;
     gap: 10px;
     scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
 .matches-item {

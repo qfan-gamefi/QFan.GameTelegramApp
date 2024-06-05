@@ -21,68 +21,71 @@
                     </div>
                 </div>
 
-                <div class="stadium text-outline-black">Stadium</div>
-                <div
-                    class="container-stadium"
-                    :key="stadiumItems?.id"
-                    @click="handleStadium(stadiumItems)"
-                >
-                    <div class="logo-stadium">
-                        <img
-                            :src="`https://qfan-api.qcloud.asia${stadiumItems?.attributes?.image?.data?.attributes?.url}`"
-                        />
-                    </div>
-
-                    <div class="box-stadium">
-                        <div class="stadium-left">
-                            <div class="lv-stadium t-primary-color">
-                                Level {{ stadiumItems?.attributes?.applyLevel }}
-                            </div>
-                            <div class="content-stadium">
-                                {{ stadiumItems?.attributes?.name }}
-                            </div>
-                            <div class="desc-stadium">
-                                {{ stadiumItems?.attributes?.description }}
-                            </div>
+                <div class="wrap-lv">
+                    <!-- <div class="stadium text-outline-black">Stadium</div> -->
+                    <div
+                        class="container-stadium"
+                        :key="stadiumItems?.id"
+                        @click="handleStadium(stadiumItems)"
+                    >
+                        <div class="logo-stadium">
+                            <img
+                                :src="`https://qfan-api.qcloud.asia${stadiumItems?.attributes?.image?.data?.attributes?.url}`"
+                            />
                         </div>
 
-                        <!-- <div class="stadium-right t-primary-color">
-                            {{ stadiumItems?.attributes?.price }}
-                            <img src="./../../public/assets/logo.svg" />
-                        </div> -->
-                    </div>
-                </div>
-
-                <div class="stadium text-outline-black">Training Room</div>
-                <div
-                    class="container-stadium"
-                    :key="trainingItems.id"
-                    @click="handleTraining"
-                >
-                    <div class="logo-stadium">
-                        <img
-                            :src="`https://qfan-api.qcloud.asia${trainingItems?.attributes?.image?.data?.attributes?.url}`"
-                        />
-                    </div>
-
-                    <div class="box-stadium">
-                        <div class="stadium-left">
-                            <div class="lv-stadium t-primary-color">
-                                Level
-                                {{ trainingItems?.attributes?.applyLevel }}
+                        <div class="box-stadium">
+                            <div class="stadium-left">
+                                <div class="content-stadium">
+                                    {{ stadiumItems?.attributes?.name }}
+                                </div>
+                                <div class="lv-stadium t-primary-color">
+                                    Level
+                                    {{ stadiumItems?.attributes?.applyLevel }}
+                                </div>
+                                <div class="desc-stadium">
+                                    {{ stadiumItems?.attributes?.description }}
+                                </div>
                             </div>
-                            <div class="content-stadium">
-                                {{ trainingItems?.attributes?.name }}
-                            </div>
-                            <div class="desc-stadium">
-                                {{ trainingItems?.attributes?.description }}
+
+                            <div class="stadium-right t-primary-color">
+                                {{ dataNextStadium?.attributes?.price }}
+                                <img src="./../../public/assets/logo.svg" />
                             </div>
                         </div>
+                    </div>
 
-                        <!-- <div class="stadium-right t-primary-color">
-                            {{ trainingItems?.attributes?.price }}
-                            <img src="./../../public/assets/logo.svg" />
-                        </div> -->
+                    <!-- <div class="stadium text-outline-black">Training Room</div> -->
+                    <div
+                        class="container-stadium"
+                        :key="trainingItems.id"
+                        @click="handleTraining"
+                    >
+                        <div class="logo-stadium">
+                            <img
+                                :src="`https://qfan-api.qcloud.asia${trainingItems?.attributes?.image?.data?.attributes?.url}`"
+                            />
+                        </div>
+
+                        <div class="box-stadium">
+                            <div class="stadium-left">
+                                <div class="content-stadium">
+                                    {{ trainingItems?.attributes?.name }}
+                                </div>
+                                <div class="lv-stadium t-primary-color">
+                                    Level
+                                    {{ trainingItems?.attributes?.applyLevel }}
+                                </div>
+                                <div class="desc-stadium">
+                                    {{ trainingItems?.attributes?.description }}
+                                </div>
+                            </div>
+
+                            <div class="stadium-right t-primary-color">
+                                {{ dataNextTraining?.attributes?.price }}
+                                <img src="./../../public/assets/logo.svg" />
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -154,6 +157,8 @@ export default {
             typeBooster: "SPEED",
             animatedBalance: 0,
             rewardAmount: 0,
+            dataNextTraining: {},
+            dataNextStadium: {},
         };
     },
     watch: {
@@ -223,17 +228,35 @@ export default {
                     this.stadiumItems = toRaw(this.stadiumItems)?.find(
                         (el) => el?.attributes?.applyLevel === 1
                     );
+                    this.dataNextStadium = toRaw(this.stadiumItems)?.find(
+                        (el) => el?.attributes?.applyLevel === 2
+                    );
                 } else {
                     const dataStadiumCurrent = res?.data?.find(
                         (el) => el?.attributes?.boosterType === "SPEED"
                     );
+                    const stadiumtList = toRaw(this.listData).filter(
+                        (item) => item.attributes.type === "SPEED"
+                    );
 
                     if (dataStadiumCurrent) {
+                        const lvCurrent =
+                            dataStadiumCurrent?.attributes?.booster?.data
+                                ?.attributes?.applyLevel;
+
                         this.stadiumItems =
                             dataStadiumCurrent?.attributes?.booster?.data;
+
+                        this.dataNextStadium = stadiumtList.find(
+                            (el) => el?.attributes?.applyLevel === lvCurrent + 1
+                        );
                     } else {
                         this.stadiumItems = toRaw(this.stadiumItems)?.find(
                             (el) => el?.attributes?.applyLevel === 1
+                        );
+
+                        this.dataNextStadium = stadiumtList.find(
+                            (el) => el?.attributes?.applyLevel === 2
                         );
                     }
                 }
@@ -252,16 +275,33 @@ export default {
                     this.trainingItems = toRaw(this.trainingItems)?.find(
                         (el) => el?.attributes?.applyLevel === 1
                     );
+                    this.dataNextTraining = toRaw(this.trainingItems)?.find(
+                        (el) => el?.attributes?.applyLevel === 2
+                    );
                 } else {
                     const dataTrainingCurrent = res?.data?.find(
                         (el) => el?.attributes?.boosterType === "AMOUNT"
                     );
+                    const amountList = toRaw(this.listData).filter(
+                        (item) => item.attributes.type === "AMOUNT"
+                    );
+
                     if (dataTrainingCurrent) {
+                        const lvCurrent =
+                            dataTrainingCurrent?.attributes?.booster?.data
+                                ?.attributes?.applyLevel;
                         this.trainingItems =
                             dataTrainingCurrent?.attributes?.booster?.data;
+
+                        this.dataNextTraining = amountList.find(
+                            (el) => el?.attributes?.applyLevel === lvCurrent + 1
+                        );
                     } else {
                         this.trainingItems = toRaw(this.trainingItems)?.find(
                             (el) => el?.attributes?.applyLevel === 1
+                        );
+                        this.dataNextTraining = amountList.find(
+                            (el) => el?.attributes?.applyLevel === 2
                         );
                     }
                 }
@@ -324,6 +364,7 @@ export default {
                 this.dataNext = amountItems.find(
                     (el) => el?.attributes?.applyLevel === lvCurrent + 1
                 );
+
                 this.isMax = false;
             }
         },
@@ -414,6 +455,7 @@ export default {
     border-radius: 15px;
     text-align: center;
     padding: 10px;
+    margin-bottom: 20px;
 }
 .title-your-balance {
     font-size: 12px;
@@ -484,10 +526,17 @@ export default {
 .stadium-right {
     display: flex;
     align-items: center;
+    font-size: 14px;
 }
 .stadium-right img {
-    width: 25px;
-    height: 25px;
+    width: 20px;
+    height: 20px;
     margin-left: 5px;
+}
+
+.wrap-lv {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 </style>

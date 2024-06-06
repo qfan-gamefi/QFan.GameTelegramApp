@@ -228,7 +228,7 @@ export default {
                     this.stadiumItems = toRaw(this.stadiumItems)?.find(
                         (el) => el?.attributes?.applyLevel === 1
                     );
-                    this.dataNextStadium = toRaw(this.stadiumItems)?.find(
+                    this.dataNextStadium = stadiumtList?.find(
                         (el) => el?.attributes?.applyLevel === 2
                     );
                 } else {
@@ -271,19 +271,19 @@ export default {
                 this.loading = true;
                 const res = await userService.getBoosterAmount(this.idUser);
 
+                const amountList = toRaw(this.listData).filter(
+                    (item) => item.attributes.type === "AMOUNT"
+                );
                 if (res?.data?.length === 0) {
+                    this.dataNextTraining = amountList?.find(
+                        (el) => el?.attributes?.applyLevel === 2
+                    );
                     this.trainingItems = toRaw(this.trainingItems)?.find(
                         (el) => el?.attributes?.applyLevel === 1
-                    );
-                    this.dataNextTraining = toRaw(this.trainingItems)?.find(
-                        (el) => el?.attributes?.applyLevel === 2
                     );
                 } else {
                     const dataTrainingCurrent = res?.data?.find(
                         (el) => el?.attributes?.boosterType === "AMOUNT"
-                    );
-                    const amountList = toRaw(this.listData).filter(
-                        (item) => item.attributes.type === "AMOUNT"
                     );
 
                     if (dataTrainingCurrent) {

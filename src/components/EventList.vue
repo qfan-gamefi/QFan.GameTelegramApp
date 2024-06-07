@@ -36,10 +36,10 @@
                             </div>
                         </div>
                         <div class="btn-join-now">
-                            <button @click="$emit('openCoomSoon')">
+                            <!-- <button @click="$emit('openCoomSoon')">
                                 Join Now
-                            </button>
-                            <!-- <button @click="handleJoin(item)">Join Now</button> -->
+                            </button> -->
+                            <button @click="handleJoin(item)">Join Now</button>
                         </div>
                         <div class="box-time">
                             <span

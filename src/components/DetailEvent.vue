@@ -68,32 +68,39 @@
             <div class="list-matches" v-if="activeButton === 'Predict'">
                 <div class="box-matches">
                     <div
-                        class="matches-item"
                         v-for="(item, index) in games"
                         :key="index"
+                        :class="[
+                            'matches-item',
+                            {
+                                'matches-item-disable': item?.BidData,
+                            },
+                        ]"
                     >
                         <div class="matches-title">
-                            {{ item.Description }}
+                            {{ item?.Description }}
                         </div>
                         <div class="matches-time">
-                            {{ item.StopBiddingTime }}
+                            {{ getTimeRemaining(item?.StopBiddingTime) }}
                         </div>
 
                         <div class="box-btn-bet">
                             <v-btn-toggle
                                 v-for="(
                                     side, indexSide
-                                ) in item.BidSideNames.split(',')"
+                                ) in item?.BidSideNames?.split(',')"
                                 :key="indexSide"
-                                :class="{
-                                    'bet-win': indexSide === 0,
-                                    'bet-draw': indexSide === 1,
-                                    'bet-lose': indexSide === 2,
-                                    selected: selectedIndex === indexSide,
-                                }"
+                                :class="[
+                                    getDynamicClass(side),
+                                    {
+                                        selected:
+                                            item?.selectedIndex === indexSide ||
+                                            item?.BidData?.Side === indexSide,
+                                    },
+                                ]"
                             >
                                 <v-btn
-                                    @click="handleSelectBid(indexSide, item)"
+                                    @click="handleSelectBid(index, indexSide)"
                                     >{{ side }}</v-btn
                                 >
                             </v-btn-toggle>
@@ -102,8 +109,15 @@
                         <!-- <div class="team-predict">Team Predict</div> -->
                         <div class="predict-point">
                             <div
-                                @click="handleJoin(item)"
-                                class="predict-point-content"
+                                @click="handleJoin(item, index)"
+                                :class="[
+                                    'predict-point-content',
+                                    {
+                                        'predict-point-disabled':
+                                            typeof item?.selectedIndex !==
+                                            'number',
+                                    },
+                                ]"
                             >
                                 Predict 200
                                 <img src="./../../public/assets/logo.svg" />
@@ -113,7 +127,7 @@
                 </div>
             </div>
 
-            <div class="list-matches" v-if="activeButton === 'Leaderboard'">
+            <div class="list-leaderboard" v-if="activeButton === 'Leaderboard'">
                 <div
                     class="box-leaderboard"
                     v-for="(item, index) in leaderboard"
@@ -121,7 +135,10 @@
                 >
                     <div class="leaderboard-item">
                         <div class="content-your-rank">
-                            <div class="your-rank-lv position-1">
+                            <div
+                                class="your-rank-lv"
+                                :class="'position-' + (index + 1)"
+                            >
                                 <span>{{ index + 1 }}</span>
                             </div>
                             <div class="avt-your-rank">
@@ -134,21 +151,27 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- <div class="box-your-rank">
-                    <div class="title-your-rank">Your rank</div>
-                    <div class="content-your-rank">
-                        <div class="your-rank-lv"><span>30</span></div>
-                        <div class="avt-your-rank">
-                            <img src="./../../public/assets/logo.jpg" />
+            </div>
+            <div class="box-your-rank" v-if="activeButton === 'Leaderboard'">
+                <div class="title-your-rank">Your rank</div>
+                <div class="content-your-rank">
+                    <div class="your-rank-lv">
+                        <span>{{ dataRankCurrent?.rank }}</span>
+                    </div>
+                    <div class="avt-your-rank">
+                        <img src="./../../public/assets/logo.jpg" />
+                    </div>
+                    <div class="your-name-point">
+                        <div class="your-name">
+                            {{ dataRankCurrent?.UserId }}
                         </div>
-                        <div class="your-name-point">
-                            <div class="your-name">ABCDE</div>
-                            <div class="your-point">500.00b</div>
+                        <div class="your-point">
+                            {{ dataRankCurrent?.Balance }}
                         </div>
                     </div>
-                </div> -->
+                </div>
             </div>
+
             <div class="list-matches" v-if="activeButton === 'HistoryReward'">
                 <div class="box-matches">
                     <div
@@ -156,15 +179,44 @@
                         v-for="(item, index) in history"
                         :key="index"
                     >
-                        <div class="your-name">
-                            CreatedAt : {{ item.createdAt }} UserId :
-                            {{ item.UserId }} GameId : {{ item.GameId }} Side :
-                            {{ item.Side }} ValueType : {{ item.ValueType }}
+                        <div class="bet-info">
+                            <div class="bet-info-row">
+                                <div class="bet-info-label">
+                                    {{ item?.Game?.ListCode }}:
+                                </div>
+                                <div class="bet-info-value">
+                                    {{ item?.Game?.Name }}
+                                </div>
+                            </div>
+                            <div class="bet-info-row">
+                                <div class="bet-info-label">Bet day:</div>
+                                <div class="bet-info-value">
+                                    {{ formatDate(item.createdAt) }}
+                                </div>
+                            </div>
+                            <div class="bet-info-row">
+                                <div class="bet-info-label">Side:</div>
+                                <div
+                                    class="bet-info-value"
+                                    :class="renderSide(item).toLowerCase()"
+                                >
+                                    {{ renderSide(item) }}
+                                </div>
+                            </div>
+
+                            <div class="bet-info-row">
+                                <div class="bet-info-label">Value:</div>
+                                <div class="bet-info-value">
+                                    {{ item.Value }} {{ item.ValueType }}
+                                </div>
+                            </div>
+                            <div class="bet-info-row">
+                                <div class="bet-info-label">Status:</div>
+                                <div class="bet-info-value">
+                                    {{ item.Status }}
+                                </div>
+                            </div>
                         </div>
-                        <span
-                            >Value : {{ item.Value }} Status :
-                            {{ item.Status }}</span
-                        >
                     </div>
                 </div>
             </div>
@@ -175,6 +227,8 @@
 
 <script>
 import betService from "../services/betService";
+import dayjs from "dayjs";
+
 export default {
     props: {
         isDetailEvent: {
@@ -207,7 +261,11 @@ export default {
             indexBtn: null,
             userPoint: 0,
             selectedIndex: null,
+            dataRankCurrent: null,
         };
+    },
+    watch: {
+        detailEvent: "fetchData",
     },
     async mounted() {
         await this.fetchData();
@@ -218,21 +276,52 @@ export default {
         },
     },
     methods: {
-        handleSelectBid(index, item) {
-            item["selectedSide"] = index;
-            this.selectedIndex = index;
+        renderSide(item) {
+            const bidSideNamesArray = item.Game.BidSideNames.split(",");
+
+            return bidSideNamesArray?.[item?.Side];
         },
-        async handleJoin(item) {
-            // Thêm giúp a a cái side nó là index của cái item.BidSideNames.split(',') xong call add bidding
-            if (item["selectedSide"] !== undefined) {
+        getDynamicClass(side) {
+            return `bet-${side.toLowerCase()}`;
+        },
+        formatDate(date) {
+            return dayjs(date).format("DD/MM/YYYY");
+        },
+        getTimeRemaining(stopBiddingTime) {
+            const now = dayjs();
+            const endTime = dayjs(stopBiddingTime);
+            const diff = endTime.diff(now);
+
+            if (diff <= 0) {
+                return "End time";
+            }
+
+            const duration = dayjs.duration(diff);
+            const days = duration.days();
+            const hours = duration.hours();
+            const minutes = duration.minutes();
+
+            return `${days} day ${hours} hour ${minutes} minute`;
+        },
+        handleSelectBid(itemIndex, sideIndex) {
+            // item["selectedSide"] = index;
+            // this.selectedIndex = index;
+            this.games[itemIndex].selectedIndex = sideIndex;
+        },
+        async handleJoin(item, index) {
+            if (typeof this.games[index].selectedIndex === "number") {
                 const data = {
                     gameId: item.id,
                     userId: this.idUser,
                     value: 200,
                     valueType: "QFC",
-                    side: item["selectedSide"],
+                    // side: item["selectedSide"],
+                    side: this.games[index].selectedIndex,
                 };
-                this.games = betService.addBidding(data);
+                const dataPredict = await betService.addBidding(data);
+                if (dataPredict?.bid) {
+                    await this.fetchData();
+                }
             } else {
                 alert("Choose your side");
             }
@@ -248,20 +337,42 @@ export default {
         },
         async fetchData() {
             this.loading = true;
+
+            if (!this.detailEvent) return;
             try {
-                this.games = await betService.getFilterData("games", {});
+                const games = await betService.getListGame(
+                    this.idUser,
+                    this.detailEvent
+                );
+
+                // const games = await betService.getFilterData("games", {});
+                this.games = games.map((game) => ({
+                    ...game,
+                    selectedIndex: null,
+                }));
+
                 this.leaderboard = await betService.getFilterData(
                     "balancePoints",
                     { order: [["Balance", "DESC"]] }
                 );
+
                 this.history = await betService.getFilterData("bids", {
                     where: { UserId: this.idUser },
                     order: [["createdAt", "DESC"]],
+                    include: "Games",
                 });
+
                 const userPointdata = await betService.getFilterData(
                     "balancePoints",
                     { where: { UserId: this.idUser } }
                 );
+
+                const dataRankCurrent = await betService.getYourRank(
+                    this.idUser,
+                    this.detailEvent
+                );
+                this.dataRankCurrent = dataRankCurrent?.[0];
+
                 this.userPoint =
                     userPointdata && userPointdata.length != 0
                         ? userPointdata[0]["Balance"]
@@ -274,6 +385,10 @@ export default {
         },
         setActiveButton(button) {
             this.activeButton = button;
+            this.games = this.games?.map((game) => ({
+                ...game,
+                selectedIndex: null,
+            }));
         },
     },
 };
@@ -375,7 +490,7 @@ export default {
 
 .list-matches {
     padding: 10px 20px;
-    height: calc(100% - 200px);
+    height: calc(100% - 270px);
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -400,6 +515,46 @@ export default {
     flex-direction: column;
     gap: 10px;
 }
+.matches-item-disable {
+    pointer-events: none;
+    opacity: 0.8;
+}
+.bet-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.bet-info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px solid #81818147;
+    gap: 30px;
+}
+.bet-info-row:last-child {
+    border-bottom: none;
+}
+.bet-info-label {
+    font-weight: bold;
+    flex: 1;
+    text-align: right;
+}
+
+.bet-info-value {
+    flex: 1;
+    text-align: left;
+    font-weight: bold;
+}
+.bet-info-value.lose {
+    color: #d40000;
+}
+.bet-info-value.draw {
+    color: #f3db00;
+}
+.bet-info-value.win {
+    color: #04cc00;
+}
 
 .matches-bet {
     display: flex;
@@ -414,30 +569,28 @@ export default {
     gap: 10px;
 }
 
-.bet-win {
-    width: min-content;
-    background-color: #04cc00;
-    padding: 5px 10px;
-    border-radius: 5px;
-}
-
-.bet-draw {
-    width: min-content;
-    background-color: #f3db00;
-    padding: 5px 10px;
-    border-radius: 5px;
-    color: #760000;
-}
-
+.bet-win,
+.bet-draw,
 .bet-lose {
     width: min-content;
-    background-color: #d40000;
-    padding: 5px 10px;
+    padding: 5px 15px;
     border-radius: 5px;
+    background-color: rgb(80 80 80);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
-.selected {
-    /* border: 2px solid #000; */
-    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5);
+
+.bet-win.selected {
+    background-color: #04cc00;
+    transition: background-color 0.3s ease;
+}
+.bet-draw.selected {
+    background-color: #f3db00;
+    color: #760000;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+.bet-lose.selected {
+    background-color: #d40000;
+    transition: background-color 0.3s ease;
 }
 
 .team-predict {
@@ -462,7 +615,10 @@ export default {
     border-radius: 5px;
     width: fit-content;
 }
-
+.predict-point-disabled {
+    pointer-events: none;
+    opacity: 0.5;
+}
 .point-your {
     display: flex;
     justify-content: center;
@@ -477,16 +633,25 @@ export default {
 
 /*  */
 .list-leaderboard {
-    text-shadow: 1px 1px 0 black, -1px -1px 0 black, 1px -1px 0 black,
-        -1px 1px 0 black, 1px 0 0 black, -1px 0 0 black, 0 1px 0 black,
-        0 -1px 0 black;
-}
-
-.box-leaderboard {
-    padding: 10px 15px;
+    padding: 10px 20px;
+    height: calc(100% - 375px);
     display: flex;
     flex-direction: column;
     gap: 10px;
+    text-shadow: 1px 1px 0 black, -1px -1px 0 black, 1px -1px 0 black,
+        -1px 1px 0 black, 1px 0 0 black, -1px 0 0 black, 0 1px 0 black,
+        0 -1px 0 black;
+    overflow: auto;
+}
+.list-leaderboard::-webkit-scrollbar {
+    display: none;
+}
+
+.box-leaderboard {
+    /* padding: 10px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px; */
 }
 
 .box-your-rank {
@@ -494,7 +659,7 @@ export default {
     flex-direction: column;
     position: absolute;
     width: 100%;
-    bottom: 0;
+    bottom: 80px;
     background-color: #ffa53a;
     width: calc(100% - 30px);
     padding: 5px 15px 15px;
@@ -586,6 +751,8 @@ export default {
     flex-direction: column;
     gap: 5px;
     font-weight: bold;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
+        1px 1px 0 #000;
 }
 
 .your-point {

@@ -72,6 +72,10 @@
                         :key="index"
                         :class="[
                             'matches-item',
+                            getBorderClass(
+                                item?.BidSideNames?.split(','),
+                                item?.BidData?.Side
+                            ),
                             {
                                 'matches-item-disable': item?.BidData,
                             },
@@ -152,6 +156,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="box-your-rank" v-if="activeButton === 'Leaderboard'">
                 <div class="title-your-rank">Your rank</div>
                 <div class="content-your-rank">
@@ -189,7 +194,9 @@
                                 </div>
                             </div>
                             <div class="bet-info-row">
-                                <div class="bet-info-label">Bet day:</div>
+                                <div class="bet-info-label">
+                                    Prediction day:
+                                </div>
                                 <div class="bet-info-value">
                                     {{ formatDate(item.createdAt) }}
                                 </div>
@@ -222,14 +229,25 @@
             </div>
         </div>
         <EmptyForm v-if="showEmptyDetailEvent" />
+
+        <Notification
+            v-if="showNotification"
+            :message="notificationMessage"
+            :type="notificationType"
+            @close="showNotification = false"
+        />
     </div>
 </template>
 
 <script>
 import betService from "../services/betService";
+import Notification from "./NotificationToast.vue";
 import dayjs from "dayjs";
 
 export default {
+    components: {
+        Notification,
+    },
     props: {
         isDetailEvent: {
             type: Boolean,
@@ -262,6 +280,10 @@ export default {
             userPoint: 0,
             selectedIndex: null,
             dataRankCurrent: null,
+
+            showNotification: false,
+            notificationMessage: "",
+            notificationType: "",
         };
     },
     watch: {
@@ -276,13 +298,27 @@ export default {
         },
     },
     methods: {
+        async renderSuccess() {
+            this.notificationMessage = `Predict Success!`;
+            this.notificationType = "success";
+            this.showNotification = true;
+        },
+        async renderErr() {
+            this.notificationMessage = `Predict Error!`;
+            this.notificationType = "error";
+            this.showNotification = true;
+        },
         renderSide(item) {
             const bidSideNamesArray = item.Game.BidSideNames.split(",");
 
             return bidSideNamesArray?.[item?.Side];
         },
+        getBorderClass(side, index) {
+            const lowCase = side?.[index]?.toLowerCase();
+            return `border-${lowCase}`;
+        },
         getDynamicClass(side) {
-            return `bet-${side.toLowerCase()}`;
+            return `bet-${side?.toLowerCase()}`;
         },
         formatDate(date) {
             return dayjs(date).format("DD/MM/YYYY");
@@ -320,7 +356,10 @@ export default {
                 };
                 const dataPredict = await betService.addBidding(data);
                 if (dataPredict?.bid) {
+                    await this.renderSuccess();
                     await this.fetchData();
+                } else {
+                    await this.renderErr();
                 }
             } else {
                 alert("Choose your side");
@@ -344,7 +383,6 @@ export default {
                     this.idUser,
                     this.detailEvent
                 );
-
                 // const games = await betService.getFilterData("games", {});
                 this.games = games.map((game) => ({
                     ...game,
@@ -371,7 +409,16 @@ export default {
                     this.idUser,
                     this.detailEvent
                 );
-                this.dataRankCurrent = dataRankCurrent?.[0];
+
+                if (dataRankCurrent?.length > 0) {
+                    this.dataRankCurrent = dataRankCurrent?.[0];
+                } else {
+                    this.dataRankCurrent = {
+                        Balance: 0,
+                        UserId: this.idUser,
+                        rank: "?",
+                    };
+                }
 
                 this.userPoint =
                     userPointdata && userPointdata.length != 0
@@ -552,10 +599,19 @@ export default {
 .bet-info-value.draw {
     color: #f3db00;
 }
+/* .border-draw {
+    border: 5px solid #f3db00;
+    border-top: none;
+    border-bottom: none;
+} */
 .bet-info-value.win {
     color: #04cc00;
 }
-
+/* .border-win {
+    border: 5px solid #04cc00;
+    border-top: none;
+    border-bottom: none;
+} */
 .matches-bet {
     display: flex;
     justify-content: center;

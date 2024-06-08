@@ -243,6 +243,9 @@
 import betService from "../services/betService";
 import Notification from "./NotificationToast.vue";
 import dayjs from "dayjs";
+import duration from "dayjs/plugin/duration";
+
+dayjs.extend(duration);
 
 export default {
     components: {
@@ -326,16 +329,16 @@ export default {
         getTimeRemaining(stopBiddingTime) {
             const now = dayjs();
             const endTime = dayjs(stopBiddingTime);
-            const diff = endTime.diff(now);
+            const diff = endTime?.diff(now);
 
             if (diff <= 0) {
                 return "End time";
             }
 
-            const duration = dayjs.duration(diff);
-            const days = duration.days();
-            const hours = duration.hours();
-            const minutes = duration.minutes();
+            const duration = dayjs?.duration(diff);
+            const days = duration?.days();
+            const hours = duration?.hours();
+            const minutes = duration?.minutes();
 
             return `${days} day ${hours} hour ${minutes} minute`;
         },

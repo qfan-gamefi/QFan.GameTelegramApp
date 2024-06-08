@@ -54,8 +54,8 @@ export default {
             telegram_bot_link:
                 telegram_bot_link +
                     window.Telegram.WebApp.initDataUnsafe.user?.id || "",
-            // idUser: "2123800227",
-            // telegram_bot_link: telegram_bot_link + 2123800227 || "",
+            // idUser: "5314337740",
+            // telegram_bot_link: telegram_bot_link + 5314337740 || "",
 
             // 1927324767 a
             //2123800227

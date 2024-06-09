@@ -2,9 +2,15 @@
     <div v-if="visible" :class="`notification ${type}`">
         <span>
             <i class="fa-solid fa-circle-check" v-if="type === 'success'"></i>
+
             <i
                 class="fa-solid fa-circle-exclamation"
                 v-if="type === 'error'"
+            ></i>
+
+            <i
+                class="fa-solid fa-circle-exclamation"
+                v-if="type === 'warning'"
             ></i>
             {{ message }}
         </span>
@@ -79,6 +85,12 @@ export default {
     box-shadow: 0px 0px 2px #ff0303;
     text-shadow: 2px 1px #00040a;
     background-color: rgb(220 17 1 / 69%);
+}
+.notification.warning {
+    border: 1px solid rgba(241, 142, 6, 0.81);
+    box-shadow: 0px 0px 2px #ffb103;
+    text-shadow: 2px 1px #00040a;
+    background-color: rgb(220 128 1 / 69%);
 }
 .notification button {
     background: none;

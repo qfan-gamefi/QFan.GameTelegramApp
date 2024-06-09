@@ -7,6 +7,8 @@ const betService = {
     },
     async addBidding(data: object) {
         const res = await axiosBetInstance.post(`/bids`, data);
+        console.log(res);
+
         return res.status == 200 ? JSON.parse(res.data.message).data : {};
     },
     async getListGame(idUser: string, detailEvent: any) {

@@ -113,13 +113,16 @@
                         <!-- <div class="team-predict">Team Predict</div> -->
                         <div class="predict-point">
                             <div
-                                @click="handleJoin(item, index)"
+                                @click="handlePredict(item, index)"
                                 :class="[
                                     'predict-point-content',
                                     {
                                         'predict-point-disabled':
                                             typeof item?.selectedIndex !==
                                             'number',
+                                    },
+                                    {
+                                        'btn-predict-disable': item?.BidData,
                                     },
                                 ]"
                             >
@@ -149,8 +152,12 @@
                                 <img src="./../../public/assets/logo.jpg" />
                             </div>
                             <div class="your-name-point">
-                                <div class="your-name">{{ item.UserId }}</div>
-                                <div class="your-point">{{ item.Balance }}</div>
+                                <div class="your-name">
+                                    {{ item?.UserName || item?.UserId }}
+                                </div>
+                                <div class="your-point">
+                                    {{ item?.Balance }}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -177,50 +184,55 @@
                 </div>
             </div>
 
-            <div class="list-matches" v-if="activeButton === 'HistoryReward'">
-                <div class="box-matches">
+            <div class="list-history" v-if="activeButton === 'HistoryReward'">
+                <div class="box-history">
+                    <div class="box-title-columns">
+                        <div class="title-columns">No.</div>
+                        <div class="title-columns">Match</div>
+                        <div class="title-columns">Predict</div>
+                        <div class="title-columns">Time</div>
+                        <div class="title-columns">Profit</div>
+                    </div>
+
                     <div
-                        class="matches-item"
+                        class="history-item"
                         v-for="(item, index) in history"
                         :key="index"
                     >
-                        <div class="bet-info">
-                            <div class="bet-info-row">
-                                <div class="bet-info-label">
-                                    {{ item?.Game?.ListCode }}:
-                                </div>
-                                <div class="bet-info-value">
-                                    {{ item?.Game?.Name }}
-                                </div>
+                        <div class="history-item-col">
+                            {{ index + 1 }}
+                        </div>
+                        <div class="history-item-col">
+                            <div
+                                class="match"
+                                :class="item?.Status?.toLowerCase()"
+                            >
+                                {{ item?.Status }}
                             </div>
-                            <div class="bet-info-row">
-                                <div class="bet-info-label">
-                                    Prediction day:
-                                </div>
-                                <div class="bet-info-value">
-                                    {{ formatDate(item.createdAt) }}
-                                </div>
+                            <div>{{ item?.Game?.Name }}</div>
+                        </div>
+                        <div class="history-item-col">
+                            {{ renderSide(item) }}
+                        </div>
+                        <div class="history-item-col">
+                            {{ formatDate(item.createdAt) }}
+                        </div>
+                        <div class="history-item-col">
+                            <div
+                                v-if="
+                                    item?.Status?.toLowerCase() !== 'win' ||
+                                    item?.Status?.toLowerCase() !== 'lose'
+                                "
+                            >
+                                <div>Pending</div>
                             </div>
-                            <div class="bet-info-row">
-                                <div class="bet-info-label">Side:</div>
-                                <div
-                                    class="bet-info-value"
-                                    :class="renderSide(item).toLowerCase()"
-                                >
-                                    {{ renderSide(item) }}
+                            <div v-else>
+                                <div>
+                                    {{ renderProfitQFC(item) }}
+                                    <img src="./../../public/assets/logo.svg" />
                                 </div>
-                            </div>
-
-                            <div class="bet-info-row">
-                                <div class="bet-info-label">Value:</div>
-                                <div class="bet-info-value">
-                                    {{ item.Value }} {{ item.ValueType }}
-                                </div>
-                            </div>
-                            <div class="bet-info-row">
-                                <div class="bet-info-label">Status:</div>
-                                <div class="bet-info-value">
-                                    {{ item.Status }}
+                                <div>
+                                    {{ renderProfitPoint(item) }}
                                 </div>
                             </div>
                         </div>
@@ -236,12 +248,21 @@
             :type="notificationType"
             @close="showNotification = false"
         />
+
+        <PopupConfirm
+            v-if="showPopup"
+            :text="`Do you want Predict`"
+            :visible="showPopup"
+            @yes="handleYesPredict"
+            @no="handleNoPredict"
+        />
     </div>
 </template>
 
 <script>
 import betService from "../services/betService";
 import Notification from "./NotificationToast.vue";
+import PopupConfirm from "./PopupConfirm.vue";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 
@@ -250,6 +271,7 @@ dayjs.extend(duration);
 export default {
     components: {
         Notification,
+        PopupConfirm,
     },
     props: {
         isDetailEvent: {
@@ -271,6 +293,7 @@ export default {
     },
     data() {
         return {
+            showPopup: false,
             loading: false,
             data: [],
             dataFrom: null,
@@ -287,6 +310,13 @@ export default {
             showNotification: false,
             notificationMessage: "",
             notificationType: "",
+
+            idPredict: null,
+            indexPredict: null,
+
+            stopBiddingTime: "",
+            countdown: "",
+            intervalId: null,
         };
     },
     watch: {
@@ -294,7 +324,11 @@ export default {
     },
     async mounted() {
         await this.fetchData();
+        // this.intervalId = setInterval(this.updateCountdowns, 1000);
     },
+    // beforeUnmount() {
+    //     clearInterval(this.intervalId);
+    // },
     computed: {
         showEmptyDetailEvent() {
             return this.data?.length == 0;
@@ -311,10 +345,47 @@ export default {
             this.notificationType = "error";
             this.showNotification = true;
         },
+        async renderWarning() {
+            this.notificationMessage = `Choose your side!`;
+            this.notificationType = "warning";
+            this.showNotification = true;
+            setTimeout(() => {
+                this.showNotification = false;
+            }, 1000);
+        },
+        calcSide(data) {
+            const bidSideNamesArray = data?.Game?.BidSideNames.split(",");
+            return bidSideNamesArray?.[data?.Side];
+        },
         renderSide(item) {
-            const bidSideNamesArray = item.Game.BidSideNames.split(",");
+            return this.calcSide(item);
+            // const bidSideNamesArray = item.Game.BidSideNames.split(",");
+            // return bidSideNamesArray?.[item?.Side];
+        },
+        renderProfitPoint(value) {
+            const dataPoint = JSON.parse(value?.Reward);
 
-            return bidSideNamesArray?.[item?.Side];
+            const qfcItem = dataPoint?.find(
+                (item) => item?.ValueType === "Point"
+            );
+            const qfcValue = qfcItem?.Value
+                ? `${qfcItem?.Value} ${qfcItem?.ValueType}`
+                : "";
+
+            return qfcValue;
+        },
+        renderProfitQFC(item) {
+            const dataQFC = JSON.parse(item?.Reward);
+            const qfcItem = dataQFC?.find((item) => item?.ValueType === "QFC");
+            const qfcValue = qfcItem ? qfcItem.Value : null;
+
+            return qfcValue;
+            // const textProfit = this.calcSide(item)?.toLowerCase();
+            // if (textProfit === "lose") {
+            //     return `-${item?.Value}`;
+            // } else if (textProfit === "win") {
+            //     return `+${item?.Value}`;
+            // }
         },
         getBorderClass(side, index) {
             const lowCase = side?.[index]?.toLowerCase();
@@ -324,7 +395,10 @@ export default {
             return `bet-${side?.toLowerCase()}`;
         },
         formatDate(date) {
-            return dayjs(date).format("DD/MM/YYYY");
+            return dayjs(date).format("DD-MMM-YY");
+        },
+        updateCountdowns() {
+            this.$forceUpdate();
         },
         getTimeRemaining(stopBiddingTime) {
             const now = dayjs();
@@ -339,34 +413,61 @@ export default {
             const days = duration?.days();
             const hours = duration?.hours();
             const minutes = duration?.minutes();
+            const seconds = duration.seconds();
 
-            return `${days} day ${hours} hour ${minutes} minute`;
+            return `${days}d ${hours}h ${minutes}m `;
         },
         handleSelectBid(itemIndex, sideIndex) {
             // item["selectedSide"] = index;
             // this.selectedIndex = index;
             this.games[itemIndex].selectedIndex = sideIndex;
         },
-        async handleJoin(item, index) {
-            if (typeof this.games[index].selectedIndex === "number") {
+        handlePredict(item, index) {
+            const isShow = typeof item?.selectedIndex === "number";
+            if (isShow) {
+                this.idPredict = item?.id;
+                this.indexPredict = index;
+                this.showPopup = true;
+            } else {
+                this.renderWarning();
+            }
+        },
+        async callPredict() {
+            if (
+                typeof this.games[this.indexPredict].selectedIndex === "number"
+            ) {
+                const dataTele = window.Telegram.WebApp.initDataUnsafe?.user;
+                const nameTele = `${dataTele.first_name} ${dataTele.last_name}`;
+
                 const data = {
-                    gameId: item.id,
+                    gameId: this.idPredict,
                     userId: this.idUser,
                     value: 200,
                     valueType: "QFC",
                     // side: item["selectedSide"],
-                    side: this.games[index].selectedIndex,
+                    side: this.games[this.indexPredict].selectedIndex,
+                    userName: nameTele,
                 };
                 const dataPredict = await betService.addBidding(data);
+
+                console.log(dataPredict);
                 if (dataPredict?.bid) {
                     await this.renderSuccess();
                     await this.fetchData();
                 } else {
                     await this.renderErr();
+                    await this.fetchData();
                 }
             } else {
                 alert("Choose your side");
             }
+        },
+        handleYesPredict() {
+            this.showPopup = false;
+            this.callPredict();
+        },
+        handleNoPredict() {
+            this.showPopup = false;
         },
         extractNumber(text) {
             const regex = /\d{1,3}(?:,\d{3})*/;
@@ -396,12 +497,15 @@ export default {
                     "balancePoints",
                     { order: [["Balance", "DESC"]] }
                 );
+                console.log(this.leaderboard);
 
                 this.history = await betService.getFilterData("bids", {
                     where: { UserId: this.idUser },
                     order: [["createdAt", "DESC"]],
                     include: "Games",
                 });
+
+                console.log(this.history);
 
                 const userPointdata = await betService.getFilterData(
                     "balancePoints",
@@ -555,6 +659,9 @@ export default {
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
+.box-matches::-webkit-scrollbar {
+    display: none;
+}
 
 .matches-item {
     text-align: center;
@@ -675,9 +782,13 @@ export default {
     width: fit-content;
 }
 .predict-point-disabled {
-    pointer-events: none;
+    /* pointer-events: none; */
     opacity: 0.5;
 }
+.btn-predict-disable {
+    background: rgb(80 80 80);
+}
+
 .point-your {
     display: flex;
     justify-content: center;
@@ -818,5 +929,85 @@ export default {
     background-color: #1b3371;
     padding: 3px 5px;
     border-radius: 3px;
+}
+
+.list-history {
+    padding: 10px;
+    height: calc(100% - 270px);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.box-history {
+    background-color: #0c2678;
+    padding: 10px;
+    border-radius: 10px;
+    height: 100%;
+    overflow: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.box-history::-webkit-scrollbar {
+    display: none;
+}
+.box-title-columns {
+    display: flex;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 10px 0;
+    border-bottom: 1px solid #fff;
+}
+.title-columns {
+    text-align: center;
+}
+.title-columns:nth-child(1) {
+    /* flex: 0 0 4%; */
+    width: 8%;
+}
+.title-columns:nth-child(n + 2) {
+    /* flex: 0 0 24%; */
+    width: 23%;
+}
+
+.history-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #ffffff5c;
+}
+/* .history-item:last-child {
+    border-bottom: none;
+} */
+.history-item-col {
+    text-align: center;
+}
+.history-item-col:nth-child(1) {
+    width: 8%;
+}
+.history-item-col:nth-child(n + 2) {
+    width: 23%;
+}
+.history-item-col img {
+    width: 10px;
+}
+
+.match {
+    font-weight: bold;
+}
+.match.lose {
+    color: #d40000;
+}
+.match.new {
+    color: #f3fb02;
+}
+.match.win {
+    color: #04cc00;
+}
+.match.placed {
+    color: #ffa53a;
+}
+.match.pending {
+    color: #ffa53a;
 }
 </style>

@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const axiosBetInstance = axios.create({
-    baseURL: "https://qfan-api.qcloud.asia/betting/api/v1/",
+    baseURL: "https://qfan-api.qcloud.asia/predict/api/v1/",
     headers: {
         "Content-Type": "application/json",
     },

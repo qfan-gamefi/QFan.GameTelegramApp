@@ -575,7 +575,11 @@ export default {
         </div>
 
         <MissionList :visible="showMission" :idUser="idUser" />
-        <EventList :visible="showEvent" :idUser="idUser" />
+        <EventList
+            :visible="showEvent"
+            :idUser="idUser"
+            @openCoomSoon="showPopupCoomingSoon"
+        />
         <!-- @openCoomSoon="showPopupCoomingSoon" -->
 
         <InviteFrens

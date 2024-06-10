@@ -1,10 +1,6 @@
 <template>
     <div class="popup-event" v-if="visible">
         <div class="box-event">
-            <!-- <div @click="$emit('close')" class="close-home">
-                <i class="fa-solid fa-rectangle-xmark"></i>
-            </div> -->
-
             <Loading :loading="loading" />
 
             <div class="box-desc-event" v-if="!loading">
@@ -19,9 +15,14 @@
                 >
                     <div class="box-content-event">
                         <div class="title-item">
-                            {{ item?.attributes?.title }}
+                            <div class="event-title">
+                                {{ item?.attributes?.title }}
+                            </div>
+                            <div class="event-content">
+                                {{ item?.attributes?.description }}
+                            </div>
                         </div>
-                        <div class="box-pool">
+                        <!-- <div class="box-pool">
                             <div class="text-pool">Prize Pool:</div>
                             <div class="img-pool t-primary-color">
                                 {{
@@ -30,11 +31,9 @@
                                             ?.children?.[0]?.text
                                     )
                                 }}
-                                <img
-                                    src="./../../public/assets/logo-quai.svg"
-                                />
+                                <img src="./../../public/assets/logo.svg" />
                             </div>
-                        </div>
+                        </div> -->
                         <div class="btn-join-now">
                             <!-- <button @click="$emit('openCoomSoon')">
                                 Join Now
@@ -68,11 +67,13 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
 import userService from "../services/userService";
 import Loading from "./LoadingForm.vue";
 import DetailEvent from "./DetailEvent.vue";
 import EventBus from "./../utils/eventBus";
+import EmptyForm from "./EmptyForm.vue";
+import { IEvent } from "../interface";
 
 export default {
     props: {
@@ -88,11 +89,9 @@ export default {
     components: {
         Loading,
         DetailEvent,
+        EmptyForm,
     },
     async mounted() {
-        // Telegram.WebApp.ready();
-        // Telegram.WebApp.setHeaderColor("ffffff");
-        // Telegram.WebApp.BackButton.show();
         EventBus.on("close-detail-event", this.closeDetailEvent);
         if (this.visible) {
             await this.fetchEventData();
@@ -109,11 +108,11 @@ export default {
     data() {
         return {
             loading: true,
-            eventData: null,
+            eventData: [] as IEvent[],
             buttonText: [],
             loadingBtn: [],
             isJoinNow: false,
-            detailEvent: null,
+            detailEvent: {} as IEvent,
         };
     },
     watch: {
@@ -148,8 +147,8 @@ export default {
                 this.loading = false;
             }
         },
-        handleJoin(item) {
-            this.detailEvent = item;
+        handleJoin(itemDetail) {
+            this.detailEvent = itemDetail;
             this.isJoinNow = true;
         },
         closeDetailEvent() {
@@ -194,8 +193,7 @@ export default {
 
 .box-event {
     padding: 20px;
-    /* height: calc(100% - 40px); */
-    height: calc(100% - 105px);
+    height: calc(100% - 125px);
 }
 
 .box-desc-event {
@@ -240,14 +238,23 @@ export default {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 10px;
+    gap: 15px;
+    font-family: monospace;
+    font-weight: bold;
 }
 
-.title-item {
-    font-size: 12px;
+.event-title {
+    font-size: 24px;
+    color: #ff0000;
+    text-shadow: 1px 1px 1px white;
+}
+.event-content {
+    margin-left: 2px;
+}
+
+.box-pool {
     font-family: monospace;
 }
-
 .box-pool img {
     margin-left: 3px;
     width: 15px;
@@ -275,6 +282,9 @@ export default {
     padding: 5px;
     border-radius: 15px;
     width: max-content;
+}
+.box-time span {
+    padding: 0 5px;
 }
 
 .close-home {

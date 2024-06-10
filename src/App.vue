@@ -50,12 +50,12 @@ export default {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            // idUser: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
-            // telegram_bot_link:
-            //     telegram_bot_link +
-            //         window.Telegram.WebApp.initDataUnsafe.user?.id || "",
-            idUser: "5314337740",
-            telegram_bot_link: telegram_bot_link + 5314337740 || "",
+            idUser: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
+            telegram_bot_link:
+                telegram_bot_link +
+                    window.Telegram.WebApp.initDataUnsafe.user?.id || "",
+            // idUser: "2123800227",
+            // telegram_bot_link: telegram_bot_link + 2123800227 || "",
 
             // 1927324767 a
             //2123800227
@@ -575,11 +575,9 @@ export default {
         </div>
 
         <MissionList :visible="showMission" :idUser="idUser" />
-        <EventList
-            :visible="showEvent"
-            :idUser="idUser"
-            @openCoomSoon="showPopupCoomingSoon"
-        />
+        <EventList :visible="showEvent" :idUser="idUser" />
+        <!-- @openCoomSoon="showPopupCoomingSoon" -->
+
         <InviteFrens
             :visible="showInvite"
             @invite="handleCopy"

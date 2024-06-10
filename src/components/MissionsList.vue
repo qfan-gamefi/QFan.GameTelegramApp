@@ -68,6 +68,7 @@
 </template>
 
 <script>
+import EmptyForm from "./EmptyForm.vue";
 import userService from "../services/userService";
 import { sortMissions } from "../utils";
 import Loading from "./LoadingForm.vue";
@@ -88,6 +89,7 @@ export default {
     components: {
         Loading,
         Notification,
+        EmptyForm,
     },
     async created() {
         this.buttonText = [];

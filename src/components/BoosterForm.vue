@@ -118,6 +118,7 @@
 </template>
 
 <script>
+import EmptyForm from "./EmptyForm.vue";
 import userService from "../services/userService";
 import Loading from "./LoadingForm.vue";
 import TemplateUpLevel from "./TemplateUpLevel.vue";
@@ -143,6 +144,7 @@ export default {
     components: {
         Loading,
         TemplateUpLevel,
+        EmptyForm,
     },
     data() {
         return {
@@ -383,7 +385,7 @@ export default {
         },
     },
     beforeUnmount() {
-        EventBus.off("close-stadium", this.closeStadium); //
+        EventBus.off("close-stadium", this.closeStadium);
     },
 };
 </script>

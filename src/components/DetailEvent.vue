@@ -4,17 +4,24 @@
         <div class="box-detail-event">
             <div
                 class="banner-event"
-                :key="index"
                 :style="{
                     backgroundImage: `url(https://qfan-api.qcloud.asia${detailEvent?.attributes?.banner?.data?.attributes?.formats?.small?.url})`,
                 }"
             >
                 <div class="text-banner">
-                    <div class="title-banner">
+                    <!-- <div class="title-banner">
                         {{ detailEvent?.attributes?.title }}
+                    </div> -->
+                    <div class="title-item">
+                        <div class="event-title-detail">
+                            {{ detailEvent?.attributes?.title }}
+                        </div>
+                        <div class="event-content-detail">
+                            {{ detailEvent?.attributes?.description }}
+                        </div>
                     </div>
-                    <div class="pool-banner">
-                        <div class="text-pool-banner">Frize Pool</div>
+                    <!-- <div class="pool-banner">
+                        <div class="text-pool-banner">Prize Pool</div>
                         <div class="number-pool t-primary-color">
                             {{
                                 extractNumber(
@@ -22,9 +29,9 @@
                                         ?.children?.[0]?.text
                                 )
                             }}
-                            <img src="./../../public/assets/logo-quai.svg" />
+                            <img src="./../../public/assets/logo.svg" />
                         </div>
-                    </div>
+                    </div> -->
                     <div class="box-time">
                         <span
                             ><i class="fa-solid fa-clock"></i>
@@ -46,7 +53,7 @@
                         :class="{ active: activeButton === 'Predict' }"
                         @click="setActiveButton('Predict')"
                     >
-                        Predict
+                        Match
                     </div>
                     <div
                         class="btn-item-banner"
@@ -82,14 +89,30 @@
                         ]"
                     >
                         <div class="matches-title">
+                            <div
+                                class="matches-title-img"
+                                :style="{
+                                    backgroundImage: `url( https://qfan-api.qcloud.asia/uploads/${item?.Name?.split(
+                                        '-'
+                                    )?.[0]?.toUpperCase()}.png)`,
+                                }"
+                            ></div>
                             {{ item?.Description }}
+                            <div
+                                class="matches-title-img"
+                                :style="{
+                                    backgroundImage: `url( https://qfan-api.qcloud.asia/uploads/${item?.Name?.split(
+                                        '-'
+                                    )?.[1]?.toUpperCase()}.png)`,
+                                }"
+                            ></div>
                         </div>
                         <div class="matches-time">
                             {{ getTimeRemaining(item?.StopBiddingTime) }}
                         </div>
 
                         <div class="box-btn-bet">
-                            <v-btn-toggle
+                            <div
                                 v-for="(
                                     side, indexSide
                                 ) in item?.BidSideNames?.split(',')"
@@ -103,11 +126,17 @@
                                     },
                                 ]"
                             >
-                                <v-btn
-                                    @click="handleSelectBid(index, indexSide)"
-                                    >{{ side }}</v-btn
-                                >
-                            </v-btn-toggle>
+                                <div @click="handleSelectBid(index, indexSide)">
+                                    <div>{{ side }}</div>
+                                    <div>
+                                        [1:{{
+                                            item?.RateData?.[
+                                                indexSide
+                                            ]?.toFixed(2)
+                                        }}]
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- <div class="team-predict">Team Predict</div> -->
@@ -116,11 +145,11 @@
                                 @click="handlePredict(item, index)"
                                 :class="[
                                     'predict-point-content',
-                                    {
-                                        'predict-point-disabled':
-                                            typeof item?.selectedIndex !==
-                                            'number',
-                                    },
+                                    // {
+                                    //     'predict-point-disabled':
+                                    //         typeof item?.selectedIndex !==
+                                    //         'number',
+                                    // },
                                     {
                                         'btn-predict-disable': item?.BidData,
                                     },
@@ -149,7 +178,16 @@
                                 <span>{{ index + 1 }}</span>
                             </div>
                             <div class="avt-your-rank">
-                                <img src="./../../public/assets/logo.jpg" />
+                                <div
+                                    class="lv-img"
+                                    :style="{
+                                        backgroundImage: `url(${
+                                            item?.UserPhotoUrl ||
+                                            './../../public/assets/logo.svg'
+                                        })`,
+                                    }"
+                                ></div>
+                                <!-- <img src="./../../public/assets/logo.jpg" /> -->
                             </div>
                             <div class="your-name-point">
                                 <div class="your-name">
@@ -171,11 +209,23 @@
                         <span>{{ dataRankCurrent?.rank }}</span>
                     </div>
                     <div class="avt-your-rank">
-                        <img src="./../../public/assets/logo.jpg" />
+                        <div
+                            class="lv-img"
+                            :style="{
+                                backgroundImage: `url(${
+                                    dataRankCurrent?.UserPhotoUrl ||
+                                    './../../public/assets/logo.svg'
+                                })`,
+                            }"
+                        ></div>
+                        <!-- <img src="./../../public/assets/logo.jpg" /> -->
                     </div>
                     <div class="your-name-point">
                         <div class="your-name">
-                            {{ dataRankCurrent?.UserId }}
+                            {{
+                                dataRankCurrent?.UserName ||
+                                dataRankCurrent?.UserId
+                            }}
                         </div>
                         <div class="your-point">
                             {{ dataRankCurrent?.Balance }}
@@ -220,13 +270,10 @@
                         <div class="history-item-col">
                             <div
                                 v-if="
-                                    item?.Status?.toLowerCase() !== 'win' ||
-                                    item?.Status?.toLowerCase() !== 'lose'
+                                    item?.Status?.toLowerCase() === 'win' ||
+                                    item?.Status?.toLowerCase() === 'lose'
                                 "
                             >
-                                <div>Pending</div>
-                            </div>
-                            <div v-else>
                                 <div>
                                     {{ renderProfitQFC(item) }}
                                     <img src="./../../public/assets/logo.svg" />
@@ -234,6 +281,9 @@
                                 <div>
                                     {{ renderProfitPoint(item) }}
                                 </div>
+                            </div>
+                            <div v-else>
+                                <div>Waiting</div>
                             </div>
                         </div>
                     </div>
@@ -259,12 +309,14 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
 import betService from "../services/betService";
 import Notification from "./NotificationToast.vue";
 import PopupConfirm from "./PopupConfirm.vue";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
+import EmptyForm from "./EmptyForm.vue";
+import { IEvent } from "../interface";
 
 dayjs.extend(duration);
 
@@ -272,6 +324,7 @@ export default {
     components: {
         Notification,
         PopupConfirm,
+        EmptyForm,
     },
     props: {
         isDetailEvent: {
@@ -279,7 +332,7 @@ export default {
             default: false,
         },
         detailEvent: {
-            type: Object,
+            type: Object as () => IEvent,
             required: true,
         },
         idUser: {
@@ -369,7 +422,7 @@ export default {
                 (item) => item?.ValueType === "Point"
             );
             const qfcValue = qfcItem?.Value
-                ? `${qfcItem?.Value} ${qfcItem?.ValueType}`
+                ? `${Math?.floor(qfcItem?.Value)} ${qfcItem?.ValueType}`
                 : "";
 
             return qfcValue;
@@ -377,15 +430,9 @@ export default {
         renderProfitQFC(item) {
             const dataQFC = JSON.parse(item?.Reward);
             const qfcItem = dataQFC?.find((item) => item?.ValueType === "QFC");
-            const qfcValue = qfcItem ? qfcItem.Value : null;
+            const qfcValue = qfcItem ? Math?.floor(qfcItem?.Value) : null;
 
             return qfcValue;
-            // const textProfit = this.calcSide(item)?.toLowerCase();
-            // if (textProfit === "lose") {
-            //     return `-${item?.Value}`;
-            // } else if (textProfit === "win") {
-            //     return `+${item?.Value}`;
-            // }
         },
         getBorderClass(side, index) {
             const lowCase = side?.[index]?.toLowerCase();
@@ -450,7 +497,6 @@ export default {
                 };
                 const dataPredict = await betService.addBidding(data);
 
-                console.log(dataPredict);
                 if (dataPredict?.bid) {
                     await this.renderSuccess();
                     await this.fetchData();
@@ -497,15 +543,12 @@ export default {
                     "balancePoints",
                     { order: [["Balance", "DESC"]] }
                 );
-                console.log(this.leaderboard);
 
                 this.history = await betService.getFilterData("bids", {
                     where: { UserId: this.idUser },
                     order: [["createdAt", "DESC"]],
                     include: "Games",
                 });
-
-                console.log(this.history);
 
                 const userPointdata = await betService.getFilterData(
                     "balancePoints",
@@ -516,6 +559,8 @@ export default {
                     this.idUser,
                     this.detailEvent
                 );
+
+                console.log(dataRankCurrent);
 
                 if (dataRankCurrent?.length > 0) {
                     this.dataRankCurrent = dataRankCurrent?.[0];
@@ -597,7 +642,7 @@ export default {
     bottom: 0;
     position: absolute;
     width: 100%;
-    padding: 10px 0;
+    padding: 7px 0;
     background-color: #0d2779;
     font-family: monospace;
     justify-content: space-around;
@@ -611,6 +656,7 @@ export default {
 .btn-item-banner {
     padding: 5px 10px;
     border-radius: 5px;
+    cursor: pointer;
 }
 
 .text-banner {
@@ -618,12 +664,14 @@ export default {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 5px;
+    gap: 15px;
 }
 
 .title-banner {
-    font-size: 12px;
+    font-size: 24px;
     font-family: monospace;
+    color: #ff0000;
+    text-shadow: 1px 1px 1px white;
 }
 
 .text-pool-banner {
@@ -644,7 +692,7 @@ export default {
 
 .list-matches {
     padding: 10px 20px;
-    height: calc(100% - 270px);
+    height: calc(100% - 280px);
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -663,6 +711,19 @@ export default {
     display: none;
 }
 
+.matches-title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+.matches-title-img {
+    width: 25px;
+    height: 25px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
 .matches-item {
     text-align: center;
     background-color: #0c2678;
@@ -738,7 +799,8 @@ export default {
 .bet-win,
 .bet-draw,
 .bet-lose {
-    width: min-content;
+    cursor: pointer;
+    /* width: min-content; */
     padding: 5px 15px;
     border-radius: 5px;
     background-color: rgb(80 80 80);
@@ -775,6 +837,7 @@ export default {
 }
 
 .predict-point-content {
+    cursor: pointer;
     background: #ffa53a;
     display: flex;
     padding: 5px 10px;
@@ -786,6 +849,7 @@ export default {
     opacity: 0.5;
 }
 .btn-predict-disable {
+    pointer-events: none;
     background: rgb(80 80 80);
 }
 
@@ -812,6 +876,7 @@ export default {
         -1px 1px 0 black, 1px 0 0 black, -1px 0 0 black, 0 1px 0 black,
         0 -1px 0 black;
     overflow: auto;
+    scrollbar-width: none;
 }
 .list-leaderboard::-webkit-scrollbar {
     display: none;
@@ -910,7 +975,14 @@ export default {
     font-size: 18px;
     font-weight: bold;
 }
-
+.lv-img {
+    width: 30px;
+    height: 30px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    border-radius: 50%;
+}
 .avt-your-rank img {
     width: 25px;
     height: 25px;
@@ -929,11 +1001,13 @@ export default {
     background-color: #1b3371;
     padding: 3px 5px;
     border-radius: 3px;
+    min-width: 90px;
+    max-width: 90px;
 }
 
 .list-history {
     padding: 10px;
-    height: calc(100% - 270px);
+    height: calc(100% - 280px);
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -975,6 +1049,7 @@ export default {
     align-items: center;
     padding: 10px 0;
     border-bottom: 1px solid #ffffff5c;
+    font-size: 11px;
 }
 /* .history-item:last-child {
     border-bottom: none;
@@ -1009,5 +1084,17 @@ export default {
 }
 .match.pending {
     color: #ffa53a;
+}
+
+.title-item {
+    font-weight: bold;
+}
+.event-title-detail {
+    font-size: 24px;
+    color: #ff0000;
+    text-shadow: 1px 1px 1px white;
+}
+.event-content-detail {
+    margin-left: 2px;
 }
 </style>

@@ -11,7 +11,7 @@ export default {
     props: {
         title: {
             type: String,
-            default: "Empty Data!",
+            default: "No Data!",
         },
         message: {
             type: String,

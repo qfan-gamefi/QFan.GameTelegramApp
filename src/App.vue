@@ -358,6 +358,12 @@ export default {
                 this.showEvent = false;
                 this.showBooster = false;
                 this.showInvite = false;
+                if (this.activeButton === "booster") {
+                    EventBus.emit("close-stadium");
+                }
+                if (this.activeButton === "event") {
+                    EventBus.emit("close-detail-event");
+                }
 
                 this.getInfoUser();
                 this.activeButton = "";
@@ -396,26 +402,6 @@ export default {
             };
 
             Object.assign(this, tabMappings[tab]);
-        },
-        async closeMission() {
-            this.activeButton = "";
-            this.showMission = false;
-            await this.getInfoUser();
-        },
-        async closeEvent() {
-            this.activeButton = "";
-            this.showEvent = false;
-            await this.getInfoUser();
-        },
-        async closeInvite() {
-            this.activeButton = "";
-            this.showInvite = false;
-            await this.getInfoUser();
-        },
-        closeBooster() {
-            this.activeButton = "";
-            this.showBooster = false;
-            this.getInfoUser();
         },
     },
     async mounted() {
@@ -588,35 +574,25 @@ export default {
             </div>
         </div>
 
-        <MissionList
-            :visible="showMission"
-            @close="closeMission"
-            :idUser="idUser"
-        />
-        <!-- @invite="handleButtonTab('mission')" -->
-
+        <MissionList :visible="showMission" :idUser="idUser" />
         <EventList
             :visible="showEvent"
-            @close="closeEvent"
             :idUser="idUser"
             @openCoomSoon="showPopupCoomingSoon"
         />
-        <!-- @invite="handleButtonTab('event')" -->
+        <!-- @openCoomSoon="showPopupCoomingSoon" -->
+
         <InviteFrens
             :visible="showInvite"
-            @close="closeInvite"
             @invite="handleCopy"
             :idUser="idUser"
             :rewardAmount="dataQPoint.rewardAmount"
         />
-
         <BoosterForm
             :visible="showBooster"
-            @close="closeBooster"
             :rewardScheduleHour="dataQPoint.rewardScheduleHour"
             :idUser="idUser"
         />
-        <!-- @invite="handleButtonTab('booster')" -->
 
         <div
             :class="[

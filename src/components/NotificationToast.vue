@@ -1,7 +1,19 @@
 <template>
     <div v-if="visible" :class="`notification ${type}`">
-        <span>{{ message }}</span>
-        <!-- <div @click="closeNotification">X</div> -->
+        <span>
+            <i class="fa-solid fa-circle-check" v-if="type === 'success'"></i>
+
+            <i
+                class="fa-solid fa-circle-exclamation"
+                v-if="type === 'error'"
+            ></i>
+
+            <i
+                class="fa-solid fa-circle-exclamation"
+                v-if="type === 'warning'"
+            ></i>
+            {{ message }}
+        </span>
     </div>
 </template>
 
@@ -46,21 +58,39 @@ export default {
 .notification {
     position: fixed;
     top: 10%;
-    right: 0;
+    right: 50%;
     color: #fff;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: calc(100% - 40px);
-    padding: 10px 20px;
-    font-size: 12px;
+    font-size: 16px;
     font-family: monospace;
+    transform: translate(50%, 50%);
+    padding: 10px;
+    width: 80%;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: bold;
+
+    animation: fadeNotification 2s ease-in-out forwards;
 }
 .notification.success {
-    background-color: #4caf50;
+    background-color: rgb(7 149 66 / 69%);
+    /* background-color: #4caf50; */
+    border: 1px solid rgba(36, 241, 6, 0.46);
+    box-shadow: 0px 0px 2px #259c08;
+    text-shadow: 2px 1px #00040a;
 }
 .notification.error {
-    background-color: #f44336;
+    /* background-color: #f44336; */
+    border: 1px solid rgba(241, 6, 6, 0.81);
+    box-shadow: 0px 0px 2px #ff0303;
+    text-shadow: 2px 1px #00040a;
+    background-color: rgb(220 17 1 / 69%);
+}
+.notification.warning {
+    border: 1px solid rgba(241, 142, 6, 0.81);
+    box-shadow: 0px 0px 2px #ffb103;
+    text-shadow: 2px 1px #00040a;
+    background-color: rgb(220 128 1 / 69%);
 }
 .notification button {
     background: none;
@@ -69,5 +99,24 @@ export default {
     font-size: 16px;
     cursor: pointer;
     margin-left: 10px;
+}
+
+@keyframes fadeNotification {
+    0% {
+        opacity: 0;
+        transform: translate(50%, 50%) scale(0.9);
+    }
+    10% {
+        opacity: 1;
+        transform: translate(50%, 50%) scale(1);
+    }
+    90% {
+        opacity: 1;
+        transform: translate(50%, 50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(50%, 50%) scale(0.9);
+    }
 }
 </style>

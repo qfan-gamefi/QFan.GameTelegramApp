@@ -1,10 +1,6 @@
 <template>
     <div class="popup-mission" v-if="visible">
         <div class="box-mission">
-            <!-- <div @click="$emit('close')" class="close-home">
-                <i class="fa-solid fa-rectangle-xmark"></i>
-            </div> -->
-
             <div class="box-content-mission">
                 <Loading :loading="loading" />
 
@@ -59,15 +55,24 @@
                 </div>
 
                 <EmptyForm v-if="showEmptyFormMission" />
+
+                <Notification
+                    v-if="showNotification"
+                    :message="notificationMessage"
+                    :type="notificationType"
+                    @close="showNotification = false"
+                />
             </div>
         </div>
     </div>
 </template>
 
 <script>
+import EmptyForm from "./EmptyForm.vue";
 import userService from "../services/userService";
 import { sortMissions } from "../utils";
 import Loading from "./LoadingForm.vue";
+import Notification from "./NotificationToast.vue";
 import { toRaw } from "vue";
 
 export default {
@@ -83,6 +88,8 @@ export default {
     },
     components: {
         Loading,
+        Notification,
+        EmptyForm,
     },
     async created() {
         this.buttonText = [];
@@ -98,6 +105,10 @@ export default {
             buttonText: [],
             missionRewardData: [],
             loadingBtn: [],
+
+            showNotification: false,
+            notificationMessage: "",
+            notificationType: "",
         };
     },
     watch: {
@@ -115,8 +126,18 @@ export default {
         }
     },
     methods: {
-        handleMission() {
-            this.$emit("mission");
+        // handleMission() {
+        //     this.$emit("mission");
+        // },
+        async renderSuccess() {
+            this.notificationMessage = `Success!`;
+            this.notificationType = "success";
+            this.showNotification = true;
+        },
+        async renderErr() {
+            this.notificationMessage = `Error!`;
+            this.notificationType = "error";
+            this.showNotification = true;
         },
         async autoClaim(idMission, id) {
             this.buttonText[id] = `Verifying`;
@@ -125,11 +146,12 @@ export default {
             userService
                 .claimMission(this.idUser, idMission)
                 .then(async () => {
+                    await this.renderSuccess();
                     await this.fetchMissionData();
                     await this.fetchListMissionReward();
                 })
-                .catch((error) => {
-                    console.error("Error claiming mission:", error);
+                .catch(() => {
+                    this.renderErr();
                 });
         },
 

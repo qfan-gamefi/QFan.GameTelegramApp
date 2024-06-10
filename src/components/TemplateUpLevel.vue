@@ -114,10 +114,14 @@
 <script>
 import userService from "../services/userService";
 import Notification from "./NotificationToast.vue";
+import EmptyForm from "./EmptyForm.vue";
+import Loading from "./LoadingForm.vue";
 
 export default {
     components: {
         Notification,
+        EmptyForm,
+        Loading,
     },
     props: {
         showPopup: {

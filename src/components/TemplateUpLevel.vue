@@ -179,7 +179,7 @@ export default {
             try {
                 this.loading = true;
                 await userService.postUplevel(this.idUser, this.typeBooster);
-                this.showSuccessNotification();
+                // this.showSuccessNotification();
                 this.$emit("close");
             } catch (error) {
                 this.showErrorNotification(
@@ -191,16 +191,16 @@ export default {
             }
         },
         showSuccessNotification() {
+            this.showNotification = true;
             const nameUp =
                 this.typeBooster === "SPEED" ? `Stadium` : `Training Room`;
             this.notificationMessage = `Upgrade is yours! ${nameUp} ${this.dataNext?.attributes?.applyLevel}`;
             this.notificationType = "success";
-            this.showNotification = true;
         },
         showErrorNotification(errorMessage) {
+            this.showNotification = true;
             this.notificationMessage = errorMessage || "An error occurred!";
             this.notificationType = "error";
-            this.showNotification = true;
         },
     },
 };

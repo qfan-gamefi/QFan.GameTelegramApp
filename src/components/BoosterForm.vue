@@ -123,7 +123,6 @@ import userService from "../services/userService";
 import Loading from "./LoadingForm.vue";
 import TemplateUpLevel from "./TemplateUpLevel.vue";
 import EventBus from "./../utils/eventBus";
-import { toRaw } from "vue";
 
 export default {
     props: {
@@ -161,6 +160,16 @@ export default {
             rewardAmount: 0,
             dataNextTraining: {},
             dataNextStadium: {},
+
+            stadiumList: [],
+            lvStadiumCurrent: 1,
+
+            amountList: [],
+            lvTrainCurrent: 1,
+
+            showNotification: false,
+            notificationMessage: "",
+            notificationType: "",
         };
     },
     watch: {
@@ -181,6 +190,18 @@ export default {
     // },
 
     methods: {
+        maxLV(data) {
+            const maxLevel = data.reduce((maxItem, currentItem) => {
+                return currentItem.attributes.applyLevel >
+                    maxItem.attributes.applyLevel
+                    ? currentItem
+                    : maxItem;
+            }, data[0]);
+            return maxLevel;
+        },
+        findLvCurrent(data) {
+            return data?.attributes?.booster?.data?.attributes?.applyLevel;
+        },
         async getInfoUser() {
             try {
                 const data = await userService.getInfo(this.idUser);
@@ -205,11 +226,14 @@ export default {
                         (item) => item.attributes.type == "SPEED"
                     );
                     this.stadiumItems = stadiumItems;
+                    this.stadiumList = stadiumItems;
 
+                    //Skill
                     const trainingItems = res?.data.filter(
                         (item) => item.attributes.type == "AMOUNT"
                     );
                     this.trainingItems = trainingItems;
+                    this.amountList = trainingItems;
 
                     this.listData = res?.data;
                 }
@@ -227,40 +251,27 @@ export default {
                 );
 
                 if (res?.data?.length === 0) {
-                    this.stadiumItems = toRaw(this.stadiumItems)?.find(
+                    this.stadiumItems = this.stadiumList?.find(
                         (el) => el?.attributes?.applyLevel === 1
                     );
-                    this.dataNextStadium = stadiumtList?.find(
+                    this.dataNextStadium = this.stadiumList?.find(
                         (el) => el?.attributes?.applyLevel === 2
                     );
+                    this.lvStadiumCurrent = 1;
                 } else {
-                    const dataStadiumCurrent = res?.data?.find(
+                    const stadiumCurrent = res?.data?.find(
                         (el) => el?.attributes?.boosterType === "SPEED"
                     );
-                    const stadiumtList = toRaw(this.listData).filter(
-                        (item) => item.attributes.type === "SPEED"
+
+                    const lvCurrent = this.findLvCurrent(stadiumCurrent);
+                    this.lvStadiumCurrent = lvCurrent;
+
+                    this.stadiumItems =
+                        stadiumCurrent?.attributes?.booster?.data;
+
+                    this.dataNextStadium = this.stadiumList.find(
+                        (el) => el?.attributes?.applyLevel === lvCurrent + 1
                     );
-
-                    if (dataStadiumCurrent) {
-                        const lvCurrent =
-                            dataStadiumCurrent?.attributes?.booster?.data
-                                ?.attributes?.applyLevel;
-
-                        this.stadiumItems =
-                            dataStadiumCurrent?.attributes?.booster?.data;
-
-                        this.dataNextStadium = stadiumtList.find(
-                            (el) => el?.attributes?.applyLevel === lvCurrent + 1
-                        );
-                    } else {
-                        this.stadiumItems = toRaw(this.stadiumItems)?.find(
-                            (el) => el?.attributes?.applyLevel === 1
-                        );
-
-                        this.dataNextStadium = stadiumtList.find(
-                            (el) => el?.attributes?.applyLevel === 2
-                        );
-                    }
                 }
             } catch (error) {
                 // this.listData = [];
@@ -273,39 +284,28 @@ export default {
                 this.loading = true;
                 const res = await userService.getBoosterAmount(this.idUser);
 
-                const amountList = toRaw(this.listData).filter(
-                    (item) => item.attributes.type === "AMOUNT"
-                );
                 if (res?.data?.length === 0) {
-                    this.dataNextTraining = amountList?.find(
+                    this.dataNextTraining = this.amountList?.find(
                         (el) => el?.attributes?.applyLevel === 2
                     );
-                    this.trainingItems = toRaw(this.trainingItems)?.find(
+                    this.trainingItems = this.amountList?.find(
                         (el) => el?.attributes?.applyLevel === 1
                     );
+                    this.lvTrainCurrent = 1;
                 } else {
-                    const dataTrainingCurrent = res?.data?.find(
+                    const trainingCurrent = res?.data?.find(
                         (el) => el?.attributes?.boosterType === "AMOUNT"
                     );
 
-                    if (dataTrainingCurrent) {
-                        const lvCurrent =
-                            dataTrainingCurrent?.attributes?.booster?.data
-                                ?.attributes?.applyLevel;
-                        this.trainingItems =
-                            dataTrainingCurrent?.attributes?.booster?.data;
+                    const lvCurrent = this.findLvCurrent(trainingCurrent);
+                    this.lvTrainCurrent = lvCurrent;
 
-                        this.dataNextTraining = amountList.find(
-                            (el) => el?.attributes?.applyLevel === lvCurrent + 1
-                        );
-                    } else {
-                        this.trainingItems = toRaw(this.trainingItems)?.find(
-                            (el) => el?.attributes?.applyLevel === 1
-                        );
-                        this.dataNextTraining = amountList.find(
-                            (el) => el?.attributes?.applyLevel === 2
-                        );
-                    }
+                    this.trainingItems =
+                        trainingCurrent?.attributes?.booster?.data;
+
+                    this.dataNextTraining = this.amountList.find(
+                        (el) => el?.attributes?.applyLevel === lvCurrent + 1
+                    );
                 }
             } catch (error) {
                 // this.listData = [];
@@ -313,60 +313,35 @@ export default {
                 this.loading = false;
             }
         },
-        handleStadium(stadiumItems) {
+        handleStadium() {
             this.isShowStadium = true;
             this.typeBooster = "SPEED";
-            //check stadium
-            const speedItems = toRaw(this.listData).filter(
-                (item) => item.attributes.type === "SPEED"
-            );
-            const lvCurrentStadium =
-                toRaw(stadiumItems)?.attributes?.applyLevel;
-            const maxLevelStadiumItem = speedItems.reduce(
-                (maxItem, currentItem) => {
-                    return currentItem.attributes.applyLevel >
-                        maxItem.attributes.applyLevel
-                        ? currentItem
-                        : maxItem;
-                },
-                speedItems[0]
-            );
+
+            const maxLevel = this.maxLV(this.stadiumList);
 
             const checkMaxStadium =
-                maxLevelStadiumItem?.attributes?.applyLevel ===
-                lvCurrentStadium;
+                maxLevel?.attributes?.applyLevel === this.lvStadiumCurrent;
+
             if (checkMaxStadium) {
                 this.isMax = true;
             } else {
-                this.dataNext = speedItems.find(
-                    (el) => el?.attributes?.applyLevel === lvCurrentStadium + 1
-                );
+                this.dataNext = this.dataNextStadium;
                 this.isMax = false;
             }
         },
         handleTraining() {
             this.isShowTraining = true;
             this.typeBooster = "AMOUNT";
-            //check training
-            const amountItems = toRaw(this.listData).filter(
-                (item) => item.attributes.type === "AMOUNT"
-            );
-            const lvCurrent = toRaw(this.trainingItems)?.attributes?.applyLevel;
-            const maxLevel = amountItems.reduce((maxItem, currentItem) => {
-                return currentItem.attributes.applyLevel >
-                    maxItem.attributes.applyLevel
-                    ? currentItem
-                    : maxItem;
-            }, amountItems[0]);
 
-            const checkMax = maxLevel?.attributes?.applyLevel === lvCurrent;
+            const maxLevel = this.maxLV(this.amountList);
+
+            const checkMax =
+                maxLevel?.attributes?.applyLevel === this.lvTrainCurrent;
+
             if (checkMax) {
                 this.isMax = true;
             } else {
-                this.dataNext = amountItems.find(
-                    (el) => el?.attributes?.applyLevel === lvCurrent + 1
-                );
-
+                this.dataNext = this.dataNextTraining;
                 this.isMax = false;
             }
         },

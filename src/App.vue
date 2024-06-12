@@ -57,9 +57,6 @@ export default {
             // idUser: "2123800227",
             // telegram_bot_link: telegram_bot_link + 2123800227 || "",
 
-            // 1927324767 a
-            //2123800227
-
             showCoomingSoon: false,
             isCopiedToClipboard: false,
             isSuccess: false,
@@ -151,7 +148,7 @@ export default {
 
                     this.getInfoUser();
                 } else {
-                    alert("Lỗi");
+                    alert("Error");
                 }
             } catch (error) {
                 console.error("Error fetching API data:", error);

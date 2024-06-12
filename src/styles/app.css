@@ -1,7 +1,7 @@
 .box-button {
     display: flex;
     width: 94%;
-    justify-content: space-around;
+    justify-content: center;
     /* background-color: #69769c; */
     /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
     position: absolute;
@@ -32,8 +32,8 @@
     justify-content: center;
     background-image: url("./../../public/assets/button-icons/bg-btn.png");
     background-position: center;
-    background-repeat: no-repeat;
-    background-size: contain;
+    /* background-repeat: no-repeat; */
+    background-size: 100% 100%;
 }
 
 /* .btn-item:last-child {

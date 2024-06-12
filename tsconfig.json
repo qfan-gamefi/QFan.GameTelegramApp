@@ -13,7 +13,11 @@
         "noImplicitAny": false,
         "noEmit": true,
         "esModuleInterop": true,
-        "forceConsistentCasingInFileNames": true
+        "forceConsistentCasingInFileNames": true,
+        "paths": {
+            "@/*": ["./src/*"],
+            "@components/*": ["./src/shared/components/*"]
+        }
     },
     "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"]
 }

@@ -2,7 +2,7 @@
     display: flex;
     width: 94%;
     justify-content: space-around;
-    background-color: #69769c;
+    /* background-color: #69769c; */
     /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
     position: absolute;
     bottom: 2%;
@@ -30,20 +30,22 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    background-image: url("./../../public/assets/button-icons/bg-btn.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
 }
 
-.btn-item:last-child {
+/* .btn-item:last-child {
     border-right: none;
-}
+} */
 
 .btn-item:hover {
-    /* background-color: #e0e0e0; */
-    /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); */
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
     transform: translateY(-2px);
 }
 
-.btn-item:not(:last-child)::after {
+/* .btn-item:not(:last-child)::after {
     content: "";
     position: absolute;
     top: 10%;
@@ -51,20 +53,30 @@
     bottom: 10%;
     width: 1px;
     background: linear-gradient(to bottom, transparent, #ccc, transparent);
-}
+} */
 
 .btn-item.active {
-    background-color: #ffa53a;
+    background-image: url("./../../public/assets/button-icons/bg-btn-active.png");
+    /* background-color: #ffa53a; */
     z-index: 1000;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
+    /* border-top-left-radius: 5px;
+    border-top-right-radius: 5px; */
     margin-top: -5px;
-    border-top: 1px solid #8c8181;
+    /* border-top: 1px solid #8c8181; */
 }
 
 .item-img img {
     width: 35px;
     height: 35px;
+}
+
+.item-img .active {
+    width: 45px;
+    height: 45px;
+    position: absolute;
+    top: 25%;
+    right: 50%;
+    transform: translate(50%, -50%);
 }
 
 .item-title {
@@ -73,6 +85,11 @@
     text-shadow: 1px 1px 0 #9f8900, -1px -1px 0 #9f8900, 1px -1px 0 #9f8900,
         -1px 1px 0 #9f8900, 1px 0 0 #9f8900, -1px 0 0 #9f8900, 0 1px 0 #9f8900,
         0 -1px 0 #9f8900;
+}
+
+.item-title.active {
+    position: absolute;
+    bottom: 10%;
 }
 
 @media screen and (max-width: 360px) {

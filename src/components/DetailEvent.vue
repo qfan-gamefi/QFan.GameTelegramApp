@@ -9,9 +9,6 @@
                 }"
             >
                 <div class="text-banner">
-                    <!-- <div class="title-banner">
-                        {{ detailEvent?.attributes?.title }}
-                    </div> -->
                     <div class="title-item">
                         <div class="event-title-detail">
                             {{ detailEvent?.attributes?.title }}
@@ -20,18 +17,7 @@
                             {{ detailEvent?.attributes?.description }}
                         </div>
                     </div>
-                    <!-- <div class="pool-banner">
-                        <div class="text-pool-banner">Prize Pool</div>
-                        <div class="number-pool t-primary-color">
-                            {{
-                                extractNumber(
-                                    detailEvent?.attributes?.content?.[0]
-                                        ?.children?.[0]?.text
-                                )
-                            }}
-                            <img src="./../../public/assets/logo.svg" />
-                        </div>
-                    </div> -->
+
                     <div class="box-time">
                         <span
                             ><i class="fa-solid fa-clock"></i>
@@ -47,27 +33,16 @@
                         <span>Your Points:{{ this.userPoint }}</span>
                     </div>
                 </div>
+
                 <div class="btn-banner">
                     <div
+                        v-for="(button, index) in buttonsBanner"
+                        :key="index"
                         class="btn-item-banner"
-                        :class="{ active: activeButton === 'Predict' }"
-                        @click="setActiveButton('Predict')"
+                        :class="{ active: activeButton === button?.name }"
+                        @click="setActiveButton(button?.name)"
                     >
-                        Match
-                    </div>
-                    <div
-                        class="btn-item-banner"
-                        :class="{ active: activeButton === 'Leaderboard' }"
-                        @click="setActiveButton('Leaderboard')"
-                    >
-                        Leaderboard
-                    </div>
-                    <div
-                        class="btn-item-banner"
-                        :class="{ active: activeButton === 'HistoryReward' }"
-                        @click="setActiveButton('HistoryReward')"
-                    >
-                        History & Reward
+                        {{ button.label }}
                     </div>
                 </div>
             </div>
@@ -88,6 +63,24 @@
                             },
                         ]"
                     >
+                        <div class="matches-time">
+                            <div class="time-start">
+                                {{ getTimeRemaining(item?.StopBiddingTime) }}
+                            </div>
+                            <div
+                                class="time-end"
+                                v-if="
+                                    item?.CloseCountDown &&
+                                    item?.CloseCountDown !== -1
+                                "
+                            >
+                                Close in:
+                                <CountDown
+                                    :countDownValue="item?.CloseCountDown"
+                                />
+                            </div>
+                        </div>
+
                         <div class="matches-title">
                             <div
                                 class="matches-title-img"
@@ -107,11 +100,13 @@
                                 }"
                             ></div>
                         </div>
-                        <div class="matches-time">
-                            {{ getTimeRemaining(item?.StopBiddingTime) }}
-                        </div>
 
-                        <div class="box-btn-bet">
+                        <div
+                            class="box-btn-bet"
+                            :class="{
+                                disable: !item?.CloseCountDown,
+                            }"
+                        >
                             <div
                                 v-for="(
                                     side, indexSide
@@ -128,7 +123,9 @@
                             >
                                 <div @click="handleSelectBid(index, indexSide)">
                                     <div>{{ side }}</div>
-                                    <div>
+                                    <div
+                                        v-if="item?.RateData?.[indexSide] !== 0"
+                                    >
                                         [1:{{
                                             item?.RateData?.[
                                                 indexSide
@@ -151,7 +148,9 @@
                                     //         'number',
                                     // },
                                     {
-                                        'btn-predict-disable': item?.BidData,
+                                        'btn-predict-disable':
+                                            item?.BidData ||
+                                            !item?.CloseCountDown,
                                     },
                                 ]"
                             >
@@ -317,6 +316,7 @@ import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import EmptyForm from "./EmptyForm.vue";
 import { IEvent } from "../interface";
+import CountDown from "../components/count-down/CountDown.vue";
 
 dayjs.extend(duration);
 
@@ -325,6 +325,7 @@ export default {
         Notification,
         PopupConfirm,
         EmptyForm,
+        CountDown,
     },
     props: {
         isDetailEvent: {
@@ -352,6 +353,11 @@ export default {
             dataFrom: null,
             dataTo: null,
             activeButton: "Predict",
+            buttonsBanner: [
+                { name: "Predict", label: "Match" },
+                { name: "Leaderboard", label: "Leaderboard" },
+                { name: "HistoryReward", label: "History & Reward" },
+            ],
             games: [],
             leaderboard: [],
             history: [],
@@ -377,11 +383,7 @@ export default {
     },
     async mounted() {
         await this.fetchData();
-        // this.intervalId = setInterval(this.updateCountdowns, 1000);
     },
-    // beforeUnmount() {
-    //     clearInterval(this.intervalId);
-    // },
     computed: {
         showEmptyDetailEvent() {
             return this.data?.length == 0;
@@ -447,22 +449,15 @@ export default {
         updateCountdowns() {
             this.$forceUpdate();
         },
-        getTimeRemaining(stopBiddingTime) {
-            const now = dayjs();
-            const endTime = dayjs(stopBiddingTime);
-            const diff = endTime?.diff(now);
-
-            if (diff <= 0) {
-                return "End time";
+        renderTimeClose(time) {
+            if (!time || time === -1) {
+                return "";
+            } else {
+                return ``;
             }
-
-            const duration = dayjs?.duration(diff);
-            const days = duration?.days();
-            const hours = duration?.hours();
-            const minutes = duration?.minutes();
-            const seconds = duration.seconds();
-
-            return `${days}d ${hours}h ${minutes}m `;
+        },
+        getTimeRemaining(stopBiddingTime) {
+            return dayjs(stopBiddingTime).format("DD.MM.YYYY, HH:mm");
         },
         handleSelectBid(itemIndex, sideIndex) {
             // item["selectedSide"] = index;
@@ -533,11 +528,15 @@ export default {
                     this.idUser,
                     this.detailEvent
                 );
+
                 // const games = await betService.getFilterData("games", {});
-                this.games = games.map((game) => ({
-                    ...game,
-                    selectedIndex: null,
-                }));
+                this.games = games.map((game) => {
+                    return {
+                        ...game,
+                        CloseCountDown: null,
+                        selectedIndex: null,
+                    };
+                });
 
                 this.leaderboard = await betService.getFilterData(
                     "balancePoints",
@@ -559,8 +558,6 @@ export default {
                     this.idUser,
                     this.detailEvent
                 );
-
-                console.log(dataRankCurrent);
 
                 if (dataRankCurrent?.length > 0) {
                     this.dataRankCurrent = dataRankCurrent?.[0];
@@ -711,11 +708,18 @@ export default {
     display: none;
 }
 
+.matches-time {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 10px;
+    font-size: 10px;
+}
 .matches-title {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 10px;
+    font-weight: bold;
 }
 .matches-title-img {
     width: 25px;
@@ -731,7 +735,7 @@ export default {
     padding: 10px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 15px;
 }
 .matches-item-disable {
     pointer-events: none;
@@ -795,12 +799,15 @@ export default {
     justify-content: center;
     gap: 10px;
 }
+.box-btn-bet.disable {
+    pointer-events: none;
+    opacity: 0.5;
+}
 
 .bet-win,
 .bet-draw,
 .bet-lose {
     cursor: pointer;
-    /* width: min-content; */
     padding: 5px 15px;
     border-radius: 5px;
     background-color: rgb(80 80 80);
@@ -850,7 +857,8 @@ export default {
 }
 .btn-predict-disable {
     pointer-events: none;
-    background: rgb(80 80 80);
+    opacity: 0.5;
+    /* background: rgb(80 80 80); */
 }
 
 .point-your {
@@ -1096,5 +1104,10 @@ export default {
 }
 .event-content-detail {
     margin-left: 2px;
+}
+
+.time-end {
+    display: flex;
+    gap: 3px;
 }
 </style>

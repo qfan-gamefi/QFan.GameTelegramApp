@@ -1,10 +1,6 @@
 <template>
     <div class="popup-booster" v-if="visible">
         <div class="box-booster">
-            <!-- <div @click="$emit('close')" class="close-home">
-                <i class="fa-solid fa-rectangle-xmark"></i>
-            </div> -->
-
             <Loading :loading="loading" />
             <EmptyForm v-if="showEmptyForm" />
 
@@ -22,11 +18,10 @@
                 </div>
 
                 <div class="wrap-lv">
-                    <!-- <div class="stadium text-outline-black">Stadium</div> -->
                     <div
                         class="container-stadium"
                         :key="stadiumItems?.id"
-                        @click="handleStadium(stadiumItems)"
+                        @click="handleStadium()"
                     >
                         <div class="logo-stadium">
                             <img
@@ -48,14 +43,16 @@
                                 </div>
                             </div>
 
-                            <div class="stadium-right t-primary-color">
+                            <div
+                                class="stadium-right t-primary-color"
+                                v-if="dataNextStadium"
+                            >
                                 {{ dataNextStadium?.attributes?.price }}
                                 <img src="./../../public/assets/logo.svg" />
                             </div>
                         </div>
                     </div>
 
-                    <!-- <div class="stadium text-outline-black">Training Room</div> -->
                     <div
                         class="container-stadium"
                         :key="trainingItems.id"
@@ -81,7 +78,10 @@
                                 </div>
                             </div>
 
-                            <div class="stadium-right t-primary-color">
+                            <div
+                                class="stadium-right t-primary-color"
+                                v-if="dataNextTraining"
+                            >
                                 {{ dataNextTraining?.attributes?.price }}
                                 <img src="./../../public/assets/logo.svg" />
                             </div>
@@ -101,6 +101,7 @@
             :titleUpload="'Stadium'"
             :descUpload="'Better Stadium holds more QFAN and you can claim it less often'"
             :typeBooster="typeBooster"
+            @closeDetailNoCall="closeDetailNoCall"
         />
 
         <TemplateUpLevel
@@ -113,6 +114,7 @@
             :titleUpload="'Training Room'"
             :descUpload="'Better boosts training speed'"
             :typeBooster="typeBooster"
+            @closeDetailNoCall="closeDetailNoCall"
         />
     </div>
 </template>
@@ -220,7 +222,6 @@ export default {
             try {
                 this.loading = true;
                 const res = await userService.getListBooster();
-
                 if (res?.data) {
                     const stadiumItems = res?.data.filter(
                         (item) => item.attributes.type == "SPEED"
@@ -228,7 +229,6 @@ export default {
                     this.stadiumItems = stadiumItems;
                     this.stadiumList = stadiumItems;
 
-                    //Skill
                     const trainingItems = res?.data.filter(
                         (item) => item.attributes.type == "AMOUNT"
                     );
@@ -345,6 +345,10 @@ export default {
                 this.isMax = false;
             }
         },
+        closeDetailNoCall() {
+            this.isShowStadium = false;
+            this.isShowTraining = false;
+        },
         async closeStadium() {
             this.isShowStadium = false;
             this.isShowTraining = false;
@@ -393,6 +397,7 @@ export default {
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
+    transition: background-image 1s ease-in-out;
 }
 
 @keyframes fadeInBooster {

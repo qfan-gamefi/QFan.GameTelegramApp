@@ -3,7 +3,7 @@
 
     <div class="popup-template" v-if="showPopup">
         <div class="box-template">
-            <div @click="$emit('close')" class="close-to-booster">
+            <div @click="$emit('closeDetailNoCall')" class="close-to-booster">
                 <i class="fa-solid fa-rectangle-xmark"></i>
             </div>
 
@@ -17,9 +17,6 @@
 
                 <div class="box-lv" v-if="!isMax">
                     <div>
-                        <!-- <img
-                            src="./../../public/assets/booster/logo-stadium1.svg"
-                        /> -->
                         <img
                             :src="`https://qfan-api.qcloud.asia${dataNext?.attributes?.image?.data?.attributes?.url}`"
                         />
@@ -53,9 +50,6 @@
 
                 <div class="box-lv">
                     <div>
-                        <!-- <img
-                            src="./../../public/assets/booster/logo-stadium1.svg"
-                        /> -->
                         <img
                             :src="`https://qfan-api.qcloud.asia${items?.attributes?.image?.data?.attributes?.url}`"
                         />

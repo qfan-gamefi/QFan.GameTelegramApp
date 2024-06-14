@@ -126,11 +126,7 @@
                                     <div
                                         v-if="item?.RateData?.[indexSide] !== 0"
                                     >
-                                        [1:{{
-                                            item?.RateData?.[
-                                                indexSide
-                                            ]?.toFixed(2)
-                                        }}]
+                                        {{ renderRate(item, indexSide) }}
                                     </div>
                                 </div>
                             </div>
@@ -222,6 +218,7 @@
                     <div class="your-name-point">
                         <div class="your-name">
                             {{
+                                `${dataTelegram?.user?.first_name} ${dataTelegram?.user?.last_name}` ||
                                 dataRankCurrent?.UserName ||
                                 dataRankCurrent?.UserId
                             }}
@@ -347,6 +344,7 @@ export default {
     },
     data() {
         return {
+            dataTelegram: null,
             showPopup: false,
             loading: false,
             data: [],
@@ -510,6 +508,12 @@ export default {
         handleNoPredict() {
             this.showPopup = false;
         },
+        renderRate(item, indexSide) {
+            const returnRate = item?.["GameTemplate.ReturnRate"];
+            const rateIndex = item?.RateData?.[indexSide];
+            return ((returnRate * rateIndex) / 100).toFixed(2);
+            // return item?.RateData?.[indexSide]?.toFixed(2);
+        },
         extractNumber(text) {
             const regex = /\d{1,3}(?:,\d{3})*/;
             const match = text?.match(regex);
@@ -521,6 +525,7 @@ export default {
         },
         async fetchData() {
             this.loading = true;
+            this.dataTelegram = window.Telegram.WebApp.initDataUnsafe;
 
             if (!this.detailEvent) return;
             try {
@@ -533,7 +538,6 @@ export default {
                 this.games = games.map((game) => {
                     return {
                         ...game,
-                        CloseCountDown: null,
                         selectedIndex: null,
                     };
                 });
@@ -542,7 +546,6 @@ export default {
                     "balancePoints",
                     { order: [["Balance", "DESC"]] }
                 );
-
                 this.history = await betService.getFilterData("bids", {
                     where: { UserId: this.idUser },
                     order: [["createdAt", "DESC"]],

@@ -54,8 +54,8 @@ export default {
             telegram_bot_link:
                 telegram_bot_link +
                     window.Telegram.WebApp.initDataUnsafe.user?.id || "",
-            // idUser: "425629311",
-            // telegram_bot_link: telegram_bot_link + 425629311 || "",
+            // idUser: "2123800227",
+            // telegram_bot_link: telegram_bot_link + 2123800227 || "",
 
             showCoomingSoon: false,
             isCopiedToClipboard: false,
@@ -575,6 +575,7 @@ export default {
         <EventList
             :visible="showEvent"
             :idUser="idUser"
+            :dataQPoint="dataQPoint"
             @openCoomSoon="showPopupCoomingSoon"
         />
         <!-- @openCoomSoon="showPopupCoomingSoon" -->

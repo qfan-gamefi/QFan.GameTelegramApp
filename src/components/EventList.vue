@@ -59,6 +59,7 @@
                 :isDetailEvent="isJoinNow"
                 :detailEvent="detailEvent"
                 :idUser="idUser"
+                :dataQPoint="dataQPoint"
                 @close="isJoinNow = false"
             />
 
@@ -83,6 +84,10 @@ export default {
         },
         idUser: {
             type: String,
+            required: true,
+        },
+        dataQPoint: {
+            type: Object,
             required: true,
         },
     },

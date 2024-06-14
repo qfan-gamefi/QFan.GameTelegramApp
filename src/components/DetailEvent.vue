@@ -341,6 +341,10 @@ export default {
             type: Boolean,
             default: false,
         },
+        dataQPoint: {
+            type: Object,
+            required: true,
+        },
     },
     data() {
         return {
@@ -398,8 +402,8 @@ export default {
             this.notificationType = "error";
             this.showNotification = true;
         },
-        async renderWarning() {
-            this.notificationMessage = `Choose your side!`;
+        async renderWarning(mess) {
+            this.notificationMessage = `${mess}`;
             this.notificationType = "warning";
             this.showNotification = true;
             setTimeout(() => {
@@ -469,10 +473,16 @@ export default {
                 this.indexPredict = index;
                 this.showPopup = true;
             } else {
-                this.renderWarning();
+                this.renderWarning("Choose your side!");
             }
         },
         async callPredict() {
+            const balace = Number(this.dataQPoint?.balance);
+
+            if (balace < 200) {
+                return this.renderWarning("Insufficient QFP!");
+            }
+
             if (
                 typeof this.games[this.indexPredict].selectedIndex === "number"
             ) {
@@ -484,7 +494,6 @@ export default {
                     userId: this.idUser,
                     value: 200,
                     valueType: "QFC",
-                    // side: item["selectedSide"],
                     side: this.games[this.indexPredict].selectedIndex,
                     userName: nameTele,
                 };

@@ -69,12 +69,13 @@
 </template>
 
 <script lang="ts">
-import userService from "../services/userService";
-import Loading from "./LoadingForm.vue";
-import DetailEvent from "./DetailEvent.vue";
-import EventBus from "./../utils/eventBus";
-import EmptyForm from "./EmptyForm.vue";
-import { IEvent } from "../interface";
+import userService from "../../services/userService";
+import Loading from "../../components/LoadingForm.vue";
+import DetailEvent from "../DetailEvent/DetailEvent.vue";
+import EventBus from "../../utils/eventBus";
+import EmptyForm from "../../components/EmptyForm.vue";
+import { IEvent } from "../../interface";
+// import LoadingForm from "@/components/LoadingForm.vue";
 
 export default {
     props: {
@@ -170,7 +171,6 @@ export default {
 
 <style>
 .popup-event {
-    /* height: calc(100% - 56px); */
     height: 100%;
     position: absolute;
     width: 100%;
@@ -178,7 +178,7 @@ export default {
     z-index: 999;
     animation: fadeInEvent 0.1s ease forwards;
     color: #fff;
-    background-image: url("./../../public/assets/event/background-event.png");
+    background-image: url("./public/assets/event/background-event.png");
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
@@ -187,12 +187,10 @@ export default {
 @keyframes fadeInEvent {
     0% {
         opacity: 0;
-        transform: translate(-50%, -50%) scale(0.5);
     }
 
     100% {
         opacity: 1;
-        transform: translate(0%, 0%) scale(1);
     }
 }
 
@@ -207,7 +205,7 @@ export default {
     gap: 15px;
     max-height: calc(100% - 5px);
     overflow-y: auto;
-    animation: fadeInDesc 0.1s ease forwards;
+    animation: fadeInDescEvent 0.5s ease forwards;
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
@@ -216,15 +214,13 @@ export default {
     display: none;
 }
 
-@keyframes fadeInDesc {
+@keyframes fadeInDescEvent {
     0% {
         opacity: 0;
-        transform: translate(50%, 50%) scale(0.5);
     }
 
     100% {
         opacity: 1;
-        transform: translate(0%, 0%) scale(1);
     }
 }
 

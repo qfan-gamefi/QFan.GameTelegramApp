@@ -1,11 +1,9 @@
 <template>
     <div class="popup-invite" v-if="visible">
-        <div class="box-invite">
-            <!-- <div @click="$emit('close')" class="close-home">
-                <i class="fa-solid fa-rectangle-xmark"></i>
-            </div> -->
+        <Loading :loading="loading" />
 
-            <div class="friend-info">
+        <div class="box-invite">
+            <div class="friend-info" v-if="!loading">
                 <div class="friend-info-text">
                     {{ inviteData?.length }} Friends
                 </div>
@@ -25,12 +23,10 @@
                 </div>
             </div>
 
-            <div class="box-content">
+            <div class="box-content" v-if="!loading">
                 <div class="box-title-friend text-outline-black">
                     Friends list
                 </div>
-
-                <Loading :loading="loading" />
 
                 <div class="box-desc" v-if="!loading">
                     <div
@@ -198,12 +194,11 @@ export default {
 }
 .popup-invite {
     height: 100%;
-    /* height: calc(100% - 56px); */
     position: absolute;
     width: 100%;
     top: 0%;
     z-index: 999;
-    animation: fadeInInvite 0.1s ease forwards;
+    animation: fadeInInvite 0.5s ease forwards;
 
     background-image: url("./../../public/assets/event/background-event.png");
     background-position: center;
@@ -213,12 +208,10 @@ export default {
 @keyframes fadeInInvite {
     0% {
         opacity: 0;
-        transform: translate(-50%, -50%) scale(0.5);
     }
 
     100% {
         opacity: 1;
-        transform: translate(0%, 0%) scale(1);
     }
 }
 

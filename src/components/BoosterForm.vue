@@ -386,7 +386,6 @@ export default {
 
 .popup-booster {
     height: 100%;
-    /* height: calc(100% - 56px); */
     position: absolute;
     width: 100%;
     top: 0;
@@ -403,12 +402,10 @@ export default {
 @keyframes fadeInBooster {
     0% {
         opacity: 0;
-        transform: translate(-50%, -50%) scale(0.5);
     }
 
     100% {
         opacity: 1;
-        transform: translate(0%, 0%) scale(1);
     }
 }
 
@@ -419,17 +416,15 @@ export default {
 
 .box-content-booster {
     height: 100%;
-    animation: fadeInDesc 0.1s ease forwards;
+    animation: fadeInDesc 0.5s ease forwards;
 }
 @keyframes fadeInDesc {
     0% {
         opacity: 0;
-        transform: translate(-50%, -50%) scale(0.5);
     }
 
     100% {
         opacity: 1;
-        transform: translate(0%, 0%) scale(1);
     }
 }
 

@@ -151,7 +151,7 @@
                                 ]"
                             >
                                 Predict 200
-                                <img src="./../../public/assets/logo.svg" />
+                                <img src="./../../../public/assets/logo.svg" />
                             </div>
                         </div>
                     </div>
@@ -174,15 +174,16 @@
                             </div>
                             <div class="avt-your-rank">
                                 <div
+                                    v-if="item?.UserPhotoUrl"
                                     class="lv-img"
                                     :style="{
-                                        backgroundImage: `url(${
-                                            item?.UserPhotoUrl ||
-                                            './../../public/assets/logo.svg'
-                                        })`,
+                                        backgroundImage: `url(${item?.UserPhotoUrl})`,
                                     }"
                                 ></div>
-                                <!-- <img src="./../../public/assets/logo.jpg" /> -->
+                                <img
+                                    v-if="!item?.UserPhotoUrl"
+                                    src="./../../../public/assets/logo.jpg"
+                                />
                             </div>
                             <div class="your-name-point">
                                 <div class="your-name">
@@ -205,15 +206,16 @@
                     </div>
                     <div class="avt-your-rank">
                         <div
+                            v-if="dataRankCurrent?.UserPhotoUrl"
                             class="lv-img"
                             :style="{
-                                backgroundImage: `url(${
-                                    dataRankCurrent?.UserPhotoUrl ||
-                                    './../../public/assets/logo.svg'
-                                })`,
+                                backgroundImage: `url(${dataRankCurrent?.UserPhotoUrl})`,
                             }"
-                        ></div>
-                        <!-- <img src="./../../public/assets/logo.jpg" /> -->
+                        />
+                        <img
+                            v-if="!dataRankCurrent?.UserPhotoUrl"
+                            src="./../../../public/assets/logo.jpg"
+                        />
                     </div>
                     <div class="your-name-point">
                         <div class="your-name">
@@ -261,7 +263,7 @@
                             {{ renderSide(item) }}
                         </div>
                         <div class="history-item-col">
-                            {{ formatDate(item.createdAt) }}
+                            {{ formatDateToDDMMMYY(item.createdAt) }}
                         </div>
                         <div class="history-item-col">
                             <div
@@ -272,7 +274,9 @@
                             >
                                 <div>
                                     {{ renderProfitQFC(item) }}
-                                    <img src="./../../public/assets/logo.svg" />
+                                    <img
+                                        src="./../../../public/assets/logo.svg"
+                                    />
                                 </div>
                                 <div>
                                     {{ renderProfitPoint(item) }}
@@ -306,14 +310,15 @@
 </template>
 
 <script lang="ts">
-import betService from "../services/betService";
-import Notification from "./NotificationToast.vue";
-import PopupConfirm from "./PopupConfirm.vue";
+import betService from "../../services/betService";
+import Notification from "../../components/NotificationToast.vue";
+import PopupConfirm from "../../components/PopupConfirm.vue";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
-import EmptyForm from "./EmptyForm.vue";
-import { IEvent } from "../interface";
-import CountDown from "../components/count-down/CountDown.vue";
+import EmptyForm from "../../components/EmptyForm.vue";
+import { IEvent } from "../../interface";
+import CountDown from "../../components/count-down/CountDown.vue";
+import { formatDateToDDMMMYY } from "../../utils";
 
 dayjs.extend(duration);
 
@@ -392,23 +397,23 @@ export default {
         },
     },
     methods: {
-        async renderSuccess() {
-            this.notificationMessage = `Predict Success!`;
-            this.notificationType = "success";
-            this.showNotification = true;
-        },
-        async renderErr() {
-            this.notificationMessage = `Predict Error!`;
-            this.notificationType = "error";
-            this.showNotification = true;
-        },
-        async renderWarning(mess) {
-            this.notificationMessage = `${mess}`;
-            this.notificationType = "warning";
+        formatDateToDDMMMYY,
+        async renderNotification(message, type) {
+            this.notificationMessage = message;
+            this.notificationType = type;
             this.showNotification = true;
             setTimeout(() => {
                 this.showNotification = false;
             }, 1000);
+        },
+        async renderSuccess() {
+            this.renderNotification("Predict Success!", "success");
+        },
+        async renderErr() {
+            this.renderNotification("Predict Error!", "error");
+        },
+        async renderWarning(mess) {
+            this.renderNotification(mess, "warning");
         },
         calcSide(data) {
             const bidSideNamesArray = data?.Game?.BidSideNames.split(",");
@@ -416,8 +421,6 @@ export default {
         },
         renderSide(item) {
             return this.calcSide(item);
-            // const bidSideNamesArray = item.Game.BidSideNames.split(",");
-            // return bidSideNamesArray?.[item?.Side];
         },
         renderProfitPoint(value) {
             const dataPoint = JSON.parse(value?.Reward);
@@ -444,9 +447,6 @@ export default {
         },
         getDynamicClass(side) {
             return `bet-${side?.toLowerCase()}`;
-        },
-        formatDate(date) {
-            return dayjs(date).format("DD-MMM-YY");
         },
         updateCountdowns() {
             this.$forceUpdate();
@@ -492,11 +492,17 @@ export default {
                 const data = {
                     gameId: this.idPredict,
                     userId: this.idUser,
-                    value: 200,
-                    valueType: "QFC",
-                    side: this.games[this.indexPredict].selectedIndex,
+                    value: this.games[this.indexPredict]?.[
+                        "GameTemplate.DefaultBidValue"
+                    ],
+                    valueType:
+                        this.games[this.indexPredict]?.[
+                            "GameTemplate.ValueType"
+                        ],
+                    side: this.games[this.indexPredict]?.selectedIndex,
                     userName: nameTele,
                 };
+
                 const dataPredict = await betService.addBidding(data);
 
                 if (dataPredict?.bid) {
@@ -521,7 +527,6 @@ export default {
             const returnRate = item?.["GameTemplate.ReturnRate"];
             const rateIndex = item?.RateData?.[indexSide];
             return ((returnRate * rateIndex) / 100).toFixed(2);
-            // return item?.RateData?.[indexSide]?.toFixed(2);
         },
         extractNumber(text) {
             const regex = /\d{1,3}(?:,\d{3})*/;
@@ -543,7 +548,6 @@ export default {
                     this.detailEvent
                 );
 
-                // const games = await betService.getFilterData("games", {});
                 this.games = games.map((game) => {
                     return {
                         ...game,
@@ -705,6 +709,7 @@ export default {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    animation: fadeIn 0.3s ease forwards;
 }
 
 .box-matches {
@@ -897,16 +902,19 @@ export default {
         0 -1px 0 black;
     overflow: auto;
     scrollbar-width: none;
+    animation: fadeIn 0.3s ease forwards;
 }
 .list-leaderboard::-webkit-scrollbar {
     display: none;
 }
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
 
-.box-leaderboard {
-    /* padding: 10px 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px; */
+    100% {
+        opacity: 1;
+    }
 }
 
 .box-your-rank {
@@ -1004,8 +1012,9 @@ export default {
     border-radius: 50%;
 }
 .avt-your-rank img {
-    width: 25px;
-    height: 25px;
+    width: 30px;
+    height: 30px;
+    display: flex;
 }
 
 .your-name-point {
@@ -1031,6 +1040,7 @@ export default {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    animation: fadeIn 0.3s ease forwards;
 }
 .box-history {
     background-color: #0c2678;

@@ -17,10 +17,10 @@ onMounted(() => {
 <script lang="ts">
 import InviteFrens from "./components/InviteFrens.vue";
 import MissionList from "./components/MissionsList.vue";
-import EventList from "./components/EventList.vue";
 import BoosterForm from "./components/BoosterForm.vue";
 import userService from "./services/userService";
 import EventBus from "./utils/eventBus";
+import EventList from "./views/Event/EventList.vue";
 
 const REF_MESS_PREFIX: string = "start r_";
 export default {
@@ -422,15 +422,6 @@ export default {
         <button class="absolute-training-btn button-decoration">
             START TRAINING
         </button>
-        <!-- <div>
-            <button
-                id="login_button"
-                class="btn-login"
-                v-show="!isTelegramLogin"
-            >
-                LOGIN
-            </button>
-        </div> -->
 
         <div class="container-game">
             <div class="container-info" v-show="isTelegramLogin">
@@ -442,10 +433,7 @@ export default {
             <div class="wrap-score">
                 <div class="content">
                     <img src="./../public/assets/logo.svg" />
-                    <div class="balance">
-                        <!-- QFP Balance: {{ dataQPoint?.balance }} -->
-                        Balance: {{ animatedBalance }}
-                    </div>
+                    <div class="balance">Balance: {{ animatedBalance }}</div>
                 </div>
             </div>
 

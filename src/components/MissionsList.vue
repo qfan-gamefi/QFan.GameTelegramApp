@@ -1,9 +1,9 @@
 <template>
     <div class="popup-mission" v-if="visible">
-        <div class="box-mission">
-            <div class="box-content-mission">
-                <Loading :loading="loading" />
+        <Loading :loading="loading" />
 
+        <div class="box-mission" v-if="!loading">
+            <div class="box-content-mission">
                 <div class="box-desc-mission" v-dragscroll v-if="!loading">
                     <div
                         class="desc-item-mission"
@@ -227,7 +227,6 @@ export default {
 <style>
 .popup-mission {
     height: 100%;
-    /* height: calc(100% - 56px); */
     position: absolute;
     width: 100%;
     top: 0%;
@@ -243,18 +242,15 @@ export default {
 @keyframes fadeInMission {
     0% {
         opacity: 0;
-        transform: translate(-50%, -50%) scale(0.5);
     }
 
     100% {
         opacity: 1;
-        transform: translate(0%, 0%) scale(1);
     }
 }
 
 .box-mission {
     padding: 20px;
-    /* height: calc(100% - 40px); */
     height: calc(100% - 105px);
 }
 
@@ -265,7 +261,7 @@ export default {
 .box-desc-mission {
     max-height: 100%;
     overflow-y: auto;
-    animation: fadeInDesc 0.1s ease forwards;
+    animation: fadeInDescMission 0.5s ease forwards;
     scrollbar-width: none;
     -ms-overflow-style: none;
 
@@ -277,15 +273,13 @@ export default {
     display: none;
 }
 
-@keyframes fadeInDesc {
+@keyframes fadeInDescMission {
     0% {
         opacity: 0;
-        transform: translate(50%, 50%) scale(0.5);
     }
 
     100% {
         opacity: 1;
-        transform: translate(0%, 0%) scale(1);
     }
 }
 

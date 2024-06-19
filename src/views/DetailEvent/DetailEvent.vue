@@ -273,7 +273,7 @@
                                 "
                             >
                                 <div>
-                                    {{ renderProfitQFC(item) }}
+                                    {{ renderProfitQFP(item) }}
                                     <img
                                         src="./../../../public/assets/logo.svg"
                                     />
@@ -426,7 +426,7 @@ export default {
             const dataPoint = JSON.parse(value?.Reward);
 
             const qfcItem = dataPoint?.find(
-                (item) => item?.ValueType === "Point"
+                (item) => item?.ValueType?.toLowerCase() === "point"
             );
             const qfcValue = qfcItem?.Value
                 ? `${Math?.floor(qfcItem?.Value)} ${qfcItem?.ValueType}`
@@ -434,9 +434,12 @@ export default {
 
             return qfcValue;
         },
-        renderProfitQFC(item) {
+        renderProfitQFP(item) {
             const dataQFC = JSON.parse(item?.Reward);
-            const qfcItem = dataQFC?.find((item) => item?.ValueType === "QFC");
+            const qfcItem = dataQFC?.find(
+                (item) => item?.ValueType?.toLowerCase() !== "point"
+            );
+
             const qfcValue = qfcItem ? Math?.floor(qfcItem?.Value) : null;
 
             return qfcValue;

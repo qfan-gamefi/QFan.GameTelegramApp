@@ -19,17 +19,23 @@ const phasermsg = () => {
     };
 };
 
+const url = (path) => fileURLToPath(new URL(path, import.meta.url));
 export default defineConfig({
     base: "./",
     plugins: [vue(), phasermsg()],
     resolve: {
         alias: {
-            "@": fileURLToPath(new URL("./src",
-                import.meta.url)),
+            "@": fileURLToPath(new URL("./src", import.meta.url)),
+            "@public": url("./../public"),
             "@components": fileURLToPath(
-                new URL("./src/components",
-                    import.meta.url)
+                new URL("./src/components", import.meta.url)
             ),
+            "@views/*": ["src/views/*"],
+            "@router/*": ["src/router/*"],
+            "@utils/*": ["src/utils/*"],
+            "@services/*": ["src/services/*"],
+            "@styles/*": ["src/styles/*"],
+            "@interface/*": ["src/interface/*"],
         },
     },
     logLevel: "warning",

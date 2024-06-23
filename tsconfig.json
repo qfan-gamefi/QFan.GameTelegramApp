@@ -9,15 +9,27 @@
         }
     ],
     "compilerOptions": {
+        "module": "esnext",
+        "target": "esnext",
+        "moduleResolution": "node",
+        "lib": ["esnext", "dom"],
         "allowJs": true,
         "noImplicitAny": false,
         "noEmit": true,
+        "checkJs": false,
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
         "baseUrl": "./",
         "paths": {
             "@/*": ["src/*"],
-            "@components/*": ["src/components/*"]
+            "@/public*": ["public/*"],
+            "@components/*": ["src/components/*"],
+            "@views/*": ["src/views/*"],
+            "@router/*": ["src/router/*"],
+            "@utils/*": ["src/utils/*"],
+            "@services/*": ["src/services/*"],
+            "@styles/*": ["src/styles/*"],
+            "@interface/*": ["src/interface/*"]
         }
     },
     "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"]

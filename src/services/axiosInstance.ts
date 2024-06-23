@@ -1,8 +1,10 @@
 // src/services/axiosInstance.js
 import axios from "axios";
 
+const URL_API = import.meta.env.VITE_API_BASE_URL;
+
 const axiosInstance = axios.create({
-    baseURL: "https://qfan-api.qcloud.asia/api/",
+    baseURL: `${URL_API}/api/`,
     headers: {
         "Content-Type": "application/json",
     },

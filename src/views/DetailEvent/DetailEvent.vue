@@ -5,7 +5,7 @@
             <div
                 class="banner-event"
                 :style="{
-                    backgroundImage: `url(https://qfan-api.qcloud.asia${detailEvent?.attributes?.banner?.data?.attributes?.formats?.small?.url})`,
+                    backgroundImage: `url(${apiBaseUrl}${detailEvent?.attributes?.banner?.data?.attributes?.formats?.small?.url})`,
                 }"
             >
                 <div class="text-banner">
@@ -85,7 +85,7 @@
                             <div
                                 class="matches-title-img"
                                 :style="{
-                                    backgroundImage: `url( https://qfan-api.qcloud.asia/uploads/${item?.Name?.split(
+                                    backgroundImage: `url(${apiBaseUrl}/uploads/${item?.Name?.split(
                                         '-'
                                     )?.[0]?.toUpperCase()}.png)`,
                                 }"
@@ -94,7 +94,7 @@
                             <div
                                 class="matches-title-img"
                                 :style="{
-                                    backgroundImage: `url( https://qfan-api.qcloud.asia/uploads/${item?.Name?.split(
+                                    backgroundImage: `url(${apiBaseUrl}/uploads/${item?.Name?.split(
                                         '-'
                                     )?.[1]?.toUpperCase()}.png)`,
                                 }"
@@ -353,6 +353,7 @@ export default {
     },
     data() {
         return {
+            apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
             dataTelegram: null,
             showPopup: false,
             loading: false,
@@ -680,7 +681,7 @@ export default {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 15px;
+    gap: 10px;
 }
 
 .title-banner {
@@ -708,7 +709,7 @@ export default {
 
 .list-matches {
     padding: 10px 20px;
-    height: calc(100% - 280px);
+    height: calc(100% - 270px);
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -896,10 +897,10 @@ export default {
 /*  */
 .list-leaderboard {
     padding: 10px 20px;
-    height: calc(100% - 375px);
+    height: calc(100% - 350px);
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 5px;
     text-shadow: 1px 1px 0 black, -1px -1px 0 black, 1px -1px 0 black,
         -1px 1px 0 black, 1px 0 0 black, -1px 0 0 black, 0 1px 0 black,
         0 -1px 0 black;
@@ -924,24 +925,22 @@ export default {
     display: flex;
     flex-direction: column;
     position: absolute;
-    width: 100%;
-    bottom: 80px;
+    bottom: 70px;
     background-color: #ffa53a;
-    width: calc(100% - 30px);
-    padding: 5px 15px 15px;
+    width: calc(100% - 40px);
+    padding: 5px 20px 10px;
 }
 
 .title-your-rank {
     font-weight: bold;
-    padding-bottom: 5px;
 }
 
 .content-your-rank {
     border: 2px solid #557aff;
-    padding: 10px 25px;
+    padding: 5px 20px;
     border-radius: 10px;
     display: flex;
-    gap: 25px;
+    gap: 20px;
     background-color: #fff;
     align-items: center;
 }
@@ -1039,7 +1038,7 @@ export default {
 
 .list-history {
     padding: 10px;
-    height: calc(100% - 280px);
+    height: calc(100% - 270px);
     display: flex;
     flex-direction: column;
     gap: 10px;

@@ -41,8 +41,9 @@ button {
     letter-spacing: 1px;
     -webkit-text-fill-color: unset;
     -webkit-text-stroke: 1px rgb(139, 129, 116);
-    background: #ffa53a; //background: rgb(226, 154, 54);
-    border: 1px solid rgb(163, 112, 41);
+    background: #ffa53a;
+    // border: 1px solid rgb(163, 112, 41);
+    border: none;
     position: relative;
     display: flex;
     -webkit-box-align: center;

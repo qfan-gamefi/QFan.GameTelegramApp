@@ -150,7 +150,8 @@
                                     },
                                 ]"
                             >
-                                Predict 200
+                                Predict
+                                {{ item?.["GameTemplate.DefaultBidValue"] }}
                                 <img src="./../../../public/assets/logo.svg" />
                             </div>
                         </div>
@@ -383,6 +384,7 @@ export default {
             stopBiddingTime: "",
             countdown: "",
             intervalId: null,
+            bidValue: null,
         };
     },
     watch: {
@@ -471,6 +473,8 @@ export default {
         },
         handlePredict(item, index) {
             const isShow = typeof item?.selectedIndex === "number";
+            this.bidValue = item?.["GameTemplate.DefaultBidValue"];
+
             if (isShow) {
                 this.idPredict = item?.id;
                 this.indexPredict = index;
@@ -480,9 +484,9 @@ export default {
             }
         },
         async callPredict() {
-            const balace = Number(this.dataQPoint?.balance);
+            const balance = Number(this.dataQPoint?.balance);
 
-            if (balace < 200) {
+            if (balance < this.bidValue) {
                 return this.renderWarning("Insufficient QFP!");
             }
 
@@ -509,6 +513,7 @@ export default {
                 const dataPredict = await betService.addBidding(data);
 
                 if (dataPredict?.bid) {
+                    this.bidValue = null;
                     await this.renderSuccess();
                     await this.fetchData();
                 } else {
@@ -550,6 +555,8 @@ export default {
                     this.idUser,
                     this.detailEvent
                 );
+
+                console.log(games);
 
                 this.games = games.map((game) => {
                     return {

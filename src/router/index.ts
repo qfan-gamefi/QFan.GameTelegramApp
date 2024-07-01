@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import HomePage from "@/views/Home/HomePage.vue";
 import WalletCreate from "@/views/Wallet/WalletCreate.vue";
 import WalletForm from "@/views/Wallet/WalletForm.vue";
+import Wallet from "@/views/Wallet/Wallet.vue";
 
 const routes = [
     {
@@ -19,6 +20,11 @@ const routes = [
         path: "/wallet/create",
         name: "WalletCreate",
         component: WalletCreate,
+    },
+    {
+        path: "/wallet/detail",
+        name: "WalletDetail",
+        component: Wallet,
     },
 ];
 

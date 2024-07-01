@@ -1,31 +1,64 @@
 <template>
     <router-view>
-        <div class="popup-wallet">
-            <div class="wraper-wallet">
-                <div class="logo-wallet">
-                    <img src="@public/assets/logo.svg" />
+        <div class="wr-detail-wallet">
+            <div class="header-wl">
+                <div class="menu-icon"><i class="fa-solid fa-bars"></i></div>
+
+                <div class="info">
+                    <div><img src="@public/assets/logo.svg" /></div>
+                    <div class="name">Winter</div>
+                    <div class="add-wallet">(...auth)</div>
+                    <div class="copy-wallet">
+                        <i class="fa-solid fa-copy"></i>
+                    </div>
                 </div>
-                <div class="title-wallet text-outline-black">
-                    QFP Wallet, the first web wallet for Quai Network, is here.
+
+                <div class="user-icon">
+                    <i class="fa-solid fa-user-plus"></i>
+                </div>
+            </div>
+
+            <div class="body-wl">
+                <div class="wr-balance">
+                    <div class="title">
+                        Total balance
+
+                        <div @click="toggleVisibility">
+                            <div v-if="!isVisible">
+                                <i class="fa-solid fa-eye"></i>
+                            </div>
+                            <div v-if="isVisible">
+                                <i class="fa-solid fa-eye-slash"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div>{{ isVisible ? totalBalance : "*********" }}</div>
+
+                    <div class="wr-btn">
+                        <div class="btn-item">
+                            <i class="fa-solid fa-copy"></i> Receive
+                        </div>
+                        <div class="btn-item">
+                            <i class="fa-solid fa-paper-plane"></i> Send
+                        </div>
+                        <div class="btn-item">
+                            <i class="fa-solid fa-faucet"></i> Faucet
+                        </div>
+                    </div>
                 </div>
 
-                <div class="box-btn">
-                    <button @click="navigateToCreateWallet">
-                        <div class="btn-img">
-                            <img src="@public/assets/logo.svg" />
-                            <div class="text-qfan">QFAN</div>
-                        </div>
+                <div class="wr-coin">
+                    <div class="title">Token</div>
 
-                        <div class="btn-title">Create Wallet</div>
-                    </button>
-
-                    <button>
-                        <div class="btn-img">
-                            <img src="@public/assets/logo.svg" />
-                            <div class="text-qfan">QFAN</div>
+                    <div class="box-content">
+                        <div class="img">
+                            <img src="@public/assets/logo-quai.svg" />
                         </div>
-                        <div class="btn-title">Import Wallet</div>
-                    </button>
+                        <div>
+                            <div>QUAI</div>
+                            <div class="price">$5</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -35,10 +68,24 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 export default defineComponent({
-    name: "WalletForm",
+    name: "WalletDetail",
+    data() {
+        return {
+            isVisible: false,
+            totalBalance: "$10,000",
+        };
+    },
     methods: {
-        navigateToCreateWallet() {
-            this.$router.push("/wallet/create");
+        navigateTo() {
+            this.$router.push("/");
+        },
+        toggleVisibility() {
+            this.isVisible = !this.isVisible;
+        },
+    },
+    computed: {
+        visibilityIcon() {
+            return this.isVisible ? "fa-solid fa-eye-slash" : "fa-solid fa-eye";
         },
     },
     mounted() {
@@ -52,19 +99,17 @@ button {
     padding: 25px 50px;
     -webkit-text-stroke: 1px #8c0000;
 }
-.popup-wallet {
+.wr-detail-wallet {
     height: 100%;
     position: absolute;
     width: 100%;
     top: 0%;
     z-index: 999;
     animation: fadeInWallet 0.3s ease forwards;
-    color: #fff;
-    background-image: url("./../../../public/assets/wallet/background-wallet.png");
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
+    background-color: #fff;
     font-family: monospace;
+    color: #000000;
+    font-weight: bold;
 }
 
 @keyframes fadeInWallet {
@@ -77,54 +122,84 @@ button {
     }
 }
 
-.wraper-wallet {
+.header-wl {
     display: flex;
-    flex-direction: column;
-    height: 100%;
-    justify-content: center;
-    gap: 35px;
-}
-.box-btn {
-    display: flex;
-    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px;
     align-items: center;
-    gap: 20px;
-    margin: 0 50px;
 }
-.logo-wallet {
-    text-align: center;
+.info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     img {
-        widows: 100px;
-        height: 100px;
+        width: 25px;
+    }
+    .name {
+        color: #00175f;
+    }
+    .add-wallet {
+        color: #8f8f8f;
+    }
+    .copy-wallet {
+        color: #8f8f8f;
     }
 }
 
-.title-wallet {
-    padding: 0 20px;
-    text-align: center;
-    font-size: 16px;
-    font-weight: bold;
-    margin: 20px 0 70px;
-}
+.body-wl {
+    padding: 10px;
 
-.btn-img {
-    display: flex;
-    position: absolute;
-    left: 5%;
-    gap: 5px;
-    align-items: center;
-    img {
-        width: 20px;
-        height: 20px;
+    .wr-balance {
+        background-color: #f5f5f5;
+        border-radius: 10px;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        .title {
+            color: #00175f;
+            font-size: 16px;
+            display: flex;
+            gap: 10px;
+        }
+        .wr-btn {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            .btn-item {
+                padding: 5px 20px;
+                background-color: #00175f;
+                color: #fff;
+                border-radius: 10px;
+            }
+        }
     }
-}
 
-.btn-title {
-    position: absolute;
-    right: 15%;
-}
-.text-qfan {
-    -webkit-text-stroke: 0px;
-    color: #841c2e;
+    .wr-coin {
+        padding: 30px 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        color: #00175f;
+        .title {
+            color: #00175f;
+            font-size: 16px;
+        }
+        .box-content {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            .img {
+                display: flex;
+                img {
+                    width: 25px;
+                    height: 25px;
+                }
+            }
+            .price {
+                color: #03a400;
+            }
+        }
+    }
 }
 </style>

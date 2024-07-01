@@ -56,8 +56,8 @@ export default {
             telegram_bot_link:
                 telegram_bot_link +
                     window.Telegram.WebApp.initDataUnsafe.user?.id || "",
-            idUser: "2123800227",
-            // telegram_bot_link: telegram_bot_link + 2123800227 || "",
+            // idUser: "212380022",
+            // telegram_bot_link: telegram_bot_link + 212380022 || "",
 
             showCoomingSoon: false,
             isSuccess: false,
@@ -381,6 +381,10 @@ export default {
 
             Object.assign(this, tabMappings[tab]);
         },
+        handleWallet() {
+            this.handleBackButton();
+            this.$router.push({ name: "WalletForm" });
+        },
     },
     async mounted() {
         Telegram.WebApp.ready();
@@ -421,12 +425,12 @@ export default {
 
             <div class="link-checkin">
                 <div>
-                    <router-link to="/wallet">
-                        <button @click="handleBackButton">
-                            <i class="fa-solid fa-wallet"></i>
-                            Wallet
-                        </button>
-                    </router-link>
+                    <!-- <router-link to="/wallet"> -->
+                    <button @click="handleWallet">
+                        <i class="fa-solid fa-wallet"></i>
+                        Wallet
+                    </button>
+                    <!-- </router-link> -->
                 </div>
                 <!-- <a
                     v-bind:href="`https://qfan-dapp.qcloud.asia/?playerId=${idUser}`"

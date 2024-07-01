@@ -1,6 +1,6 @@
 <template>
     <div class="popup-mission" v-if="visible">
-        <Loading :loading="loading" />
+        <LoadingForm :loading="loading" />
 
         <div class="box-mission" v-if="!loading">
             <div class="box-content-mission">
@@ -13,7 +13,7 @@
                     >
                         <div class="item-left-mission">
                             <div class="item-img-mission">
-                                <img src="./../../public/assets/logo.jpg" />
+                                <img src="@public/assets/logo.jpg" />
                             </div>
 
                             <div class="item-left-content">
@@ -22,7 +22,7 @@
                                 </div>
                                 <div class="left-desc t-primary-color">
                                     +{{ item?.attributes?.rewardAmount }}
-                                    <img src="./../../public/assets/logo.svg" />
+                                    <img src="@public/assets/logo.svg" />
                                 </div>
                             </div>
                         </div>
@@ -49,33 +49,33 @@
                             </a>
                         </div>
                         <div class="item-right" v-else>
-                            <img src="./../../public/assets/tick.svg" />
+                            <img src="@public/assets/tick.svg" />
                         </div>
                     </div>
                 </div>
 
                 <EmptyForm v-if="showEmptyFormMission" />
 
-                <Notification
-                    v-if="showNotification"
-                    :message="notificationMessage"
-                    :type="notificationType"
-                    @close="showNotification = false"
+                <NotificationToast
+                    v-if="notification.visible"
+                    :message="notification.message"
+                    :type="notification.type"
                 />
             </div>
         </div>
     </div>
 </template>
 
-<script>
-import EmptyForm from "./EmptyForm.vue";
-import userService from "../services/userService";
-import { sortMissions } from "../utils";
-import Loading from "./LoadingForm.vue";
-import Notification from "./NotificationToast.vue";
-import { toRaw } from "vue";
+<script lang="ts">
+import { defineComponent, toRaw } from "vue";
+import EmptyForm from "@/components/EmptyForm.vue";
+import NotificationToast from "@/components/NotificationToast.vue";
+import LoadingForm from "@/components/LoadingForm.vue";
+import userService from "@/services/userService";
+import { sortMissions } from "@/utils";
 
-export default {
+export default defineComponent({
+    name: "MissionsList",
     props: {
         visible: {
             type: Boolean,
@@ -87,8 +87,8 @@ export default {
         },
     },
     components: {
-        Loading,
-        Notification,
+        LoadingForm,
+        NotificationToast,
         EmptyForm,
     },
     async created() {
@@ -109,6 +109,12 @@ export default {
             showNotification: false,
             notificationMessage: "",
             notificationType: "",
+
+            notification: {
+                visible: false,
+                type: "",
+                message: "",
+            },
         };
     },
     watch: {
@@ -126,18 +132,29 @@ export default {
         }
     },
     methods: {
-        // handleMission() {
-        //     this.$emit("mission");
-        // },
-        async renderSuccess() {
-            this.notificationMessage = `Success!`;
-            this.notificationType = "success";
-            this.showNotification = true;
-        },
-        async renderErr() {
-            this.notificationMessage = `Error!`;
-            this.notificationType = "error";
-            this.showNotification = true;
+        async renderNotification(type, message, idMiss) {
+            this.notification = {
+                visible: true,
+                type,
+                message,
+            };
+
+            setTimeout(() => {
+                // this.fetchMissionData();
+                // this.fetchListMissionReward();
+                if (type == "success") {
+                    this.missionData.forEach((mission) => {
+                        if (mission?.id == idMiss) {
+                            mission.isStatus = true;
+                            mission.status = "COMPLETED";
+                        }
+                    });
+                }
+
+                this.notification = {
+                    visible: false,
+                };
+            }, 2000);
         },
         async autoClaim(idMission, id) {
             this.buttonText[id] = `Verifying`;
@@ -146,12 +163,14 @@ export default {
             userService
                 .claimMission(this.idUser, idMission)
                 .then(async () => {
-                    await this.renderSuccess();
-                    await this.fetchMissionData();
-                    await this.fetchListMissionReward();
+                    await this.renderNotification(
+                        "success",
+                        "Success!",
+                        idMission
+                    );
                 })
                 .catch(() => {
-                    this.renderErr();
+                    this.renderNotification("error", "Error!", idMission);
                 });
         },
 
@@ -221,10 +240,10 @@ export default {
             return this.missionData?.length == 0;
         },
     },
-};
+});
 </script>
 
-<style>
+<style scoped>
 .popup-mission {
     height: 100%;
     position: absolute;

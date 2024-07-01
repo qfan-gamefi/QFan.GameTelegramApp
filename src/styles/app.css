@@ -36,6 +36,7 @@
     background-size: 100% 100%;
 }
 
+
 /* .btn-item:last-child {
     border-right: none;
 } */
@@ -44,6 +45,7 @@
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
     transform: translateY(-2px);
 }
+
 
 /* .btn-item:not(:last-child)::after {
     content: "";
@@ -82,9 +84,7 @@
 .item-title {
     font-size: 10px;
     color: #fff;
-    text-shadow: 1px 1px 0 #9f8900, -1px -1px 0 #9f8900, 1px -1px 0 #9f8900,
-        -1px 1px 0 #9f8900, 1px 0 0 #9f8900, -1px 0 0 #9f8900, 0 1px 0 #9f8900,
-        0 -1px 0 #9f8900;
+    text-shadow: 1px 1px 0 #9f8900, -1px -1px 0 #9f8900, 1px -1px 0 #9f8900, -1px 1px 0 #9f8900, 1px 0 0 #9f8900, -1px 0 0 #9f8900, 0 1px 0 #9f8900, 0 -1px 0 #9f8900;
 }
 
 .item-title.active {
@@ -105,8 +105,7 @@
     justify-content: end;
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
-    box-shadow: inset 2px 2px 3px #ac772e, inset -2px -2px 3px #ac772e,
-        inset -2px 2px 3px #ac772e, inset 2px -2px 3px #ac772e;
+    box-shadow: inset 2px 2px 3px #ac772e, inset -2px -2px 3px #ac772e, inset -2px 2px 3px #ac772e, inset 2px -2px 3px #ac772e;
 }
 
 .booster .item-img img {
@@ -121,6 +120,7 @@
 .booster .item-title {
     font-size: 14px;
 }
+
 
 /*  */
 
@@ -275,10 +275,9 @@
 }
 
 .wrap-commit_reward .box-left {
-    text-shadow: 1px 1px 0 #9f8900, -1px -1px 0 #9f8900, 1px -1px 0 #9f8900,
-        -1px 1px 0 #9f8900, 1px 0 0 #9f8900, -1px 0 0 #9f8900, 0 1px 0 #9f8900,
-        0 -1px 0 #9f8900;
+    text-shadow: 1px 1px 0 #9f8900, -1px -1px 0 #9f8900, 1px -1px 0 #9f8900, -1px 1px 0 #9f8900, 1px 0 0 #9f8900, -1px 0 0 #9f8900, 0 1px 0 #9f8900, 0 -1px 0 #9f8900;
 }
+
 
 /* .wrap-commit_reward .box-right {
     text-shadow: 2px 2px 0 #9f8900, -2px -2px 0 #9f8900, 2px -2px 0 #9f8900,
@@ -294,6 +293,8 @@
     position: absolute;
     top: 3%;
     right: 3%;
+    display: flex;
+    gap: 10px;
 }
 
 .link-checkin a {
@@ -338,9 +339,7 @@
 
 .wrap-score .content {
     text-align: center;
-    text-shadow: 1px 1px 0 #9f8900, -1px -1px 0 #9f8900, 1px -1px 0 #9f8900,
-        -1px 1px 0 #9f8900, 1px 0 0 #9f8900, -1px 0 0 #9f8900, 0 1px 0 #9f8900,
-        0 -1px 0 #9f8900;
+    text-shadow: 1px 1px 0 #9f8900, -1px -1px 0 #9f8900, 1px -1px 0 #9f8900, -1px 1px 0 #9f8900, 1px 0 0 #9f8900, -1px 0 0 #9f8900, 0 1px 0 #9f8900, 0 -1px 0 #9f8900;
 }
 
 .wrap-score .content img {

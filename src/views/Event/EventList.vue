@@ -10,7 +10,7 @@
                     v-for="(item, index) in eventData"
                     :key="index"
                     :style="{
-                        backgroundImage: `url(https://qfan-api.qcloud.asia${item?.attributes?.banner?.data?.attributes?.formats?.small?.url})`,
+                        backgroundImage: `url(${apiBaseUrl}${item?.attributes?.banner?.data?.attributes?.formats?.small?.url})`,
                     }"
                 >
                     <div class="box-content-event">
@@ -22,18 +22,7 @@
                                 {{ item?.attributes?.description }}
                             </div>
                         </div>
-                        <!-- <div class="box-pool">
-                            <div class="text-pool">Prize Pool:</div>
-                            <div class="img-pool t-primary-color">
-                                {{
-                                    extractNumber(
-                                        item?.attributes?.content?.[0]
-                                            ?.children?.[0]?.text
-                                    )
-                                }}
-                                <img src="./../../public/assets/logo.svg" />
-                            </div>
-                        </div> -->
+
                         <div class="btn-join-now">
                             <!-- <button @click="$emit('openCoomSoon')">
                                 Join Now
@@ -72,10 +61,8 @@
 import userService from "../../services/userService";
 import Loading from "../../components/LoadingForm.vue";
 import DetailEvent from "../DetailEvent/DetailEvent.vue";
-import EventBus from "../../utils/eventBus";
 import EmptyForm from "../../components/EmptyForm.vue";
 import { IEvent } from "../../interface";
-// import LoadingForm from "@/components/LoadingForm.vue";
 
 export default {
     props: {
@@ -98,7 +85,6 @@ export default {
         EmptyForm,
     },
     async mounted() {
-        EventBus.on("close-detail-event", this.closeDetailEvent);
         if (this.visible) {
             await this.fetchEventData();
         }
@@ -108,11 +94,10 @@ export default {
             this.fetchEventData();
         }
     },
-    beforeUnmount() {
-        EventBus.off("close-detail-event", this.closeDetailEvent);
-    },
+
     data() {
         return {
+            apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
             loading: true,
             eventData: [] as IEvent[],
             buttonText: [],
@@ -124,6 +109,7 @@ export default {
     watch: {
         visible(newVal) {
             if (newVal) {
+                this.isJoinNow = false;
                 this.fetchEventData();
             }
         },
@@ -156,9 +142,6 @@ export default {
         handleJoin(itemDetail) {
             this.detailEvent = itemDetail;
             this.isJoinNow = true;
-        },
-        closeDetailEvent() {
-            this.isJoinNow = false;
         },
     },
     computed: {

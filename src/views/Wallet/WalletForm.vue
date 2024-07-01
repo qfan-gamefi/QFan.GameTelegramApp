@@ -37,34 +37,61 @@
                 </div>
 
                 <div class="box-btn">
-                    <span>Wallet is created</span>
+                    <h3>{{ activeAddress?.name }}</h3>
+                    <a href="#" @click="linkToExplorer($event)" target="_blank">{{ activeAddress?.address }}</a>
+                    <span>{{ balance }} </span>
+                    <button class="btn" @click="checkIn()">Checkin</button>
                 </div>
+
             </div>
         </div>
     </router-view>
 </template>
 
 <script lang="ts">
+import { DEFAULT_NETWORKS, updateNetworkController } from "@/services/network/chains";
+import { setActiveNetwork } from "@/storage/network";
+import { Pelagus } from "@/services/network/pelagus";
 import { storage } from "@/storage/storage";
+import { Address, getActiveAddress, getActiveWallet, type StoredWallet, getLinkToExplorer } from "@/storage/wallet";
 import { defineComponent } from "vue";
+
 export default defineComponent({
     name: "WalletForm",
     data() {
         return {
             isSigned: false,
+            activeWallet: null as StoredWallet | null,
+            activeAddress: null as Address | null,
+            balance: 0,
+            exploreUrl: ""
         };
     },
     methods: {
         navigateToCreateWallet() {
             this.$router.push("/wallet/create");
         },
+        async linkToExplorer(e: Event) {
+            e.preventDefault();
+            const exploreUrl = await getLinkToExplorer(this.activeAddress as Address);
+            if (exploreUrl) {
+                window.open(exploreUrl, "_blank");
+            }
+        },
+        async checkIn() {
+            Pelagus.NetworkController.interactContract(this.activeAddress as Address)
+        }
     },
-    mounted() {
+    async mounted() {
+        await setActiveNetwork(DEFAULT_NETWORKS[0].name);
+        // await updateNetworkController();
         storage.get<boolean>("signed_in").then((signed) => {
             console.log("signed", signed);
-            
+
             this.isSigned = signed ?? false;
         });
+        this.activeWallet = await getActiveWallet();
+        this.activeAddress = await getActiveAddress();
     },
 });
 </script>

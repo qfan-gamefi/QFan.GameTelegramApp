@@ -1,3 +1,10 @@
+import { storage } from "@/storage/storage"
+import { quais } from "quais"
+import NetworkController from "./controller"
+import { Pelagus } from "./pelagus"
+import { getActiveWallet } from "@/storage/wallet"
+import { getActiveNetwork } from "@/storage/network"
+
 // Network class contains data about a default or custom network.
 export class Network {
   name: string
@@ -13,6 +20,8 @@ export class ChainData {
   blockExplorerUrl: string
   rpc: string
 }
+export const QFC_CONTRACT_ADDRESS = "0x0fECB7076f4E103f8bDDb34eC3DaA543595935BE";
+export const QFC_WALLET_ADDRESS = "0x0F5ee10A4C1EDBadEAD8e87981012512f7014D01"
 
 export const NETWORK_LIST = []
 
@@ -373,4 +382,21 @@ export function getExplorerURLForShard(network: Network, shard: string) {
     return undefined
   }
   return chainData.blockExplorerUrl
+}
+
+export async function updateNetworkController() {
+  let activeNetwork = await getActiveNetwork()
+  if (!activeNetwork) {
+    activeNetwork = DEFAULT_QUAI_TESNTET
+  }
+
+  const newController = new NetworkController({
+    activeNetwork: activeNetwork
+  })
+
+  Pelagus.NetworkController = newController
+  const wallet = await getActiveWallet()
+  if (wallet) {
+    await Pelagus.NetworkController.updateNetworkController(wallet)
+  }
 }

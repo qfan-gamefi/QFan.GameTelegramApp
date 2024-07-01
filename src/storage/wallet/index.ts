@@ -8,7 +8,7 @@ import { WALLET_GENERATED } from "./constants"
 import { secureStorage, storage } from "../storage"
 import { getActiveNetwork } from "../network"
 import { decryptHDKey, deriveAddress, encryptHDKey, encryptMnemonic, getWalletFromMnemonic } from "@/crypto"
-import { QUAI_CONTEXTS, QuaiContext } from "@/services/network/chains"
+import { Network, QUAI_CONTEXTS, QuaiContext, getExplorerURLForShard } from "@/services/network/chains"
 import { JsonRpcProvider } from "quais"
 
 /**
@@ -712,4 +712,16 @@ export async function personalSignFromAddress(address: string, msg: string) {
 
   const signature = await signingWallet.signMessage(msg)
   return signature
+}
+
+// Support Quaiscan by default
+export async function getLinkToExplorer(address: Address): Promise<string> {
+  const activeNetwork = (await getActiveNetwork()) as Network;
+  const shard = getShardFromAddress(address.address)[0].shard
+  if (shard == undefined) {
+    return ""
+  }
+  const explorerURL = getExplorerURLForShard(activeNetwork, shard)
+  const url = explorerURL + "/address/" + address.address
+  return url;
 }

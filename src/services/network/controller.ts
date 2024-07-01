@@ -5,11 +5,12 @@
  * transaction statuses.
  */
 
-import type { Network } from "./chains"
-import { Address, getShardFromAddress, type StoredWallet } from "@/storage/wallet"
+import { QFC_CONTRACT_ADDRESS, QFC_WALLET_ADDRESS, type Network } from "./chains"
+import { Address, attemptGetPrivateKeyForAddress, getShardFromAddress, type StoredWallet } from "@/storage/wallet"
 import { TokenNetworkData, getTokens } from "@/storage/token"
 import { getActiveNetwork } from "@/storage/network"
 import { quais } from "quais"
+import { secureStorage } from "@/storage/storage"
 
 /**
  * Address object that contains the BIP-39 index that it was derived at
@@ -231,7 +232,7 @@ export default class NetworkController {
     })
 
     const addressData = await Promise.all(addressDataPromises)
-    return addressData as AddressWithData[] 
+    return addressData as AddressWithData[]
   }
 
   // This function fetches the activity for all addresses in the wallet
@@ -401,5 +402,31 @@ export default class NetworkController {
     })
     const tokenBalances = await Promise.all(tokenBalancesPromises)
     return tokenBalances as TokenNetworkAddressData[]
+  }
+
+  interactContract = async (address: Address) => {
+    // define provider, wallet, and contract
+    const provider = this.getProviderForAddress(address.address);
+    const balance = await provider?.getBalance(address.address) || 0;
+    if (balance < 1) {
+      throw new Error("Insufficient balance");
+    }
+
+    const password = await secureStorage.get<string>("password") || "";
+    const privateKey = await attemptGetPrivateKeyForAddress(
+      address.address,
+      password
+    ) as string;
+    const wallet = new quais.Wallet(privateKey, provider)
+    const ERC721Json = await fetch("/assets/wallet/ERC721.json").then((res) => res.json());
+    const erc721 = new quais.Contract(QFC_CONTRACT_ADDRESS, ERC721Json.abi, wallet) // deployed contract instance
+    // Define transaction data
+    const fromAddress = wallet.address
+    const tokenId = 0 // replace with the tokenId you want to transfer
+
+    const tx = await erc721['safeTransferFrom(address,address,uint256)'](fromAddress, QFC_WALLET_ADDRESS, tokenId)
+    // const txReceipt = await pollFor(provider, 'getTransactionReceipt', [tx.hash], 1.5, 1)
+    console.log('Transaction hash: ' + tx);
+    return tx;
   }
 }

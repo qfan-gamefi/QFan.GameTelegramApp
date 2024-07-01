@@ -52,12 +52,12 @@ export default {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            idUser: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
-            telegram_bot_link:
-                telegram_bot_link +
-                    window.Telegram.WebApp.initDataUnsafe.user?.id || "",
+            // idUser: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
+            // telegram_bot_link:
+            //     telegram_bot_link +
+            //         window.Telegram.WebApp.initDataUnsafe.user?.id || "",
             idUser: "2123800227",
-            // telegram_bot_link: telegram_bot_link + 2123800227 || "",
+            telegram_bot_link: telegram_bot_link + 2123800227 || "",
 
             showCoomingSoon: false,
             isSuccess: false,
@@ -436,6 +436,14 @@ export default {
                     <i class="fa-solid fa-calendar-days"></i> Checkin
                 </button>
                 <!-- </a> -->
+            </div>
+
+            <div class="wr-flip">
+                <router-link to="/flip">
+                    <button @click="handleBackButton">
+                        <i class="fa-solid fa-coins"></i> Flip
+                    </button>
+                </router-link>
             </div>
 
             <div class="wrap-commit_reward" :style="beforeStyle">

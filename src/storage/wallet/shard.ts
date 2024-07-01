@@ -50,6 +50,8 @@ export const getQuaiContextForLocation = (latitude: number, longitude: number) =
   }
 }
 
+export const getDefaultQuaiContext = () => QUAI_CONTEXTS.find((context) => context.shard === "cyprus-1");
+
 export const sortAddressesByActiveShard = (
   addresses: Address[],
   activeShard: string

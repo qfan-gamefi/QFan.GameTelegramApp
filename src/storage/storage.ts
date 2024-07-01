@@ -21,7 +21,7 @@ export const secureStorage = {
         return baseSecureStorage.setItem("password", password);
     },
     set: (key: string, value: any) => {
-        return baseSecureStorage.setItem(key, value);
+        return baseSecureStorage.setItem(key, JSON.stringify(value));
     },
     get: async <T>(key: string) => {
         const value = baseSecureStorage.getItem(key);

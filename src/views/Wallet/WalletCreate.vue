@@ -15,15 +15,8 @@
 
                 <div class="wl-addr">
                     <div class="title-addr">Wallet password</div>
-                    <input
-                        class="code-input"
-                        :class="{ 'input-error': errorMessage }"
-                        type="text"
-                        v-model="walletPassword"
-                        id="code"
-                        @input="clearError"
-                        placeholder="Enter password"
-                    />
+                    <input class="code-input" :class="{ 'input-error': errorMessage }" type="text"
+                        v-model="walletPassword" id="code" @input="clearError" placeholder="Enter password" />
                     <div v-if="errorMessage" class="text-err-code">
                         {{ errorMessage }}
                     </div>
@@ -54,8 +47,9 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { createWallet } from "../../storage/wallet";
+import { addAdddressByShard, createWallet } from "../../storage/wallet";
 import { generateRandomMnemonic } from "../../crypto";
+import { getDefaultQuaiContext } from "@/storage/wallet/shard";
 
 export default defineComponent({
     name: "WalletCreate",
@@ -73,7 +67,14 @@ export default defineComponent({
         async createWallet() {
             let hdWallet = await createWallet(this.walletPassword, this.mnemonic)
             console.log("hdWallet", hdWallet);
-            this.$router.push("/wallet/balance");
+            const context = await getDefaultQuaiContext();
+            console.log("context", context);
+            
+            if (context) {
+                await addAdddressByShard(context?.shard)
+                this.$router.push("/wallet");
+            }
+
         },
         clearError() {
             this.errorMessage = "";
@@ -121,6 +122,7 @@ export default defineComponent({
     gap: 30px;
     text-shadow: -1px -1px 0 #8c0000, 1px -1px 0 #8c0000, -1px 1px 0 #8c0000,
         1px 1px 0 #8c0000;
+
     .title {
         font-size: 28px;
         font-weight: bold;
@@ -132,10 +134,12 @@ export default defineComponent({
     padding: 15px;
     border-radius: 10px;
     text-shadow: none;
+
     .title-addr {
         color: #000000;
         margin-bottom: 5px;
     }
+
     .ct-addr {
         color: #006dbc;
         font-weight: bold;
@@ -149,9 +153,11 @@ export default defineComponent({
     align-items: center;
     gap: 20px;
     margin-bottom: 5px;
+
     .title {
         font-size: 18px;
     }
+
     .copy {
         color: #8c0000;
     }
@@ -172,6 +178,7 @@ export default defineComponent({
     bottom: 40px;
     left: 0;
     padding: 20px;
+
     button {
         border-radius: 10px;
     }

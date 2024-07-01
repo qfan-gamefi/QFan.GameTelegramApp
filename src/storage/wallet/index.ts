@@ -66,14 +66,17 @@ export async function getActiveAddress(): Promise<Address | null> {
  */
 export async function setActiveAddress(newActiveAddress?: Address) {
   const addresses = await getAddresses()
-  const address = addresses.find(
-    (address) => address.address === newActiveAddress?.address
-  )
-  if (!address) {
-    return
+  if (addresses.length > 0) {
+    const address = addresses.find(
+      (address) => address.address === newActiveAddress?.address
+    )
+    await storage.set("active_address", address)
+    console.log("Set active address", address)
   }
-  console.log("Set active address", address)
-  await storage.set("active_address", address)
+  else {
+    await storage.set("active_address", newActiveAddress)
+    console.log("Set active address", newActiveAddress)
+  }
 }
 
 /**
@@ -209,6 +212,9 @@ export async function getKeyfiles(password?: string) {
   }
 
   await secureStorage.setPassword(password)
+  console.log("keyfiles---", secureStorage.getItem("keyfiles"));
+  console.log("keyfiles", await secureStorage.get<Keyfile[]>("keyfiles"));
+
   const keyfiles: Keyfile[] = JSON.parse(secureStorage.getItem("keyfiles") || "[]") as Keyfile[]
   return keyfiles || []
 }
@@ -531,7 +537,7 @@ async function getSigningWallet(from: string) {
  */
 export async function signAndSendTransaction(transaction: TransactionRequest) {
   const wallet = await getActiveWallet()
-  if(!wallet){
+  if (!wallet) {
     throw new Error("No active wallet")
   }
   const activeNetwork = await getActiveNetwork()
@@ -547,7 +553,7 @@ export async function signAndSendTransaction(transaction: TransactionRequest) {
   }
 
   const password = await storage.get<string>("decryption_key")
-  if(!password){
+  if (!password) {
     throw new Error("No password found")
   }
   const keyfile = await getKeyfileForWallet(wallet.pubkey)

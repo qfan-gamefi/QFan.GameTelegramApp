@@ -15,8 +15,15 @@
 
                 <div class="wl-addr">
                     <div class="title-addr">Wallet password</div>
-                    <input class="code-input" :class="{ 'input-error': errorMessage }" type="text"
-                        v-model="walletPassword" id="code" @input="clearError" placeholder="Enter password" />
+                    <input
+                        class="code-input"
+                        :class="{ 'input-error': errorMessage }"
+                        type="text"
+                        v-model="walletPassword"
+                        id="code"
+                        @input="clearError"
+                        placeholder="Enter password"
+                    />
                     <div v-if="errorMessage" class="text-err-code">
                         {{ errorMessage }}
                     </div>
@@ -25,7 +32,9 @@
                 <div class="wr-phrase">
                     <div class="wr-title">
                         <div class="title">Seed phrase</div>
-                        <div class="copy" @click="copySeedPhrase()"><i class="fa-solid fa-copy"></i></div>
+                        <div class="copy" @click="copySeedPhrase()">
+                            <i class="fa-solid fa-copy"></i>
+                        </div>
                     </div>
                     <div class="desc">
                         Copy your seed phrase right now to avoid losing your
@@ -62,19 +71,21 @@ export default defineComponent({
     },
     methods: {
         navigateToHome() {
-            this.$router.push("/wallet");
+            this.$router.push("/");
         },
         async createWallet() {
-            let hdWallet = await createWallet(this.walletPassword, this.mnemonic)
+            let hdWallet = await createWallet(
+                this.walletPassword,
+                this.mnemonic
+            );
             console.log("hdWallet", hdWallet);
             const context = await getDefaultQuaiContext();
             console.log("context", context);
-            
+
             if (context) {
-                await addAdddressByShard(context?.shard)
+                await addAdddressByShard(context?.shard);
                 this.$router.push("/wallet");
             }
-
         },
         clearError() {
             this.errorMessage = "";
@@ -84,7 +95,7 @@ export default defineComponent({
         },
     },
     async mounted() {
-        this.mnemonic = await generateRandomMnemonic()
+        this.mnemonic = await generateRandomMnemonic();
     },
 });
 </script>
@@ -122,7 +133,6 @@ export default defineComponent({
     gap: 30px;
     text-shadow: -1px -1px 0 #8c0000, 1px -1px 0 #8c0000, -1px 1px 0 #8c0000,
         1px 1px 0 #8c0000;
-
     .title {
         font-size: 28px;
         font-weight: bold;
@@ -134,12 +144,10 @@ export default defineComponent({
     padding: 15px;
     border-radius: 10px;
     text-shadow: none;
-
     .title-addr {
         color: #000000;
         margin-bottom: 5px;
     }
-
     .ct-addr {
         color: #006dbc;
         font-weight: bold;
@@ -178,7 +186,6 @@ export default defineComponent({
     bottom: 40px;
     left: 0;
     padding: 20px;
-
     button {
         border-radius: 10px;
     }

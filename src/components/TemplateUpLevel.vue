@@ -3,7 +3,7 @@
 
     <div class="popup-template" v-if="showPopup">
         <div class="box-template">
-            <div @click="$emit('closeDetailNoCall')" class="close-to-booster">
+            <div @click="handleClose" class="close-to-booster">
                 <i class="fa-solid fa-rectangle-xmark"></i>
             </div>
 
@@ -18,7 +18,7 @@
                 <div class="box-lv" v-if="!isMax">
                     <div>
                         <img
-                            :src="`https://qfan-api.qcloud.asia${dataNext?.attributes?.image?.data?.attributes?.url}`"
+                            :src="`${apiBaseUrl}${dataNext?.attributes?.image?.data?.attributes?.url}`"
                         />
                     </div>
                     <div class="r-lv">
@@ -51,7 +51,7 @@
                 <div class="box-lv">
                     <div>
                         <img
-                            :src="`https://qfan-api.qcloud.asia${items?.attributes?.image?.data?.attributes?.url}`"
+                            :src="`${apiBaseUrl}${items?.attributes?.image?.data?.attributes?.url}`"
                         />
                     </div>
                     <div class="r-lv">
@@ -93,14 +93,13 @@
                 </div>
             </div>
 
-            <EmptyForm v-if="showEmptyFormEvent" />
+            <!-- <EmptyForm v-if="showEmptyFormEvent" /> -->
         </div>
 
         <Notification
             v-if="showNotification"
             :message="notificationMessage"
             :type="notificationType"
-            @close="showNotification = false"
         />
     </div>
 </template>
@@ -108,13 +107,13 @@
 <script>
 import userService from "../services/userService";
 import Notification from "./NotificationToast.vue";
-import EmptyForm from "./EmptyForm.vue";
+// import EmptyForm from "./EmptyForm.vue";
 import Loading from "./LoadingForm.vue";
 
 export default {
     components: {
         Notification,
-        EmptyForm,
+        // EmptyForm,
         Loading,
     },
     props: {
@@ -153,6 +152,7 @@ export default {
     },
     data() {
         return {
+            apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
             loading: false,
             data: null,
             dataFrom: null,
@@ -169,11 +169,13 @@ export default {
         },
     },
     methods: {
+        handleClose() {
+            this.$emit("closeDetailNoCall");
+        },
         async handleUplevel() {
             try {
                 this.loading = true;
                 await userService.postUplevel(this.idUser, this.typeBooster);
-                // this.showSuccessNotification();
                 this.$emit("close");
             } catch (error) {
                 this.showErrorNotification(
@@ -184,23 +186,22 @@ export default {
                 this.loading = false;
             }
         },
-        showSuccessNotification() {
-            this.showNotification = true;
-            const nameUp =
-                this.typeBooster === "SPEED" ? `Stadium` : `Training Room`;
-            this.notificationMessage = `Upgrade is yours! ${nameUp} ${this.dataNext?.attributes?.applyLevel}`;
-            this.notificationType = "success";
-        },
+
         showErrorNotification(errorMessage) {
             this.showNotification = true;
             this.notificationMessage = errorMessage || "An error occurred!";
             this.notificationType = "error";
+
+            const intervalId = setInterval(() => {
+                this.showNotification = false;
+                clearInterval(intervalId);
+            }, 2000);
         },
     },
 };
 </script>
 
-<style>
+<style scoped>
 .overlay-template {
     position: fixed;
     top: 0;

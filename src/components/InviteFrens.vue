@@ -72,6 +72,12 @@
                 Invite Friend
             </button>
         </div>
+
+        <NotificationToast
+            v-if="notification.isShow"
+            :message="notification.mess"
+            :type="notification.type"
+        />
     </div>
 </template>
 
@@ -79,6 +85,7 @@
 import userService from "./../services/userService";
 import Loading from "./LoadingForm.vue";
 import EmptyForm from "./EmptyForm.vue";
+import NotificationToast from "./NotificationToast.vue";
 
 export default {
     props: {
@@ -94,10 +101,15 @@ export default {
             type: String,
             default: "",
         },
+        telegram_bot_link: {
+            type: String,
+            required: true,
+        },
     },
     components: {
         Loading,
         EmptyForm,
+        NotificationToast,
     },
     data() {
         return {
@@ -108,6 +120,12 @@ export default {
             perHour: 0,
             referalRewardLv1Percent: 10,
             referalRewardLv2Percent: 5,
+
+            notification: {
+                isShow: false,
+                mess: "",
+                type: "",
+            },
         };
     },
     watch: {
@@ -115,12 +133,36 @@ export default {
             if (newVal) {
                 this.fetchInviteData();
                 this.getConfiguration();
+
+                this.notification = {
+                    isShow: false,
+                };
             }
         },
     },
     methods: {
         handleInvite() {
-            this.$emit("invite");
+            // this.$emit("invite");
+            this.notification = {
+                isShow: true,
+                type: "success",
+                mess: "Copied to clipboard!",
+            };
+
+            const input = document.createElement("input");
+            input.style.position = "fixed";
+            input.style.opacity = "0";
+            input.value = this.telegram_bot_link;
+            document.body.appendChild(input);
+            input.select();
+            document.execCommand("copy");
+            document.body.removeChild(input);
+
+            setTimeout(() => {
+                this.notification = {
+                    isShow: false,
+                };
+            }, 1000);
         },
         async fetchInviteData() {
             try {
@@ -153,9 +195,6 @@ export default {
                 this.loading = false;
             }
         },
-        // async mounted() {
-        //     await this.fetchInviteData();
-        // },
         async getConfiguration() {
             try {
                 const response = await userService.getConfiguration();
@@ -188,7 +227,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .box-title-friend {
     margin: 10px 0;
 }

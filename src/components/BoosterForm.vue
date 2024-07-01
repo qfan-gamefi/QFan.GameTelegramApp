@@ -25,7 +25,7 @@
                     >
                         <div class="logo-stadium">
                             <img
-                                :src="`https://qfan-api.qcloud.asia${stadiumItems?.attributes?.image?.data?.attributes?.url}`"
+                                :src="`${apiBaseUrl}${stadiumItems?.attributes?.image?.data?.attributes?.url}`"
                             />
                         </div>
 
@@ -60,7 +60,7 @@
                     >
                         <div class="logo-stadium">
                             <img
-                                :src="`https://qfan-api.qcloud.asia${trainingItems?.attributes?.image?.data?.attributes?.url}`"
+                                :src="`${apiBaseUrl}${trainingItems?.attributes?.image?.data?.attributes?.url}`"
                             />
                         </div>
 
@@ -116,6 +116,12 @@
             :typeBooster="typeBooster"
             @closeDetailNoCall="closeDetailNoCall"
         />
+
+        <NotificationToast
+            v-if="showNotification"
+            :message="notificationMessage"
+            :type="notificationType"
+        />
     </div>
 </template>
 
@@ -124,7 +130,7 @@ import EmptyForm from "./EmptyForm.vue";
 import userService from "../services/userService";
 import Loading from "./LoadingForm.vue";
 import TemplateUpLevel from "./TemplateUpLevel.vue";
-import EventBus from "./../utils/eventBus";
+import NotificationToast from "./NotificationToast.vue";
 
 export default {
     props: {
@@ -146,9 +152,11 @@ export default {
         Loading,
         TemplateUpLevel,
         EmptyForm,
+        NotificationToast,
     },
     data() {
         return {
+            apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
             loading: true,
             listData: null,
             stadiumItems: {},
@@ -177,6 +185,9 @@ export default {
     watch: {
         async visible(newVal) {
             if (newVal) {
+                this.showNotification = false;
+                this.isShowStadium = false;
+                this.isShowTraining = false;
                 await this.getInfoUser();
                 await this.fetchListData();
                 await this.fetchBoosterTransaction();
@@ -184,12 +195,6 @@ export default {
             }
         },
     },
-    mounted() {
-        EventBus.on("close-stadium", this.closeStadium);
-    },
-    // created() {
-    //     EventBus.on("close-stadium", this.closeStadium);
-    // },
 
     methods: {
         maxLV(data) {
@@ -349,9 +354,17 @@ export default {
             this.isShowStadium = false;
             this.isShowTraining = false;
         },
+        notification() {
+            this.showNotification = true;
+            const nameUp =
+                this.typeBooster === "SPEED" ? `Stadium` : `Training Room`;
+            this.notificationMessage = `Upgrade is yours! ${nameUp} ${this.dataNext?.attributes?.applyLevel}`;
+            this.notificationType = "success";
+        },
         async closeStadium() {
             this.isShowStadium = false;
             this.isShowTraining = false;
+            this.notification();
             await this.getInfoUser();
             await this.fetchListData();
             await this.fetchBoosterTransaction();
@@ -362,9 +375,6 @@ export default {
         showEmptyForm() {
             return this.listData?.length === 0;
         },
-    },
-    beforeUnmount() {
-        EventBus.off("close-stadium", this.closeStadium);
     },
 };
 </script>

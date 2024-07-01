@@ -32,7 +32,9 @@
                 <div class="wr-phrase">
                     <div class="wr-title">
                         <div class="title">Seed phrase</div>
-                        <div class="copy" @click="copySeedPhrase()"><i class="fa-solid fa-copy"></i></div>
+                        <div class="copy" @click="copySeedPhrase()">
+                            <i class="fa-solid fa-copy"></i>
+                        </div>
                     </div>
                     <div class="desc">
                         Copy your seed phrase right now to avoid losing your
@@ -54,8 +56,9 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { createWallet } from "../../storage/wallet";
+import { addAdddressByShard, createWallet } from "../../storage/wallet";
 import { generateRandomMnemonic } from "../../crypto";
+import { getDefaultQuaiContext } from "@/storage/wallet/shard";
 
 export default defineComponent({
     name: "WalletCreate",
@@ -68,12 +71,21 @@ export default defineComponent({
     },
     methods: {
         navigateToHome() {
-            this.$router.push("/wallet");
+            this.$router.push("/");
         },
         async createWallet() {
-            let hdWallet = await createWallet(this.walletPassword, this.mnemonic)
+            let hdWallet = await createWallet(
+                this.walletPassword,
+                this.mnemonic
+            );
             console.log("hdWallet", hdWallet);
-            this.$router.push("/wallet/balance");
+            const context = await getDefaultQuaiContext();
+            console.log("context", context);
+
+            if (context) {
+                await addAdddressByShard(context?.shard);
+                this.$router.push("/wallet");
+            }
         },
         clearError() {
             this.errorMessage = "";
@@ -83,7 +95,7 @@ export default defineComponent({
         },
     },
     async mounted() {
-        this.mnemonic = await generateRandomMnemonic()
+        this.mnemonic = await generateRandomMnemonic();
     },
 });
 </script>
@@ -149,9 +161,11 @@ export default defineComponent({
     align-items: center;
     gap: 20px;
     margin-bottom: 5px;
+
     .title {
         font-size: 18px;
     }
+
     .copy {
         color: #8c0000;
     }

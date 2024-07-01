@@ -62,7 +62,10 @@ export default defineComponent({
     mounted() {
         storage.get<boolean>("signed_in").then((signed) => {
             console.log("signed", signed);
-            
+
+            if (!signed) {
+                this.$router.push({ name: "WalletDetail" });
+            }
             this.isSigned = signed ?? false;
         });
     },

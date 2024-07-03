@@ -145,6 +145,11 @@ export default {
         },
 
         async getInfoUser() {
+            this.$store.commit("setUserId", this.idUser);
+            this.$store.commit(
+                "setFullName",
+                `${this.first_name} ${this.last_name}`
+            );
             try {
                 var data = await userService.getInfo(this.idUser!);
 

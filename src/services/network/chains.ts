@@ -1,9 +1,10 @@
 import { storage } from "@/storage/storage"
 import { quais } from "quais"
 import NetworkController from "./controller"
-import { Pelagus } from "./pelagus"
+// import { Pelagus } from "./pelagus"
 import { getActiveWallet } from "@/storage/wallet"
 import { getActiveNetwork } from "@/storage/network"
+import { Pelagus } from "./pelagus"
 
 // Network class contains data about a default or custom network.
 export class Network {
@@ -393,6 +394,9 @@ export async function updateNetworkController() {
   const newController = new NetworkController({
     activeNetwork: activeNetwork
   })
+
+  console.log("newController", newController);
+  
 
   Pelagus.NetworkController = newController
   const wallet = await getActiveWallet()

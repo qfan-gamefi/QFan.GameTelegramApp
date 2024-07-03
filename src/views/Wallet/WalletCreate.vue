@@ -84,7 +84,7 @@ export default defineComponent({
 
             if (context) {
                 await addAdddressByShard(context?.shard);
-                this.$router.push("/wallet");
+                this.$router.push({ name: "WalletDetail" });
             }
         },
         clearError() {

@@ -6,10 +6,12 @@
 
                 <div class="info">
                     <div><img src="@public/assets/logo.svg" /></div>
-                    <div class="name">Winter</div>
-                    <div class="add-wallet">(...auth)</div>
+                    <div class="name">{{ activeAddress?.name }}</div>
+                    <div class="add-wallet">(<a href="#" @click="linkToExplore($event)">{{ activeAddress?.address.substring(0,5) }}...</a>)</div>
                     <div class="copy-wallet">
-                        <i class="fa-solid fa-copy"></i>
+                        <a href="#" @click="copyAddress($event)">
+                            <i class="fa-solid fa-copy"></i>
+                        </a>
                     </div>
                 </div>
 
@@ -32,7 +34,7 @@
                             </div>
                         </div>
                     </div>
-                    <div>{{ isVisible ? totalBalance : "*********" }}</div>
+                    <div><h1>{{ isVisible ? balance : "*********" }}</h1></div>
 
                     <div class="wr-btn">
                         <div class="btn-item">
@@ -56,9 +58,13 @@
                         </div>
                         <div>
                             <div>QUAI</div>
-                            <div class="price">$5</div>
+                            <h2>{{ balance }}</h2>
                         </div>
                     </div>
+                </div>
+                <div>
+                    <button class="btn" @click="checkIn()">Checkin</button>
+                    <span class="alert">{{ checkinMessage }}</span>
                 </div>
             </div>
         </div>
@@ -67,12 +73,24 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import { DEFAULT_NETWORKS, updateNetworkController } from "@/services/network/chains";
+import { setActiveNetwork } from "@/storage/network";
+// import { Pelagus } from "@/services/network/pelagus";
+import { storage } from "@/storage/storage";
+import { Address, getActiveAddress, getActiveWallet, type StoredWallet, getLinkToExplorer } from "@/storage/wallet";
+import { Pelagus } from "@/services/network/pelagus";
 export default defineComponent({
     name: "WalletDetail",
     data() {
         return {
             isVisible: false,
             totalBalance: "$10,000",
+            isSigned: false,
+            activeWallet: null as StoredWallet | null,
+            activeAddress: null as Address | null,
+            balance: "0",
+            exploreUrl: "",
+            checkinMessage:""
         };
     },
     methods: {
@@ -82,14 +100,46 @@ export default defineComponent({
         toggleVisibility() {
             this.isVisible = !this.isVisible;
         },
+        copyAddress(e: Event) {
+            e.preventDefault();
+            navigator.clipboard.writeText(this.activeAddress?.address ?? "");
+        },
+        checkIn() {
+            console.log("Checkin");
+            Pelagus.NetworkController.interactContract(this.activeAddress as Address);
+        },
+        async linkToExplore(e: Event) {
+            console.log("Link to explore");
+            e.preventDefault();
+            const exploreUrl = await getLinkToExplorer(this.activeAddress as Address);
+            if (exploreUrl) {
+                window.open(exploreUrl, "_blank");
+            }
+        }
     },
     computed: {
         visibilityIcon() {
             return this.isVisible ? "fa-solid fa-eye-slash" : "fa-solid fa-eye";
         },
     },
-    mounted() {
+    async mounted() {
         console.log("WalletForm component is mounted");
+        await setActiveNetwork(DEFAULT_NETWORKS[0].name);
+        await updateNetworkController();
+        storage.get<boolean>("signed_in").then((signed) => {
+            console.log("signed", signed);
+            if (!signed) {
+                this.$router.push({ name: "WalletCreate" });
+            }
+            this.isSigned = signed ?? false;
+        });
+        this.activeWallet = await getActiveWallet();
+        this.activeAddress = await getActiveAddress();
+        const balance = await Pelagus.NetworkController.getBalance(this.activeAddress?.address as string);
+        this.balance = balance as string;
+        const activites = await Pelagus.NetworkController.fetchActivity([this.activeAddress as Address]);
+        console.log("activites", activites);
+        
     },
 });
 </script>
@@ -99,6 +149,7 @@ button {
     padding: 25px 50px;
     -webkit-text-stroke: 1px #8c0000;
 }
+
 .wr-detail-wallet {
     height: 100%;
     position: absolute;
@@ -128,19 +179,24 @@ button {
     padding: 20px;
     align-items: center;
 }
+
 .info {
     display: flex;
     align-items: center;
     gap: 10px;
+
     img {
         width: 25px;
     }
+
     .name {
         color: #00175f;
     }
+
     .add-wallet {
         color: #8f8f8f;
     }
+
     .copy-wallet {
         color: #8f8f8f;
     }
@@ -156,16 +212,19 @@ button {
         display: flex;
         flex-direction: column;
         gap: 10px;
+
         .title {
             color: #00175f;
             font-size: 16px;
             display: flex;
             gap: 10px;
         }
+
         .wr-btn {
             display: flex;
             justify-content: space-between;
             margin-top: 30px;
+
             .btn-item {
                 padding: 5px 20px;
                 background-color: #00175f;
@@ -181,23 +240,29 @@ button {
         flex-direction: column;
         gap: 10px;
         color: #00175f;
+
         .title {
             color: #00175f;
             font-size: 16px;
         }
+
         .box-content {
             display: flex;
             gap: 20px;
             align-items: center;
+
             .img {
                 display: flex;
+
                 img {
                     width: 25px;
                     height: 25px;
                 }
             }
+
             .price {
                 color: #03a400;
+                font-size: 18px;
             }
         }
     }

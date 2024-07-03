@@ -3,7 +3,7 @@ import { secureStorage, storage } from "../storage"
 import { getActiveNetwork } from "../network"
 import { decryptHDKey, deriveAddress, encryptHDKey, encryptMnemonic, getWalletFromMnemonic } from "@/crypto"
 import { Network, QUAI_CONTEXTS, QuaiContext, getExplorerURLForShard } from "@/services/network/chains"
-import { JsonRpcProvider } from "quais"
+import { quais } from "quais"
 
 /**
  * Address object that contains the BIP-39 index that it was derived at
@@ -529,7 +529,7 @@ async function getSigningWallet(from: string) {
         (item: any) => item.shard === fromShard[0].shard
     );
 
-    const provider = new JsonRpcProvider(fromChain?.rpc);
+    const provider = new quais.providers.JsonRpcProvider(fromChain?.rpc);
     const signingWallet = new quais.Wallet(privKeyString, provider);
     return signingWallet;
 }
@@ -579,7 +579,7 @@ export async function signAndSendTransaction(transaction: TransactionRequest) {
 
     const toShard = getShardFromAddress(transaction.from);
 
-    const provider = new quais.JsonRpcProvider(fromChain?.rpc);
+    const provider = new quais.providers.JsonRpcProvider(fromChain?.rpc);
     const signingWallet = new quais.Wallet(privKeyString, provider);
 
     if (fromShard[0].shard !== toShard[0].shard) {
@@ -624,6 +624,8 @@ export async function signAndSendTransaction(transaction: TransactionRequest) {
         );
         rawTransaction.type = 2;
     }
+
+    console.log("rawTransaction", rawTransaction);
 
     const tx = await signingWallet.sendTransaction(rawTransaction);
     return tx;

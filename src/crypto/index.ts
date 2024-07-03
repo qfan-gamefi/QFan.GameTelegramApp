@@ -45,8 +45,8 @@ export function deriveAddress(hdKey: any, opts: any) {
   const index = opts.index || 0
 
   const childKey = hdKey.derive(path + "/" + index.toString())
-  const signingKey = new quais.SigningKey(childKey.privateKey)
-  const address = quais.computeAddress(signingKey.publicKey)
+  const signingKey = new quais.utils.SigningKey(childKey.privateKey)
+  const address = quais.utils.computeAddress(signingKey.publicKey)
   return address
 }
 

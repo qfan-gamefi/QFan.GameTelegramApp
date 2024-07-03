@@ -5,7 +5,7 @@ import "@fortawesome/fontawesome-free/css/all.css";
 import "@fortawesome/fontawesome-free/js/all.js";
 import VueDragscroll from "vue-dragscroll";
 import router from "./router";
-import { Buffer } from 'buffer';
+import { Buffer } from "buffer";
 import { setActiveNetwork } from "./storage/network";
 import { DEFAULT_NETWORKS } from "./services/network/chains";
 

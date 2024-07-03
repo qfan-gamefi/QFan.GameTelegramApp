@@ -5,13 +5,11 @@
  * transaction statuses.
  */
 
-import { QFC_CONTRACT_ADDRESS, QFC_WALLET_ADDRESS, type Network } from "./chains"
-import { Address, attemptGetPrivateKeyForAddress, getShardFromAddress, signAndSendTransaction, type StoredWallet, type TransactionRequest } from "@/storage/wallet"
+import { Address, getShardFromAddress, type StoredWallet } from "@/storage/wallet"
 import { TokenNetworkData, getTokens } from "@/storage/token"
 import { getActiveNetwork } from "@/storage/network"
-import { BigNumber, quais } from "quais"
-import { secureStorage } from "@/storage/storage"
-import { pollFor } from "quais-polling";
+import { quais } from "quais"
+import type { Network } from "./chains"
 
 /**
  * Address object that contains the BIP-39 index that it was derived at
@@ -417,45 +415,5 @@ export default class NetworkController {
     })
     const tokenBalances = await Promise.all(tokenBalancesPromises)
     return tokenBalances as TokenNetworkAddressData[]
-  }
-
-  interactContract = async (address: Address) => {
-    // define provider, wallet, and contract
-    // const provider = this.getProviderForAddress(address.address);
-    const provider = new quais.providers.JsonRpcProvider(this.activeNetwork.chains.find(x => x.shard === "cyprus-1")?.rpc);
-    const balance = (await this.getBalanceNumber(address.address)) as BigNumber;
-    if (balance < BigNumber.from(1)) {
-      throw new Error("Insufficient balance");
-    }
-
-    // const transaction = {
-    //   from: address.address,
-    //   to: QFC_WALLET_ADDRESS,
-    //   value: 10000,
-    //   data: ""
-    // } as unknown as TransactionRequest
-
-
-    // const resp = await signAndSendTransaction(transaction);
-    // console.log("resp", resp);
-
-
-    const password = await secureStorage.get<string>("password") || "";
-    const privateKey = await attemptGetPrivateKeyForAddress(
-      address.address,
-      password
-    ) as string;
-    const wallet = new quais.Wallet(privateKey, provider)
-    const ERC721Json = await fetch("/assets/wallet/QFCToken.json").then((res) => res.json());
-    const erc721 = new quais.Contract(QFC_CONTRACT_ADDRESS, ERC721Json.abi, wallet) // deployed contract instance
-    console.log("erc721", erc721)
-    // Define transaction data
-    const fromAddress = wallet.address
-    const tokenId = 0 // replace with the tokenId you want to transfer
-
-    const tx = await erc721['safeTransferFrom(address,address,uint256)'](fromAddress, QFC_WALLET_ADDRESS, tokenId)
-    const txReceipt = await pollFor(provider, 'getTransactionReceipt', [tx.hash], 1.5, 1)
-    console.log('Transaction: ', txReceipt);
-    return txReceipt;
   }
 }

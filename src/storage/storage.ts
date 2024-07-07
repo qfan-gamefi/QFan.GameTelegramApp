@@ -25,6 +25,9 @@ export const secureStorage = {
     setPassword: (password: string) => {
         return baseSecureStorage.setItem("password", password);
     },
+    getPassword: () => {
+        return baseSecureStorage.getItem("password");
+    },
     set: (key: string, value: any) => {
         return baseSecureStorage.setItem(key, JSON.stringify(value));
     },

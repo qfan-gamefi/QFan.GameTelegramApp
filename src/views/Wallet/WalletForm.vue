@@ -33,13 +33,15 @@
 </template>
 
 <script lang="ts">
+import { VAULT_KEY } from "@/crypto/storage";
+import { storage } from "@/storage/storage";
 import { defineComponent } from "vue";
 
 export default defineComponent({
     name: "WalletForm",
     data() {
         return {
-            
+
         };
     },
     methods: {
@@ -48,7 +50,10 @@ export default defineComponent({
         }
     },
     async mounted() {
-        
+        const vault = await storage.get(VAULT_KEY);
+        if (vault) {
+            this.$router.push("/wallet/detail");
+        }
     },
 });
 </script>

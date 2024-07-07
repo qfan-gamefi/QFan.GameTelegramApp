@@ -6,44 +6,30 @@
             </div>
 
             <div class="wr-content-wallet">
-                <div class="title">Create Wallet</div>
+                <div class="title">Import Wallet</div>
 
                 <div class="desc">
-                    We have created a unique QUAI address for you, which is
-                    similar to your telegram nickname.
+                    This account has been logged into from another
+                    device. Please enter your passphrase to use this
+                    account.
                 </div>
-
+                <div class="title">Wallet Password</div>
                 <div class="wl-addr">
-                    <div class="title-addr">Wallet password</div>
-                    <input
-                        class="code-input"
-                        :class="{ 'input-error': errorMessage }"
-                        type="text"
-                        v-model="walletPassword"
-                        id="code"
-                        @input="clearError"
-                        placeholder="Enter password"
-                    />
-                    <div v-if="errorMessage" class="text-err-code">
-                        {{ errorMessage }}
-                    </div>
+                    <div class="title-addr">Password</div>
+                    <input class="code-input" :class="{ 'input-error': errorMessage }" type="password"
+                        v-model="walletPassword" id="code" @input="clearError" placeholder="Enter password" />
+                    <div class="title-addr">Confirm password</div>
+                    <input class="code-input" :class="{ 'input-error': errorMessage }" type="password"
+                        v-model="confirmPassword" id="code" @input="clearError" placeholder="Enter password" />
                 </div>
-
+                <div class="title">Seed phrase</div>
                 <div class="wr-phrase">
-                    <div class="wr-title">
-                        <div class="title">Seed phrase</div>
-                        <div class="copy" @click="copySeedPhrase()">
-                            <i class="fa-solid fa-copy"></i>
-                        </div>
-                    </div>
-                    <div class="desc">
-                        Copy your seed phrase right now to avoid losing your
-                        account!
-                    </div>
+                    <textarea class="code-input" :class="{ 'input-error': errorMessage }" type="text" v-model="mnemonic"
+                        id="code" @input="clearError" placeholder="Enter seed phrase"></textarea>
                 </div>
 
-                <div class="wr-phrase-text">
-                    {{ mnemonic }}
+                <div v-if="errorMessage" class="text-err-code">
+                    {{ errorMessage }}
                 </div>
 
                 <div class="wr-btn">
@@ -56,16 +42,19 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { addAdddressByShard, createWallet } from "../../storage/wallet";
-import { generateRandomMnemonic } from "../../crypto";
-import { getDefaultQuaiContext } from "@/storage/wallet/shard";
+import { setActiveAddress } from "../../storage/wallet";
+import { setActiveWallet } from "../../storage/wallet";
+import KeyringService from "@/crypto/KDKeyringService";
+import { SignerSourceTypes } from "@/crypto/type";
+import { secureStorage, storage } from "@/storage/storage";
 
 export default defineComponent({
     name: "WalletCreate",
     data() {
         return {
             walletPassword: "",
-            mnemonic: "",
+            confirmPassword: "",
+            mnemonic: "0xc59bbc72a2f2267ed80790499f4696f58fbb4bd52b526945ec09d48f63d0a7c9",
             errorMessage: "",
         };
     },
@@ -74,18 +63,44 @@ export default defineComponent({
             this.$router.push("/");
         },
         async createWallet() {
-            let hdWallet = await createWallet(
-                this.walletPassword,
-                this.mnemonic
-            );
-            console.log("hdWallet", hdWallet);
-            const context = await getDefaultQuaiContext();
-            console.log("context", context);
+            if (!this.walletPassword) {
+                this.errorMessage = "";
+                setTimeout(() => {
+                    this.errorMessage = "Please enter password";
+                }, 200);
 
-            if (context) {
-                await addAdddressByShard(context?.shard);
-                this.$router.push({ name: "WalletDetail" });
+                return;
             }
+
+            if (this.walletPassword !== this.confirmPassword) {
+                this.errorMessage = "";
+                setTimeout(() => {
+                    this.errorMessage = "Password does not match";
+                }, 200);
+
+                return;
+            }
+
+            if (!this.mnemonic) {
+                this.errorMessage = "";
+                setTimeout(() => {
+                    this.errorMessage = "Please enter seed phrase";
+                }, 200);
+
+                return;
+            }
+
+            const keyring: KeyringService = new KeyringService();
+            const address = await keyring.importKeyring({
+                type: SignerSourceTypes.privateKey,
+                privateKey: this.mnemonic
+            });
+            storage.set("address", address);
+            secureStorage.setPassword(this.walletPassword);
+            if (await keyring.unlock(this.walletPassword)) {
+                this.$router.push("/wallet/detail");
+            }
+
         },
         clearError() {
             this.errorMessage = "";
@@ -95,7 +110,7 @@ export default defineComponent({
         },
     },
     async mounted() {
-        this.mnemonic = await generateRandomMnemonic();
+        // this.mnemonic = await generateRandomMnemonic();
     },
 });
 </script>
@@ -126,13 +141,32 @@ export default defineComponent({
     }
 }
 
+.text-err-code {
+    background-color: #e49f9f;
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    animation: fade 1s infinite;
+}
+
+.code-input:focus {
+    border-color: #66afe9;
+    outline: none;
+}
+
+.input-error {
+    border-color: #8c0000;
+    animation: pulse 1s infinite;
+}
+
 .wr-content-wallet {
     display: flex;
     flex-direction: column;
     padding: 20px;
-    gap: 30px;
+    gap: 10px;
     text-shadow: -1px -1px 0 #8c0000, 1px -1px 0 #8c0000, -1px 1px 0 #8c0000,
         1px 1px 0 #8c0000;
+
     .title {
         font-size: 28px;
         font-weight: bold;
@@ -144,15 +178,29 @@ export default defineComponent({
     padding: 15px;
     border-radius: 10px;
     text-shadow: none;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+
     .title-addr {
         color: #000000;
         margin-bottom: 5px;
     }
+
     .ct-addr {
         color: #006dbc;
         font-weight: bold;
         word-wrap: break-word;
         white-space: normal;
+    }
+
+    input {
+        position: relative;
+        border: 1px solid #cdcdcd;
+        border-radius: 5px;
+        padding: 10px;
+        color: #333;
+        margin-bottom: 10px;
     }
 }
 
@@ -171,13 +219,27 @@ export default defineComponent({
     }
 }
 
-.wr-phrase-text {
+.wr-phrase {
     background-color: #fff;
     color: #000000;
     padding: 15px;
     border-radius: 10px;
     text-shadow: none;
     font-weight: bold;
+    display: flex;
+    flex-direction: column;
+
+    textarea {
+        position: relative;
+        border: 1px solid #cdcdcd;
+        border-radius: 5px;
+        padding: 10px;
+        color: #333;
+        margin-bottom: 10px;
+        height: 100px;
+    }
+
+
 }
 
 .wr-btn {
@@ -186,8 +248,10 @@ export default defineComponent({
     bottom: 40px;
     left: 0;
     padding: 20px;
+
     button {
         border-radius: 10px;
+        padding: 30px;
     }
 }
 

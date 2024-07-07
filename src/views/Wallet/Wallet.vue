@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/require-v-for-key -->
 <template>
     <router-view>
         <div class="wr-detail-wallet">
@@ -6,8 +7,9 @@
 
                 <div class="info">
                     <div><img src="@public/assets/logo.svg" /></div>
-                    <div class="name">{{ activeAddress?.name }}</div>
-                    <div class="add-wallet">(<a href="#" @click="linkToExplore($event)">{{ activeAddress?.address.substring(0,5) }}...</a>)</div>
+                    <div class="name">Address</div>
+                    <div class="add-wallet">(<a href="#" @click="linkToExplore($event)">{{
+                        activeWallet?.address.substring(0, 5) }}...</a>)</div>
                     <div class="copy-wallet">
                         <a href="#" @click="copyAddress($event)">
                             <i class="fa-solid fa-copy"></i>
@@ -33,39 +35,120 @@
                                 <i class="fa-solid fa-eye-slash"></i>
                             </div>
                         </div>
+                        <div>
+                            <a href="#" @click="getBalance()"><i class="fa-solid fa-refresh"></i></a>
+
+                        </div>
                     </div>
-                    <div><h1>{{ isVisible ? balance : "*********" }}</h1></div>
+                    <div>
+                        <h1>{{ isVisible ? balance : "*********" }}</h1>
+                    </div>
 
                     <div class="wr-btn">
-                        <div class="btn-item">
+                        <button class="btn-item">
                             <i class="fa-solid fa-copy"></i> Receive
-                        </div>
-                        <div class="btn-item">
+                        </button>
+                        <button @click="onSend()" class="btn-item">
                             <i class="fa-solid fa-paper-plane"></i> Send
-                        </div>
-                        <div class="btn-item">
+                        </button>
+                        <button class="btn-item" @click="faucet()" v-bind:disabled="executing">
                             <i class="fa-solid fa-faucet"></i> Faucet
-                        </div>
+                        </button>
                     </div>
+                    <span v-if="errorMessage" class="text-err-code">{{ errorMessage }}</span>
+                    <span class="faucet-success" v-if="transactionUrl">Faucet success. Click <a
+                            v-bind:href="transactionUrl" target="_blank">here</a> to view transaction on explorer</span>
                 </div>
 
                 <div class="wr-coin">
-                    <div class="title">Token</div>
+                    <div class="title">
+                        <a href="#" @click="setActiveTab('token')"
+                            v-bind:class="activeTab === 'token' ? 'active' : ''">Token</a>
+                        <a href="#" @click="setActiveTab('activities')"
+                            v-bind:class="activeTab === 'activities' ? 'active' : ''">Activities</a>
+                    </div>
 
-                    <div class="box-content">
-                        <div class="img">
-                            <img src="@public/assets/logo-quai.svg" />
-                        </div>
-                        <div>
-                            <div>QUAI</div>
-                            <h2>{{ balance }}</h2>
+                    <div class="box-content" v-if="activeTab === 'token'">
+                        <div class="item-list">
+                            <div class="box-item">
+                                <div class="item-title">
+                                    <img src="@public/assets/logo-quai.svg" />
+                                    <h2>{{ balance }} QUAI</h2>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    <div class="box-content" v-if="activeTab === 'activities'">
+                        <div class="filter">
+                            Status:
+                            <select v-model="filterStatus">
+                                <option value="">All</option>
+                                <option value="pending">Pending</option>
+                                <option value="confirmed">Confirmed</option>
+                            </select>
+                        </div>
+                        <LoadingForm :loading="executing" />
+                        <div class="item-list">
+                            <div class="box-item"
+                                v-for="(transaction, index) in activities.filter(x => (!filterStatus || x.status === filterStatus))"
+                                key="{{ index }}">
+                                <div class="item-title">
+                                    <span><i class="fa-solid fa-exchange"></i>&nbsp;{{ transaction.type.toUpperCase()
+                                        }}</span>
+                                    <a href="#" @click="getLinkTx(transaction.hash)">({{ formatAddress(transaction.hash)
+                                        }})</a>
+                                    <div v-bind:class="transaction.status">{{ transaction.status.toUpperCase() }}</div>
+                                </div>
+                                <div class="item-address">
+                                    <div>
+                                        <a v-if="transaction.type === 'receive'" class="address">From: {{
+                                            transaction?.from
+                                        }}</a>
+                                        <a v-if="transaction.type === 'send'" class="address">To: {{ transaction?.to
+                                            }}</a>
+                                    </div>
+                                </div>
+                                <div class="item-value">
+                                    <span class="value">{{ formatValue(transaction?.value) }} {{
+                                        transaction?.tokenSymbol ??
+                                        'QUAI' }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
-                <div>
-                    <button class="btn" @click="checkIn()">Checkin</button>
-                    <span class="alert">{{ checkinMessage }}</span>
-                </div>
+            </div>
+        </div>
+        <NotificationToast v-if="notification.visible" :message="notification.message" :type="notification.type" />
+        <div v-if="openSend">
+            <div class="popup-overlay"></div>
+            <div class="popup-referer-code">
+                <a href="#" @click="() => { openSend = false }" class="close"><i class="fa fa-close"></i></a>
+                <div class="popup-title">Input address and value to send</div>
+                <form @submit.prevent="onSend">
+                    <div class="form-group">
+                        <label class="label" for="address">Address</label>
+                        <input class="code-input" :class="{ 'input-error': errorMessage }" type="text"
+                            v-model="toAddress" id="address" @input="clearError" placeholder="Enter address" />
+                    </div>
+                    <div class="form-group">
+                        <label class="label" for="value">Value</label>
+                        <input class="code-input" :class="{ 'input-error': errorMessage }" type="text"
+                            v-model="sendValue" id="value" @input="clearError" placeholder="Enter value to send" />
+                    </div>
+                    <div class="form-group">
+                        <label class="label" for="value">Password</label>
+                        <input class="code-input" :class="{ 'input-error': errorMessage }" type="password"
+                            v-model="sendPassword" id="password" @input="clearError" placeholder="Enter password" />
+                    </div>
+                    <div v-if="errorMessage" class="text-err-code">
+                        {{ errorMessage }}
+                    </div>
+                    <button class="btn-submit-code" @click="executeSend()" v-bind:disabled="executing" type="submit">
+                        <span>Send <a v-if="executing"><i class="fa fa-spinner loading"></i></a></span>
+                    </button>
+                </form>
             </div>
         </div>
     </router-view>
@@ -73,24 +156,47 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { DEFAULT_NETWORKS, updateNetworkController } from "@/services/network/chains";
-import { setActiveNetwork } from "@/storage/network";
-// import { Pelagus } from "@/services/network/pelagus";
-import { storage } from "@/storage/storage";
-import { Address, getActiveAddress, getActiveWallet, type StoredWallet, getLinkToExplorer } from "@/storage/wallet";
-import { Pelagus } from "@/services/network/pelagus";
+import { secureStorage, storage } from "@/storage/storage";
+import userService from "@/services/userService";
+import { providers, quais, utils, Wallet } from "quais";
+import NotificationToast from "@/components/NotificationToast.vue";
+import LoadingForm from "@/components/LoadingForm.vue";
+import KeyringService from "@/crypto/KDKeyringService";
+import { VAULT_KEY } from "@/crypto/storage";
+import { activeProvider, fetchActivity, getAddressLinkToExplorer, getTxLinkToExplorer, signAndSendTransaction } from "@/crypto/networks";
+
 export default defineComponent({
     name: "WalletDetail",
+    components: {
+        NotificationToast,
+        LoadingForm
+    },
     data() {
         return {
+            keyringService: new KeyringService(), // KeyringService
             isVisible: false,
             totalBalance: "$10,000",
             isSigned: false,
-            activeWallet: null as StoredWallet | null,
-            activeAddress: null as Address | null,
+            activeWallet: null as Wallet | null,
             balance: "0",
             exploreUrl: "",
-            checkinMessage:""
+            checkinMessage: "",
+            playerId: window.Telegram.WebApp.initDataUnsafe.user?.id.toString() ?? "1927324767",
+            toAddress: "",
+            activeTab: "token",
+            activities: [],
+            notification: {
+                visible: false,
+                message: "",
+                type: "success",
+            },
+            executing: false,
+            openSend: false,
+            errorMessage: "",
+            sendValue: "",
+            sendPassword: "",
+            filterStatus: "",
+            transactionUrl: "",
         };
     },
     methods: {
@@ -100,21 +206,114 @@ export default defineComponent({
         toggleVisibility() {
             this.isVisible = !this.isVisible;
         },
+        async setActiveTab(tab: string) {
+            this.activeTab = tab;
+            if (tab === "activities") {
+                this.executing = true;
+                this.activities = await fetchActivity(this.activeWallet?.address as string) as never[];
+                console.log("activites", this.activities);
+                this.executing = false;
+            }
+        },
         copyAddress(e: Event) {
             e.preventDefault();
-            navigator.clipboard.writeText(this.activeAddress?.address ?? "");
+            navigator.clipboard.writeText(this.activeWallet?.address ?? "");
         },
-        checkIn() {
-            console.log("Checkin");
-            Pelagus.NetworkController.interactContract(this.activeAddress as Address);
+        async faucet() {
+            try {
+                this.executing = true;
+                this.errorMessage = "";
+                this.transactionUrl = "";
+                const faucetResult = await userService.faucet(this.playerId, this.activeWallet?.address as string);
+                console.log("faucetResult", faucetResult);
+                if (faucetResult.statusCode && faucetResult.statusCode !== 200) {
+                    this.errorMessage = "Faucet error: " + faucetResult.message;
+                    this.executing = false;
+                    return;
+                }
+                if (faucetResult?.hash) {
+                    this.transactionUrl = await getTxLinkToExplorer(faucetResult?.hash);
+                }
+                this.executing = false;
+            } catch (error) {
+                console.log("error", error);
+                this.errorMessage = "Faucet error: " + error?.message;
+                this.executing = false;
+            }
         },
         async linkToExplore(e: Event) {
             console.log("Link to explore");
             e.preventDefault();
-            const exploreUrl = await getLinkToExplorer(this.activeAddress as Address);
+            const exploreUrl = await getAddressLinkToExplorer(this.activeWallet?.address as string);
             if (exploreUrl) {
                 window.open(exploreUrl, "_blank");
             }
+        },
+        async getLinkTx(hash: string) {
+            const exploreUrl = await getTxLinkToExplorer(hash);
+            window.open(exploreUrl, "_blank");
+        },
+        onSend() {
+            this.openSend = true;
+        },
+        async executeSend() {
+            if (this.toAddress === "" || this.sendValue === "") {
+                this.errorMessage = "Please input address and value";
+                return;
+            }
+
+            if (this.sendPassword === "") {
+                this.errorMessage = "Please input password";
+                return;
+            }
+
+            //check password
+            const password = secureStorage.getPassword() as string;
+            console.log("password", password, this.sendPassword);
+
+            if (password !== this.sendPassword) {
+                this.errorMessage = "Password is incorrect";
+                return;
+            }
+
+            try {
+                this.executing = true;
+                const transaction = {
+                    from: this.activeWallet?.address as string,
+                    to: this.toAddress,
+                    value: this.sendValue
+                } as unknown as TransactionRequest;
+
+                // const signedData = await this.keyringService.signTransaction(this.toAddress, transaction);
+
+                const result = await signAndSendTransaction(this.activeWallet?.privateKey as string, transaction);
+
+                console.log("result", result);
+
+                this.setActiveTab("activities");
+                this.executing = false;
+                this.openSend = false;
+            } catch (error) {
+                console.log("error", error);
+                this.errorMessage = error?.message;
+                this.executing = false;
+            }
+
+        },
+        formatValue(value: string) {
+            return quais.utils.formatEther(value);
+        },
+        formatAddress(address: string) {
+            const length = address.length;
+            return `${address.substring(0, 5)}...${address.substring(length - 6, length - 1)}`;
+        },
+        clearError() {
+            this.errorMessage = "";
+        },
+        async getBalance() {
+            const provider = activeProvider();
+            const balance = await provider.getBalance(this.activeWallet?.address as string);
+            this.balance = utils.formatEther(balance);
         }
     },
     computed: {
@@ -124,22 +323,25 @@ export default defineComponent({
     },
     async mounted() {
         console.log("WalletForm component is mounted");
-        await setActiveNetwork(DEFAULT_NETWORKS[0].name);
-        await updateNetworkController();
-        storage.get<boolean>("signed_in").then((signed) => {
-            console.log("signed", signed);
-            if (!signed) {
-                this.$router.push({ name: "WalletCreate" });
+        const keyringService = new KeyringService();
+        const provider = activeProvider();
+        const vault = await storage.get(VAULT_KEY);
+        if (vault) {
+            const password = secureStorage.getPassword() as string;
+            const isUnlock = await keyringService.unlock(password, false);
+            console.log("isUnlock", isUnlock);
+
+            if (isUnlock) {
+                this.activeWallet = keyringService.getPrivateKeys()?.at(0) as Wallet;
+                setInterval(async () => {
+                    const balance = await provider.getBalance(this.activeWallet?.address as string);
+                    this.balance = utils.formatEther(balance);
+                }, 5000);
             }
-            this.isSigned = signed ?? false;
-        });
-        this.activeWallet = await getActiveWallet();
-        this.activeAddress = await getActiveAddress();
-        const balance = await Pelagus.NetworkController.getBalance(this.activeAddress?.address as string);
-        this.balance = balance as string;
-        const activites = await Pelagus.NetworkController.fetchActivity([this.activeAddress as Address]);
-        console.log("activites", activites);
-        
+        }
+        else {
+            this.$router.push({ name: "WalletCreate" });
+        }
     },
 });
 </script>
@@ -206,7 +408,7 @@ button {
     padding: 10px;
 
     .wr-balance {
-        background-color: #f5f5f5;
+        background-image: linear-gradient(#5da1db, #fbe1a6);
         border-radius: 10px;
         padding: 10px;
         display: flex;
@@ -222,14 +424,24 @@ button {
 
         .wr-btn {
             display: flex;
-            justify-content: space-between;
-            margin-top: 30px;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
 
             .btn-item {
-                padding: 5px 20px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 15px;
+                margin: 5px;
                 background-color: #00175f;
                 color: #fff;
                 border-radius: 10px;
+            }
+
+            .btn-item:disabled {
+                background-color: #677cb9;
+                cursor: not-allowed;
             }
         }
     }
@@ -244,27 +456,239 @@ button {
         .title {
             color: #00175f;
             font-size: 16px;
+
+            a {
+                color: #00175f;
+                text-decoration: none;
+                padding: 5px;
+
+                &.active {
+                    color: #8c0000;
+                    background-color: bisque;
+                }
+            }
         }
 
         .box-content {
             display: flex;
-            gap: 20px;
             align-items: center;
+            flex-direction: column;
+            width: 100%;
+            gap: 10px;
 
-            .img {
+            .filter {
                 display: flex;
+                justify-content: flex-end;
+                margin-bottom: 10px;
+                width: 100%;
+                align-items: center;
 
-                img {
-                    width: 25px;
-                    height: 25px;
+                select {
+                    padding: 5px;
+                    border-radius: 5px;
+                    border: 1px solid #ccc;
+                    background-color: #f0f0f0;
+                    color: #333;
+                    outline: none;
                 }
             }
 
-            .price {
-                color: #03a400;
-                font-size: 18px;
+            .item-list {
+                display: flex;
+                align-items: center;
+                flex-direction: column;
+                width: 100%;
+                max-height: calc(100vh - 370px);
+                overflow-y: auto;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+                gap: 10px;
+
+                .img {
+                    display: flex;
+
+                    img {
+                        width: 25px;
+                        height: 25px;
+                    }
+                }
+
+                .price {
+                    color: #03a400;
+                    font-size: 18px;
+                }
+
+                .box-item {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-between;
+                    align-items: center;
+                    background-color: #f5f5f5;
+                    border-radius: 10px;
+                    width: calc(100% - 20px);
+                    padding: 10px;
+                    gap: 10px;
+
+                    .address {
+                        display: flex;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
+
+                    .item-title {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        gap: 10px;
+                        width: 100%;
+                    }
+
+                    .item-address {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        gap: 10px;
+                        width: 100%;
+                    }
+
+                    .item-value {
+                        display: flex;
+                        justify-content: flex-end;
+                        align-items: center;
+                        gap: 10px;
+                        width: 100%;
+
+                        .value {
+                            font-size: 16px;
+                            font-weight: bold;
+                        }
+                    }
+
+                    .pending {
+                        background-color: #dba52f;
+                        padding: 5px;
+                        border-radius: 8px;
+                        color: #fff;
+                    }
+
+                    .confirmed {
+                        background-color: #03a400;
+                        padding: 5px;
+                        border-radius: 8px;
+                        color: #fff;
+                    }
+                }
             }
         }
+    }
+}
+
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
+.popup-referer-code {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    padding: 20px;
+    z-index: 1000;
+    border-radius: 8px;
+}
+
+.code-input {
+    padding: 5px;
+    border: 1px solid #ccc;
+    transition: border-color 0.3s ease;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: #f0f0f0;
+    color: #333;
+    outline: none;
+}
+
+.label {
+    font-size: 12px;
+    color: #333;
+    margin-top: 10px;
+}
+
+.code-input:focus {
+    border-color: #66afe9;
+    outline: none;
+}
+
+.input-error {
+    border-color: red;
+    animation: pulse 1s infinite;
+}
+
+.form-group {
+    padding: 8px 0;
+}
+
+.btn-submit-code {
+    margin-top: 20px;
+    border-radius: 5px;
+    color: #fff;
+}
+
+.btn-submit-code:disabled {
+    background-color: #efcda5;
+    cursor: not-allowed;
+}
+
+.popup-title {
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    color: #333;
+    padding-top: 10px;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: #8c0000;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.loading {
+    animation: spin 1s linear infinite;
+}
+
+.text-err-code {
+    color: #8c0000;
+    font-size: 12px;
+}
+
+.faucet-success {
+    color: #fff;
+    font-size: 12px;
+    background-color: #a4d8a3;
+    padding: 8px;
+    border-radius: 5px;
+}
+
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
     }
 }
 </style>

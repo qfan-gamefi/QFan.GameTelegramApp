@@ -23,7 +23,10 @@ import userService from "@/services/userService";
 // import EventBus from "@/utils/eventBus";
 import EventList from "@/views/Event/EventList.vue";
 import CheckinForm from "@/views/Checkin/CheckinForm.vue";
-import { storage } from "@/storage/storage";
+import { secureStorage, storage } from "@/storage/storage";
+import KeyringService from "@/crypto/KDKeyringService";
+import { transferToken } from "@/crypto/networks";
+import type { Wallet } from "quais";
 
 const REF_MESS_PREFIX: string = "start r_";
 export default {
@@ -53,11 +56,11 @@ export default {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            // idUser: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
+            idUser: window.Telegram.WebApp.initDataUnsafe.user?.id?.toString() || "1927324767",
             telegram_bot_link:
                 telegram_bot_link +
                 window.Telegram.WebApp.initDataUnsafe.user?.id || "",
-            idUser: "1927324767",
+            // idUser: "1927324767",
             // telegram_bot_link: telegram_bot_link + 212380022 || "",
 
             showCoomingSoon: false,
@@ -87,8 +90,9 @@ export default {
             showEvent: false,
             isClaim: false,
             activeButton: "",
-
+            activeWallet: null as Wallet | null,
             isCheckin: false,
+            isExecCheckin:false
         };
     },
     computed: {
@@ -391,15 +395,40 @@ export default {
                 this.$router.push({ name: "WalletForm" });
             }
         },
-    },
-    async mounted() {
-        Telegram.WebApp.ready();
-        Telegram.WebApp.setHeaderColor("#ffffff");
-        await this.getInfoUser();
-    },
-    async updated() {
-        this.updateSence();
-    },
+        async onCheckIn() {
+            try {
+                this.isExecCheckin = true;
+                const keyringService = new KeyringService();
+                const isUnlock = await keyringService.unlock(secureStorage.getPassword() as string, false)
+                if (isUnlock) {
+                    const activeWallet = await keyringService.getPrivateKeys().at(0) as Wallet;
+                    const claimCheckin = await userService.claimCheckin(this.idUser, activeWallet?.address as string);
+                    console.log("claimCheckin", claimCheckin);
+                    alert(claimCheckin?.message)
+                }
+                else {
+                    alert("Please import wallet to checkin");
+                    this.$router.push({ name: "WalletCreate" });
+                }
+                this.isExecCheckin = false;
+                
+            } catch (error) {
+                console.error("Error claimCheckin:", error);
+                this.isExecCheckin = false;
+            }
+            finally {
+                this.isExecCheckin = false;
+            }
+        },
+        async mounted() {
+            Telegram.WebApp.ready();
+            Telegram.WebApp.setHeaderColor("#ffffff");
+            await this.getInfoUser();
+        },
+        async updated() {
+            this.updateSence();
+        }
+    }
 };
 </script>
 
@@ -442,8 +471,9 @@ export default {
                     v-bind:href="`https://qfan-dapp.qcloud.asia/?playerId=${idUser}`"
                     target="'_blank"
                 > -->
-                <button @click="isCheckin = true">
+                <button @click="onCheckIn()" v-bind:disabled="isExecCheckin">
                     <i class="fa-solid fa-calendar-days"></i> Checkin
+                    <i v-if="isExecCheckin" class="fa fa-spinner"></i>
                 </button>
                 <!-- </a> -->
             </div>

@@ -16,16 +16,16 @@
                             <div class="text-qfan">QFAN</div>
                         </div>
 
-                        <div class="btn-title">Create Wallet</div>
+                        <div class="btn-title">Import Wallet</div>
                     </button>
 
-                    <button>
+                    <!-- <button>
                         <div class="btn-img">
                             <img src="@public/assets/logo.svg" />
                             <div class="text-qfan">QFAN</div>
                         </div>
                         <div class="btn-title">Import Wallet</div>
-                    </button>
+                    </button> -->
                 </div>
             </div>
         </div>

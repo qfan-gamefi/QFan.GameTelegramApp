@@ -42,8 +42,6 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { setActiveAddress } from "../../storage/wallet";
-import { setActiveWallet } from "../../storage/wallet";
 import KeyringService from "@/crypto/KDKeyringService";
 import { SignerSourceTypes } from "@/crypto/type";
 import { secureStorage, storage } from "@/storage/storage";
@@ -54,7 +52,7 @@ export default defineComponent({
         return {
             walletPassword: "",
             confirmPassword: "",
-            mnemonic: "0xc59bbc72a2f2267ed80790499f4696f58fbb4bd52b526945ec09d48f63d0a7c9",
+            mnemonic: "",
             errorMessage: "",
         };
     },

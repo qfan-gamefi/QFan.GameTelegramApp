@@ -208,7 +208,7 @@ export default defineComponent({
             balance: "0",
             exploreUrl: "",
             checkinMessage: "",
-            playerId: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
+            playerId: window.Telegram.WebApp.initDataUnsafe.user?.id.toString() ?? '1927324767',
             toAddress: "",
             activeTab: "token",
             activities: [],
@@ -310,12 +310,15 @@ export default defineComponent({
                 return;
             }
 
+            console.log("execute send", this.sendValue);
+            
+
             try {
                 this.executing = true;
                 const transaction = {
                     from: this.activeWallet?.address as string,
                     to: this.toAddress,
-                    value: this.sendValue
+                    value: this.sendValue.toString(),
                 } as unknown as TransactionRequest;
 
                 // const signedData = await this.keyringService.signTransaction(this.toAddress, transaction);

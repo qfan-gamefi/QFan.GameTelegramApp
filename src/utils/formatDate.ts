@@ -11,5 +11,5 @@ export const formatDateTimeUS = (date: Date | null | undefined) => {
     if (!date) {
         return "";
     }
-    return dayjs(date).format("YYYY-MMM-DD HH:mm");
+    return dayjs(date).format("YY-MM-DD HH:mm");
 };

@@ -111,17 +111,23 @@ const userService = {
         return res.data;
     },
     async claimCheckin(userId: string, toAddress: string) {
-        const dataForm = {
-            data: {
-                playerId: userId,
-                toAddress: toAddress,
-            },
-        };
-        const res = await axiosInstance.post(
-            `qpoint-transaction/takeCheckinReward`,
-            dataForm
-        );
-        return res.data;
+        try {
+            const dataForm = {
+                data: {
+                    playerId: userId,
+                    toAddress: toAddress,
+                },
+            };
+            const res = await axiosInstance.post(
+                `qpoint-transaction/takeCheckinReward`,
+                dataForm
+            );
+            return res.data;
+        } catch (error) {
+            console.log(error);
+            return error?.response?.data;
+        }
+
     },
     async faucet(userId: string, toAddress: string) {
         try {
@@ -140,6 +146,22 @@ const userService = {
         }
 
     },
+    async registerAddress(userId: string, address: string) {
+        try {
+            const dataForm = {
+                playerId: userId,
+                address
+            };
+            const res = await networkAxiosInstance.post(
+                `user/register-address`,
+                dataForm
+            );
+            return res.data;
+        } catch (error) {
+            console.log(error);
+            return error?.response?.data;
+        }
+    }
 };
 
 export default userService;

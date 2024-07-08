@@ -56,7 +56,7 @@ export default {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            idUser: window.Telegram.WebApp.initDataUnsafe.user?.id?.toString() || "1927324767",
+            idUser: window.Telegram.WebApp.initDataUnsafe.user?.id?.toString(),
             telegram_bot_link:
                 telegram_bot_link +
                 window.Telegram.WebApp.initDataUnsafe.user?.id || "",
@@ -92,7 +92,7 @@ export default {
             activeButton: "",
             activeWallet: null as Wallet | null,
             isCheckin: false,
-            isExecCheckin:false
+            isExecCheckin: false
         };
     },
     computed: {
@@ -404,16 +404,22 @@ export default {
                     const activeWallet = await keyringService.getPrivateKeys().at(0) as Wallet;
                     const claimCheckin = await userService.claimCheckin(this.idUser, activeWallet?.address as string);
                     console.log("claimCheckin", claimCheckin);
-                    alert(claimCheckin?.message)
+                    if (claimCheckin.error) {
+                        alert(claimCheckin?.error?.message)
+                    }
+                    else {
+                        alert(claimCheckin?.message)
+                    }
                 }
                 else {
                     alert("Please import wallet to checkin");
                     this.$router.push({ name: "WalletCreate" });
                 }
                 this.isExecCheckin = false;
-                
+
             } catch (error) {
                 console.error("Error claimCheckin:", error);
+                alert(error?.message);
                 this.isExecCheckin = false;
             }
             finally {
@@ -473,7 +479,7 @@ export default {
                 > -->
                 <button @click="onCheckIn()" v-bind:disabled="isExecCheckin">
                     <i class="fa-solid fa-calendar-days"></i> Checkin
-                    <i v-if="isExecCheckin" class="fa fa-spinner"></i>
+                    <span v-if="isExecCheckin"><i class="fa fa-spinner"></i></span>
                 </button>
                 <!-- </a> -->
             </div>

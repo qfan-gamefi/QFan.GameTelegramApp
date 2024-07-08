@@ -3,7 +3,9 @@
     <router-view>
         <div class="wr-detail-wallet">
             <div class="header-wl">
-                <div class="menu-icon"><i class="fa-solid fa-bars"></i></div>
+                <div>
+                    <a @click="removeWallet()"><i class="fa fa-trash"></i></a>
+                </div>
 
                 <div class="info">
                     <div><img src="@public/assets/logo.svg" /></div>
@@ -36,7 +38,7 @@
                             </div>
                         </div>
                         <div>
-                            <a href="#" @click="getBalance()"><i class="fa-solid fa-refresh"></i></a>
+                            <a href="#" @click="refreshWallet($event)"><i class="fa-solid fa-refresh"></i></a>
 
                         </div>
                     </div>
@@ -45,7 +47,7 @@
                     </div>
 
                     <div class="wr-btn">
-                        <button class="btn-item">
+                        <button class="btn-item" @click="() => openReceive = true">
                             <i class="fa-solid fa-copy"></i> Receive
                         </button>
                         <button @click="onSend()" class="btn-item">
@@ -59,15 +61,14 @@
                     <span class="faucet-success" v-if="transactionUrl">Faucet success. Click <a
                             v-bind:href="transactionUrl" target="_blank">here</a> to view transaction on explorer</span>
                 </div>
-
+                <LoadingForm :loading="executing" />
                 <div class="wr-coin">
                     <div class="title">
-                        <a href="#" @click="setActiveTab('token')"
+                        <a href="#" @click="setActiveTab($event, 'token')"
                             v-bind:class="activeTab === 'token' ? 'active' : ''">Token</a>
-                        <a href="#" @click="setActiveTab('activities')"
+                        <a href="#" @click="setActiveTab($event, 'activities')"
                             v-bind:class="activeTab === 'activities' ? 'active' : ''">Activities</a>
                     </div>
-
                     <div class="box-content" v-if="activeTab === 'token'">
                         <div class="item-list">
                             <div class="box-item">
@@ -87,7 +88,6 @@
                                 <option value="confirmed">Confirmed</option>
                             </select>
                         </div>
-                        <LoadingForm :loading="executing" />
                         <div class="item-list">
                             <div class="box-item"
                                 v-for="(transaction, index) in activities.filter(x => (!filterStatus || x.status === filterStatus))"
@@ -95,16 +95,18 @@
                                 <div class="item-title">
                                     <span><i class="fa-solid fa-exchange"></i>&nbsp;{{ transaction.type.toUpperCase()
                                         }}</span>
-                                    <a href="#" @click="getLinkTx(transaction.hash)">({{ formatAddress(transaction.hash)
+                                    <a href="#" @click="getLinkTx($event, transaction.hash)">({{
+                                        formatAddress(transaction.hash)
                                         }})</a>
                                     <div v-bind:class="transaction.status">{{ transaction.status.toUpperCase() }}</div>
                                 </div>
                                 <div class="item-address">
                                     <div>
                                         <a v-if="transaction.type === 'receive'" class="address">From: {{
-                                            transaction?.from
-                                        }}</a>
-                                        <a v-if="transaction.type === 'send'" class="address">To: {{ transaction?.to
+                                            formatAddress(transaction?.from)
+                                            }}</a>
+                                        <a v-if="transaction.type === 'send'" class="address">To: {{
+                                            formatAddress(transaction?.to)
                                             }}</a>
                                     </div>
                                 </div>
@@ -127,21 +129,28 @@
                 <a href="#" @click="() => { openSend = false }" class="close"><i class="fa fa-close"></i></a>
                 <div class="popup-title">Input address and value to send</div>
                 <form @submit.prevent="onSend">
-                    <div class="form-group">
-                        <label class="label" for="address">Address</label>
-                        <input class="code-input" :class="{ 'input-error': errorMessage }" type="text"
-                            v-model="toAddress" id="address" @input="clearError" placeholder="Enter address" />
-                    </div>
-                    <div class="form-group">
-                        <label class="label" for="value">Value</label>
-                        <input class="code-input" :class="{ 'input-error': errorMessage }" type="text"
-                            v-model="sendValue" id="value" @input="clearError" placeholder="Enter value to send" />
-                    </div>
-                    <div class="form-group">
-                        <label class="label" for="value">Password</label>
-                        <input class="code-input" :class="{ 'input-error': errorMessage }" type="password"
-                            v-model="sendPassword" id="password" @input="clearError" placeholder="Enter password" />
-                    </div>
+                    <table>
+                        <tr class="form-group">
+                            <td><label class="label" for="address">Address</label></td>
+                            <td><input class="code-input" :class="{ 'input-error': errorMessage }" type="text"
+                                    v-model="toAddress" id="address" @input="clearError" placeholder="Enter address" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><label class="label" for="value">Value</label></td>
+                            <td><input class="code-input" :class="{ 'input-error': errorMessage }" type="number"
+                                    v-model="sendValue" id="value" @input="clearError"
+                                    placeholder="Enter value to send" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><label class="label" for="value">Password</label></td>
+                            <td><input class="code-input" :class="{ 'input-error': errorMessage }" type="password"
+                                    v-model="sendPassword" id="password" @input="clearError"
+                                    placeholder="Enter password" />
+                            </td>
+                        </tr>
+                    </table>
                     <div v-if="errorMessage" class="text-err-code">
                         {{ errorMessage }}
                     </div>
@@ -149,6 +158,24 @@
                         <span>Send <a v-if="executing"><i class="fa fa-spinner loading"></i></a></span>
                     </button>
                 </form>
+            </div>
+        </div>
+        <div v-if="openReceive">
+            <div class="popup-overlay"></div>
+            <div class="popup-referer-code">
+                <a href="#" @click="() => { openReceive = false }" class="close"><i class="fa fa-close"></i></a>
+                <div class="popup-title">Receive Address</div>
+                <div class="wl-addr">
+                    <div class="address-image">
+                        <img
+                            v-bind:src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${activeWallet?.address}`" />
+                    </div>
+                    <div class="address-action">
+                        <a href="#" @click="copyAddress($event)">
+                            <i class="fa-solid fa-copy"></i> Copy Address
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </router-view>
@@ -181,7 +208,7 @@ export default defineComponent({
             balance: "0",
             exploreUrl: "",
             checkinMessage: "",
-            playerId: window.Telegram.WebApp.initDataUnsafe.user?.id.toString() ?? "1927324767",
+            playerId: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
             toAddress: "",
             activeTab: "token",
             activities: [],
@@ -197,6 +224,7 @@ export default defineComponent({
             sendPassword: "",
             filterStatus: "",
             transactionUrl: "",
+            openReceive: false,
         };
     },
     methods: {
@@ -206,18 +234,22 @@ export default defineComponent({
         toggleVisibility() {
             this.isVisible = !this.isVisible;
         },
-        async setActiveTab(tab: string) {
+        async setActiveTab($event: Event, tab: string) {
+            $event.preventDefault();
             this.activeTab = tab;
             if (tab === "activities") {
-                this.executing = true;
-                this.activities = await fetchActivity(this.activeWallet?.address as string) as never[];
-                console.log("activites", this.activities);
-                this.executing = false;
+                await this.fetchActivity();
             }
         },
         copyAddress(e: Event) {
             e.preventDefault();
             navigator.clipboard.writeText(this.activeWallet?.address ?? "");
+        },
+        async fetchActivity() {
+            this.executing = true;
+            this.activities = await fetchActivity(this.activeWallet?.address as string) as never[];
+            console.log("activites", this.activities);
+            this.executing = false;
         },
         async faucet() {
             try {
@@ -249,11 +281,13 @@ export default defineComponent({
                 window.open(exploreUrl, "_blank");
             }
         },
-        async getLinkTx(hash: string) {
+        async getLinkTx($event: Event, hash: string) {
+            $event.preventDefault();
             const exploreUrl = await getTxLinkToExplorer(hash);
             window.open(exploreUrl, "_blank");
         },
         onSend() {
+            this.errorMessage = "";
             this.openSend = true;
         },
         async executeSend() {
@@ -289,8 +323,10 @@ export default defineComponent({
                 const result = await signAndSendTransaction(this.activeWallet?.privateKey as string, transaction);
 
                 console.log("result", result);
-
-                this.setActiveTab("activities");
+                this.openSend = false;
+                setTimeout(() => {
+                    this.setActiveTab("activities");
+                }, 2000);
                 this.executing = false;
                 this.openSend = false;
             } catch (error) {
@@ -298,7 +334,6 @@ export default defineComponent({
                 this.errorMessage = error?.message;
                 this.executing = false;
             }
-
         },
         formatValue(value: string) {
             return quais.utils.formatEther(value);
@@ -314,7 +349,18 @@ export default defineComponent({
             const provider = activeProvider();
             const balance = await provider.getBalance(this.activeWallet?.address as string);
             this.balance = utils.formatEther(balance);
-        }
+            //round 2 digits
+            this.balance = parseFloat(this.balance).toFixed(2);
+        },
+        async refreshWallet($event: Event) {
+            $event.preventDefault();
+            await this.getBalance();
+            await this.fetchActivity();
+        },
+        removeWallet() {
+            localStorage.clear();
+            this.$router.push({ name: "WalletCreate" });
+        },
     },
     computed: {
         visibilityIcon() {
@@ -324,7 +370,6 @@ export default defineComponent({
     async mounted() {
         console.log("WalletForm component is mounted");
         const keyringService = new KeyringService();
-        const provider = activeProvider();
         const vault = await storage.get(VAULT_KEY);
         if (vault) {
             const password = secureStorage.getPassword() as string;
@@ -334,8 +379,7 @@ export default defineComponent({
             if (isUnlock) {
                 this.activeWallet = keyringService.getPrivateKeys()?.at(0) as Wallet;
                 setInterval(async () => {
-                    const balance = await provider.getBalance(this.activeWallet?.address as string);
-                    this.balance = utils.formatEther(balance);
+                    await this.getBalance();
                 }, 5000);
             }
         }
@@ -679,6 +723,30 @@ button {
     background-color: #a4d8a3;
     padding: 8px;
     border-radius: 5px;
+}
+
+.address-action {
+    margin-top: 20px;
+    width: 100%;
+
+    a {
+        color: #fff;
+        background-color: #1568e5;
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 12px;
+        text-decoration: none;
+        width: 100%;
+    }
+}
+
+.popup-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20px;
+
+    text-decoration: none;
 }
 
 

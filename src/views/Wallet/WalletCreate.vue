@@ -22,10 +22,10 @@
                     <input class="code-input" :class="{ 'input-error': errorMessage }" type="password"
                         v-model="confirmPassword" id="code" @input="clearError" placeholder="Enter password" />
                 </div>
-                <div class="title">Seed phrase</div>
+                <div class="title">Private Key</div>
                 <div class="wr-phrase">
                     <textarea class="code-input" :class="{ 'input-error': errorMessage }" type="text" v-model="mnemonic"
-                        id="code" @input="clearError" placeholder="Enter seed phrase"></textarea>
+                        id="code" @input="clearError" placeholder="Enter private key export from Pelagus Wallet"></textarea>
                 </div>
 
                 <div v-if="errorMessage" class="text-err-code">
@@ -33,7 +33,7 @@
                 </div>
 
                 <div class="wr-btn">
-                    <button @click="createWallet()">Create</button>
+                    <button  @click="createWallet()">Import</button>
                 </div>
             </div>
         </div>
@@ -115,10 +115,9 @@ export default defineComponent({
 
 <style scoped lang="scss">
 .wr-create-wallet {
-    height: 100%;
-    position: absolute;
+    height: 100vh;
     width: 100%;
-    top: 0%;
+    overflow-y: auto;
     z-index: 999;
     animation: fadeIn 0.3s ease forwards;
     color: #fff;
@@ -241,10 +240,7 @@ export default defineComponent({
 }
 
 .wr-btn {
-    position: absolute;
     width: calc(100% - 40px);
-    bottom: 40px;
-    left: 0;
     padding: 20px;
 
     button {

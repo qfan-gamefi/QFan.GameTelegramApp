@@ -15,4 +15,5 @@ window.global ||= window;
 const app = createApp(SampleGame);
 app.use(VueDragscroll);
 app.use(router);
+app.use(router);
 app.mount("#app");

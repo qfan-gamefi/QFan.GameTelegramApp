@@ -1,7 +1,7 @@
 <template>
     <router-view>
         <div class="popup-wallet">
-            <div class="wraper-wallet" v-if="!isSigned">
+            <div class="wraper-wallet">
                 <div class="logo-wallet">
                     <img src="@public/assets/logo.svg" />
                 </div>
@@ -16,28 +16,16 @@
                             <div class="text-qfan">QFAN</div>
                         </div>
 
-                        <div class="btn-title">Create Wallet</div>
+                        <div class="btn-title">Import Wallet</div>
                     </button>
 
-                    <button>
+                    <!-- <button>
                         <div class="btn-img">
                             <img src="@public/assets/logo.svg" />
                             <div class="text-qfan">QFAN</div>
                         </div>
                         <div class="btn-title">Import Wallet</div>
-                    </button>
-                </div>
-            </div>
-            <div class="wraper-wallet">
-                <div class="logo-wallet">
-                    <img src="@public/assets/logo.svg" />
-                </div>
-                <div class="title-wallet text-outline-black">
-                    QFP Wallet, the first web wallet for Quai Network, is here.
-                </div>
-
-                <div class="box-btn">
-                    <span>Wallet is created</span>
+                    </button> -->
                 </div>
             </div>
         </div>
@@ -45,26 +33,27 @@
 </template>
 
 <script lang="ts">
+import { VAULT_KEY } from "@/crypto/storage";
 import { storage } from "@/storage/storage";
 import { defineComponent } from "vue";
+
 export default defineComponent({
     name: "WalletForm",
     data() {
         return {
-            isSigned: false,
+
         };
     },
     methods: {
         navigateToCreateWallet() {
             this.$router.push("/wallet/create");
-        },
+        }
     },
-    mounted() {
-        storage.get<boolean>("signed_in").then((signed) => {
-            console.log("signed", signed);
-            
-            this.isSigned = signed ?? false;
-        });
+    async mounted() {
+        const vault = await storage.get(VAULT_KEY);
+        if (vault) {
+            this.$router.push("/wallet/detail");
+        }
     },
 });
 </script>

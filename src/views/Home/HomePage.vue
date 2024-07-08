@@ -23,6 +23,10 @@ import userService from "@/services/userService";
 // import EventBus from "@/utils/eventBus";
 import EventList from "@/views/Event/EventList.vue";
 import CheckinForm from "@/views/Checkin/CheckinForm.vue";
+import { secureStorage, storage } from "@/storage/storage";
+import KeyringService from "@/crypto/KDKeyringService";
+import { transferToken } from "@/crypto/networks";
+import type { Wallet } from "quais";
 
 const REF_MESS_PREFIX: string = "start r_";
 export default {
@@ -52,12 +56,12 @@ export default {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            idUser: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
+            idUser: window.Telegram.WebApp.initDataUnsafe.user?.id?.toString(),
             telegram_bot_link:
                 telegram_bot_link +
-                    window.Telegram.WebApp.initDataUnsafe.user?.id || "",
-            idUser: "2123800227",
-            // telegram_bot_link: telegram_bot_link + 2123800227 || "",
+                window.Telegram.WebApp.initDataUnsafe.user?.id || "",
+            // idUser: "1927324767",
+            // telegram_bot_link: telegram_bot_link + 212380022 || "",
 
             showCoomingSoon: false,
             isSuccess: false,
@@ -86,8 +90,9 @@ export default {
             showEvent: false,
             isClaim: false,
             activeButton: "",
-
+            activeWallet: null as Wallet | null,
             isCheckin: false,
+            isExecCheckin: false
         };
     },
     computed: {
@@ -254,10 +259,10 @@ export default {
         async updateSence() {
             const phaserRef: any = this.$refs.phaserRef as
                 | {
-                      scene?: {
-                          changeScene: () => void;
-                      };
-                  }
+                    scene?: {
+                        changeScene: () => void;
+                    };
+                }
                 | undefined;
             const scene = toRaw(phaserRef?.scene);
             const givenDateTimeString = this.dataQPoint.nextTakeRewardTime;
@@ -381,15 +386,55 @@ export default {
 
             Object.assign(this, tabMappings[tab]);
         },
-    },
-    async mounted() {
-        Telegram.WebApp.ready();
-        Telegram.WebApp.setHeaderColor("#ffffff");
-        await this.getInfoUser();
-    },
-    async updated() {
-        this.updateSence();
-    },
+        async handleWallet() {
+            this.handleBackButton();
+            const isSigned = (await storage.get<boolean>("signed_in")) || false;
+            if (isSigned) {
+                this.$router.push({ name: "WalletDetail" });
+            } else {
+                this.$router.push({ name: "WalletForm" });
+            }
+        },
+        async onCheckIn() {
+            try {
+                this.isExecCheckin = true;
+                const keyringService = new KeyringService();
+                const isUnlock = await keyringService.unlock(secureStorage.getPassword() as string, false)
+                if (isUnlock) {
+                    const activeWallet = await keyringService.getPrivateKeys().at(0) as Wallet;
+                    const claimCheckin = await userService.claimCheckin(this.idUser, activeWallet?.address as string);
+                    console.log("claimCheckin", claimCheckin);
+                    if (claimCheckin.error) {
+                        alert(claimCheckin?.error?.message)
+                    }
+                    else {
+                        alert(claimCheckin?.message)
+                    }
+                }
+                else {
+                    alert("Please import wallet to checkin");
+                    this.$router.push({ name: "WalletCreate" });
+                }
+                this.isExecCheckin = false;
+
+            } catch (error) {
+                console.error("Error claimCheckin:", error);
+                alert(error?.message);
+                this.isExecCheckin = false;
+            }
+            finally {
+                this.isExecCheckin = false;
+            }
+        },
+        async mounted() {
+            Telegram.WebApp.ready();
+            Telegram.WebApp.setHeaderColor("#ffffff");
+            await this.getInfoUser();
+        },
+        async updated() {
+            this.updateSence();
+        }
+    }
 };
 </script>
 
@@ -421,19 +466,18 @@ export default {
 
             <div class="link-checkin">
                 <div>
-                    <router-link to="/wallet">
-                        <button @click="handleBackButton">
-                            <i class="fa-solid fa-wallet"></i>
-                            Wallet
-                        </button>
-                    </router-link>
+                    <button @click="handleWallet">
+                        <i class="fa-solid fa-wallet"></i>
+                        Wallet
+                    </button>
                 </div>
                 <!-- <a
                     v-bind:href="`https://qfan-dapp.qcloud.asia/?playerId=${idUser}`"
                     target="'_blank"
                 > -->
-                <button @click="isCheckin = true">
+                <button @click="onCheckIn()" v-bind:disabled="isExecCheckin">
                     <i class="fa-solid fa-calendar-days"></i> Checkin
+                    <span v-if="isExecCheckin"><i class="fa fa-spinner"></i></span>
                 </button>
                 <!-- </a> -->
             </div>
@@ -455,11 +499,7 @@ export default {
                     </div>
 
                     <div class="box-right">
-                        <button
-                            class="btn-commit_reward"
-                            @click="handleReward"
-                            :disabled="isCountingDown"
-                        >
+                        <button class="btn-commit_reward" @click="handleReward" :disabled="isCountingDown">
                             {{ isClaim ? "Claim" : "Training..." }}
                         </button>
                     </div>
@@ -470,46 +510,27 @@ export default {
         </div>
 
         <div class="box-button">
-            <div
-                class="btn-item"
-                @click="handleButtonTab('mission')"
-                :class="{ active: activeButton === 'mission' }"
-            >
+            <div class="btn-item" @click="handleButtonTab('mission')" :class="{ active: activeButton === 'mission' }">
                 <div class="item-img">
                     <img src="@public/assets/button-icons/mission.svg" />
                 </div>
                 <div class="item-title">Mission</div>
             </div>
-            <div
-                class="btn-item"
-                @click="handleButtonTab('event')"
-                :class="{ active: activeButton === 'event' }"
-            >
+            <div class="btn-item" @click="handleButtonTab('event')" :class="{ active: activeButton === 'event' }">
                 <div class="item-img">
                     <img src="@public/assets/button-icons/event.svg" />
                 </div>
                 <div class="item-title">Event</div>
             </div>
-            <div
-                class="btn-item"
-                @click="handleButtonTab('booster')"
-                :class="{ active: activeButton === 'booster' }"
-            >
+            <div class="btn-item" @click="handleButtonTab('booster')" :class="{ active: activeButton === 'booster' }">
                 <div class="item-img">
                     <img src="@public/assets/button-icons/booster.svg" />
                 </div>
-                <div
-                    class="item-title"
-                    :class="{ active: activeButton === 'booster' }"
-                >
+                <div class="item-title" :class="{ active: activeButton === 'booster' }">
                     Booster
                 </div>
             </div>
-            <div
-                class="btn-item"
-                @click="handleButtonTab('invite')"
-                :class="{ active: activeButton === 'invite' }"
-            >
+            <div class="btn-item" @click="handleButtonTab('invite')" :class="{ active: activeButton === 'invite' }">
                 <div class="item-img">
                     <img src="@public/assets/button-icons/invite-friend.svg" />
                 </div>
@@ -528,15 +549,8 @@ export default {
             <div class="popup-referer-code">
                 <div class="referer-code">Referer code</div>
                 <form @submit.prevent="submitCode">
-                    <input
-                        class="code-input"
-                        :class="{ 'input-error': errorMessage }"
-                        type="text"
-                        v-model="code"
-                        id="code"
-                        @input="clearError"
-                        placeholder="Enter code"
-                    />
+                    <input class="code-input" :class="{ 'input-error': errorMessage }" type="text" v-model="code"
+                        id="code" @input="clearError" placeholder="Enter code" />
                     <div v-if="errorMessage" class="text-err-code">
                         {{ errorMessage }}
                     </div>
@@ -548,34 +562,19 @@ export default {
         </div>
 
         <MissionList :visible="showMission" :idUser="idUser" />
-        <EventList
-            :visible="showEvent"
-            :idUser="idUser"
-            :dataQPoint="dataQPoint"
-            @openCoomSoon="showPopupCoomingSoon"
-        />
+        <EventList :visible="showEvent" :idUser="idUser" :dataQPoint="dataQPoint"
+            @openCoomSoon="showPopupCoomingSoon" />
 
-        <InviteFrens
-            :visible="showInvite"
-            :idUser="idUser"
-            :rewardAmount="dataQPoint.rewardAmount"
-            :telegram_bot_link="telegram_bot_link"
-        />
-        <BoosterForm
-            :visible="showBooster"
-            :rewardScheduleHour="dataQPoint.rewardScheduleHour"
-            :idUser="idUser"
-        />
+        <InviteFrens :visible="showInvite" :idUser="idUser" :rewardAmount="dataQPoint.rewardAmount"
+            :telegram_bot_link="telegram_bot_link" />
+        <BoosterForm :visible="showBooster" :rewardScheduleHour="dataQPoint.rewardScheduleHour" :idUser="idUser" />
 
         <CheckinForm :isCheckin="isCheckin" @closeCheckin="closeCheckin" />
 
-        <div
-            :class="[
-                'popup-cooming-soon',
-                { 'closing-popup': !showCoomingSoon },
-            ]"
-            v-if="showCoomingSoon"
-        >
+        <div :class="[
+            'popup-cooming-soon',
+            { 'closing-popup': !showCoomingSoon },
+        ]" v-if="showCoomingSoon">
             <p>Coming soon</p>
             <button @click="hidePopupCoomingSoon" class="btn-close-coming-soon">
                 Close

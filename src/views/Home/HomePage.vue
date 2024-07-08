@@ -466,12 +466,10 @@ export default {
 
             <div class="link-checkin">
                 <div>
-                    <!-- <router-link to="/wallet"> -->
                     <button @click="handleWallet">
                         <i class="fa-solid fa-wallet"></i>
                         Wallet
                     </button>
-                    <!-- </router-link> -->
                 </div>
                 <!-- <a
                     v-bind:href="`https://qfan-dapp.qcloud.asia/?playerId=${idUser}`"

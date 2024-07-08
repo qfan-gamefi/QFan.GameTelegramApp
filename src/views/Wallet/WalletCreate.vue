@@ -59,6 +59,7 @@ export default defineComponent({
     methods: {
         navigateToHome() {
             this.$router.push("/");
+            this.$router.push("/");
         },
         async createWallet() {
             if (!this.walletPassword) {
@@ -98,7 +99,6 @@ export default defineComponent({
             if (await keyring.unlock(this.walletPassword)) {
                 this.$router.push("/wallet/detail");
             }
-
         },
         clearError() {
             this.errorMessage = "";
@@ -163,7 +163,6 @@ export default defineComponent({
     gap: 10px;
     text-shadow: -1px -1px 0 #8c0000, 1px -1px 0 #8c0000, -1px 1px 0 #8c0000,
         1px 1px 0 #8c0000;
-
     .title {
         font-size: 28px;
         font-weight: bold;
@@ -183,7 +182,6 @@ export default defineComponent({
         color: #000000;
         margin-bottom: 5px;
     }
-
     .ct-addr {
         color: #006dbc;
         font-weight: bold;
@@ -242,7 +240,6 @@ export default defineComponent({
 .wr-btn {
     width: calc(100% - 40px);
     padding: 20px;
-
     button {
         border-radius: 10px;
         padding: 30px;

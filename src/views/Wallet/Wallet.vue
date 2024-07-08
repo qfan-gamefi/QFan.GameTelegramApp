@@ -404,7 +404,10 @@ button {
     z-index: 999;
     animation: fadeInWallet 0.3s ease forwards;
     background-color: #fff;
+    background-color: #fff;
     font-family: monospace;
+    color: #000000;
+    font-weight: bold;
     color: #000000;
     font-weight: bold;
 }
@@ -424,27 +427,27 @@ button {
     justify-content: space-between;
     padding: 20px;
     align-items: center;
-}
 
-.info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    .info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
 
-    img {
-        width: 25px;
-    }
+        img {
+            width: 25px;
+        }
 
-    .name {
-        color: #00175f;
-    }
+        .name {
+            color: #00175f;
+        }
 
-    .add-wallet {
-        color: #8f8f8f;
-    }
+        .add-wallet {
+            color: #8f8f8f;
+        }
 
-    .copy-wallet {
-        color: #8f8f8f;
+        .copy-wallet {
+            color: #8f8f8f;
+        }
     }
 }
 

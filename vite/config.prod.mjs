@@ -20,7 +20,6 @@ const phasermsg = () => {
 };
 
 const url = (path) => fileURLToPath(new URL(path, import.meta.url));
-const url = (path) => fileURLToPath(new URL(path, import.meta.url));
 export default defineConfig({
     base: "./",
     plugins: [vue(), phasermsg()],
@@ -39,7 +38,7 @@ export default defineConfig({
             "@services/*": ["src/services/*"],
             "@styles/*": ["src/styles/*"],
             "@interface/*": ["src/interface/*"],
-            "readable-stream": "vite-compatible-readable-stream",
+            // "readable-stream": "vite-compatible-readable-stream",
         },
     },
     logLevel: "warning",

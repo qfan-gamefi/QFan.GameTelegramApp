@@ -7,9 +7,6 @@ import vue from "@vitejs/plugin-vue";
 
 const url = (path) => fileURLToPath(new URL(path, import.meta.url));
 
-
-const url = (path) => fileURLToPath(new URL(path, import.meta.url));
-
 export default defineConfig({
     base: "./",
     build: {
@@ -27,17 +24,6 @@ export default defineConfig({
     ],
     resolve: {
         alias: {
-            // "@public": fileURLToPath(new URL("./../public",
-            //     import.meta.url)),
-            "@": url("../src"),
-            "@public": url("./../public"),
-            "@components": url("./src/components"),
-            "@views": url("./src/views"),
-            "@router": url("./src/router"),
-            "@utils": url("./src/utils"),
-            "@services": url("./src/services"),
-            "@styles": url("./src/styles"),
-            "@interface": url("./src/interface"),
             // "@public": fileURLToPath(new URL("./../public",
             //     import.meta.url)),
             "@": url("../src"),

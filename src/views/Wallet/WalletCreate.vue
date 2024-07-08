@@ -9,9 +9,7 @@
                 <div class="title">Import Wallet</div>
 
                 <div class="desc">
-                    This account has been logged into from another
-                    device. Please enter your passphrase to use this
-                    account.
+                    We have created a unique PELAGUS address for you, which is similar to your telegram nickname.
                 </div>
                 <div class="title">Wallet Password</div>
                 <div class="wl-addr">
@@ -25,7 +23,8 @@
                 <div class="title">Private Key</div>
                 <div class="wr-phrase">
                     <textarea class="code-input" :class="{ 'input-error': errorMessage }" type="text" v-model="mnemonic"
-                        id="code" @input="clearError" placeholder="Enter private key export from Pelagus Wallet"></textarea>
+                        id="code" @input="clearError"
+                        placeholder="Enter private key export from Pelagus Wallet"></textarea>
                 </div>
 
                 <div v-if="errorMessage" class="text-err-code">
@@ -33,7 +32,7 @@
                 </div>
 
                 <div class="wr-btn">
-                    <button  @click="createWallet()">Import</button>
+                    <button @click="createWallet()">Import</button>
                 </div>
             </div>
         </div>
@@ -163,6 +162,7 @@ export default defineComponent({
     gap: 10px;
     text-shadow: -1px -1px 0 #8c0000, 1px -1px 0 #8c0000, -1px 1px 0 #8c0000,
         1px 1px 0 #8c0000;
+
     .title {
         font-size: 28px;
         font-weight: bold;
@@ -182,6 +182,7 @@ export default defineComponent({
         color: #000000;
         margin-bottom: 5px;
     }
+
     .ct-addr {
         color: #006dbc;
         font-weight: bold;
@@ -240,6 +241,7 @@ export default defineComponent({
 .wr-btn {
     width: calc(100% - 40px);
     padding: 20px;
+
     button {
         border-radius: 10px;
         padding: 30px;

@@ -6,7 +6,7 @@
                     <img src="@public/assets/logo.svg" />
                 </div>
                 <div class="title-wallet text-outline-black">
-                    QFP Wallet, the first web wallet for Quai Network, is here.
+                    PELAGUS Wallet, the first web wallet for PELAGUS, is here.
                 </div>
 
                 <div class="box-btn">

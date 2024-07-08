@@ -25,27 +25,32 @@ export default defineConfig({
     plugins: [vue(), phasermsg()],
     resolve: {
         alias: {
-            "@": fileURLToPath(new URL("./src", import.meta.url)),
+            "@": fileURLToPath(new URL("../src", import.meta.url)),
             "@public": url("./../public"),
-            "@components": fileURLToPath(
-                new URL("./src/components", import.meta.url)
-            ),
+            // "@components": fileURLToPath(
+            //     new URL("src/components", import.meta.url)
+            // ),
+
+            "@components/*": url("./src/components"),
             "@views/*": ["src/views/*"],
             "@router/*": ["src/router/*"],
             "@utils/*": ["src/utils/*"],
             "@services/*": ["src/services/*"],
             "@styles/*": ["src/styles/*"],
             "@interface/*": ["src/interface/*"],
+            "readable-stream": "vite-compatible-readable-stream",
         },
     },
     logLevel: "warning",
     build: {
+        target: "esnext",
         rollupOptions: {
             output: {
                 manualChunks: {
                     phaser: ["phaser"],
                 },
             },
+            external: ["crypto"],
         },
         minify: "terser",
         terserOptions: {
@@ -57,5 +62,9 @@ export default defineConfig({
                 comments: false,
             },
         },
+    },
+    optimizeDeps: {
+        include: ["@quais/contracts"],
+        exclude: ["__vite-browser-external"],
     },
 });

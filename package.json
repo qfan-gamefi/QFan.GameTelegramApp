@@ -21,10 +21,11 @@
         "vite"
     ],
     "scripts": {
-        "dev": "vite --config vite/config.dev.mjs",
+        "dev": "patch-package && vite --config vite/config.dev.mjs",
         "build": "vite build --config vite/config.prod.mjs"
     },
     "dependencies": {
+        "@ethersproject/providers": "5.5.3",
         "@fortawesome/fontawesome-free": "^6.5.2",
         "@jihyunlab/web-secure-storage": "^1.0.6",
         "@metamask/browser-passworder": "^5.0.0",
@@ -34,10 +35,14 @@
         "bip39": "^3.1.0",
         "buffer": "^6.0.3",
         "dayjs": "^1.11.11",
+        "ethers": "^6.13.1",
         "fortawesome": "^0.0.1-security",
+        "lodash": "^4.17.21",
         "mitt": "^3.0.1",
         "phaser": "^3.80.1",
-        "quais": "^1.2.0-pre",
+        "quais": "^0.1.17",
+        "quais-polling": "^1.0.4",
+        "rollup-plugin-node-polyfills": "^0.2.1",
         "sass": "^1.77.2",
         "secure-web-storage": "^1.0.2",
         "vue": "^3.4.20",
@@ -48,6 +53,7 @@
     "devDependencies": {
         "@rushstack/eslint-patch": "^1.7.2",
         "@tsconfig/node20": "^20.1.2",
+        "@types/lodash": "^4.17.6",
         "@types/node": "^20.14.5",
         "@vitejs/plugin-vue": "^5.0.4",
         "@vue/eslint-config-typescript": "^12.0.0",
@@ -55,6 +61,7 @@
         "eslint": "^8.57.0",
         "eslint-plugin-vue": "^9.22.0",
         "npm-run-all2": "^6.1.2",
+        "patch-package": "^8.0.0",
         "terser": "^5.28.1",
         "typescript": "~5.3.3",
         "vite": "^5.1.4",

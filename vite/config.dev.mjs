@@ -9,6 +9,9 @@ const url = (path) => fileURLToPath(new URL(path, import.meta.url));
 
 export default defineConfig({
     base: "./",
+    build: {
+        target: "esnext",
+    },
     plugins: [
         vue(),
         //     {
@@ -36,5 +39,9 @@ export default defineConfig({
     },
     server: {
         port: 8080,
+    },
+    optimizeDeps: {
+        include: ["@quais/contracts"],
+        exclude: ["__vite-browser-external"],
     },
 });

@@ -426,14 +426,14 @@ export default {
                 this.isExecCheckin = false;
             }
         },
-        async mounted() {
-            Telegram.WebApp.ready();
-            Telegram.WebApp.setHeaderColor("#ffffff");
-            await this.getInfoUser();
-        },
-        async updated() {
-            this.updateSence();
-        }
+    },
+    async mounted() {
+        Telegram.WebApp.ready();
+        Telegram.WebApp.setHeaderColor("#ffffff");
+        await this.getInfoUser();
+    },
+    async updated() {
+        this.updateSence();
     }
 };
 </script>

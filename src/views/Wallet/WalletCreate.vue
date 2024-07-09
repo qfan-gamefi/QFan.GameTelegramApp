@@ -8,23 +8,44 @@
             <div class="wr-content-wallet">
                 <div class="title">Import Wallet</div>
 
-                <div class="desc">
-                    We have created a unique PELAGUS address for you, which is similar to your telegram nickname.
-                </div>
-                <div class="title">Wallet Password</div>
+                <!-- <div class="desc">
+                    This account has been logged into from another device.
+                    Please enter your passphrase to use this account.
+                </div> -->
+                <div class="title-pass">Wallet Password</div>
                 <div class="wl-addr">
                     <div class="title-addr">Password</div>
-                    <input class="code-input" :class="{ 'input-error': errorMessage }" type="password"
-                        v-model="walletPassword" id="code" @input="clearError" placeholder="Enter password" />
+                    <input
+                        class="code-input"
+                        :class="{ 'input-error': errorMessage }"
+                        type="password"
+                        v-model="walletPassword"
+                        id="code"
+                        @input="clearError"
+                        placeholder="Enter password"
+                    />
                     <div class="title-addr">Confirm password</div>
-                    <input class="code-input" :class="{ 'input-error': errorMessage }" type="password"
-                        v-model="confirmPassword" id="code" @input="clearError" placeholder="Enter password" />
+                    <input
+                        class="code-input"
+                        :class="{ 'input-error': errorMessage }"
+                        type="password"
+                        v-model="confirmPassword"
+                        id="code"
+                        @input="clearError"
+                        placeholder="Enter password"
+                    />
                 </div>
-                <div class="title">Private Key</div>
+                <div class="title-pass">Private Key</div>
                 <div class="wr-phrase">
-                    <textarea class="code-input" :class="{ 'input-error': errorMessage }" type="text" v-model="mnemonic"
-                        id="code" @input="clearError"
-                        placeholder="Enter private key export from Pelagus Wallet"></textarea>
+                    <textarea
+                        class="code-input"
+                        :class="{ 'input-error': errorMessage }"
+                        type="text"
+                        v-model="mnemonic"
+                        id="code"
+                        @input="clearError"
+                        placeholder="Enter private key export from Pelagus Wallet"
+                    ></textarea>
                 </div>
 
                 <div v-if="errorMessage" class="text-err-code">
@@ -91,7 +112,7 @@ export default defineComponent({
             const keyring: KeyringService = new KeyringService();
             const address = await keyring.importKeyring({
                 type: SignerSourceTypes.privateKey,
-                privateKey: this.mnemonic
+                privateKey: this.mnemonic,
             });
             storage.set("address", address);
             secureStorage.setPassword(this.walletPassword);
@@ -120,7 +141,7 @@ export default defineComponent({
     z-index: 999;
     animation: fadeIn 0.3s ease forwards;
     color: #fff;
-    background-image: url("./../../../public/assets/wallet/background-wallet.png");
+    background-image: url("./../../../public/assets/wallet/background-wallet-pelagus.png");
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
@@ -160,12 +181,13 @@ export default defineComponent({
     flex-direction: column;
     padding: 20px;
     gap: 10px;
-    text-shadow: -1px -1px 0 #8c0000, 1px -1px 0 #8c0000, -1px 1px 0 #8c0000,
-        1px 1px 0 #8c0000;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
+        1px 1px 0 #000;
 
     .title {
-        font-size: 28px;
+        font-size: 30px;
         font-weight: bold;
+        margin-bottom: 30px;
     }
 }
 
@@ -234,24 +256,30 @@ export default defineComponent({
         margin-bottom: 10px;
         height: 100px;
     }
-
-
 }
 
 .wr-btn {
-    width: calc(100% - 40px);
-    padding: 20px;
-
+    // width: calc(100% - 40px);
+    // padding: 20px;
+    color: #0054d2;
+    margin-top: 20px;
     button {
-        border-radius: 10px;
         padding: 30px;
+        border-radius: 10px;
+        background: #fff;
+        // padding: 25px 80px;
+        -webkit-text-stroke: 0px;
     }
 }
 
 .btn-close {
     text-align: right;
     padding: 10px;
-    color: #8c0000;
+    color: #fff;
     font-size: 20px;
+}
+.title-pass {
+    font-size: 22px;
+    font-weight: bold;
 }
 </style>

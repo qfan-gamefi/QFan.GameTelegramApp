@@ -252,7 +252,7 @@ export default defineComponent({
     z-index: 999;
     animation: fadeInMission 0.1s ease forwards;
     color: #fff;
-    background-image: url("./../../public/assets/event/background-event.png");
+    background-image: url("./../../../public/assets/event/background-event.png");
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;

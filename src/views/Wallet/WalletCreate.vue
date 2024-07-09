@@ -259,15 +259,12 @@ export default defineComponent({
 }
 
 .wr-btn {
-    // width: calc(100% - 40px);
-    // padding: 20px;
     color: #0054d2;
     margin-top: 20px;
     button {
-        padding: 30px;
+        padding: 25px;
         border-radius: 10px;
         background: #fff;
-        // padding: 25px 80px;
         -webkit-text-stroke: 0px;
     }
 }

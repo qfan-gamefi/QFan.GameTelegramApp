@@ -9,25 +9,25 @@
                     PELAGUS Wallet, the first web wallet for Quai Network, is
                     here.
                 </div>
+            </div>
 
-                <div class="box-btn">
-                    <button @click="navigateToCreateWallet">
-                        <!-- <div class="btn-img">
+            <div class="box-btn">
+                <button @click="navigateToCreateWallet">
+                    <!-- <div class="btn-img">
                             <img src="@public/assets/logo.svg" />
                             <div class="text-qfan">QFAN</div>
                         </div> -->
 
-                        <div class="btn-title">Import Wallet</div>
-                    </button>
+                    <div class="btn-title">Import Wallet</div>
+                </button>
 
-                    <!-- <button>
+                <!-- <button>
                         <div class="btn-img">
                             <img src="@public/assets/logo.svg" />
                             <div class="text-qfan">QFAN</div>
                         </div>
                         <div class="btn-title">Import Wallet</div>
                     </button> -->
-                </div>
             </div>
         </div>
     </router-view>
@@ -86,15 +86,17 @@ export default defineComponent({
 .wraper-wallet {
     display: flex;
     flex-direction: column;
-    // height: 100%;
-    // justify-content: center;
     gap: 45px;
-    margin-top: 40%;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top: 40%;
+    left: 50%;
+    width: 100%;
 }
 
 .box-btn {
     position: absolute;
-    bottom: 20%;
+    bottom: 15%;
     left: 50%;
     transform: translate(-50%, 0);
     width: 100%;

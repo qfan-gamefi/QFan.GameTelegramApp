@@ -404,6 +404,7 @@ export default {
                     const activeWallet = await keyringService.getPrivateKeys().at(0) as Wallet;
                     const claimCheckin = await userService.claimCheckin(this.idUser, activeWallet?.address as string);
                     console.log("claimCheckin", claimCheckin);
+                    await this.getInfoUser();
                     if (claimCheckin.error) {
                         alert(claimCheckin?.error?.message)
                     }

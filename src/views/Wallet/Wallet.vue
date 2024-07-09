@@ -97,17 +97,17 @@
                                         }}</span>
                                     <a href="#" @click="getLinkTx($event, transaction.hash)">({{
                                         formatAddress(transaction.hash)
-                                        }})</a>
+                                    }})</a>
                                     <div v-bind:class="transaction.status">{{ transaction.status.toUpperCase() }}</div>
                                 </div>
                                 <div class="item-address">
                                     <div>
                                         <a v-if="transaction.type === 'receive'" class="address">From: {{
                                             formatAddress(transaction?.from)
-                                            }}</a>
+                                        }}</a>
                                         <a v-if="transaction.type === 'send'" class="address">To: {{
                                             formatAddress(transaction?.to)
-                                            }}</a>
+                                        }}</a>
                                     </div>
                                 </div>
                                 <div class="item-value">
@@ -311,7 +311,7 @@ export default defineComponent({
             }
 
             console.log("execute send", this.sendValue);
-            
+
 
             try {
                 this.executing = true;
@@ -355,8 +355,9 @@ export default defineComponent({
             //round 2 digits
             this.balance = parseFloat(this.balance).toFixed(2);
         },
-        async refreshWallet($event: Event) {
-            $event.preventDefault();
+        async refreshWallet($event?: Event) {
+            if ($event)
+                $event.preventDefault();
             await this.getBalance();
             await this.fetchActivity();
         },
@@ -378,9 +379,9 @@ export default defineComponent({
             const password = secureStorage.getPassword() as string;
             const isUnlock = await keyringService.unlock(password, false);
             console.log("isUnlock", isUnlock);
-
             if (isUnlock) {
                 this.activeWallet = keyringService.getPrivateKeys()?.at(0) as Wallet;
+                await this.refreshWallet();
                 setInterval(async () => {
                     await this.getBalance();
                 }, 5000);

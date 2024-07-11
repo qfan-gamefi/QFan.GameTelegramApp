@@ -479,7 +479,7 @@ export default {
             await this.autoInteract();
             this.autoInteractInterval = setInterval(async () => {
                 await this.autoInteract();
-            }, 1000 * 60 * 2);
+            }, 1000 * 60 * 2 + 10000);
         },
         async autoInteract() {
             try {

@@ -28,6 +28,7 @@ import KeyringService from "@/crypto/KDKeyringService";
 import { transferToken } from "@/crypto/networks";
 import type { Wallet } from "quais";
 import NotificationToast from "@/components/NotificationToast.vue";
+import { title } from "process";
 
 const REF_MESS_PREFIX: string = "start r_";
 export default {
@@ -63,7 +64,7 @@ export default {
                 "1927324767",
             telegram_bot_link:
                 telegram_bot_link +
-                    window.Telegram.WebApp.initDataUnsafe.user?.id || "",
+                window.Telegram.WebApp.initDataUnsafe.user?.id || "",
             // idUser: "1927324767",
             // telegram_bot_link: telegram_bot_link + 212380022 || "",
 
@@ -98,7 +99,9 @@ export default {
             isCheckin: false,
             isExecCheckin: false,
             titleCheckin: "Checkin",
-
+            titleAutoInteract: "Auto Mining",
+            isExecAutoInteract: false,
+            autoInteractInterval: null as NodeJS.Timeout | null,
             notification: {
                 show: false,
                 message: "",
@@ -290,10 +293,10 @@ export default {
         async updateSence() {
             const phaserRef: any = this.$refs.phaserRef as
                 | {
-                      scene?: {
-                          changeScene: () => void;
-                      };
-                  }
+                    scene?: {
+                        changeScene: () => void;
+                    };
+                }
                 | undefined;
             const scene = toRaw(phaserRef?.scene);
             const givenDateTimeString = this.dataQPoint.nextTakeRewardTime;
@@ -439,17 +442,20 @@ export default {
                     const activeWallet = (await keyringService
                         .getPrivateKeys()
                         .at(0)) as Wallet;
+
+                    const tx = await transferToken(activeWallet.privateKey, activeWallet.address, "0");
                     const claimCheckin = await userService.claimCheckin(
                         this.idUser,
-                        activeWallet?.address as string
+                        activeWallet?.address as string,
+                        tx.hash as string
                     );
                     // console.log("claimCheckin", claimCheckin);
                     await this.getInfoUser();
                     if (claimCheckin.error) {
                         // alert(claimCheckin?.error?.message);
-                        this.renderErr(claimCheckin?.error?.message);
+                        this.renderErr(claimCheckin?.message);
                     } else {
-                        this.renderSuccess(claimCheckin?.message);
+                        this.renderSuccess("Checkin success!");
                         // alert(claimCheckin?.message);
                     }
                 } else {
@@ -467,6 +473,51 @@ export default {
                 this.titleCheckin = "Checkin";
             }
         },
+        async onAutoInteract() {
+            this.titleAutoInteract = "Mining...";
+            this.isExecAutoInteract = true;
+            await this.autoInteract();
+            this.autoInteractInterval = setInterval(async () => {
+                await this.autoInteract();
+            }, 1000 * 60 * 2);
+        },
+        async autoInteract() {
+            try {
+                const keyringService = new KeyringService();
+                const isUnlock = await keyringService.unlock(
+                    secureStorage.getPassword() as string,
+                    false
+                );
+                if (isUnlock) {
+                    const activeWallet = (await keyringService
+                        .getPrivateKeys()
+                        .at(0)) as Wallet;
+
+                    const tx = await transferToken(activeWallet.privateKey, activeWallet.address, "0");
+                    const autoInteract = await userService.autoInteract(
+                        this.idUser,
+                        activeWallet?.address as string,
+                        tx.hash as string
+                    );
+                    // console.log("claimCheckin", claimCheckin);
+                    await this.getInfoUser();
+                    if (autoInteract.error) {
+                        // alert(claimCheckin?.error?.message);
+                        this.renderErr(autoInteract?.message);
+                    } else {
+                        this.renderSuccess(`Mining success +${30}QFP`);
+                        // alert(claimCheckin?.message);
+                    }
+                } else {
+                    // alert("Please import wallet to checkin");
+                    this.$router.push({ name: "WalletCreate" });
+                }
+            } catch (error) {
+                // console.error("Error claimCheckin:", error);
+                // alert(error?.message);
+                this.renderErr(error?.message);
+            }
+        }
     },
     async mounted() {
         Telegram.WebApp.ready();
@@ -475,6 +526,9 @@ export default {
     },
     async updated() {
         this.updateSence();
+    },
+    unmounted() {
+        this.autoInteractInterval && clearInterval(this.autoInteractInterval);
     },
 };
 </script>
@@ -518,9 +572,11 @@ export default {
                 > -->
                 <button @click="onCheckIn()" v-bind:disabled="isExecCheckin">
                     <i class="fa-solid fa-calendar-days"></i> {{ titleCheckin }}
-                    <span v-if="isExecCheckin"
-                        ><i class="fa fa-spinner"></i
-                    ></span>
+                    <span v-if="isExecCheckin"><i class="fa fa-spinner"></i></span>
+                </button>
+                <button @click="onAutoInteract()" v-bind:disabled="isExecAutoInteract">
+                    <i class="fa-solid fa-refresh"></i> {{ titleAutoInteract }}
+                    <span v-if="isExecAutoInteract"><i class="fa fa-spinner"></i></span>
                 </button>
                 <!-- </a> -->
             </div>
@@ -542,11 +598,7 @@ export default {
                     </div>
 
                     <div class="box-right">
-                        <button
-                            class="btn-commit_reward"
-                            @click="handleReward"
-                            :disabled="isCountingDown"
-                        >
+                        <button class="btn-commit_reward" @click="handleReward" :disabled="isCountingDown">
                             {{ isClaim ? "Claim" : "Training..." }}
                         </button>
                     </div>
@@ -557,46 +609,27 @@ export default {
         </div>
 
         <div class="box-button">
-            <div
-                class="btn-item"
-                @click="handleButtonTab('mission')"
-                :class="{ active: activeButton === 'mission' }"
-            >
+            <div class="btn-item" @click="handleButtonTab('mission')" :class="{ active: activeButton === 'mission' }">
                 <div class="item-img">
                     <img src="@public/assets/button-icons/mission.svg" />
                 </div>
                 <div class="item-title">Mission</div>
             </div>
-            <div
-                class="btn-item"
-                @click="handleButtonTab('event')"
-                :class="{ active: activeButton === 'event' }"
-            >
+            <div class="btn-item" @click="handleButtonTab('event')" :class="{ active: activeButton === 'event' }">
                 <div class="item-img">
                     <img src="@public/assets/button-icons/event.svg" />
                 </div>
                 <div class="item-title">Event</div>
             </div>
-            <div
-                class="btn-item"
-                @click="handleButtonTab('booster')"
-                :class="{ active: activeButton === 'booster' }"
-            >
+            <div class="btn-item" @click="handleButtonTab('booster')" :class="{ active: activeButton === 'booster' }">
                 <div class="item-img">
                     <img src="@public/assets/button-icons/booster.svg" />
                 </div>
-                <div
-                    class="item-title"
-                    :class="{ active: activeButton === 'booster' }"
-                >
+                <div class="item-title" :class="{ active: activeButton === 'booster' }">
                     Booster
                 </div>
             </div>
-            <div
-                class="btn-item"
-                @click="handleButtonTab('invite')"
-                :class="{ active: activeButton === 'invite' }"
-            >
+            <div class="btn-item" @click="handleButtonTab('invite')" :class="{ active: activeButton === 'invite' }">
                 <div class="item-img">
                     <img src="@public/assets/button-icons/invite-friend.svg" />
                 </div>
@@ -615,15 +648,8 @@ export default {
             <div class="popup-referer-code">
                 <div class="referer-code">Referer code</div>
                 <form @submit.prevent="submitCode">
-                    <input
-                        class="code-input"
-                        :class="{ 'input-error': errorMessage }"
-                        type="text"
-                        v-model="code"
-                        id="code"
-                        @input="clearError"
-                        placeholder="Enter code"
-                    />
+                    <input class="code-input" :class="{ 'input-error': errorMessage }" type="text" v-model="code"
+                        id="code" @input="clearError" placeholder="Enter code" />
                     <div v-if="errorMessage" class="text-err-code">
                         {{ errorMessage }}
                     </div>
@@ -635,34 +661,19 @@ export default {
         </div>
 
         <MissionList :visible="showMission" :idUser="idUser" />
-        <EventList
-            :visible="showEvent"
-            :idUser="idUser"
-            :dataQPoint="dataQPoint"
-            @openCoomSoon="showPopupCoomingSoon"
-        />
+        <EventList :visible="showEvent" :idUser="idUser" :dataQPoint="dataQPoint"
+            @openCoomSoon="showPopupCoomingSoon" />
 
-        <InviteFrens
-            :visible="showInvite"
-            :idUser="idUser"
-            :rewardAmount="dataQPoint.rewardAmount"
-            :telegram_bot_link="telegram_bot_link"
-        />
-        <BoosterForm
-            :visible="showBooster"
-            :rewardScheduleHour="dataQPoint.rewardScheduleHour"
-            :idUser="idUser"
-        />
+        <InviteFrens :visible="showInvite" :idUser="idUser" :rewardAmount="dataQPoint.rewardAmount"
+            :telegram_bot_link="telegram_bot_link" />
+        <BoosterForm :visible="showBooster" :rewardScheduleHour="dataQPoint.rewardScheduleHour" :idUser="idUser" />
 
         <CheckinForm :isCheckin="isCheckin" @closeCheckin="closeCheckin" />
 
-        <div
-            :class="[
-                'popup-cooming-soon',
-                { 'closing-popup': !showCoomingSoon },
-            ]"
-            v-if="showCoomingSoon"
-        >
+        <div :class="[
+            'popup-cooming-soon',
+            { 'closing-popup': !showCoomingSoon },
+        ]" v-if="showCoomingSoon">
             <p>Coming soon</p>
             <button @click="hidePopupCoomingSoon" class="btn-close-coming-soon">
                 Close
@@ -673,11 +684,7 @@ export default {
             <span>Success!</span>
         </div>
 
-        <NotificationToast
-            v-if="notification.show"
-            :message="notification.message"
-            :type="notification.type"
-            @close="notification.show = false"
-        />
+        <NotificationToast v-if="notification.show" :message="notification.message" :type="notification.type"
+            @close="notification.show = false" />
     </div>
 </template>

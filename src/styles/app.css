@@ -486,3 +486,7 @@
     z-index: 1000;
     border-radius: 8px;
 }
+
+.fa-spinner {
+    animation: fa-spin 2s infinite linear;
+}

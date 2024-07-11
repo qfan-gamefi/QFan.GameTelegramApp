@@ -516,6 +516,7 @@ export default {
                 // console.error("Error claimCheckin:", error);
                 // alert(error?.message);
                 this.renderErr(error?.message);
+                await this.getInfoUser();
             }
         }
     },

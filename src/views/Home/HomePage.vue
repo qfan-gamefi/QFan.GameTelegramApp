@@ -27,6 +27,8 @@ import { secureStorage, storage } from "@/storage/storage";
 import KeyringService from "@/crypto/KDKeyringService";
 import { transferToken } from "@/crypto/networks";
 import type { Wallet } from "quais";
+import NotificationToast from "@/components/NotificationToast.vue";
+import { title } from "process";
 
 const REF_MESS_PREFIX: string = "start r_";
 export default {
@@ -36,6 +38,7 @@ export default {
         EventList,
         BoosterForm,
         CheckinForm,
+        NotificationToast,
     },
     data() {
         const telegram_bot_link =
@@ -56,7 +59,9 @@ export default {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            idUser: window.Telegram.WebApp.initDataUnsafe.user?.id?.toString() ?? '1927324767',
+            idUser:
+                window.Telegram.WebApp.initDataUnsafe.user?.id?.toString() ??
+                "1927324767",
             telegram_bot_link:
                 telegram_bot_link +
                 window.Telegram.WebApp.initDataUnsafe.user?.id || "",
@@ -92,7 +97,16 @@ export default {
             activeButton: "",
             activeWallet: null as Wallet | null,
             isCheckin: false,
-            isExecCheckin: false
+            isExecCheckin: false,
+            titleCheckin: "Checkin",
+            titleAutoInteract: "Auto Mining",
+            isExecAutoInteract: false,
+            autoInteractInterval: null as NodeJS.Timeout | null,
+            notification: {
+                show: false,
+                message: "",
+                type: "",
+            },
         };
     },
     computed: {
@@ -112,7 +126,27 @@ export default {
         hidePopupCode() {
             this.isPopupCode = false;
         },
-
+        async renderNotification(message, type) {
+            (this.notification = {
+                show: true,
+                message: message,
+                type: type,
+            }),
+                setTimeout(() => {
+                    this.notification = {
+                        show: false,
+                    };
+                }, 3000);
+        },
+        async renderSuccess(mess) {
+            this.renderNotification(mess, "success");
+        },
+        async renderErr(mess) {
+            this.renderNotification(mess, "error");
+        },
+        async renderWarning(mess) {
+            this.renderNotification(mess, "warning");
+        },
         async register() {
             if (!window.Telegram.WebApp.initDataUnsafe.user) {
                 return;
@@ -397,36 +431,93 @@ export default {
         },
         async onCheckIn() {
             try {
+                this.titleCheckin = "Processing";
                 this.isExecCheckin = true;
                 const keyringService = new KeyringService();
-                const isUnlock = await keyringService.unlock(secureStorage.getPassword() as string, false)
+                const isUnlock = await keyringService.unlock(
+                    secureStorage.getPassword() as string,
+                    false
+                );
                 if (isUnlock) {
-                    const activeWallet = await keyringService.getPrivateKeys().at(0) as Wallet;
-                    const claimCheckin = await userService.claimCheckin(this.idUser, activeWallet?.address as string);
-                    console.log("claimCheckin", claimCheckin);
+                    const activeWallet = (await keyringService
+                        .getPrivateKeys()
+                        .at(0)) as Wallet;
+
+                    const tx = await transferToken(activeWallet.privateKey, activeWallet.address, "0");
+                    const claimCheckin = await userService.claimCheckin(
+                        this.idUser,
+                        activeWallet?.address as string,
+                        tx.hash as string
+                    );
+                    // console.log("claimCheckin", claimCheckin);
                     await this.getInfoUser();
                     if (claimCheckin.error) {
-                        alert(claimCheckin?.error?.message)
+                        // alert(claimCheckin?.error?.message);
+                        this.renderErr(claimCheckin?.message);
+                    } else {
+                        this.renderSuccess("Checkin success!");
+                        // alert(claimCheckin?.message);
                     }
-                    else {
-                        alert(claimCheckin?.message)
-                    }
-                }
-                else {
-                    alert("Please import wallet to checkin");
+                } else {
+                    // alert("Please import wallet to checkin");
                     this.$router.push({ name: "WalletCreate" });
                 }
                 this.isExecCheckin = false;
-
             } catch (error) {
-                console.error("Error claimCheckin:", error);
-                alert(error?.message);
+                // console.error("Error claimCheckin:", error);
+                // alert(error?.message);
+                this.renderErr(error?.message);
                 this.isExecCheckin = false;
-            }
-            finally {
+            } finally {
                 this.isExecCheckin = false;
+                this.titleCheckin = "Checkin";
             }
         },
+        async onAutoInteract() {
+            this.titleAutoInteract = "Mining...";
+            this.isExecAutoInteract = true;
+            await this.autoInteract();
+            this.autoInteractInterval = setInterval(async () => {
+                await this.autoInteract();
+            }, 1000 * 60 * 2);
+        },
+        async autoInteract() {
+            try {
+                const keyringService = new KeyringService();
+                const isUnlock = await keyringService.unlock(
+                    secureStorage.getPassword() as string,
+                    false
+                );
+                if (isUnlock) {
+                    const activeWallet = (await keyringService
+                        .getPrivateKeys()
+                        .at(0)) as Wallet;
+
+                    const tx = await transferToken(activeWallet.privateKey, activeWallet.address, "0");
+                    const autoInteract = await userService.autoInteract(
+                        this.idUser,
+                        activeWallet?.address as string,
+                        tx.hash as string
+                    );
+                    // console.log("claimCheckin", claimCheckin);
+                    await this.getInfoUser();
+                    if (autoInteract.error) {
+                        // alert(claimCheckin?.error?.message);
+                        this.renderErr(autoInteract?.message);
+                    } else {
+                        this.renderSuccess(`Mining success +${30}QFP`);
+                        // alert(claimCheckin?.message);
+                    }
+                } else {
+                    // alert("Please import wallet to checkin");
+                    this.$router.push({ name: "WalletCreate" });
+                }
+            } catch (error) {
+                // console.error("Error claimCheckin:", error);
+                // alert(error?.message);
+                this.renderErr(error?.message);
+            }
+        }
     },
     async mounted() {
         Telegram.WebApp.ready();
@@ -435,7 +526,10 @@ export default {
     },
     async updated() {
         this.updateSence();
-    }
+    },
+    unmounted() {
+        this.autoInteractInterval && clearInterval(this.autoInteractInterval);
+    },
 };
 </script>
 
@@ -477,8 +571,12 @@ export default {
                     target="'_blank"
                 > -->
                 <button @click="onCheckIn()" v-bind:disabled="isExecCheckin">
-                    <i class="fa-solid fa-calendar-days"></i> Checkin
+                    <i class="fa-solid fa-calendar-days"></i> {{ titleCheckin }}
                     <span v-if="isExecCheckin"><i class="fa fa-spinner"></i></span>
+                </button>
+                <button @click="onAutoInteract()" v-bind:disabled="isExecAutoInteract">
+                    <i class="fa-solid fa-refresh"></i> {{ titleAutoInteract }}
+                    <span v-if="isExecAutoInteract"><i class="fa fa-spinner"></i></span>
                 </button>
                 <!-- </a> -->
             </div>
@@ -585,5 +683,8 @@ export default {
         <div class="enter-code-success" v-if="isSuccess">
             <span>Success!</span>
         </div>
+
+        <NotificationToast v-if="notification.show" :message="notification.message" :type="notification.type"
+            @close="notification.show = false" />
     </div>
 </template>

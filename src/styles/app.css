@@ -502,10 +502,10 @@
     /* animation: gradientShift 4s ease-in-out infinite; */
 }
 
-
-/* .btn-mining.active {
-    animation: gradientShift 4s ease-in-out infinite;
-} */
+.btn-mining.active {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 
 .rotateMining {
     animation: rotateMining 2s linear infinite;

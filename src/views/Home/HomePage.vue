@@ -485,10 +485,13 @@ export default {
         },
         async onAutoInteract() {
             // this.titleAutoInteract = "Mining...";
-            // this.isExecAutoInteract = true;
+            // this.calcWidthMining();
+            this.isExecAutoInteract = true;
             await this.autoInteract();
+
             this.autoInteractInterval = setInterval(async () => {
                 await this.autoInteract();
+                await this.calcWidthMining();
             }, 1000 * 60 * 2 + 10000);
         },
         async autoInteract() {
@@ -499,8 +502,6 @@ export default {
                     false
                 );
                 if (isUnlock) {
-                    this.calcWidthMining();
-                    this.isExecAutoInteract = true;
                     const activeWallet = (await keyringService
                         .getPrivateKeys()
                         .at(0)) as Wallet;
@@ -515,22 +516,19 @@ export default {
                         activeWallet?.address as string,
                         tx.hash as string
                     );
-                    // console.log("claimCheckin", claimCheckin);
                     await this.getInfoUser();
                     if (autoInteract.error) {
-                        // alert(claimCheckin?.error?.message);
                         this.renderErr(autoInteract?.message);
+                        this.widthWining = 0;
                     } else {
+                        this.widthWining = 0;
                         this.renderSuccess(`Mining success +${30}QFP`);
-                        // alert(claimCheckin?.message);
+                        this.calcWidthMining();
                     }
                 } else {
-                    // alert("Please import wallet to checkin");
                     this.$router.push({ name: "WalletCreate" });
                 }
             } catch (error) {
-                // console.error("Error claimCheckin:", error);
-                // alert(error?.message);
                 this.renderErr(error?.message);
                 await this.getInfoUser();
             }

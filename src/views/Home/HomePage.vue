@@ -502,6 +502,8 @@ export default {
                     false
                 );
                 if (isUnlock) {
+                    this.calcWidthMining();
+                    this.isExecAutoInteract = true;
                     const activeWallet = (await keyringService
                         .getPrivateKeys()
                         .at(0)) as Wallet;

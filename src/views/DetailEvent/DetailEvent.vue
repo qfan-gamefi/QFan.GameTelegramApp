@@ -102,7 +102,7 @@
                         </div>
 
                         <div
-                            class="box-btn-bet"
+                            class="box-btn-predict"
                             :class="{
                                 disable: !item?.CloseCountDown,
                             }"
@@ -113,7 +113,8 @@
                                 ) in item?.BidSideNames?.split(',')"
                                 :key="indexSide"
                                 :class="[
-                                    getDynamicClass(side),
+                                    // getDynamicClass(side),
+                                    'team',
                                     {
                                         selected:
                                             item?.selectedIndex === indexSide ||
@@ -132,17 +133,11 @@
                             </div>
                         </div>
 
-                        <!-- <div class="team-predict">Team Predict</div> -->
                         <div class="predict-point">
                             <div
                                 @click="handlePredict(item, index)"
                                 :class="[
                                     'predict-point-content',
-                                    // {
-                                    //     'predict-point-disabled':
-                                    //         typeof item?.selectedIndex !==
-                                    //         'number',
-                                    // },
                                     {
                                         'btn-predict-disable':
                                             item?.BidData ||
@@ -452,7 +447,7 @@ export default {
             return `border-${lowCase}`;
         },
         getDynamicClass(side) {
-            return `bet-${side?.toLowerCase()}`;
+            return `team-${side?.toLowerCase()}`;
         },
         updateCountdowns() {
             this.$forceUpdate();
@@ -822,19 +817,19 @@ export default {
     font-weight: bold;
 }
 
-.box-btn-bet {
+.box-btn-predict {
     display: flex;
     justify-content: center;
     gap: 10px;
 }
-.box-btn-bet.disable {
+.box-btn-predict.disable {
     pointer-events: none;
     opacity: 0.5;
 }
 
-.bet-win,
-.bet-draw,
-.bet-lose {
+.team-win,
+.team-draw,
+.team-lose {
     cursor: pointer;
     padding: 5px 15px;
     border-radius: 5px;
@@ -842,17 +837,29 @@ export default {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.bet-win.selected {
+.team-win.selected {
     background-color: #04cc00;
     transition: background-color 0.3s ease;
 }
-.bet-draw.selected {
+.team-draw.selected {
     background-color: #f3db00;
     color: #760000;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
-.bet-lose.selected {
+.team-lose.selected {
     background-color: #d40000;
+    transition: background-color 0.3s ease;
+}
+
+.team {
+    cursor: pointer;
+    padding: 5px 15px;
+    border-radius: 5px;
+    background-color: rgb(80 80 80);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+.team.selected {
+    background-color: #04cc00;
     transition: background-color 0.3s ease;
 }
 

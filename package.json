@@ -68,6 +68,6 @@
         "vue-tsc": "^1.8.27"
     },
     "browser": {
-        "crypto": false
+        "crypto": true
     }
 }

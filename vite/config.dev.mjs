@@ -41,7 +41,7 @@ export default defineConfig({
         port: 8080,
     },
     optimizeDeps: {
-        include: ["@quais/contracts"],
+        // include: ["@quais/contracts"],
         exclude: ["__vite-browser-external"],
     },
 });

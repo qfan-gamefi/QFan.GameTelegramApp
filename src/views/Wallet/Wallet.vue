@@ -188,9 +188,9 @@ import userService from "@/services/userService";
 import { providers, quais, utils, Wallet } from "quais";
 import NotificationToast from "@/components/NotificationToast.vue";
 import LoadingForm from "@/components/LoadingForm.vue";
-import KeyringService from "@/crypto/KDKeyringService";
-import { VAULT_KEY } from "@/crypto/storage";
-import { activeProvider, fetchActivity, getAddressLinkToExplorer, getTxLinkToExplorer, signAndSendTransaction } from "@/crypto/networks";
+import KeyringService from "@/crypto_utils/KDKeyringService";
+import { VAULT_KEY } from "@/crypto_utils/storage";
+import { activeProvider, fetchActivity, getAddressLinkToExplorer, getTxLinkToExplorer, signAndSendTransaction } from "@/crypto_utils/networks";
 
 export default defineComponent({
     name: "WalletDetail",

@@ -485,13 +485,13 @@ export default {
         },
         async onAutoInteract() {
             // this.titleAutoInteract = "Mining...";
-            // this.calcWidthMining();
+            this.calcWidthMining();
             this.isExecAutoInteract = true;
             await this.autoInteract();
 
             this.autoInteractInterval = setInterval(async () => {
-                await this.autoInteract();
                 await this.calcWidthMining();
+                await this.autoInteract();
             }, 1000 * 60 * 2 + 10000);
         },
         async autoInteract() {
@@ -502,7 +502,6 @@ export default {
                     false
                 );
                 if (isUnlock) {
-                    this.calcWidthMining();
                     this.isExecAutoInteract = true;
                     const activeWallet = (await keyringService
                         .getPrivateKeys()
@@ -536,7 +535,7 @@ export default {
             }
         },
         calcWidthMining() {
-            const totalTime = 120000;
+            const totalTime = 130000;
             const updateInterval = 1000;
             const increment = (100 / totalTime) * updateInterval;
 
@@ -563,6 +562,7 @@ export default {
     },
     unmounted() {
         this.autoInteractInterval && clearInterval(this.autoInteractInterval);
+        this.intervalId && clearInterval(this.intervalId);
     },
 };
 </script>

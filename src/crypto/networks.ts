@@ -1,41 +1,41 @@
 /* eslint-disable prefer-const */
-import type { TransactionRequest as EthersTransactionRequest } from "@quais/abstract-provider"
-import type { Transaction } from "@quais/transactions"
-import { ChainData, QUAI_CONTEXTS, QUAI_NETWORK } from "./constants/networks"
-import type { Slip44CoinType } from "./constants"
-import type { HexString, UNIXTime } from "@/storage/types"
-import { providers, quais, utils, Wallet } from "quais"
-import { QFPTokenABI } from "./constants/QFPToken"
+import type { TransactionRequest as EthersTransactionRequest } from "@quais/abstract-provider";
+import type { Transaction } from "@quais/transactions";
+import { ChainData, QUAI_CONTEXTS, QUAI_NETWORK } from "./constants/networks";
+import type { Slip44CoinType } from "./constants";
+import type { HexString, UNIXTime } from "@/storage/types";
+import { providers, quais, utils, Wallet } from "quais";
+import { QFPTokenABI } from "./constants/QFPToken";
 
 /**
  * Each supported network family is generally incompatible with others from a
  * transaction, consensus, and/or wire format perspective.
  */
-export type NetworkFamily = "EVM"
+export type NetworkFamily = "EVM";
 
 // Should be structurally compatible with FungibleAsset or much code will
 // likely explode.
 export type NetworkBaseAsset = {
-  name: string,
-  symbol: string,
-  decimals: number,
-  contractAddress?: string
-  coinType?: Slip44CoinType
-  chainID: string,
-  metadata: any
-}
+    name: string;
+    symbol: string;
+    decimals: number;
+    contractAddress?: string;
+    coinType?: Slip44CoinType;
+    chainID: string;
+    metadata: any;
+};
 
 /**
  * Represents a cryptocurrency network; these can potentially be L1 or L2.
  */
 export type Network = {
-  // Considered a primary key; two Networks should never share a name.
-  name: string
-  baseAsset: NetworkBaseAsset
-  family: NetworkFamily
-  chainID?: string
-  derivationPath?: string
-}
+    // Considered a primary key; two Networks should never share a name.
+    name: string;
+    baseAsset: NetworkBaseAsset;
+    family: NetworkFamily;
+    chainID?: string;
+    derivationPath?: string;
+};
 
 /**
  * Mixed in to any other type, gives it the property of belonging to a
@@ -44,90 +44,90 @@ export type Network = {
  * networks.
  */
 export type NetworkSpecific = {
-  homeNetwork: AnyNetwork
-}
+    homeNetwork: AnyNetwork;
+};
 
 /**
  * A smart contract on any network that tracks smart contracts via a hex
  * contract address.
  */
 export type SmartContract = NetworkSpecific & {
-  contractAddress: HexString
-}
+    contractAddress: HexString;
+};
 
 /**
  * An EVM-style network which *must* include a chainID.
  */
 export type EVMNetwork = Network & {
-  chainID: string
-  family: "EVM"
-  /**
-   * Provided for custom networks
-   */
-  blockExplorerURL?: string
-  chains?: ChainData[]
-  isQuai?: boolean
-}
+    chainID: string;
+    family: "EVM";
+    /**
+     * Provided for custom networks
+     */
+    blockExplorerURL?: string;
+    chains?: ChainData[];
+    isQuai?: boolean;
+};
 
 export type ChainIdWithError = {
-  chainId: string
-  error: boolean
-}
+    chainId: string;
+    error: boolean;
+};
 
 /**
  * Union type that allows narrowing to particular network subtypes.
  */
-export type AnyNetwork = EVMNetwork
+export type AnyNetwork = EVMNetwork;
 
 /**
  * An EVM-style block identifier, including difficulty, block height, and
  * self/parent hash data.
  */
 export type EVMBlock = {
-  hash: string
-  parentHash: string
-  difficulty: bigint
-  blockHeight: number
-  timestamp: UNIXTime
-  network: EVMNetwork
-}
+    hash: string;
+    parentHash: string;
+    difficulty: bigint;
+    blockHeight: number;
+    timestamp: UNIXTime;
+    network: EVMNetwork;
+};
 
 /**
  * An EVM-style block identifier that includes the base fee, as per EIP-1559.
  */
 export type EIP1559Block = EVMBlock & {
-  baseFeePerGas: bigint
-}
+    baseFeePerGas: bigint;
+};
 
 /**
  * A pre- or post-EIP1559 EVM-style block.
  */
-export type AnyEVMBlock = EVMBlock | EIP1559Block
+export type AnyEVMBlock = EVMBlock | EIP1559Block;
 
 /**
  * Base EVM transaction fields; these are further specialized by particular
  * subtypes.
  */
 export type EVMTransaction = {
-  hash: string
-  from: HexString
-  to?: HexString
-  gasLimit: bigint
-  gasPrice: bigint | null
-  maxFeePerGas: bigint | null
-  maxPriorityFeePerGas: bigint | null
-  input: string | null
-  nonce: number
-  value: bigint
-  blockHash: string | null
-  blockHeight: number | null
-  asset: NetworkBaseAsset
-  network: EVMNetwork
-  type: KnownTxTypes | null
-  externalGasLimit?: bigint
-  externalGasPrice?: bigint
-  externalGasTip?: bigint
-}
+    hash: string;
+    from: HexString;
+    to?: HexString;
+    gasLimit: bigint;
+    gasPrice: bigint | null;
+    maxFeePerGas: bigint | null;
+    maxPriorityFeePerGas: bigint | null;
+    input: string | null;
+    nonce: number;
+    value: bigint;
+    blockHash: string | null;
+    blockHeight: number | null;
+    asset: NetworkBaseAsset;
+    network: EVMNetwork;
+    type: KnownTxTypes | null;
+    externalGasLimit?: bigint;
+    externalGasPrice?: bigint;
+    externalGasTip?: bigint;
+};
 
 /**
  * A legacy (pre-EIP1559) EVM transaction, whose type is fixed to `0` and whose
@@ -135,11 +135,11 @@ export type EVMTransaction = {
  * set.
  */
 export type LegacyEVMTransaction = EVMTransaction & {
-  gasPrice: bigint
-  type: 0 | null
-  maxFeePerGas: null
-  maxPriorityFeePerGas: null
-}
+    gasPrice: bigint;
+    type: 0 | null;
+    maxFeePerGas: null;
+    maxPriorityFeePerGas: null;
+};
 
 /**
  * A legacy (pre-EIP1559) EVM transaction _request_, meaning only fields that
@@ -163,15 +163,15 @@ export type LegacyEVMTransaction = EVMTransaction & {
  * LegacyEvmRollupTransactionRequest.
  */
 export type LegacyEVMTransactionRequest = Pick<
-  LegacyEVMTransaction,
-  "gasPrice" | "type" | "from" | "to" | "input" | "value" | "network"
+    LegacyEVMTransaction,
+    "gasPrice" | "type" | "from" | "to" | "input" | "value" | "network"
 > & {
-  chainID: LegacyEVMTransaction["network"]["chainID"]
-  gasLimit: bigint
-  estimatedRollupFee: bigint
-  estimatedRollupGwei: bigint
-  nonce?: number
-}
+    chainID: LegacyEVMTransaction["network"]["chainID"];
+    gasLimit: bigint;
+    estimatedRollupFee: bigint;
+    estimatedRollupGwei: bigint;
+    nonce?: number;
+};
 
 /**
  * Transaction types attributes are expanded in the https://eips.ethereum.org/EIPS/eip-2718 standard which
@@ -183,14 +183,14 @@ export type LegacyEVMTransactionRequest = Pick<
  * 2 - EIP-1559 transactions
  * 100 - EIP-2718 on Arbitrum
  */
-export const KNOWN_TX_TYPES = [0, 1, 2, 100] as const
-export type KnownTxTypes = typeof KNOWN_TX_TYPES[number]
+export const KNOWN_TX_TYPES = [0, 1, 2, 100] as const;
+export type KnownTxTypes = (typeof KNOWN_TX_TYPES)[number];
 export function isKnownTxType(arg: unknown): arg is KnownTxTypes {
-  return (
-    arg !== undefined &&
-    arg !== null &&
-    (KNOWN_TX_TYPES as unknown as number[]).includes(Number(arg))
-  )
+    return (
+        arg !== undefined &&
+        arg !== null &&
+        (KNOWN_TX_TYPES as unknown as number[]).includes(Number(arg))
+    );
 }
 
 /**
@@ -199,11 +199,11 @@ export function isKnownTxType(arg: unknown): arg is KnownTxTypes {
  * mandated to be `null`.
  */
 export type EIP1559Transaction = EVMTransaction & {
-  gasPrice: null
-  type: KnownTxTypes
-  maxFeePerGas: bigint
-  maxPriorityFeePerGas: bigint
-}
+    gasPrice: null;
+    type: KnownTxTypes;
+    maxFeePerGas: bigint;
+    maxPriorityFeePerGas: bigint;
+};
 
 /**
  * An EIP1559 EVM transaction _request_, meaning only fields used to post a
@@ -215,39 +215,41 @@ export type EIP1559Transaction = EVMTransaction & {
  * populate the nonce immediately before a request is signed.
  */
 export type EIP1559TransactionRequest = Pick<
-  EIP1559Transaction,
-  | "from"
-  | "to"
-  | "type"
-  | "input"
-  | "value"
-  | "maxFeePerGas"
-  | "maxPriorityFeePerGas"
-  | "network"
+    EIP1559Transaction,
+    | "from"
+    | "to"
+    | "type"
+    | "input"
+    | "value"
+    | "maxFeePerGas"
+    | "maxPriorityFeePerGas"
+    | "network"
 > & {
-  externalGasLimit?: bigint
-  externalGasPrice?: bigint
-  externalGasTip?: bigint
-  gasLimit: bigint
-  chainID: EIP1559Transaction["network"]["chainID"]
-  nonce?: number
-}
+    externalGasLimit?: bigint;
+    externalGasPrice?: bigint;
+    externalGasTip?: bigint;
+    gasLimit: bigint;
+    chainID: EIP1559Transaction["network"]["chainID"];
+    nonce?: number;
+};
 
 export type TransactionRequest =
-  | EIP1559TransactionRequest
-  | LegacyEVMTransactionRequest
+    | EIP1559TransactionRequest
+    | LegacyEVMTransactionRequest;
 
-export type TransactionRequestWithNonce = TransactionRequest & { nonce: number }
+export type TransactionRequestWithNonce = TransactionRequest & {
+    nonce: number;
+};
 
 /**
  * EVM log metadata, including the contract address that generated the log, the
  * full log data, and the indexed log topics.
  */
 export type EVMLog = {
-  contractAddress: HexString
-  data: HexString
-  topics: HexString[]
-}
+    contractAddress: HexString;
+    data: HexString;
+    topics: HexString[];
+};
 
 /**
  * A confirmed EVM transaction that has been included in a block. Includes
@@ -255,75 +257,75 @@ export type EVMLog = {
  * as the block hash and block height at which the transaction was included.
  */
 export type ConfirmedEVMTransaction = EVMTransaction & {
-  gasUsed: bigint
-  status: number
-  blockHash: string
-  blockHeight: number
-  etxs: Transaction[]
-  logs: EVMLog[] | undefined
-}
+    gasUsed: bigint;
+    status: number;
+    blockHash: string;
+    blockHeight: number;
+    etxs: Transaction[];
+    logs: EVMLog[] | undefined;
+};
 
 /**
  * An EVM transaction that failed to be confirmed. Includes information about
  * the error if available.
  */
 export type FailedConfirmationEVMTransaction = EVMTransaction & {
-  status: 0
-  error?: string
-  blockHash: null
-  blockHeight: null
-}
+    status: 0;
+    error?: string;
+    blockHash: null;
+    blockHeight: null;
+};
 
 /**
  * An almost-signed EVM transaction, meaning a transaction that knows about the
  * signature fields but may not have them all populated yet.
  */
 export type AlmostSignedEVMTransaction = EVMTransaction & {
-  r?: string
-  s?: string
-  v?: number
-}
+    r?: string;
+    s?: string;
+    v?: number;
+};
 
 /**
  * An EVM transaction with signature fields filled in and ready for broadcast
  * to the network.
  */
 type SignedEIP1559Transaction = EVMTransaction & {
-  r: string
-  s: string
-  v: number
-}
+    r: string;
+    s: string;
+    v: number;
+};
 
 /**
  * A Legacy EVM transaction with signature fields filled in and ready for broadcast
  * to the network.
  */
 export type SignedLegacyEVMTransaction = LegacyEVMTransaction & {
-  r: string
-  s: string
-  v: number
-}
+    r: string;
+    s: string;
+    v: number;
+};
 
 export type SignedTransaction =
-  | SignedEIP1559Transaction
-  | SignedLegacyEVMTransaction
+    | SignedEIP1559Transaction
+    | SignedLegacyEVMTransaction;
 
 /**
  * An EVM transaction that has all signature fields and has been included in a
  * block.
  */
 export type SignedConfirmedEVMTransaction = SignedEIP1559Transaction &
-  ConfirmedEVMTransaction
+    ConfirmedEVMTransaction;
 
 /**
  * Any EVM transaction, confirmed or unconfirmed and signed or unsigned.
  */
 export type AnyEVMTransaction =
-  | EVMTransaction
-  | ConfirmedEVMTransaction
-  | AlmostSignedEVMTransaction
-  | SignedTransaction
-  | FailedConfirmationEVMTransaction
+    | EVMTransaction
+    | ConfirmedEVMTransaction
+    | AlmostSignedEVMTransaction
+    | SignedTransaction
+    | FailedConfirmationEVMTransaction;
 
 /**
  * The estimated gas prices for including a transaction in the next block.
@@ -332,54 +334,55 @@ export type AnyEVMTransaction =
  * the given `baseFeePerGas` will be included in the next block.
  */
 export type BlockPrices = {
-  network: Network
-  blockNumber: number
-  baseFeePerGas: bigint
-  /**
-   * A choice of gas price parameters with associated confidence that a
-   * transaction using those parameters will be included in the next block.
-   */
-  estimatedPrices: BlockEstimate[]
-  /**
-   * Whether these prices were estimated locally or via a third party provider
-   */
-  dataSource: "local"
-}
+    network: Network;
+    blockNumber: number;
+    baseFeePerGas: bigint;
+    /**
+     * A choice of gas price parameters with associated confidence that a
+     * transaction using those parameters will be included in the next block.
+     */
+    estimatedPrices: BlockEstimate[];
+    /**
+     * Whether these prices were estimated locally or via a third party provider
+     */
+    dataSource: "local";
+};
 
 /**
  * An estimate of the confidence that a given set of gas price parameters
  * will result in the inclusion of a transaction in the next block.
  */
 export type BlockEstimate = {
-  confidence: number
-  /**
-   * For legacy (pre-EIP1559) transactions, the gas price that results in the
-   * above likelihood of inclusion.
-   */
-  price?: bigint
-  /**
-   * For EIP1559 transactions, the max priority fee per gas that results in the
-   * above likelihood of inclusion.
-   */
-  maxPriorityFeePerGas: bigint
-  /**
-   * For EIP1559 transactions, the max fee per gas that results in the above
-   * likelihood of inclusion.
-   */
-  maxFeePerGas: bigint
-}
+    confidence: number;
+    /**
+     * For legacy (pre-EIP1559) transactions, the gas price that results in the
+     * above likelihood of inclusion.
+     */
+    price?: bigint;
+    /**
+     * For EIP1559 transactions, the max priority fee per gas that results in the
+     * above likelihood of inclusion.
+     */
+    maxPriorityFeePerGas: bigint;
+    /**
+     * For EIP1559 transactions, the max fee per gas that results in the above
+     * likelihood of inclusion.
+     */
+    maxFeePerGas: bigint;
+};
 
 /**
  * Tests whether two networks should be considered the same. Verifies family,
  * chainID, and name.
  */
 export function sameNetwork(
-  network1: AnyNetwork,
-  network2: AnyNetwork
+    network1: AnyNetwork,
+    network2: AnyNetwork
 ): boolean {
-  return (
-    network1.family === network2.family && network1.chainID === network2.chainID
-  )
+    return (
+        network1.family === network2.family &&
+        network1.chainID === network2.chainID
+    );
 }
 
 /**
@@ -387,261 +390,292 @@ export function sameNetwork(
  * while also handling cases where an already hexlified chainID is passed in.
  */
 export function toHexChainID(chainID: string | number): string {
-  if (typeof chainID === "string" && chainID.startsWith("0x"))
-    return chainID.toLowerCase()
+    if (typeof chainID === "string" && chainID.startsWith("0x"))
+        return chainID.toLowerCase();
 
-  return `0x${BigInt(chainID).toString(16)}`
+    return `0x${BigInt(chainID).toString(16)}`;
 }
 
 export const sameChainID = (chainID: string, other: string): boolean => {
-  return toHexChainID(chainID) === toHexChainID(other)
-}
+    return toHexChainID(chainID) === toHexChainID(other);
+};
 
 export const activeProvider = () => {
-  const fromChain = QUAI_NETWORK.chains?.find(x => x.shard === 'cyprus-1') as ChainData;
-  const provider = new providers.JsonRpcProvider(fromChain.rpc);
-  return provider;
-}
+    const fromChain = QUAI_NETWORK.chains?.find(
+        (x) => x.shard === "cyprus-1"
+    ) as ChainData;
+    const provider = new providers.JsonRpcProvider(fromChain.rpc);
+    return provider;
+};
 
 export async function fetchActivity(address: string) {
-  const chainData = QUAI_NETWORK.chains?.find(x => x.shard === 'cyprus-1') as ChainData;
+    const chainData = QUAI_NETWORK.chains?.find(
+        (x) => x.shard === "cyprus-1"
+    ) as ChainData;
 
-  let explorerEndpoint = chainData?.blockExplorerUrl;
-  let accountActivity: any[] = []
-  if (explorerEndpoint) {
-    try {
-      let pendingData = await fetch(
-        `${explorerEndpoint}/api?module=account&action=pendingtxlist&address=${address}`
-      )
+    let explorerEndpoint = chainData?.blockExplorerUrl;
+    let accountActivity: any[] = [];
+    if (explorerEndpoint) {
+        try {
+            let pendingData = await fetch(
+                `${explorerEndpoint}/api?module=account&action=pendingtxlist&address=${address}`
+            );
 
-      let pendingDataJSON = await pendingData.json()
-      // Return if the request was successful
-      if (pendingDataJSON.status === "1") {
-        // add shard and address to each result
-        pendingDataJSON.result.forEach((item: any) => {
-          item.shard = chainData.shard
-          item.lookupAddress = address
-          item.status = "pending"
-        })
+            let pendingDataJSON = await pendingData.json();
+            // Return if the request was successful
+            if (pendingDataJSON.status === "1") {
+                // add shard and address to each result
+                pendingDataJSON.result.forEach((item: any) => {
+                    item.shard = chainData.shard;
+                    item.lookupAddress = address;
+                    item.status = "pending";
+                });
 
-        accountActivity = accountActivity.concat(pendingDataJSON.result)
-      }
-    } catch (e) {
-      console.log(e)
-    }
-
-    try {
-      let tokenTxData = await fetch(
-        `${explorerEndpoint}/api?module=account&action=tokentx&address=${address}`
-      )
-      if (tokenTxData.ok) {
-        let tokenTxDataJSON = await tokenTxData.json()
-        // Return if the request was successful
-        if (tokenTxDataJSON.status === "1") {
-          // add shard and address to each result
-          tokenTxDataJSON.result.forEach((item: any) => {
-            item.shard = chainData.shard
-            item.lookupAddress = address
-            item.status = "confirmed"
-          })
-
-          accountActivity = accountActivity.concat(tokenTxDataJSON.result)
+                accountActivity = accountActivity.concat(
+                    pendingDataJSON.result
+                );
+            }
+        } catch (e) {
+            console.log(e);
         }
-      }
-    } catch (e) {
-      console.log(e)
+
+        try {
+            let tokenTxData = await fetch(
+                `${explorerEndpoint}/api?module=account&action=tokentx&address=${address}`
+            );
+            if (tokenTxData.ok) {
+                let tokenTxDataJSON = await tokenTxData.json();
+                // Return if the request was successful
+                if (tokenTxDataJSON.status === "1") {
+                    // add shard and address to each result
+                    tokenTxDataJSON.result.forEach((item: any) => {
+                        item.shard = chainData.shard;
+                        item.lookupAddress = address;
+                        item.status = "confirmed";
+                    });
+
+                    accountActivity = accountActivity.concat(
+                        tokenTxDataJSON.result
+                    );
+                }
+            }
+        } catch (e) {
+            console.log(e);
+        }
+
+        try {
+            let confirmedData = await fetch(
+                `${explorerEndpoint}/api?module=account&action=txlist&address=${address}`
+            );
+
+            let confirmedDataJSON = await confirmedData.json();
+            // Return if the request was successful
+            if (confirmedDataJSON.status === "1") {
+                // add shard and address to each result
+                confirmedDataJSON.result.forEach((item: any) => {
+                    item.shard = chainData.shard;
+                    item.lookupAddress = address;
+                    item.status = "confirmed";
+                });
+
+                accountActivity = accountActivity.concat(
+                    confirmedDataJSON.result
+                );
+            }
+        } catch (e) {
+            console.log(e);
+        }
     }
 
-    try {
-      let confirmedData = await fetch(
-        `${explorerEndpoint}/api?module=account&action=txlist&address=${address}`
-      )
+    const activityData = accountActivity;
+    // Remove undefined values
+    let filteredActivityData = activityData.filter(
+        (item) => item !== undefined
+    );
 
-      let confirmedDataJSON = await confirmedData.json()
-      // Return if the request was successful
-      if (confirmedDataJSON.status === "1") {
-        // add shard and address to each result
-        confirmedDataJSON.result.forEach((item: any) => {
-          item.shard = chainData.shard
-          item.lookupAddress = address
-          item.status = "confirmed"
-        })
+    let activity: any[] = [];
+    filteredActivityData.forEach((item) => {
+        activity = activity.concat(item);
+    });
 
-        accountActivity = accountActivity.concat(confirmedDataJSON.result)
-      }
-    } catch (e) {
-      console.log(e)
-    }
-  }
+    // sort pending first and by timestamp second
+    activity.sort((a, b) => {
+        if (a.status === "pending" && b.status === "confirmed") {
+            return -1;
+        } else if (a.status === "confirmed" && b.status === "pending") {
+            return 1;
+        } else {
+            return Number(b.timeStamp) - Number(a.timeStamp);
+        }
+    });
 
-  const activityData = accountActivity;
-  // Remove undefined values
-  let filteredActivityData = activityData.filter((item) => item !== undefined)
+    // set the type of each activity item
+    // remove duplicate hashes and set the duplicates to transfer
+    let uniqueActivity: any[] = [];
+    let hashes: any[] = [];
+    activity.forEach((item) => {
+        if (!hashes.includes(item.hash)) {
+            uniqueActivity.push(item);
+            hashes.push(item.hash);
+            let send =
+                item.lookupAddress.trim().toLowerCase() ===
+                item.from.trim().toLowerCase();
+            if (send) {
+                item.type = "send";
+            } else {
+                item.type = "receive";
+            }
+        } else {
+            let index = uniqueActivity.findIndex((i) => i.hash === item.hash);
+            if (
+                index !== -1 &&
+                uniqueActivity[index].tokenSymbol === undefined
+            ) {
+                uniqueActivity[index].type = "transfer";
+            }
+        }
+    });
 
-  let activity: any[] = []
-  filteredActivityData.forEach((item) => {
-    activity = activity.concat(item)
-  })
-
-  // sort pending first and by timestamp second
-  activity.sort((a, b) => {
-    if (a.status === "pending" && b.status === "confirmed") {
-      return -1
-    } else if (a.status === "confirmed" && b.status === "pending") {
-      return 1
-    } else {
-      return Number(b.timeStamp) - Number(a.timeStamp)
-    }
-  })
-
-  // set the type of each activity item
-  // remove duplicate hashes and set the duplicates to transfer
-  let uniqueActivity: any[] = []
-  let hashes: any[] = []
-  activity.forEach((item) => {
-    if (!hashes.includes(item.hash)) {
-      uniqueActivity.push(item)
-      hashes.push(item.hash)
-      let send =
-        item.lookupAddress.trim().toLowerCase() ===
-        item.from.trim().toLowerCase()
-      if (send) {
-        item.type = "send"
-      } else {
-        item.type = "receive"
-      }
-    } else {
-      let index = uniqueActivity.findIndex((i) => i.hash === item.hash)
-      if (index !== -1 && uniqueActivity[index].tokenSymbol === undefined) {
-        uniqueActivity[index].type = "transfer"
-      }
-    }
-  })
-
-  return uniqueActivity
+    return uniqueActivity;
 }
 
 export function getAddressLinkToExplorer(address: string) {
-  return `${QUAI_NETWORK.chains?.find(x => x.shard === 'cyprus-1')?.blockExplorerUrl}/address/${address}`
+    return `${
+        QUAI_NETWORK.chains?.find((x) => x.shard === "cyprus-1")
+            ?.blockExplorerUrl
+    }/address/${address}`;
 }
 
 export function getTxLinkToExplorer(txHash: string) {
-  return `${QUAI_NETWORK.chains?.find(x => x.shard === 'cyprus-1')?.blockExplorerUrl}/tx/${txHash}`
+    return `${
+        QUAI_NETWORK.chains?.find((x) => x.shard === "cyprus-1")
+            ?.blockExplorerUrl
+    }/tx/${txHash}`;
 }
 
 export const parseAndValidateSignedTransaction = (
-  tx: any,
-  network: any
+    tx: any,
+    network: any
 ): SignedTransaction => {
-  if (!tx.hash || !tx.from || !tx.r || !tx.s || typeof tx.v === "undefined") {
-    throw new Error("Transaction doesn't appear to have been signed.")
-  }
+    if (!tx.hash || !tx.from || !tx.r || !tx.s || typeof tx.v === "undefined") {
+        throw new Error("Transaction doesn't appear to have been signed.");
+    }
 
-  const {
-    to,
-    gasPrice,
-    gasLimit,
-    maxFeePerGas,
-    maxPriorityFeePerGas,
-    externalGasLimit,
-    externalGasPrice,
-    externalGasTip,
-    hash,
-    from,
-    nonce,
-    data,
-    value,
-    type,
-    r,
-    s,
-    v,
-  } = tx
+    const {
+        to,
+        gasPrice,
+        gasLimit,
+        maxFeePerGas,
+        maxPriorityFeePerGas,
+        externalGasLimit,
+        externalGasPrice,
+        externalGasTip,
+        hash,
+        from,
+        nonce,
+        data,
+        value,
+        type,
+        r,
+        s,
+        v,
+    } = tx;
 
-  const baseSignedTx = {
-    hash,
-    from,
-    to,
-    nonce,
-    input: data,
-    value: value.toBigInt(),
-    type: type as 0,
-    gasLimit: gasLimit.toBigInt(),
-    r,
-    s,
-    v,
-    blockHash: null,
-    blockHeight: null,
-    asset: network.baseAsset,
-    network: network,
-  }
+    const baseSignedTx = {
+        hash,
+        from,
+        to,
+        nonce,
+        input: data,
+        value: value.toBigInt(),
+        type: type as 0,
+        gasLimit: gasLimit.toBigInt(),
+        r,
+        s,
+        v,
+        blockHash: null,
+        blockHeight: null,
+        asset: network.baseAsset,
+        network: network,
+    };
 
-  const signedTx: SignedTransaction =
-    typeof maxPriorityFeePerGas === "undefined" ||
-      typeof maxFeePerGas === "undefined"
-      ? {
-        ...baseSignedTx,
-        gasPrice: gasPrice?.toBigInt() ?? null,
-        maxFeePerGas: null,
-        maxPriorityFeePerGas: null,
-      }
-      : {
-        ...baseSignedTx,
-        gasPrice: null,
-        maxFeePerGas: maxFeePerGas.toBigInt(),
-        maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
-        externalGasLimit: externalGasLimit?.toBigInt(),
-        externalGasPrice: externalGasPrice?.toBigInt(),
-        externalGasTip: externalGasTip?.toBigInt(),
-        type: type as 0 | 2 | 1 | 100 | null,
-      }
+    const signedTx: SignedTransaction =
+        typeof maxPriorityFeePerGas === "undefined" ||
+        typeof maxFeePerGas === "undefined"
+            ? {
+                  ...baseSignedTx,
+                  gasPrice: gasPrice?.toBigInt() ?? null,
+                  maxFeePerGas: null,
+                  maxPriorityFeePerGas: null,
+              }
+            : {
+                  ...baseSignedTx,
+                  gasPrice: null,
+                  maxFeePerGas: maxFeePerGas.toBigInt(),
+                  maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
+                  externalGasLimit: externalGasLimit?.toBigInt(),
+                  externalGasPrice: externalGasPrice?.toBigInt(),
+                  externalGasTip: externalGasTip?.toBigInt(),
+                  type: type as 0 | 2 | 1 | 100 | null,
+              };
 
-  return signedTx
-}
+    return signedTx;
+};
 
 /**
  * Signed and send a transaction
  * @param transaction
  * @returns
  */
-export async function signAndSendTransaction(privateKey: string, transaction: providers.TransactionRequest) {
-  const provider = activeProvider();
-  const signingWallet = new Wallet(privateKey, provider)
-  const feeData = await provider.getFeeData()
+export async function signAndSendTransaction(
+    privateKey: string,
+    transaction: providers.TransactionRequest
+) {
+    const provider = activeProvider();
+    const signingWallet = new Wallet(privateKey, provider);
+    const feeData = await provider.getFeeData();
 
-  if (transaction.maxFeePerGas == undefined) {
-    transaction.maxFeePerGas = 1
-  }
-  if (transaction.maxPriorityFeePerGas == undefined) {
-    transaction.maxPriorityFeePerGas = 1
-  }
+    if (transaction.maxFeePerGas == undefined) {
+        transaction.maxFeePerGas = 1;
+    }
+    if (transaction.maxPriorityFeePerGas == undefined) {
+        transaction.maxPriorityFeePerGas = 1;
+    }
 
-  if (transaction.gasLimit === undefined) {
-    transaction.gasLimit = 21000
-  }
+    if (transaction.gasLimit === undefined) {
+        transaction.gasLimit = 21000;
+    }
 
-  const rawTransaction = {
-    to: transaction.to,
-    value: utils.parseEther(transaction.value as string),
-    nonce: transaction.nonce,
-    maxFeePerGas: feeData.maxFeePerGas,
-    maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
-    gasLimit: transaction.gasLimit,
-    type: 0,
-    externalGasLimit: null,
-    externalGasPrice: null,
-    externalGasTip: null
-  }
+    const rawTransaction = {
+        to: transaction.to,
+        value: utils.parseEther(transaction.value as string),
+        nonce: transaction.nonce,
+        maxFeePerGas: feeData.maxFeePerGas,
+        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
+        gasLimit: transaction.gasLimit,
+        type: 0,
+        externalGasLimit: null,
+        externalGasPrice: null,
+        externalGasTip: null,
+    };
 
-  const tx = await signingWallet.sendTransaction(rawTransaction)
-  return tx
+    const tx = await signingWallet.sendTransaction(rawTransaction);
+    return tx;
 }
 
-export const transferToken = async (privateKey: string, toAddress: string, amount: string) => {
-  // define provider, wallet, and contract
-  const provider = activeProvider();
-  const wallet = new Wallet(privateKey, provider)
-  const erc20 = new quais.Contract("0x0BE8BD7911111C3BF55488Ad7b11bC98a755a3C3", QFPTokenABI, wallet) // deployed contract instance
-  const tx = await erc20.transfer(toAddress, quais.utils.parseEther(amount))
-  console.log('Transaction hash: ' + tx.hash);
-  return tx;
-}
+export const transferToken = async (
+    privateKey: string,
+    toAddress: string,
+    amount: string
+) => {
+    // define provider, wallet, and contract
+    const provider = activeProvider();
+    const wallet = new Wallet(privateKey, provider);
+    const erc20 = new quais.Contract(
+        "0x0BE8BD7911111C3BF55488Ad7b11bC98a755a3C3",
+        QFPTokenABI,
+        wallet
+    ); // deployed contract instance
+    const tx = await erc20.transfer(toAddress, quais.utils.parseEther(amount));
+    return tx;
+};

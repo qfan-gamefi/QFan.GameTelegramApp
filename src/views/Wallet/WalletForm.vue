@@ -34,7 +34,7 @@
 </template>
 
 <script lang="ts">
-import { VAULT_KEY } from "@/crypto/storage";
+import { VAULT_KEY } from "@/crypto_utils/storage";
 import { storage } from "@/storage/storage";
 import { defineComponent } from "vue";
 

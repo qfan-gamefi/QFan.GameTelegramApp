@@ -42,8 +42,8 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import KeyringService from "@/crypto/KDKeyringService";
-import { SignerSourceTypes } from "@/crypto/type";
+import KeyringService from "@/crypto_utils/KDKeyringService";
+import { SignerSourceTypes } from "@/crypto_utils/type";
 import { secureStorage, storage } from "@/storage/storage";
 
 export default defineComponent({

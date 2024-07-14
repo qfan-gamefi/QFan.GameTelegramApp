@@ -46,7 +46,7 @@ export default defineConfig({
                     phaser: ["phaser"],
                 },
             },
-            external: ["crypto"],
+            // external: ["crypto-js"],
         },
         minify: "terser",
         terserOptions: {
@@ -60,7 +60,7 @@ export default defineConfig({
         },
     },
     optimizeDeps: {
-        include: ["@quais/contracts"],
+        // include: ["@quais/contracts"],
         exclude: ["__vite-browser-external"],
     },
 });

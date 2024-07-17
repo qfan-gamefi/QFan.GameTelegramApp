@@ -10,7 +10,7 @@
                             <img src="@public/assets/logo.svg" />
                         </div>
                         <div class="name-rate">
-                            <div>Name 1</div>
+                            <div>{{ fullName }}</div>
                             <div>Win rate: <span>50%</span></div>
                         </div>
                     </div>
@@ -119,15 +119,49 @@
             @close="showNotification = false"
         />
 
+        <div v-bind:class="{ 'overlay-popup': isPopup }"></div>
         <div :class="['popup', { 'closing-popup': !isPopup }]" v-if="isPopup">
             <div class="icon-win" v-if="status !== 'placed'">
-                <i class="fa-solid fa-crown"></i>
+                <!-- <i class="fa-solid fa-crown"></i> -->
+                <div class="">Winner</div>
             </div>
+            <div class="box-img">
+                <div
+                    class="img"
+                    :style="{
+                        backgroundImage: `url(${
+                            this.urlImg || './../../../public/assets/logo.jpg'
+                        })`,
+                    }"
+                />
+            </div>
+
             <!-- <div class="icon-lose" v-if="status == 'lose'">
                 <i class="fa-solid fa-flag"></i>
             </div> -->
             <p>{{ text }}</p>
             <button @click="hidePopup" class="btn-close">Close</button>
+        </div>
+
+        <div class="popup-pass" v-if="isPopupPass">
+            <div class="referer-code">Password</div>
+            <form @submit.prevent="submitPass">
+                <input
+                    class="pass-input"
+                    :class="{ 'input-error': errorMessagePass }"
+                    type="text"
+                    v-model="pass"
+                    id="pass"
+                    @input="clearError"
+                    placeholder="Enter password"
+                />
+                <div v-if="errorMessagePass" class="text-err">
+                    {{ errorMessagePass }}
+                </div>
+                <button class="btn-submit-pass" type="submit">
+                    <span>Submit</span>
+                </button>
+            </form>
         </div>
     </div>
 </template>
@@ -135,6 +169,8 @@
 <script lang="ts">
 import LoadingForm from "@/components/LoadingForm.vue";
 import NotificationToast from "@/components/NotificationToast.vue";
+import betService from "@/services/betService";
+import { storage } from "@/storage/storage";
 import { formatDateTimeUS } from "@/utils";
 import { defineComponent } from "vue";
 // import { mapState } from "vuex";
@@ -169,6 +205,10 @@ export default defineComponent({
             dataHistory: null,
             status: "",
             loadingSubmit: false,
+
+            isPopupPass: false,
+            errorMessagePass: "",
+            pass: null,
 
             showNotification: false,
             notificationMessage: "",
@@ -227,6 +267,12 @@ export default defineComponent({
         },
 
         async flipCoin() {
+            //check show popup pass
+            // if(){
+            //     this.isPopupPass = true;
+            // }
+
+            // this.showPopup();
             this.flipClass = "";
             this.loadingSubmit = true;
 
@@ -244,25 +290,44 @@ export default defineComponent({
 
         async getAvt() {
             try {
-                const response = await fetch(
-                    `https://322f-171-224-181-129.ngrok-free.app/api/v1/flip/getPlayerFlipInfo?userId=${this.userId}&domainCode=FLIP_COIN&userName=${this.fullName}`,
-                    {
-                        headers: {
-                            "Content-Type": "application/json",
-                            "ngrok-skip-browser-warning": "1",
-                        },
-                    }
+                // const response = await fetch(
+                //     `https://4987-171-224-181-129.ngrok-free.app/api/v1/flip/getPlayerFlipInfo?userId=${this.userId}&domainCode=FLIP_COIN&userName=${this.fullName}`,
+                //     {
+                //         headers: {
+                //             "Content-Type": "application/json",
+                //             "ngrok-skip-browser-warning": "1",
+                //         },
+                //     }
+                // );
+                const code = {
+                    attributes: {
+                        domainCode: "FLIP_COIN",
+                    },
+                };
+
+                const dataAvt = await betService.getYourRank(
+                    this.userId,
+                    code,
+                    this.fullName
                 );
+                console.log(dataAvt);
+
+                // if (dataAvt?.length > 0) {
+                //     this.dataRankCurrent = dataAvt?.[0];
+                // } else {
+                //     this.dataAvt = {
+                //         Balance: 0,
+                //         UserId: this.idUser,
+                //         rank: "?",
+                //     };
+                // }
 
                 const data = await response.json();
                 const parseData = JSON.parse(data?.message);
 
                 this.urlImg = parseData?.UserPhotoUrl;
             } catch (error) {
-                console.error(
-                    "There has been a problem with your fetch operation:",
-                    error
-                );
+                console.error(error);
             }
         },
 
@@ -347,6 +412,24 @@ export default defineComponent({
             } catch (error) {
                 this.loading = false;
             }
+        },
+
+        async submitPass() {
+            if (!this.pass) {
+                this.errorMessagePass = "Pass is required!";
+                return;
+            }
+            try {
+                // storage.set('passFlip', 'pass')
+                this.flipCoin();
+                this.errorMessagePass = null;
+                this.isPopupPass = false;
+            } catch (error) {
+                console.log(error);
+            }
+        },
+        clearError() {
+            this.errorMessagePass = "";
         },
     },
 });
@@ -549,7 +632,7 @@ export default defineComponent({
 .box-submit {
     margin: 20px;
     .btn-submit {
-        background-color: #3eff3a;
+        // background-color: #3eff3a;
         padding: 10px;
         border-radius: 5px;
         width: fit-content;
@@ -568,8 +651,6 @@ export default defineComponent({
     height: calc(100% - 406px);
     margin-top: 15px;
     border: 2px solid #d631ff;
-    // border-top-left-radius: 10px;
-    // border-top-right-radius: 10px;
     border-radius: 10px;
     .title {
         display: flex;
@@ -649,13 +730,26 @@ export default defineComponent({
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: white;
-    padding: 30px;
-    border: 1px solid #ccc;
+    background: #500d79;
+    padding: 30px 50px;
+    border: 1px solid #d631ff;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     animation: slideIn 0.5s forwards;
     border-radius: 10px;
     text-align: center;
+    .box-img {
+        display: flex;
+        justify-content: center;
+        padding: 10px;
+    }
+    .img {
+        width: 50px;
+        height: 50px;
+        background-position: center;
+        background-size: contain;
+        background-repeat: no-repeat;
+        border-radius: 8px;
+    }
     .icon-win {
         color: #ffe500;
         font-size: 22px;
@@ -676,5 +770,60 @@ export default defineComponent({
 }
 .btn-close {
     border-radius: 5px;
+}
+@keyframes slideIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.overlay-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
+.popup-pass {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    animation: slideIn 0.5s forwards;
+    border-radius: 10px;
+    color: black;
+}
+.pass-input {
+    margin-top: 10px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    transition: border-color 0.3s ease;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: #f0f0f0;
+    color: #333;
+    outline: none;
+}
+.text-err {
+    color: red;
+    font-size: 12px;
+}
+.input-error {
+    border-color: red;
+    animation: pulse 1s infinite;
+}
+.btn-submit-pass {
+    margin-top: 10px;
 }
 </style>

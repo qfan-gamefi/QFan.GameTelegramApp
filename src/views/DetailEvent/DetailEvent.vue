@@ -186,7 +186,8 @@
                                     {{ item?.UserName || item?.UserId }}
                                 </div>
                                 <div class="your-point">
-                                    Point: {{ item?.Balance }} QFP : {{ item?.QFP_VALUE }}
+                                    Point: {{ item?.Balance }} <br />
+                                    QFP: {{ item?.QFP_VALUE || 0 }}
                                 </div>
                             </div>
                         </div>
@@ -1050,6 +1051,7 @@ export default {
     border-radius: 3px;
     min-width: 90px;
     max-width: 90px;
+    font-size: 11px;
 }
 
 .list-history {

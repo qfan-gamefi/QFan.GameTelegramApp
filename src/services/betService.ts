@@ -5,6 +5,12 @@ const betService = {
         const res = await axiosBetInstance.post(table + `/filter`, queryObject);
         return res.status == 200 ? JSON.parse(res.data.message).data : {};
     },
+    async getLeaderBoard(domainCode: string) {
+        const res = await axiosBetInstance.get(
+            `leaderboard?domainCode=${domainCode}`
+        );
+        return res.status == 200 ? JSON.parse(res.data.message).data : {};
+    },
     async addBidding(data: object) {
         const res = await axiosBetInstance.post(`/bids`, data);
         console.log(res);
@@ -18,9 +24,9 @@ const betService = {
         return res.status == 200 ? JSON.parse(res.data.message).data : {};
     },
 
-    async getYourRank(idUser: string, detailEvent: any) {
+    async getYourRank(idUser: string, detailEvent: any, userName: string) {
         const res = await axiosBetInstance.get(
-            `point?userId=${idUser}&domainCode=${detailEvent?.attributes?.domainCode}`
+            `point?userId=${idUser}&domainCode=${detailEvent?.attributes?.domainCode}&userName=${userName}`
         );
         return res.status == 200 ? JSON.parse(res.data.message).data : {};
     },

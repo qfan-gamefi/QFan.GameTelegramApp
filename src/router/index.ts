@@ -4,6 +4,7 @@ import HomePage from "@/views/Home/HomePage.vue";
 import WalletCreate from "@/views/Wallet/WalletCreate.vue";
 import WalletForm from "@/views/Wallet/WalletForm.vue";
 import FlipPage from "@/views/Flip/FlipPage.vue";
+import Wallet from "@/views/Wallet/Wallet.vue";
 
 const routes = [
     {
@@ -25,6 +26,11 @@ const routes = [
         path: "/flip",
         name: "FlipPage",
         component: FlipPage,
+    },
+    {
+        path: "/wallet/detail",
+        name: "WalletDetail",
+        component: Wallet,
     },
 ];
 

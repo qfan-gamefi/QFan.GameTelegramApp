@@ -23,6 +23,12 @@ import userService from "@/services/userService";
 // import EventBus from "@/utils/eventBus";
 import EventList from "@/views/Event/EventList.vue";
 import CheckinForm from "@/views/Checkin/CheckinForm.vue";
+import { secureStorage, storage } from "@/storage/storage";
+import KeyringService from "@/crypto_utils/KDKeyringService";
+import { transferToken } from "@/crypto_utils/networks";
+import type { Wallet } from "quais";
+import NotificationToast from "@/components/NotificationToast.vue";
+import { title } from "process";
 
 const REF_MESS_PREFIX: string = "start r_";
 export default {
@@ -32,6 +38,7 @@ export default {
         EventList,
         BoosterForm,
         CheckinForm,
+        NotificationToast,
     },
     data() {
         const telegram_bot_link =
@@ -52,12 +59,14 @@ export default {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            // idUser: window.Telegram.WebApp.initDataUnsafe.user?.id.toString(),
-            // telegram_bot_link:
-            //     telegram_bot_link +
-            //         window.Telegram.WebApp.initDataUnsafe.user?.id || "",
-            idUser: "2123800227",
-            telegram_bot_link: telegram_bot_link + 2123800227 || "",
+            idUser:
+                window.Telegram.WebApp.initDataUnsafe.user?.id?.toString() ??
+                "1927324767",
+            telegram_bot_link:
+                telegram_bot_link +
+                    window.Telegram.WebApp.initDataUnsafe.user?.id || "",
+            // idUser: "1927324767",
+            // telegram_bot_link: telegram_bot_link + 212380022 || "",
 
             showCoomingSoon: false,
             isSuccess: false,
@@ -86,14 +95,30 @@ export default {
             showEvent: false,
             isClaim: false,
             activeButton: "",
-
+            activeWallet: null as Wallet | null,
             isCheckin: false,
+            isExecCheckin: false,
+            titleCheckin: "Checkin",
+            titleAutoInteract: "Auto Mining",
+            isExecAutoInteract: false,
+            autoInteractInterval: null as NodeJS.Timeout | null,
+            notification: {
+                show: false,
+                message: "",
+                type: "",
+            },
+            widthWining: 0,
         };
     },
     computed: {
         beforeStyle() {
             return {
                 "--pseudo-width": `${this.apiDataWidth}%`,
+            };
+        },
+        styleWining() {
+            return {
+                "--pseudo-width": `${this.widthWining}%`,
             };
         },
     },
@@ -107,7 +132,27 @@ export default {
         hidePopupCode() {
             this.isPopupCode = false;
         },
-
+        async renderNotification(message, type) {
+            (this.notification = {
+                show: true,
+                message: message,
+                type: type,
+            }),
+                setTimeout(() => {
+                    this.notification = {
+                        show: false,
+                    };
+                }, 3000);
+        },
+        async renderSuccess(mess) {
+            this.renderNotification(mess, "success");
+        },
+        async renderErr(mess) {
+            this.renderNotification(mess, "error");
+        },
+        async renderWarning(mess) {
+            this.renderNotification(mess, "warning");
+        },
         async register() {
             if (!window.Telegram.WebApp.initDataUnsafe.user) {
                 return;
@@ -386,6 +431,131 @@ export default {
 
             Object.assign(this, tabMappings[tab]);
         },
+        async handleWallet() {
+            this.handleBackButton();
+            const isSigned = (await storage.get<boolean>("signed_in")) || false;
+            if (isSigned) {
+                this.$router.push({ name: "WalletDetail" });
+            } else {
+                this.$router.push({ name: "WalletForm" });
+            }
+        },
+        async onCheckIn() {
+            try {
+                this.titleCheckin = "Processing";
+                this.isExecCheckin = true;
+                const keyringService = new KeyringService();
+                const isUnlock = await keyringService.unlock(
+                    secureStorage.getPassword() as string,
+                    false
+                );
+                if (isUnlock) {
+                    const activeWallet = (await keyringService
+                        .getPrivateKeys()
+                        .at(0)) as Wallet;
+
+                    const tx = await transferToken(
+                        activeWallet.privateKey,
+                        activeWallet.address,
+                        "0"
+                    );
+                    const claimCheckin = await userService.claimCheckin(
+                        this.idUser,
+                        activeWallet?.address as string,
+                        tx.hash as string
+                    );
+                    // console.log("claimCheckin", claimCheckin);
+                    await this.getInfoUser();
+                    if (claimCheckin.error) {
+                        // alert(claimCheckin?.error?.message);
+                        this.renderErr(claimCheckin?.message);
+                    } else {
+                        this.renderSuccess("Checkin success!");
+                        // alert(claimCheckin?.message);
+                    }
+                } else {
+                    // alert("Please import wallet to checkin");
+                    this.$router.push({ name: "WalletCreate" });
+                }
+                this.isExecCheckin = false;
+            } catch (error) {
+                // console.error("Error claimCheckin:", error);
+                // alert(error?.message);
+                this.renderErr(error?.message);
+                this.isExecCheckin = false;
+            } finally {
+                this.isExecCheckin = false;
+                this.titleCheckin = "Checkin";
+            }
+        },
+        async onAutoInteract() {
+            // this.titleAutoInteract = "Mining...";
+            this.calcWidthMining();
+            this.isExecAutoInteract = true;
+            await this.autoInteract();
+
+            this.autoInteractInterval = setInterval(async () => {
+                await this.calcWidthMining();
+                await this.autoInteract();
+            }, 1000 * 60 * 2 + 10000);
+        },
+        async autoInteract() {
+            try {
+                const keyringService = new KeyringService();
+                const isUnlock = await keyringService.unlock(
+                    secureStorage.getPassword() as string,
+                    false
+                );
+                if (isUnlock) {
+                    this.isExecAutoInteract = true;
+                    const activeWallet = (await keyringService
+                        .getPrivateKeys()
+                        .at(0)) as Wallet;
+
+                    const tx = await transferToken(
+                        activeWallet.privateKey,
+                        activeWallet.address,
+                        "0"
+                    );
+                    const autoInteract = await userService.autoInteract(
+                        this.idUser,
+                        activeWallet?.address as string,
+                        tx.hash as string
+                    );
+                    await this.getInfoUser();
+                    if (autoInteract.error) {
+                        this.renderErr(autoInteract?.message);
+                        this.widthWining = 0;
+                    } else {
+                        this.widthWining = 0;
+                        this.renderSuccess(`Mining success +${30}QFP`);
+                        this.calcWidthMining();
+                    }
+                } else {
+                    this.$router.push({ name: "WalletCreate" });
+                }
+            } catch (error) {
+                this.renderErr(error?.message);
+                await this.getInfoUser();
+            }
+        },
+        calcWidthMining() {
+            const totalTime = 130000;
+            const updateInterval = 1000;
+            const increment = (100 / totalTime) * updateInterval;
+
+            this.intervalId = setInterval(() => {
+                if (this.widthWining < 100) {
+                    this.widthWining += increment;
+                    if (this.widthWining >= 100) {
+                        this.widthWining = 100;
+                        clearInterval(this.intervalId);
+                    }
+                } else {
+                    clearInterval(this.intervalId);
+                }
+            }, updateInterval);
+        },
     },
     async mounted() {
         Telegram.WebApp.ready();
@@ -394,6 +564,10 @@ export default {
     },
     async updated() {
         this.updateSence();
+    },
+    unmounted() {
+        this.autoInteractInterval && clearInterval(this.autoInteractInterval);
+        this.intervalId && clearInterval(this.intervalId);
     },
 };
 </script>
@@ -426,21 +600,30 @@ export default {
 
             <div class="link-checkin">
                 <div>
-                    <router-link to="/wallet">
-                        <button @click="handleBackButton">
-                            <i class="fa-solid fa-wallet"></i>
-                            Wallet
-                        </button>
-                    </router-link>
+                    <button @click="handleWallet">
+                        <i class="fa-solid fa-wallet"></i>
+                        Wallet
+                    </button>
                 </div>
                 <!-- <a
                     v-bind:href="`https://qfan-dapp.qcloud.asia/?playerId=${idUser}`"
                     target="'_blank"
                 > -->
-                <button @click="isCheckin = true">
-                    <i class="fa-solid fa-calendar-days"></i> Checkin
+                <button @click="onCheckIn()" v-bind:disabled="isExecCheckin">
+                    <i class="fa-solid fa-calendar-days"></i> {{ titleCheckin }}
+                    <span v-if="isExecCheckin"
+                        ><i class="fa fa-spinner"></i
+                    ></span>
                 </button>
-                <!-- </a> -->
+                <!-- <button
+                    @click="onAutoInteract()"
+                    v-bind:disabled="isExecAutoInteract"
+                >
+                    <i class="fa-solid fa-refresh"></i> {{ titleAutoInteract }}
+                    <span v-if="isExecAutoInteract"
+                        ><i class="fa fa-spinner"></i
+                    ></span>
+                </button> -->
             </div>
 
             <div class="wr-flip">
@@ -462,9 +645,7 @@ export default {
                     </div>
 
                     <div v-else class="box-left">
-                        <div class="content">
-                            Remain {{ countdown }} to claim
-                        </div>
+                        <div class="content">Remain time: {{ countdown }}</div>
                     </div>
 
                     <div class="box-right">
@@ -475,6 +656,31 @@ export default {
                         >
                             {{ isClaim ? "Claim" : "Training..." }}
                         </button>
+                    </div>
+                </div>
+
+                <div class="box-info" :style="styleWining">
+                    <div class="auto-left">
+                        <div class="woodwork-loader">
+                            <div class="runner" :style="styleWining"></div>
+                        </div>
+
+                        <div class="box-woodwork">
+                            <img src="@public/assets/mining/woodwork.png" />
+                        </div>
+                    </div>
+                    <div class="box-right">
+                        <div
+                            class="btn-mining"
+                            @click="onAutoInteract()"
+                            :class="{ active: isExecAutoInteract }"
+                        >
+                            <img
+                                src="@public/assets/mining/icon-auto.png"
+                                :class="{ rotateMining: isExecAutoInteract }"
+                            />
+                            Mining
+                        </div>
                     </div>
                 </div>
             </div>
@@ -598,5 +804,12 @@ export default {
         <div class="enter-code-success" v-if="isSuccess">
             <span>Success!</span>
         </div>
+
+        <NotificationToast
+            v-if="notification.show"
+            :message="notification.message"
+            :type="notification.type"
+            @close="notification.show = false"
+        />
     </div>
 </template>

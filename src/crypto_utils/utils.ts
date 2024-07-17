@@ -1,0 +1,81 @@
+import { validateMnemonic } from "bip39"
+import { keccak256 } from "@ethersproject/keccak256"
+import type { NormalizedEVMAddress } from "@/storage/types"
+
+export function normalizeEVMAddress(
+  address: string | Buffer
+): NormalizedEVMAddress {
+  return normalizeHexAddress(address) as NormalizedEVMAddress
+}
+
+export function sameEVMAddress(
+  address1: string | Buffer | undefined | null,
+  address2: string | Buffer | undefined | null
+): boolean {
+  if (
+    typeof address1 === "undefined" ||
+    typeof address2 === "undefined" ||
+    address1 === null ||
+    address2 === null
+  )
+    return false
+
+  return normalizeHexAddress(address1) === normalizeHexAddress(address2)
+}
+
+
+export function normalizeMnemonic(mnemonic: string): string {
+  return mnemonic.trim().toLowerCase().replace(/\r/, " ").replace(/ +/, " ")
+}
+
+export function validateAndFormatMnemonic(
+  mnemonic: string,
+  wordlist?: string[]
+): string | null {
+  const normalized = normalizeMnemonic(mnemonic)
+
+  if (validateMnemonic(normalized, wordlist)) {
+    return normalized
+  }
+  return null
+}
+
+export function normalizeHexAddress(address: string | Buffer): string {
+  const addressString =
+    typeof address === "object" && !("toLowerCase" in address)
+      ? address.toString("hex")
+      : address
+  const noPrefix = (addressString as string).replace(/^0x/, "")
+  const even = noPrefix.length % 2 === 0 ? noPrefix : `0${noPrefix}`
+  return `0x${Buffer.from(even, "hex").toString("hex")}`
+}
+
+export function toChecksumAddress(address: string, chainId?: number): string {
+  const whitelistedChainIds = [30, 31]
+  const addressWithOutPrefix = normalizeHexAddress(address)
+    .replace("0x", "")
+    .toLowerCase()
+  const prefix =
+    chainId && whitelistedChainIds.includes(chainId) ? `${chainId}0x` : ""
+  const hash = keccak256(
+    Buffer.from(`${prefix}${addressWithOutPrefix}`, "ascii")
+  ).replace("0x", "")
+
+  const checkSum = Array.from(addressWithOutPrefix)
+    .map((_, index): string => {
+      if (parseInt(hash[index], 16) >= 8) {
+        return addressWithOutPrefix[index].toUpperCase()
+      }
+      return addressWithOutPrefix[index]
+    })
+    .join("")
+
+  return `0x${checkSum}`
+}
+
+export function isValidChecksumAddress(
+  address: string,
+  chainId?: number
+): boolean {
+  return toChecksumAddress(address, chainId) === address
+}

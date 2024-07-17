@@ -4,8 +4,30 @@
 
         <div class="box-detail-flip">
             <div class="wr-cooldown">
-                <div class="title">Cooldown</div>
-                <!-- <div class="time">0:59</div> -->
+                <div class="box-info">
+                    <div class="user">
+                        <div class="avt">
+                            <img src="@public/assets/logo.svg" />
+                        </div>
+                        <div class="name-rate">
+                            <div>Name 1</div>
+                            <div>Win rate: <span>50%</span></div>
+                        </div>
+                    </div>
+
+                    <div class="box-cd">
+                        <div class="title">Cooldown</div>
+                        <div class="time">0:59</div>
+                    </div>
+                </div>
+
+                <div class="win-lose">
+                    <div class="wl win"></div>
+                    <div class="wl lose"></div>
+                    <div class="wl win"></div>
+                    <div class="wl lose"></div>
+                    <div class="wl win"></div>
+                </div>
 
                 <div id="coin" :class="flipClass">
                     <div class="side-a"></div>
@@ -17,17 +39,13 @@
                     ></div>
                 </div>
 
-                <!-- <div class="box-value">
-                    <div class="value">500</div>
-                </div> -->
-
                 <div class="box-submit">
                     <button
                         class="btn-submit"
                         @click="flipCoin"
                         :disabled="loadingSubmit"
                     >
-                        Submit - 500
+                        Flip the coin - 500
                     </button>
                 </div>
 
@@ -380,17 +398,60 @@ export default defineComponent({
     border-radius: 10px;
     border: 2px solid #d631ff;
     position: relative;
-    .title {
-        text-align: center;
-        font-size: 20px;
+    .box-info {
+        display: flex;
+        justify-content: space-between;
         padding: 15px;
-        color: #e6b2ff;
+        .user {
+            display: flex;
+            gap: 10px;
+            .avt {
+                border: 2px solid #d83aff;
+                border-radius: 5px;
+                img {
+                    width: 40px;
+                    height: 40px;
+                    display: flex;
+                }
+            }
+            .name-rate {
+                font-size: 13px;
+                span {
+                    color: #ffcf56;
+                }
+            }
+        }
+        .title {
+            text-align: center;
+            font-size: 20px;
+            color: #e6b2ff;
+        }
+        .time {
+            font-size: 20px;
+            color: #ffcf56;
+            text-align: center;
+        }
     }
-    .time {
-        font-size: 20px;
-        color: #ffcf56;
-        text-align: center;
-        margin-bottom: 20px;
+
+    .win-lose {
+        display: flex;
+        gap: 5px;
+        background: #240039;
+        padding: 5px 10px;
+        margin: 0 20px 20px;
+        width: fit-content;
+        border-radius: 5px;
+        .wl {
+            width: 10px;
+            height: 10px;
+            border-radius: 10px;
+        }
+        .win {
+            background: #42ff00;
+        }
+        .lose {
+            background: #ff0000;
+        }
     }
 }
 
@@ -425,18 +486,11 @@ export default defineComponent({
     background-repeat: no-repeat;
     background-size: cover;
     background-image: url("./../../../public/assets/event/coin-img.png");
-    // width: 70px;
-    // height: 70px;
     z-index: 100;
-    // background-color: #bb0000;
-    // width: 70px;
-    // height: 70px;
     height: 100%;
     width: 100%;
 }
 .side-b {
-    // width: 70px;
-    // height: 70px;
     height: 100%;
     width: 100%;
     background-color: #3e3e3e;
@@ -492,17 +546,6 @@ export default defineComponent({
     height: 55px;
 }
 
-.box-value {
-    margin: 20px;
-    .value {
-        background-color: #ffa53a;
-        padding: 5px 10px;
-        border-radius: 5px;
-        width: fit-content;
-        margin: 0 auto;
-    }
-}
-
 .box-submit {
     margin: 20px;
     .btn-submit {
@@ -522,7 +565,7 @@ export default defineComponent({
 
 .wr-history {
     background-color: #500d79;
-    height: calc(100% - 341px);
+    height: calc(100% - 406px);
     margin-top: 15px;
     border: 2px solid #d631ff;
     // border-top-left-radius: 10px;

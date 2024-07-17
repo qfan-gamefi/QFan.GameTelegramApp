@@ -25,27 +25,28 @@ export default defineConfig({
     plugins: [vue(), phasermsg()],
     resolve: {
         alias: {
-            "@": fileURLToPath(new URL("./src", import.meta.url)),
+            "@": url("../src"),
             "@public": url("./../public"),
-            "@components": fileURLToPath(
-                new URL("./src/components", import.meta.url)
-            ),
-            "@views/*": ["src/views/*"],
-            "@router/*": ["src/router/*"],
-            "@utils/*": ["src/utils/*"],
-            "@services/*": ["src/services/*"],
-            "@styles/*": ["src/styles/*"],
-            "@interface/*": ["src/interface/*"],
+            "@components": url("./src/components"),
+            "@views": url("./src/views"),
+            "@router": url("./src/router"),
+            "@utils": url("./src/utils"),
+            "@services": url("./src/services"),
+            "@styles": url("./src/styles"),
+            "@interface": url("./src/interface"),
+            // "readable-stream": "vite-compatible-readable-stream",
         },
     },
     logLevel: "warning",
     build: {
+        target: "esnext",
         rollupOptions: {
             output: {
                 manualChunks: {
                     phaser: ["phaser"],
                 },
             },
+            // external: ["crypto-js"],
         },
         minify: "terser",
         terserOptions: {
@@ -58,4 +59,9 @@ export default defineConfig({
             },
         },
     },
+    optimizeDeps: {
+        // include: ["@quais/contracts"],
+        exclude: ["__vite-browser-external"],
+    },
 });
+

@@ -1,31 +1,180 @@
+<!-- eslint-disable vue/require-v-for-key -->
 <template>
     <router-view>
-        <div class="popup-wallet">
-            <div class="wraper-wallet">
-                <div class="logo-wallet">
-                    <img src="@public/assets/logo.svg" />
-                </div>
-                <div class="title-wallet text-outline-black">
-                    QFP Wallet, the first web wallet for Quai Network, is here.
+        <div class="wr-detail-wallet">
+            <div class="header-wl">
+                <div>
+                    <a @click="removeWallet()"><i class="fa fa-trash"></i></a>
                 </div>
 
-                <div class="box-btn">
-                    <button @click="navigateToCreateWallet">
-                        <div class="btn-img">
-                            <img src="@public/assets/logo.svg" />
-                            <div class="text-qfan">QFAN</div>
+                <div class="info">
+                    <div><img src="@public/assets/logo.svg" /></div>
+                    <div class="name">Address</div>
+                    <div class="add-wallet">(<a href="#" @click="linkToExplore($event)">{{
+                        activeWallet?.address.substring(0, 5) }}...</a>)</div>
+                    <div class="copy-wallet">
+                        <a href="#" @click="copyAddress($event)">
+                            <i class="fa-solid fa-copy"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="user-icon">
+                    <i class="fa-solid fa-user-plus"></i>
+                </div>
+            </div>
+
+            <div class="body-wl">
+                <div class="wr-balance">
+                    <div class="title">
+                        Total balance
+
+                        <div @click="toggleVisibility">
+                            <div v-if="!isVisible">
+                                <i class="fa-solid fa-eye"></i>
+                            </div>
+                            <div v-if="isVisible">
+                                <i class="fa-solid fa-eye-slash"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <a href="#" @click="refreshWallet($event)"><i class="fa-solid fa-refresh"></i></a>
+
+                        </div>
+                    </div>
+                    <div>
+                        <h1>{{ isVisible ? balance : "*********" }}</h1>
+                    </div>
+
+                    <div class="wr-btn">
+                        <button class="btn-item" @click="() => openReceive = true">
+                            <i class="fa-solid fa-copy"></i> Receive
+                        </button>
+                        <button @click="onSend()" class="btn-item">
+                            <i class="fa-solid fa-paper-plane"></i> Send
+                        </button>
+                        <button class="btn-item" @click="faucet()" v-bind:disabled="executing">
+                            <i class="fa-solid fa-faucet"></i> Faucet
+                        </button>
+                    </div>
+                    <span v-if="errorMessage" class="text-err-code">{{ errorMessage }}</span>
+                    <span class="faucet-success" v-if="transactionUrl">Faucet success. Click <a
+                            v-bind:href="transactionUrl" target="_blank">here</a> to view transaction on explorer</span>
+                </div>
+                <LoadingForm :loading="executing" />
+                <div class="wr-coin">
+                    <div class="title">
+                        <a href="#" @click="setActiveTab($event, 'token')"
+                            v-bind:class="activeTab === 'token' ? 'active' : ''">Token</a>
+                        <a href="#" @click="setActiveTab($event, 'activities')"
+                            v-bind:class="activeTab === 'activities' ? 'active' : ''">Activities</a>
+                    </div>
+                    <div class="box-content" v-if="activeTab === 'token'">
+                        <div class="item-list">
+                            <div class="box-item">
+                                <div class="item-title">
+                                    <img src="@public/assets/logo-quai.svg" />
+                                    <h2>{{ balance }} QUAI</h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-content" v-if="activeTab === 'activities'">
+                        <div class="filter">
+                            Status:
+                            <select v-model="filterStatus">
+                                <option value="">All</option>
+                                <option value="pending">Pending</option>
+                                <option value="confirmed">Confirmed</option>
+                            </select>
+                        </div>
+                        <div class="item-list">
+                            <div class="box-item"
+                                v-for="(transaction, index) in activities.filter(x => (!filterStatus || x.status === filterStatus))"
+                                key="{{ index }}">
+                                <div class="item-title">
+                                    <span><i class="fa-solid fa-exchange"></i>&nbsp;{{ transaction.type.toUpperCase()
+                                        }}</span>
+                                    <a href="#" @click="getLinkTx($event, transaction.hash)">({{
+                                        formatAddress(transaction.hash)
+                                    }})</a>
+                                    <div v-bind:class="transaction.status">{{ transaction.status.toUpperCase() }}</div>
+                                </div>
+                                <div class="item-address">
+                                    <div>
+                                        <a v-if="transaction.type === 'receive'" class="address">From: {{
+                                            formatAddress(transaction?.from)
+                                        }}</a>
+                                        <a v-if="transaction.type === 'send'" class="address">To: {{
+                                            formatAddress(transaction?.to)
+                                        }}</a>
+                                    </div>
+                                </div>
+                                <div class="item-value">
+                                    <span class="value">{{ formatValue(transaction?.value) }} {{
+                                        transaction?.tokenSymbol ??
+                                        'QUAI' }}</span>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="btn-title">Create Wallet</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <NotificationToast v-if="notification.visible" :message="notification.message" :type="notification.type" />
+        <div v-if="openSend">
+            <div class="popup-overlay"></div>
+            <div class="popup-referer-code">
+                <a href="#" @click="() => { openSend = false }" class="close"><i class="fa fa-close"></i></a>
+                <div class="popup-title">Input address and value to send</div>
+                <form @submit.prevent="onSend">
+                    <table>
+                        <tr class="form-group">
+                            <td><label class="label" for="address">Address</label></td>
+                            <td><input class="code-input" :class="{ 'input-error': errorMessage }" type="text"
+                                    v-model="toAddress" id="address" @input="clearError" placeholder="Enter address" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><label class="label" for="value">Value</label></td>
+                            <td><input class="code-input" :class="{ 'input-error': errorMessage }" type="number"
+                                    v-model="sendValue" id="value" @input="clearError"
+                                    placeholder="Enter value to send" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><label class="label" for="value">Password</label></td>
+                            <td><input class="code-input" :class="{ 'input-error': errorMessage }" type="password"
+                                    v-model="sendPassword" id="password" @input="clearError"
+                                    placeholder="Enter password" />
+                            </td>
+                        </tr>
+                    </table>
+                    <div v-if="errorMessage" class="text-err-code">
+                        {{ errorMessage }}
+                    </div>
+                    <button class="btn-submit-code" @click="executeSend()" v-bind:disabled="executing" type="submit">
+                        <span>Send <a v-if="executing"><i class="fa fa-spinner loading"></i></a></span>
                     </button>
-
-                    <button>
-                        <div class="btn-img">
-                            <img src="@public/assets/logo.svg" />
-                            <div class="text-qfan">QFAN</div>
-                        </div>
-                        <div class="btn-title">Import Wallet</div>
-                    </button>
+                </form>
+            </div>
+        </div>
+        <div v-if="openReceive">
+            <div class="popup-overlay"></div>
+            <div class="popup-referer-code">
+                <a href="#" @click="() => { openReceive = false }" class="close"><i class="fa fa-close"></i></a>
+                <div class="popup-title">Receive Address</div>
+                <div class="wl-addr">
+                    <div class="address-image">
+                        <img
+                            v-bind:src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${activeWallet?.address}`" />
+                    </div>
+                    <div class="address-action">
+                        <a href="#" @click="copyAddress($event)">
+                            <i class="fa-solid fa-copy"></i> Copy Address
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -34,15 +183,213 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import { secureStorage, storage } from "@/storage/storage";
+import userService from "@/services/userService";
+import { providers, quais, utils, Wallet } from "quais";
+import NotificationToast from "@/components/NotificationToast.vue";
+import LoadingForm from "@/components/LoadingForm.vue";
+import KeyringService from "@/crypto_utils/KDKeyringService";
+import { VAULT_KEY } from "@/crypto_utils/storage";
+import { activeProvider, fetchActivity, getAddressLinkToExplorer, getTxLinkToExplorer, signAndSendTransaction } from "@/crypto_utils/networks";
+
 export default defineComponent({
-    name: "WalletForm",
+    name: "WalletDetail",
+    components: {
+        NotificationToast,
+        LoadingForm
+    },
+    data() {
+        return {
+            keyringService: new KeyringService(), // KeyringService
+            isVisible: false,
+            totalBalance: "$10,000",
+            isSigned: false,
+            activeWallet: null as Wallet | null,
+            balance: "0",
+            exploreUrl: "",
+            checkinMessage: "",
+            playerId: window.Telegram.WebApp.initDataUnsafe.user?.id.toString() ?? '1927324767',
+            toAddress: "",
+            activeTab: "token",
+            activities: [],
+            notification: {
+                visible: false,
+                message: "",
+                type: "success",
+            },
+            executing: false,
+            openSend: false,
+            errorMessage: "",
+            sendValue: "",
+            sendPassword: "",
+            filterStatus: "",
+            transactionUrl: "",
+            openReceive: false,
+        };
+    },
     methods: {
-        navigateToCreateWallet() {
-            this.$router.push("/wallet/create");
+        navigateTo() {
+            this.$router.push("/");
+        },
+        toggleVisibility() {
+            this.isVisible = !this.isVisible;
+        },
+        async setActiveTab($event: Event, tab: string) {
+            $event.preventDefault();
+            this.activeTab = tab;
+            if (tab === "activities") {
+                await this.fetchActivity();
+            }
+        },
+        copyAddress(e: Event) {
+            e.preventDefault();
+            navigator.clipboard.writeText(this.activeWallet?.address ?? "");
+        },
+        async fetchActivity() {
+            this.executing = true;
+            this.activities = await fetchActivity(this.activeWallet?.address as string) as never[];
+            console.log("activites", this.activities);
+            this.executing = false;
+        },
+        async faucet() {
+            try {
+                this.executing = true;
+                this.errorMessage = "";
+                this.transactionUrl = "";
+                const faucetResult = await userService.faucet(this.playerId, this.activeWallet?.address as string);
+                console.log("faucetResult", faucetResult);
+                if (faucetResult.statusCode && faucetResult.statusCode !== 200) {
+                    this.errorMessage = "Faucet error: " + faucetResult.message;
+                    this.executing = false;
+                    return;
+                }
+                if (faucetResult?.hash) {
+                    this.transactionUrl = await getTxLinkToExplorer(faucetResult?.hash);
+                }
+                this.executing = false;
+            } catch (error) {
+                console.log("error", error);
+                this.errorMessage = "Faucet error: " + error?.message;
+                this.executing = false;
+            }
+        },
+        async linkToExplore(e: Event) {
+            console.log("Link to explore");
+            e.preventDefault();
+            const exploreUrl = await getAddressLinkToExplorer(this.activeWallet?.address as string);
+            if (exploreUrl) {
+                window.open(exploreUrl, "_blank");
+            }
+        },
+        async getLinkTx($event: Event, hash: string) {
+            $event.preventDefault();
+            const exploreUrl = await getTxLinkToExplorer(hash);
+            window.open(exploreUrl, "_blank");
+        },
+        onSend() {
+            this.errorMessage = "";
+            this.openSend = true;
+        },
+        async executeSend() {
+            if (this.toAddress === "" || this.sendValue === "") {
+                this.errorMessage = "Please input address and value";
+                return;
+            }
+
+            if (this.sendPassword === "") {
+                this.errorMessage = "Please input password";
+                return;
+            }
+
+            //check password
+            const password = secureStorage.getPassword() as string;
+            console.log("password", password, this.sendPassword);
+
+            if (password !== this.sendPassword) {
+                this.errorMessage = "Password is incorrect";
+                return;
+            }
+
+            console.log("execute send", this.sendValue);
+
+
+            try {
+                this.executing = true;
+                const transaction = {
+                    from: this.activeWallet?.address as string,
+                    to: this.toAddress,
+                    value: this.sendValue.toString(),
+                } as unknown as TransactionRequest;
+
+                // const signedData = await this.keyringService.signTransaction(this.toAddress, transaction);
+
+                const result = await signAndSendTransaction(this.activeWallet?.privateKey as string, transaction);
+
+                console.log("result", result);
+                this.openSend = false;
+                setTimeout(() => {
+                    this.setActiveTab("activities");
+                }, 2000);
+                this.executing = false;
+                this.openSend = false;
+            } catch (error) {
+                console.log("error", error);
+                this.errorMessage = error?.message;
+                this.executing = false;
+            }
+        },
+        formatValue(value: string) {
+            return quais.utils.formatEther(value);
+        },
+        formatAddress(address: string) {
+            const length = address.length;
+            return `${address.substring(0, 5)}...${address.substring(length - 6, length - 1)}`;
+        },
+        clearError() {
+            this.errorMessage = "";
+        },
+        async getBalance() {
+            const provider = activeProvider();
+            const balance = await provider.getBalance(this.activeWallet?.address as string);
+            this.balance = utils.formatEther(balance);
+            //round 2 digits
+            this.balance = parseFloat(this.balance).toFixed(2);
+        },
+        async refreshWallet($event?: Event) {
+            if ($event)
+                $event.preventDefault();
+            await this.getBalance();
+            await this.fetchActivity();
+        },
+        removeWallet() {
+            localStorage.clear();
+            this.$router.push({ name: "WalletCreate" });
         },
     },
-    mounted() {
+    computed: {
+        visibilityIcon() {
+            return this.isVisible ? "fa-solid fa-eye-slash" : "fa-solid fa-eye";
+        },
+    },
+    async mounted() {
         console.log("WalletForm component is mounted");
+        const keyringService = new KeyringService();
+        const vault = await storage.get(VAULT_KEY);
+        if (vault) {
+            const password = secureStorage.getPassword() as string;
+            const isUnlock = await keyringService.unlock(password, false);
+            console.log("isUnlock", isUnlock);
+            if (isUnlock) {
+                this.activeWallet = keyringService.getPrivateKeys()?.at(0) as Wallet;
+                await this.refreshWallet();
+                setInterval(async () => {
+                    await this.getBalance();
+                }, 5000);
+            }
+        }
+        else {
+            this.$router.push({ name: "WalletCreate" });
+        }
     },
 });
 </script>
@@ -52,19 +399,21 @@ button {
     padding: 25px 50px;
     -webkit-text-stroke: 1px #8c0000;
 }
-.popup-wallet {
+
+.wr-detail-wallet {
     height: 100%;
     position: absolute;
     width: 100%;
     top: 0%;
     z-index: 999;
     animation: fadeInWallet 0.3s ease forwards;
-    color: #fff;
-    background-image: url("./../../../public/assets/wallet/background-wallet.png");
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
+    background-color: #fff;
+    background-color: #fff;
     font-family: monospace;
+    color: #000000;
+    font-weight: bold;
+    color: #000000;
+    font-weight: bold;
 }
 
 @keyframes fadeInWallet {
@@ -77,54 +426,344 @@ button {
     }
 }
 
-.wraper-wallet {
+.header-wl {
     display: flex;
-    flex-direction: column;
-    height: 100%;
-    justify-content: center;
-    gap: 35px;
-}
-.box-btn {
-    display: flex;
-    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px;
     align-items: center;
-    gap: 20px;
-    margin: 0 50px;
-}
-.logo-wallet {
-    text-align: center;
-    img {
-        widows: 100px;
-        height: 100px;
+
+    .info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        img {
+            width: 25px;
+        }
+
+        .name {
+            color: #00175f;
+        }
+
+        .add-wallet {
+            color: #8f8f8f;
+        }
+
+        .copy-wallet {
+            color: #8f8f8f;
+        }
     }
 }
 
-.title-wallet {
-    padding: 0 20px;
-    text-align: center;
+.body-wl {
+    padding: 10px;
+
+    .wr-balance {
+        background-image: linear-gradient(#5da1db, #fbe1a6);
+        border-radius: 10px;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+
+        .title {
+            color: #00175f;
+            font-size: 16px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .wr-btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+
+            .btn-item {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 15px;
+                margin: 5px;
+                background-color: #00175f;
+                color: #fff;
+                border-radius: 10px;
+            }
+
+            .btn-item:disabled {
+                background-color: #677cb9;
+                cursor: not-allowed;
+            }
+        }
+    }
+
+    .wr-coin {
+        padding: 30px 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        color: #00175f;
+
+        .title {
+            color: #00175f;
+            font-size: 16px;
+
+            a {
+                color: #00175f;
+                text-decoration: none;
+                padding: 5px;
+
+                &.active {
+                    color: #8c0000;
+                    background-color: bisque;
+                }
+            }
+        }
+
+        .box-content {
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            width: 100%;
+            gap: 10px;
+
+            .filter {
+                display: flex;
+                justify-content: flex-end;
+                margin-bottom: 10px;
+                width: 100%;
+                align-items: center;
+
+                select {
+                    padding: 5px;
+                    border-radius: 5px;
+                    border: 1px solid #ccc;
+                    background-color: #f0f0f0;
+                    color: #333;
+                    outline: none;
+                }
+            }
+
+            .item-list {
+                display: flex;
+                align-items: center;
+                flex-direction: column;
+                width: 100%;
+                max-height: calc(100vh - 370px);
+                overflow-y: auto;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+                gap: 10px;
+
+                .img {
+                    display: flex;
+
+                    img {
+                        width: 25px;
+                        height: 25px;
+                    }
+                }
+
+                .price {
+                    color: #03a400;
+                    font-size: 18px;
+                }
+
+                .box-item {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-between;
+                    align-items: center;
+                    background-color: #f5f5f5;
+                    border-radius: 10px;
+                    width: calc(100% - 20px);
+                    padding: 10px;
+                    gap: 10px;
+
+                    .address {
+                        display: flex;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
+
+                    .item-title {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        gap: 10px;
+                        width: 100%;
+                    }
+
+                    .item-address {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        gap: 10px;
+                        width: 100%;
+                    }
+
+                    .item-value {
+                        display: flex;
+                        justify-content: flex-end;
+                        align-items: center;
+                        gap: 10px;
+                        width: 100%;
+
+                        .value {
+                            font-size: 16px;
+                            font-weight: bold;
+                        }
+                    }
+
+                    .pending {
+                        background-color: #dba52f;
+                        padding: 5px;
+                        border-radius: 8px;
+                        color: #fff;
+                    }
+
+                    .confirmed {
+                        background-color: #03a400;
+                        padding: 5px;
+                        border-radius: 8px;
+                        color: #fff;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
+.popup-referer-code {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    padding: 20px;
+    z-index: 1000;
+    border-radius: 8px;
+}
+
+.code-input {
+    padding: 5px;
+    border: 1px solid #ccc;
+    transition: border-color 0.3s ease;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: #f0f0f0;
+    color: #333;
+    outline: none;
+}
+
+.label {
+    font-size: 12px;
+    color: #333;
+    margin-top: 10px;
+}
+
+.code-input:focus {
+    border-color: #66afe9;
+    outline: none;
+}
+
+.input-error {
+    border-color: red;
+    animation: pulse 1s infinite;
+}
+
+.form-group {
+    padding: 8px 0;
+}
+
+.btn-submit-code {
+    margin-top: 20px;
+    border-radius: 5px;
+    color: #fff;
+}
+
+.btn-submit-code:disabled {
+    background-color: #efcda5;
+    cursor: not-allowed;
+}
+
+.popup-title {
     font-size: 16px;
     font-weight: bold;
-    margin: 20px 0 70px;
+    text-align: center;
+    color: #333;
+    padding-top: 10px;
 }
 
-.btn-img {
-    display: flex;
+.close {
     position: absolute;
-    left: 5%;
-    gap: 5px;
-    align-items: center;
-    img {
-        width: 20px;
-        height: 20px;
+    top: 10px;
+    right: 10px;
+    color: #8c0000;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.loading {
+    animation: spin 1s linear infinite;
+}
+
+.text-err-code {
+    color: #8c0000;
+    font-size: 12px;
+}
+
+.faucet-success {
+    color: #fff;
+    font-size: 12px;
+    background-color: #a4d8a3;
+    padding: 8px;
+    border-radius: 5px;
+}
+
+.address-action {
+    margin-top: 20px;
+    width: 100%;
+
+    a {
+        color: #fff;
+        background-color: #1568e5;
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 12px;
+        text-decoration: none;
+        width: 100%;
     }
 }
 
-.btn-title {
-    position: absolute;
-    right: 15%;
+.popup-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20px;
+
+    text-decoration: none;
 }
-.text-qfan {
-    -webkit-text-stroke: 0px;
-    color: #841c2e;
+
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 </style>

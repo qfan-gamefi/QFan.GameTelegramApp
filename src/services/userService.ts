@@ -1,4 +1,5 @@
 import axiosInstance from "./axiosInstance";
+import { networkAxiosInstance } from "./networkAxiosInstance";
 
 const userService = {
     getListInvite(userId: string) {
@@ -109,6 +110,75 @@ const userService = {
         const res = await axiosInstance.post(`booster/upLevel`, dataForm);
         return res.data;
     },
+    async claimCheckin(userId: string, toAddress: string, hash: string) {
+        try {
+            const dataForm = {
+                playerId: userId,
+                address: toAddress,
+                hash
+            };
+            const res = await networkAxiosInstance.post(
+                `interact/daily-checkin`,
+                dataForm
+            );
+            return res.data;
+        } catch (error) {
+            console.log(error);
+            return error?.response?.data;
+        }
+
+    },
+    async autoInteract(userId: string, toAddress: string, hash: string) {
+        try {
+            const dataForm = {
+                playerId: userId,
+                address: toAddress,
+                hash
+            };
+            const res = await networkAxiosInstance.post(
+                `interact/auto-interact`,
+                dataForm
+            );
+            return res.data;
+        } catch (error) {
+            console.log(error);
+            return error?.response?.data;
+        }
+
+    },
+    async faucet(userId: string, toAddress: string) {
+        try {
+            const dataForm = {
+                playerId: userId,
+                toAddress
+            };
+            const res = await networkAxiosInstance.post(
+                `faucet/send-faucet`,
+                dataForm
+            );
+            return res.data;
+        } catch (error) {
+            console.log(error);
+            return error?.response?.data;
+        }
+
+    },
+    async registerAddress(userId: string, address: string) {
+        try {
+            const dataForm = {
+                playerId: userId,
+                address
+            };
+            const res = await networkAxiosInstance.post(
+                `user/register-address`,
+                dataForm
+            );
+            return res.data;
+        } catch (error) {
+            console.log(error);
+            return error?.response?.data;
+        }
+    }
 };
 
 export default userService;

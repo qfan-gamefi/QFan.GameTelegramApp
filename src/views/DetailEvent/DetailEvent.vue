@@ -186,7 +186,8 @@
                                     {{ item?.UserName || item?.UserId }}
                                 </div>
                                 <div class="your-point">
-                                    {{ item?.Balance }}
+                                    Point: {{ item?.Balance }} <br />
+                                    QFP: {{ item?.QFP_VALUE || 0 }}
                                 </div>
                             </div>
                         </div>
@@ -561,9 +562,8 @@ export default {
                     };
                 });
 
-                this.leaderboard = await betService.getFilterData(
-                    "balancePoints",
-                    { order: [["Balance", "DESC"]] }
+                this.leaderboard = await betService.getLeaderBoard(
+                    this.detailEvent?.attributes?.domainCode
                 );
                 this.history = await betService.getFilterData("bids", {
                     where: { UserId: this.idUser },
@@ -576,9 +576,12 @@ export default {
                     { where: { UserId: this.idUser } }
                 );
 
+                const dataTele = window.Telegram.WebApp.initDataUnsafe?.user;
+                const nameTele = `${dataTele.first_name} ${dataTele.last_name}`;
                 const dataRankCurrent = await betService.getYourRank(
                     this.idUser,
-                    this.detailEvent
+                    this.detailEvent,
+                    nameTele
                 );
 
                 if (dataRankCurrent?.length > 0) {
@@ -1048,6 +1051,7 @@ export default {
     border-radius: 3px;
     min-width: 90px;
     max-width: 90px;
+    font-size: 11px;
 }
 
 .list-history {

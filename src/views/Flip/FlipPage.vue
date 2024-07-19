@@ -6,27 +6,37 @@
             <div class="wr-cooldown">
                 <div class="box-info">
                     <div class="user">
-                        <div class="avt">
-                            <img src="@public/assets/logo.svg" />
+                        <div
+                            class="avt"
+                            :style="{
+                                backgroundImage: `url(${urlImg})`,
+                            }"
+                        >
+                            <!-- <img src="@public/assets/logo.svg" /> -->
                         </div>
                         <div class="name-rate">
                             <div>{{ fullName }}</div>
-                            <div>Win rate: <span>50%</span></div>
+                            <div>
+                                Win rate: <span>{{ winRate }}%</span>
+                            </div>
                         </div>
                     </div>
 
                     <div class="box-cd">
                         <div class="title">Cooldown</div>
-                        <div class="time">0:59</div>
+                        <div
+                            class="time"
+                            :class="{ 'counter-animation': isAnimating }"
+                        >
+                            {{ timeCountdown }}
+                        </div>
                     </div>
                 </div>
 
                 <div class="win-lose">
-                    <div class="wl win"></div>
-                    <div class="wl lose"></div>
-                    <div class="wl win"></div>
-                    <div class="wl lose"></div>
-                    <div class="wl win"></div>
+                    <div v-for="(item, index) in lights" :key="index">
+                        <div class="wl" :class="item.toLowerCase()"></div>
+                    </div>
                 </div>
 
                 <div id="coin" :class="flipClass">
@@ -123,7 +133,7 @@
         <div :class="['popup', { 'closing-popup': !isPopup }]" v-if="isPopup">
             <div class="icon-win" v-if="status !== 'placed'">
                 <!-- <i class="fa-solid fa-crown"></i> -->
-                <div class="">Winner</div>
+                <div>Winner</div>
             </div>
             <div class="box-img">
                 <div
@@ -139,39 +149,28 @@
             <!-- <div class="icon-lose" v-if="status == 'lose'">
                 <i class="fa-solid fa-flag"></i>
             </div> -->
-            <p>{{ text }}</p>
+            <div class="text">{{ text }}</div>
+            <div class="desc">{{ descWinner }}</div>
             <button @click="hidePopup" class="btn-close">Close</button>
         </div>
-
-        <div class="popup-pass" v-if="isPopupPass">
-            <div class="referer-code">Password</div>
-            <form @submit.prevent="submitPass">
-                <input
-                    class="pass-input"
-                    :class="{ 'input-error': errorMessagePass }"
-                    type="text"
-                    v-model="pass"
-                    id="pass"
-                    @input="clearError"
-                    placeholder="Enter password"
-                />
-                <div v-if="errorMessagePass" class="text-err">
-                    {{ errorMessagePass }}
-                </div>
-                <button class="btn-submit-pass" type="submit">
-                    <span>Submit</span>
-                </button>
-            </form>
-        </div>
     </div>
+
+    <PopupConfirm
+        v-if="isToken"
+        :text="`Click to invoke your security token!`"
+        :visible="isToken"
+        @yes="handleYesToken"
+        @no="handleNoToken"
+    />
 </template>
 
 <script lang="ts">
 import LoadingForm from "@/components/LoadingForm.vue";
 import NotificationToast from "@/components/NotificationToast.vue";
-import betService from "@/services/betService";
-import { storage } from "@/storage/storage";
+import PopupConfirm from "@/components/PopupConfirm.vue";
+import userServiceTelebot from "@/services/useServiceTeleBot";
 import { formatDateTimeUS } from "@/utils";
+import axios from "axios";
 import { defineComponent } from "vue";
 // import { mapState } from "vuex";
 
@@ -180,6 +179,7 @@ export default defineComponent({
     components: {
         NotificationToast,
         LoadingForm,
+        PopupConfirm,
     },
     props: {},
     // computed: {
@@ -191,32 +191,50 @@ export default defineComponent({
     created() {
         this.getAvt();
         this.history();
+        this.getRate();
     },
     data() {
-        const userInfo = window.Telegram.WebApp.initDataUnsafe.user;
+        const userInfo = window.Telegram.WebApp.initDataUnsafe;
+        const startParam =
+            userInfo?.start_param &&
+            userInfo?.start_param?.replace(/[a-zA-Z_-]/g, "");
 
         return {
             loading: false,
-            userId: userInfo?.id,
-            fullName: `${userInfo?.first_name} ${userInfo?.last_name}`,
+            userId: userInfo?.user?.id || 2123800227,
+            fullName: `${userInfo?.user?.first_name} ${userInfo?.user?.last_name}`,
+            tokenUser: startParam || "",
             isPopup: false,
             flipClass: "",
-            urlImg: "",
+            urlImg: null,
+            urlImgWinner: null,
             dataHistory: null,
             status: "",
             loadingSubmit: false,
 
-            isPopupPass: false,
-            errorMessagePass: "",
-            pass: null,
+            timeCountdown: 60,
+            isAnimating: false,
 
             showNotification: false,
             notificationMessage: "",
             notificationType: "",
             text: "",
+            descWinner: "",
+
+            isToken: false,
+            winRate: 0,
+            lights: [],
         };
     },
     methods: {
+        handleYesToken() {
+            this.isToken = false;
+            window.location.href =
+                "https://t.me/Sampletwabot?start=invoketoken";
+        },
+        handleNoToken() {
+            this.isToken = false;
+        },
         showPopup() {
             this.isPopup = true;
         },
@@ -237,6 +255,23 @@ export default defineComponent({
         },
         async renderErr(text) {
             this.renderNotification(text, "error");
+        },
+        startCountdown() {
+            const countdown = setInterval(() => {
+                if (this.timeCountdown > 0) {
+                    this.animateCounter();
+                    this.timeCountdown -= 1;
+                } else {
+                    this.loadingSubmit = false;
+                    clearInterval(countdown);
+                }
+            }, 1000);
+        },
+        animateCounter() {
+            this.isAnimating = true;
+            setTimeout(() => {
+                this.isAnimating = false;
+            }, 500);
         },
         parseReward(rewardString) {
             if (!rewardString) {
@@ -267,122 +302,93 @@ export default defineComponent({
         },
 
         async flipCoin() {
-            //check show popup pass
-            // if(){
-            //     this.isPopupPass = true;
-            // }
-
-            // this.showPopup();
             this.flipClass = "";
             this.loadingSubmit = true;
+            // this.startCountdown();
 
-            const flipResult = Math.random();
+            // const flipResult = Math.random();
 
-            setTimeout(() => {
-                if (flipResult <= 0.5) {
-                    this.flipClass = "heads";
-                } else {
-                    this.flipClass = "tails";
-                }
-            }, 100);
+            // setTimeout(() => {
+            //     if (flipResult <= 0.5) {
+            //         this.flipClass = "heads";
+            //     } else {
+            //         this.flipClass = "tails";
+            //     }
+            // }, 100);
             await this.handleSubmit();
         },
 
         async getAvt() {
-            try {
-                // const response = await fetch(
-                //     `https://4987-171-224-181-129.ngrok-free.app/api/v1/flip/getPlayerFlipInfo?userId=${this.userId}&domainCode=FLIP_COIN&userName=${this.fullName}`,
-                //     {
-                //         headers: {
-                //             "Content-Type": "application/json",
-                //             "ngrok-skip-browser-warning": "1",
-                //         },
-                //     }
-                // );
-                const code = {
-                    attributes: {
-                        domainCode: "FLIP_COIN",
-                    },
-                };
-
-                const dataAvt = await betService.getYourRank(
-                    this.userId,
-                    code,
-                    this.fullName
-                );
-                console.log(dataAvt);
-
-                // if (dataAvt?.length > 0) {
-                //     this.dataRankCurrent = dataAvt?.[0];
-                // } else {
-                //     this.dataAvt = {
-                //         Balance: 0,
-                //         UserId: this.idUser,
-                //         rank: "?",
-                //     };
-                // }
-
-                const data = await response.json();
-                const parseData = JSON.parse(data?.message);
-
-                this.urlImg = parseData?.UserPhotoUrl;
-            } catch (error) {
-                console.error(error);
-            }
+            const response = await userServiceTelebot.getAvtTelegram(
+                this.userId
+            );
+            this.urlImg = response;
         },
 
         async handleSubmit() {
             try {
-                const response = await fetch(
-                    `https://322f-171-224-181-129.ngrok-free.app/api/v1/flip/makeflip`,
+                const response = await axios.post(
+                    "https://baf3-171-224-181-129.ngrok-free.app/api/v1/flip/makeflip",
                     {
-                        method: "POST",
+                        gameId: 1,
+                        userId: this.userId,
+                        userName: this.fullName,
+                        value: 500,
+                        valueType: "QFP",
+                        side: 0,
+                        securityToken: this.startParam,
+                    },
+                    {
                         headers: {
                             "Content-Type": "application/json",
                             "ngrok-skip-browser-warning": "1",
                         },
-                        body: JSON.stringify({
-                            gameId: 1,
-                            userId: this.userId, //this.userId 5314337740
-                            userName: this.fullName, //this.fullName 2Awesome
-                            value: 500,
-                            valueType: "QFP",
-                            side: 0,
-                        }),
                     }
                 );
 
-                const data = await response.json();
-                const parseData = JSON.parse(data?.message);
+                const parseData = JSON.parse(response?.data?.message);
                 console.log(parseData);
 
-                if (parseData?.success === true) {
-                    this.loadingSubmit = false;
+                if (
+                    !parseData?.success &&
+                    parseData?.data?.SecurityToken == ""
+                ) {
+                    this.isToken = true;
+                    // this.renderErr("Token");
+                }
+
+                if (parseData?.success) {
+                    this.startCountdown();
+
                     if (parseData?.data?.Status === "Placed") {
                         this.status = "placed";
                         this.flipClass = "heads";
 
-                        const text = `Flip success!`;
                         // this.renderSuccess(text);
-                        this.text = text;
+                        this.text = `Flip success!`;
+                        this.descWinner = null;
                         this.showPopup();
                     } else {
                         if (parseData?.data?.Status === "Win") {
                             this.status = "win";
                             this.flipClass = "tails";
+                            this.descWinner = "You Win";
                         }
                         if (parseData?.data?.Status === "Lose") {
                             this.status = "lose";
                             this.flipClass = "heads";
+                            this.descWinner = "You Lose";
                         }
                         const text = `${parseData?.data?.WinnerInfo?.UserName}`; // - ${parseData?.data?.Status}`;
+
                         // this.renderSuccess(text);
                         this.text = text;
+                        this.urlImgWinner =
+                            parseData?.data?.WinnerInfo?.UserPhotoUrl;
                         this.showPopup();
                     }
-                } else {
-                    this.renderErr(parseData?.data?.Reason);
                 }
+                // this.renderErr(parseData?.data?.Reason);
             } catch (error) {
                 console.log(error);
             } finally {
@@ -394,7 +400,9 @@ export default defineComponent({
             this.loading = true;
             try {
                 const response = await fetch(
-                    `https://322f-171-224-181-129.ngrok-free.app/api/v1/flip/getPlayerFlip?userId=${this.userId}&domainCode=FLIP_COIN`,
+                    `https://baf3-171-224-181-129.ngrok-free.app/api/v1/flip/getPlayerFlip?userId=${
+                        this.userId || 2123800227
+                    }&domainCode=FLIP_COIN`,
                     {
                         method: "Get",
                         headers: {
@@ -403,33 +411,45 @@ export default defineComponent({
                         },
                     }
                 );
-
                 const data = await response.json();
-                this.loading = false;
-                this.dataHistory = JSON.parse(data?.message);
+                const result = JSON.parse(data?.message);
 
-                console.log(JSON.parse(data?.message));
+                this.loading = false;
+                this.dataHistory = result;
+
+                this.lights = result?.map((item) => item?.Status);
+                console.log(this.lights);
             } catch (error) {
                 this.loading = false;
             }
         },
+        async getRate() {
+            const headers = {
+                Authorization:
+                    "Bearer 660787f4d83b0ac80df01fc58696d85b409f92bfccc6ee30b4a5eac5488513b8fc58dbcdf0005885f3aa5d95ed67a3af1ed7d9a1f517bebdea657e867dbfc1c03dfb072d987cd3c0472cbfa46170d58ebb26f044921ca1b9b9fd8df8499a143d932221c0393f3324b7d00100b8b8869cb1475b8e80d95e3e02ed87a97c350319",
+                "Content-Type": "application/json",
+                Accept: "*/*",
+                "ngrok-skip-browser-warning": "1",
+            };
+            const data = {
+                where: { id: 1 },
+                include: "GamesBiddingSides",
+            };
 
-        async submitPass() {
-            if (!this.pass) {
-                this.errorMessagePass = "Pass is required!";
-                return;
-            }
-            try {
-                // storage.set('passFlip', 'pass')
-                this.flipCoin();
-                this.errorMessagePass = null;
-                this.isPopupPass = false;
-            } catch (error) {
-                console.log(error);
-            }
-        },
-        clearError() {
-            this.errorMessagePass = "";
+            const response = await axios.get(
+                `https://baf3-171-224-181-129.ngrok-free.app/api/v1/flip/getPlayerFlipInfo?userId=${this.userId}&domainCode=FLIP_COIN`,
+                {
+                    headers: headers,
+                    data: data,
+                }
+            );
+
+            const parseData = JSON.parse(response?.data?.message);
+
+            const totalCount = parseData?.WonCount + parseData?.LostCount;
+            const winRate = (parseData?.WonCount / totalCount) * 100;
+
+            this.winRate = winRate.toFixed(2);
         },
     },
 });
@@ -481,21 +501,27 @@ export default defineComponent({
     border-radius: 10px;
     border: 2px solid #d631ff;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
     .box-info {
         display: flex;
         justify-content: space-between;
-        padding: 15px;
+        padding: 15px 15px 0;
         .user {
             display: flex;
             gap: 10px;
             .avt {
                 border: 2px solid #d83aff;
                 border-radius: 5px;
-                img {
-                    width: 40px;
-                    height: 40px;
-                    display: flex;
-                }
+
+                min-width: 40px;
+                height: 40px;
+                display: flex;
+
+                background-position: center;
+                background-repeat: no-repeat;
+                background-size: contain;
             }
             .name-rate {
                 font-size: 13px;
@@ -513,6 +539,10 @@ export default defineComponent({
             font-size: 20px;
             color: #ffcf56;
             text-align: center;
+            transition: transform 0.5s ease-in-out;
+        }
+        .counter-animation {
+            transform: scale(1.2);
         }
     }
 
@@ -521,9 +551,11 @@ export default defineComponent({
         gap: 5px;
         background: #240039;
         padding: 5px 10px;
-        margin: 0 20px 20px;
+        margin-bottom: 20px;
         width: fit-content;
         border-radius: 5px;
+        margin: 0 auto;
+        flex-wrap: wrap;
         .wl {
             width: 10px;
             height: 10px;
@@ -534,6 +566,9 @@ export default defineComponent({
         }
         .lose {
             background: #ff0000;
+        }
+        .placed {
+            background: #ffe500;
         }
     }
 }
@@ -630,7 +665,7 @@ export default defineComponent({
 }
 
 .box-submit {
-    margin: 20px;
+    margin-bottom: 20px;
     .btn-submit {
         // background-color: #3eff3a;
         padding: 10px;
@@ -754,12 +789,12 @@ export default defineComponent({
         color: #ffe500;
         font-size: 22px;
     }
-    .icon-lose {
-        color: #000000;
-        font-size: 22px;
+    .text {
+        font-size: 12px;
     }
-    p {
-        color: black;
+    .desc {
+        font-size: 12px;
+        margin: 10px 0;
     }
 }
 
@@ -788,42 +823,5 @@ export default defineComponent({
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 999;
-}
-
-.popup-pass {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    padding: 20px;
-    border: 1px solid #ccc;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    animation: slideIn 0.5s forwards;
-    border-radius: 10px;
-    color: black;
-}
-.pass-input {
-    margin-top: 10px;
-    padding: 5px;
-    border: 1px solid #ccc;
-    transition: border-color 0.3s ease;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 16px;
-    background-color: #f0f0f0;
-    color: #333;
-    outline: none;
-}
-.text-err {
-    color: red;
-    font-size: 12px;
-}
-.input-error {
-    border-color: red;
-    animation: pulse 1s infinite;
-}
-.btn-submit-pass {
-    margin-top: 10px;
 }
 </style>

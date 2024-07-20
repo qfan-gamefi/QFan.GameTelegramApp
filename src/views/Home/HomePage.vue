@@ -58,7 +58,7 @@ export default {
         if(window.Telegram.WebApp.initDataUnsafe.start_param &&
             window.Telegram.WebApp.initDataUnsafe.start_param.startsWith('TOKEN_')
         ){
-            secureStorage.set('SECURITY_TOKEN', window.Telegram.WebApp.initDataUnsafe.start_param);
+            secureStorage.set('SECURITY_TOKEN', window.Telegram.WebApp.initDataUnsafe.start_param.replace('TOKEN_',''));
         }
         return {
             isTelegramLogin: !!first_name || !!last_name,

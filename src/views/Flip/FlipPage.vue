@@ -197,7 +197,12 @@ export default defineComponent({
     },
     data() {
         const userInfo = window.Telegram.WebApp.initDataUnsafe;
-        const startParam =  window.Telegram.WebApp.initDataUnsafe.start_param.replace('TOKEN_','');
+        var startParam = '';
+        if(window.Telegram.WebApp.initDataUnsafe.start_param &&
+            window.Telegram.WebApp.initDataUnsafe.start_param.startsWith('TOKEN_')
+        ){
+            startParam =  window.Telegram.WebApp.initDataUnsafe.start_param.replace('TOKEN_','');
+        }
         return {
             loading: false,
             userId: userInfo?.user?.id || 2123800227,

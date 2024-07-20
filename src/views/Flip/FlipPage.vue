@@ -55,7 +55,7 @@
                         @click="flipCoin"
                         :disabled="loadingSubmit"
                     >
-                        Flip the coin - 500
+                        Flip the coin - 50
                     </button>
                 </div>
 
@@ -157,7 +157,7 @@
 
     <PopupConfirm
         v-if="isToken"
-        :text="`Click to invoke your security token!`"
+        :text="`Click yes to invoke your security token!`"
         :visible="isToken"
         @yes="handleYesToken"
         @no="handleNoToken"
@@ -197,8 +197,7 @@ export default defineComponent({
     },
     data() {
         const userInfo = window.Telegram.WebApp.initDataUnsafe;
-        const startParam = secureStorage.get<string>('SECURITY_TOKEN');
-
+        const startParam =  window.Telegram.WebApp.initDataUnsafe.start_param.replace('TOKEN_','');
         return {
             loading: false,
             userId: userInfo?.user?.id || 2123800227,
@@ -330,13 +329,13 @@ export default defineComponent({
                 const response = await axios.post(
                     "https://qfan-api.qcloud.asia/predict/api/v1/flip/makeflip",
                     {
-                        gameId: 1,
+                        gameId: 58,
                         userId: this.userId,
                         userName: this.fullName,
-                        value: 500,
+                        value: 50,
                         valueType: "QFP",
                         side: 0,
-                        securityToken: this.startParam,
+                        securityToken: this.tokenUser,
                     },
                     {
                         headers: {
@@ -345,7 +344,6 @@ export default defineComponent({
                         },
                     }
                 );
-
                 const parseData = JSON.parse(response?.data?.message);
                 console.log(parseData);
 

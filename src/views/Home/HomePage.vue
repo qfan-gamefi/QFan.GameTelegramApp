@@ -190,6 +190,11 @@ export default {
         },
 
         async getInfoUser() {
+            this.$store.commit("setUserId", this.idUser);
+            this.$store.commit(
+                "setFullName",
+                `${this.first_name} ${this.last_name}`
+            );
             try {
                 var data = await userService.getInfo(this.idUser!);
 
@@ -619,6 +624,14 @@ export default {
                         ><i class="fa fa-spinner"></i
                     ></span>
                 </button> -->
+            </div>
+
+            <div class="wr-flip">
+                <router-link to="/flip">
+                    <button @click="handleBackButton">
+                        <i class="fa-solid fa-coins"></i> Flip
+                    </button>
+                </router-link>
             </div>
 
             <div class="wrap-commit_reward" :style="beforeStyle">

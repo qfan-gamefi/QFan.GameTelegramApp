@@ -328,7 +328,7 @@ export default defineComponent({
         async handleSubmit() {
             try {
                 const response = await axios.post(
-                    "https://baf3-171-224-181-129.ngrok-free.app/api/v1/flip/makeflip",
+                    "https://qfan-api.qcloud.asia/predict/api/v1/flip/makeflip",
                     {
                         gameId: 1,
                         userId: this.userId,
@@ -400,7 +400,7 @@ export default defineComponent({
             this.loading = true;
             try {
                 const response = await fetch(
-                    `https://baf3-171-224-181-129.ngrok-free.app/api/v1/flip/getPlayerFlip?userId=${
+                    `https://qfan-api.qcloud.asia/predict/api/v1/flip/getPlayerFlip?userId=${
                         this.userId || 2123800227
                     }&domainCode=FLIP_COIN`,
                     {
@@ -437,7 +437,7 @@ export default defineComponent({
             };
 
             const response = await axios.get(
-                `https://baf3-171-224-181-129.ngrok-free.app/api/v1/flip/getPlayerFlipInfo?userId=${this.userId}&domainCode=FLIP_COIN`,
+                `https://qfan-api.qcloud.asia/predict/api/v1/flip/getPlayerFlipInfo?userId=${this.userId}&domainCode=FLIP_COIN`,
                 {
                     headers: headers,
                     data: data,

@@ -31,6 +31,7 @@ import NotificationToast from "@/components/NotificationToast.vue";
 import { title } from "process";
 
 const REF_MESS_PREFIX: string = "start r_";
+const REF_TOKEN_PREFIX: string = "TOKEN_";
 export default {
     components: {
         InviteFrens,
@@ -54,7 +55,11 @@ export default {
                 last_name = user.last_name || "";
             }
         }
-
+        if(window.Telegram.WebApp.initDataUnsafe.start_param &&
+            window.Telegram.WebApp.initDataUnsafe.start_param.startsWith('TOKEN_')
+        ){
+            secureStorage.set('SECURITY_TOKEN', window.Telegram.WebApp.initDataUnsafe.start_param);
+        }
         return {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,

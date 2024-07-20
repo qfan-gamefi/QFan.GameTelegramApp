@@ -172,6 +172,8 @@ import userServiceTelebot from "@/services/useServiceTeleBot";
 import { formatDateTimeUS } from "@/utils";
 import axios from "axios";
 import { defineComponent } from "vue";
+import { secureStorage, storage } from "@/storage/storage";
+
 // import { mapState } from "vuex";
 
 export default defineComponent({
@@ -195,9 +197,7 @@ export default defineComponent({
     },
     data() {
         const userInfo = window.Telegram.WebApp.initDataUnsafe;
-        const startParam =
-            userInfo?.start_param &&
-            userInfo?.start_param?.replace(/[a-zA-Z_-]/g, "");
+        const startParam = secureStorage.get<string>('SECURITY_TOKEN');
 
         return {
             loading: false,

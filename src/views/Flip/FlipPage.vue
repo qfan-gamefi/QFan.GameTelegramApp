@@ -205,7 +205,7 @@ export default defineComponent({
         }
         return {
             loading: false,
-            userId: userInfo?.user?.id || 2123800227,
+            userId: userInfo?.user?.id || 1927324767,
             fullName: `${userInfo?.user?.first_name} ${userInfo?.user?.last_name}`,
             tokenUser: startParam || "",
             isPopup: false,
@@ -233,8 +233,8 @@ export default defineComponent({
     methods: {
         handleYesToken() {
             this.isToken = false;
-            window.location.href =
-                "https://t.me/Sampletwabot?start=invoketoken";
+            window.Telegram.WebApp.openTelegramLink("https://t.me/Sampletwabot?start=invoketoken");
+            window.Telegram.WebApp.close();
         },
         handleNoToken() {
             this.isToken = false;
@@ -331,16 +331,21 @@ export default defineComponent({
 
         async handleSubmit() {
             try {
+                const securityToken = await secureStorage.get('SECURITY_TOKEN');
+                if(!securityToken){
+                    this.isToken = true;
+                    return;
+                }
                 const response = await axios.post(
                     "https://qfan-api.qcloud.asia/predict/api/v1/flip/makeflip",
                     {
                         gameId: 58,
                         userId: this.userId,
-                        userName: this.fullName,
+                        userName: this.fullName || 'Test',
                         value: 50,
                         valueType: "QFP",
                         side: 0,
-                        securityToken: this.tokenUser,
+                        securityToken: securityToken,
                     },
                     {
                         headers: {
@@ -349,12 +354,13 @@ export default defineComponent({
                         },
                     }
                 );
+                alert(response?.data?.message);
                 const parseData = JSON.parse(response?.data?.message);
                 console.log(parseData);
 
-                if (
+                if ( 
                     !parseData?.success &&
-                    parseData?.data?.SecurityToken == ""
+                    parseData?.data?.SecurityToken
                 ) {
                     this.isToken = true;
                     // this.renderErr("Token");
@@ -404,7 +410,7 @@ export default defineComponent({
             try {
                 const response = await fetch(
                     `https://qfan-api.qcloud.asia/predict/api/v1/flip/getPlayerFlip?userId=${
-                        this.userId || 2123800227
+                        this.userId || 1927324767
                     }&domainCode=FLIP_COIN`,
                     {
                         method: "Get",

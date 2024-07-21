@@ -1,14 +1,14 @@
 // src/services/axiosInstance.js
 import axios from "axios";
 
-const axiosBetInstance = axios.create({
+const axiosPredictInstance = axios.create({
     baseURL: "https://qfan-api.qcloud.asia/predict/api/v1/",
     headers: {
         "Content-Type": "application/json",
     },
 });
 
-axiosBetInstance.interceptors.request.use(
+axiosPredictInstance.interceptors.request.use(
     (config) => {
         // Add any custom request configuration here, like auth tokens
         return config;
@@ -18,7 +18,7 @@ axiosBetInstance.interceptors.request.use(
     }
 );
 
-axiosBetInstance.interceptors.response.use(
+axiosPredictInstance.interceptors.response.use(
     (response) => response,
     (error) => {
         // Handle any errors
@@ -26,4 +26,4 @@ axiosBetInstance.interceptors.response.use(
     }
 );
 
-export default axiosBetInstance;
+export default axiosPredictInstance;

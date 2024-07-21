@@ -55,7 +55,7 @@
                         @click="flipCoin"
                         :disabled="loadingSubmit"
                     >
-                        Flip the coin - 500
+                        Flip the coin - 50
                     </button>
                 </div>
 
@@ -157,7 +157,7 @@
 
     <PopupConfirm
         v-if="isToken"
-        :text="`Click to invoke your security token!`"
+        :text="`Click yes to invoke your security token!`"
         :visible="isToken"
         @yes="handleYesToken"
         @no="handleNoToken"
@@ -172,6 +172,9 @@ import userServiceTelebot from "@/services/useServiceTeleBot";
 import { formatDateTimeUS } from "@/utils";
 import axios from "axios";
 import { defineComponent } from "vue";
+import { secureStorage, storage } from "@/storage/storage";
+import predictService from "@/services/predictService";
+
 // import { mapState } from "vuex";
 
 export default defineComponent({
@@ -327,26 +330,35 @@ export default defineComponent({
 
         async handleSubmit() {
             try {
-                const response = await axios.post(
-                    "https://baf3-171-224-181-129.ngrok-free.app/api/v1/flip/makeflip",
-                    {
-                        gameId: 1,
-                        userId: this.userId,
-                        userName: this.fullName,
-                        value: 500,
-                        valueType: "QFP",
-                        side: 0,
-                        securityToken: this.startParam,
-                    },
-                    {
-                        headers: {
-                            "Content-Type": "application/json",
-                            "ngrok-skip-browser-warning": "1",
-                        },
-                    }
-                );
-
-                const parseData = JSON.parse(response?.data?.message);
+                // const response = await axios.post(
+                //     "https://qfan-api.qcloud.asia/predict/api/v1/flip/makeflip",
+                //     {
+                //         gameId: 58,
+                //         userId: this.userId,
+                //         userName: this.fullName,
+                //         value: 50,
+                //         valueType: "QFP",
+                //         side: 0,
+                //         securityToken: this.tokenUser,
+                //     },
+                //     {
+                //         headers: {
+                //             "Content-Type": "application/json",
+                //             "ngrok-skip-browser-warning": "1",
+                //         },
+                //     }
+                // );
+                const data = {
+                    gameId: 58,
+                    userId: this.userId,
+                    userName: this.fullName,
+                    value: 50,
+                    valueType: "QFP",
+                    side: 0,
+                    securityToken: this.tokenUser,
+                };
+                const res = await predictService.makeFlip(data);
+                const parseData = JSON.parse(res?.data?.message);
                 console.log(parseData);
 
                 if (
@@ -400,7 +412,7 @@ export default defineComponent({
             this.loading = true;
             try {
                 const response = await fetch(
-                    `https://baf3-171-224-181-129.ngrok-free.app/api/v1/flip/getPlayerFlip?userId=${
+                    `https://qfan-api.qcloud.asia/predict/api/v1/flip/getPlayerFlip?userId=${
                         this.userId || 2123800227
                     }&domainCode=FLIP_COIN`,
                     {
@@ -437,7 +449,7 @@ export default defineComponent({
             };
 
             const response = await axios.get(
-                `https://baf3-171-224-181-129.ngrok-free.app/api/v1/flip/getPlayerFlipInfo?userId=${this.userId}&domainCode=FLIP_COIN`,
+                `https://qfan-api.qcloud.asia/predict/api/v1/flip/getPlayerFlipInfo?userId=${this.userId}&domainCode=FLIP_COIN`,
                 {
                     headers: headers,
                     data: data,

@@ -213,7 +213,7 @@ export default defineComponent({
         }
         return {
             loading: false,
-            userId: userInfo?.user?.id || 2123800227,
+            userId: userInfo?.user?.id || "",
             fullName: `${userInfo?.user?.first_name} ${userInfo?.user?.last_name}`,
             tokenUser: startParam,
             isPopup: false,
@@ -338,12 +338,11 @@ export default defineComponent({
 
         async handleSubmit() {
             try {
-                const securityToken = await secureStorage.get("SECURITY_TOKEN");
+                var securityToken = await secureStorage.get("SECURITY_TOKEN");
                 if (!securityToken) {
                     this.isToken = true;
                     return;
                 }
-
                 const data = {
                     gameId: 58,
                     userId: this.userId,
@@ -351,7 +350,7 @@ export default defineComponent({
                     value: 200,
                     valueType: "QFP",
                     side: 0,
-                    securityToken,
+                    securityToken: String(securityToken),
                 };
                 const res = await predictService.makeFlip(data);
 

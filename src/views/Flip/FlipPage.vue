@@ -11,13 +11,14 @@
                             :style="{
                                 backgroundImage: `url(${urlImg})`,
                             }"
-                        >
-                            <!-- <img src="@public/assets/logo.svg" /> -->
-                        </div>
+                        ></div>
                         <div class="name-rate">
                             <div>{{ fullName }}</div>
                             <div>
-                                Win rate: <span>{{ winRate }}%</span>
+                                Win rate:
+                                <span v-bind:class="{ 'loader-rate': loading }"
+                                    >{{ winRate }}%</span
+                                >
                             </div>
                         </div>
                     </div>
@@ -33,7 +34,7 @@
                     </div>
                 </div>
 
-                <div class="win-lose">
+                <div class="win-lose" v-if="lights?.length > 0">
                     <div v-for="(item, index) in lights" :key="index">
                         <div class="wl" :class="item.toLowerCase()"></div>
                     </div>
@@ -55,7 +56,7 @@
                         @click="flipCoin"
                         :disabled="loadingSubmit"
                     >
-                        Flip the coin - 50
+                        Flip the coin - 200
                     </button>
                 </div>
 
@@ -170,9 +171,9 @@ import NotificationToast from "@/components/NotificationToast.vue";
 import PopupConfirm from "@/components/PopupConfirm.vue";
 import userServiceTelebot from "@/services/useServiceTeleBot";
 import { formatDateTimeUS } from "@/utils";
-import axios from "axios";
 import { defineComponent } from "vue";
-import { secureStorage, storage } from "@/storage/storage";
+import { secureStorage } from "@/storage/storage";
+import predictService from "@/services/predictService";
 
 // import { mapState } from "vuex";
 
@@ -197,17 +198,24 @@ export default defineComponent({
     },
     data() {
         const userInfo = window.Telegram.WebApp.initDataUnsafe;
-        var startParam = '';
-        if(window.Telegram.WebApp.initDataUnsafe.start_param &&
-            window.Telegram.WebApp.initDataUnsafe.start_param.startsWith('TOKEN_')
-        ){
-            startParam =  window.Telegram.WebApp.initDataUnsafe.start_param.replace('TOKEN_','');
+        let startParam = "";
+        if (
+            window.Telegram.WebApp.initDataUnsafe.start_param &&
+            window.Telegram.WebApp.initDataUnsafe.start_param?.startsWith(
+                "TOKEN_"
+            )
+        ) {
+            startParam =
+                window.Telegram.WebApp.initDataUnsafe.start_param?.replace(
+                    "TOKEN_",
+                    ""
+                );
         }
         return {
             loading: false,
             userId: userInfo?.user?.id || 2123800227,
             fullName: `${userInfo?.user?.first_name} ${userInfo?.user?.last_name}`,
-            tokenUser: startParam || "",
+            tokenUser: startParam,
             isPopup: false,
             flipClass: "",
             urlImg: null,
@@ -233,10 +241,13 @@ export default defineComponent({
     methods: {
         handleYesToken() {
             this.isToken = false;
-            window.location.href =
-                "https://t.me/Sampletwabot?start=invoketoken";
+            window.Telegram.WebApp.openTelegramLink(
+                "https://t.me/Sampletwabot?start=invoketoken"
+            );
+            window.Telegram.WebApp.close();
         },
         handleNoToken() {
+            // this.loadingSubmit = false;
             this.isToken = false;
         },
         showPopup() {
@@ -244,6 +255,8 @@ export default defineComponent({
         },
         hidePopup() {
             this.isPopup = false;
+            this.history();
+            this.getRate();
         },
         formatDateTimeUS,
         async renderNotification(message, type) {
@@ -304,21 +317,15 @@ export default defineComponent({
         navigateToHome() {
             this.$router.push("/");
         },
-
+        timeoutPopup() {
+            const timeoutId = setTimeout(() => {
+                this.showPopup();
+                clearTimeout(timeoutId);
+            }, 3000);
+        },
         async flipCoin() {
-            this.flipClass = "";
             this.loadingSubmit = true;
-            // this.startCountdown();
 
-            // const flipResult = Math.random();
-
-            // setTimeout(() => {
-            //     if (flipResult <= 0.5) {
-            //         this.flipClass = "heads";
-            //     } else {
-            //         this.flipClass = "tails";
-            //     }
-            // }, 100);
             await this.handleSubmit();
         },
 
@@ -331,128 +338,83 @@ export default defineComponent({
 
         async handleSubmit() {
             try {
-                const response = await axios.post(
-                    "https://qfan-api.qcloud.asia/predict/api/v1/flip/makeflip",
-                    {
-                        gameId: 58,
-                        userId: this.userId,
-                        userName: this.fullName,
-                        value: 50,
-                        valueType: "QFP",
-                        side: 0,
-                        securityToken: this.tokenUser,
-                    },
-                    {
-                        headers: {
-                            "Content-Type": "application/json",
-                            "ngrok-skip-browser-warning": "1",
-                        },
-                    }
-                );
-                const parseData = JSON.parse(response?.data?.message);
-                console.log(parseData);
-
-                if (
-                    !parseData?.success &&
-                    parseData?.data?.SecurityToken == ""
-                ) {
+                const securityToken = await secureStorage.get("SECURITY_TOKEN");
+                if (!securityToken) {
                     this.isToken = true;
-                    // this.renderErr("Token");
+                    return;
                 }
 
-                if (parseData?.success) {
+                const data = {
+                    gameId: 58,
+                    userId: this.userId,
+                    userName: this.fullName,
+                    value: 200,
+                    valueType: "QFP",
+                    side: 0,
+                    securityToken,
+                };
+                const res = await predictService.makeFlip(data);
+
+                if (res.success) {
+                    const result = res?.data;
                     this.startCountdown();
 
-                    if (parseData?.data?.Status === "Placed") {
+                    if (result?.Status === "Placed") {
                         this.status = "placed";
                         this.flipClass = "heads";
 
-                        // this.renderSuccess(text);
                         this.text = `Flip success!`;
                         this.descWinner = null;
-                        this.showPopup();
                     } else {
-                        if (parseData?.data?.Status === "Win") {
+                        if (result?.Status === "Win") {
                             this.status = "win";
                             this.flipClass = "tails";
                             this.descWinner = "You Win";
                         }
-                        if (parseData?.data?.Status === "Lose") {
+                        if (result?.Status === "Lose") {
                             this.status = "lose";
                             this.flipClass = "heads";
                             this.descWinner = "You Lose";
                         }
-                        const text = `${parseData?.data?.WinnerInfo?.UserName}`; // - ${parseData?.data?.Status}`;
+                        const text = `${result?.WinnerInfo?.UserName}`;
 
-                        // this.renderSuccess(text);
                         this.text = text;
-                        this.urlImgWinner =
-                            parseData?.data?.WinnerInfo?.UserPhotoUrl;
-                        this.showPopup();
+                        this.urlImgWinner = result?.WinnerInfo?.UserPhotoUrl;
                     }
+                    this.timeoutPopup();
+                } else {
+                    this.startCountdown();
+                    this.renderErr(res?.data?.Reason);
                 }
-                // this.renderErr(parseData?.data?.Reason);
             } catch (error) {
                 console.log(error);
-            } finally {
-                this.history();
             }
         },
 
         async history() {
             this.loading = true;
+            this.getRate();
+
             try {
-                const response = await fetch(
-                    `https://qfan-api.qcloud.asia/predict/api/v1/flip/getPlayerFlip?userId=${
-                        this.userId || 2123800227
-                    }&domainCode=FLIP_COIN`,
-                    {
-                        method: "Get",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "ngrok-skip-browser-warning": "1",
-                        },
-                    }
+                const response = await predictService.getHistoryFlip(
+                    this.userId
                 );
-                const data = await response.json();
-                const result = JSON.parse(data?.message);
 
                 this.loading = false;
-                this.dataHistory = result;
+                this.dataHistory = response;
 
-                this.lights = result?.map((item) => item?.Status);
-                console.log(this.lights);
+                this.lights = response?.map((item) => item?.Status);
             } catch (error) {
                 this.loading = false;
             }
         },
         async getRate() {
-            const headers = {
-                Authorization:
-                    "Bearer 660787f4d83b0ac80df01fc58696d85b409f92bfccc6ee30b4a5eac5488513b8fc58dbcdf0005885f3aa5d95ed67a3af1ed7d9a1f517bebdea657e867dbfc1c03dfb072d987cd3c0472cbfa46170d58ebb26f044921ca1b9b9fd8df8499a143d932221c0393f3324b7d00100b8b8869cb1475b8e80d95e3e02ed87a97c350319",
-                "Content-Type": "application/json",
-                Accept: "*/*",
-                "ngrok-skip-browser-warning": "1",
-            };
-            const data = {
-                where: { id: 1 },
-                include: "GamesBiddingSides",
-            };
+            const response = await predictService.getRateFlip(this.userId);
 
-            const response = await axios.get(
-                `https://qfan-api.qcloud.asia/predict/api/v1/flip/getPlayerFlipInfo?userId=${this.userId}&domainCode=FLIP_COIN`,
-                {
-                    headers: headers,
-                    data: data,
-                }
-            );
+            const totalCount = response?.WonCount + response?.LostCount;
+            const winRate = (response?.WonCount / totalCount) * 100;
 
-            const parseData = JSON.parse(response?.data?.message);
-
-            const totalCount = parseData?.WonCount + parseData?.LostCount;
-            const winRate = (parseData?.WonCount / totalCount) * 100;
-
-            this.winRate = winRate.toFixed(2);
+            this.winRate = isNaN(winRate) ? "0" : winRate.toFixed(2);
         },
     },
 });
@@ -527,7 +489,10 @@ export default defineComponent({
                 background-size: contain;
             }
             .name-rate {
-                font-size: 13px;
+                font-size: 12px;
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
                 span {
                     color: #ffcf56;
                 }

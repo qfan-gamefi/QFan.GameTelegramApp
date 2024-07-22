@@ -133,7 +133,6 @@
         <div v-bind:class="{ 'overlay-popup': isPopup }"></div>
         <div :class="['popup', { 'closing-popup': !isPopup }]" v-if="isPopup">
             <div class="icon-win" v-if="status !== 'placed'">
-                <!-- <i class="fa-solid fa-crown"></i> -->
                 <div>Winner</div>
             </div>
             <div class="box-img">
@@ -141,15 +140,13 @@
                     class="img"
                     :style="{
                         backgroundImage: `url(${
-                            this.urlImg || './../../../public/assets/logo.jpg'
+                            this.urlImgWinner ||
+                            './../../../public/assets/logo.jpg'
                         })`,
                     }"
                 />
             </div>
 
-            <!-- <div class="icon-lose" v-if="status == 'lose'">
-                <i class="fa-solid fa-flag"></i>
-            </div> -->
             <div class="text">{{ text }}</div>
             <div class="desc">{{ descWinner }}</div>
             <button @click="hidePopup" class="btn-close">Close</button>
@@ -279,6 +276,7 @@ export default defineComponent({
                     this.animateCounter();
                     this.timeCountdown -= 1;
                 } else {
+                    this.timeCountdown = 60;
                     this.loadingSubmit = false;
                     clearInterval(countdown);
                 }
@@ -351,7 +349,7 @@ export default defineComponent({
                     value: 200,
                     valueType: "QFP",
                     side: 0,
-                    securityToken,
+                    securityToken: securityToken?.toString(),
                 };
                 const res = await predictService.makeFlip(data);
 
@@ -773,6 +771,7 @@ export default defineComponent({
 }
 .btn-close {
     border-radius: 5px;
+    font-size: 12px;
 }
 @keyframes slideIn {
     from {

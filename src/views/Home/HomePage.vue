@@ -55,10 +55,21 @@ export default {
                 last_name = user.last_name || "";
             }
         }
-        if(window.Telegram.WebApp.initDataUnsafe.start_param &&
-            window.Telegram.WebApp.initDataUnsafe.start_param.startsWith('TOKEN_')
-        ){
-            secureStorage.set('SECURITY_TOKEN', String(window.Telegram.WebApp.initDataUnsafe.start_param.replace('TOKEN_','')));
+        if (
+            window.Telegram.WebApp.initDataUnsafe.start_param &&
+            window.Telegram.WebApp.initDataUnsafe.start_param.startsWith(
+                "TOKEN_"
+            )
+        ) {
+            secureStorage.set(
+                "SECURITY_TOKEN",
+                String(
+                    window.Telegram.WebApp.initDataUnsafe.start_param.replace(
+                        "TOKEN_",
+                        ""
+                    )
+                )
+            );
         }
         return {
             isTelegramLogin: !!first_name || !!last_name,
@@ -66,7 +77,7 @@ export default {
             last_name: last_name,
             idUser:
                 window.Telegram.WebApp.initDataUnsafe.user?.id?.toString() ??
-                "",
+                "2123800227",
             telegram_bot_link:
                 telegram_bot_link +
                     window.Telegram.WebApp.initDataUnsafe.user?.id || "",
@@ -633,9 +644,12 @@ export default {
 
             <div class="wr-flip">
                 <router-link to="/flip">
-                    <button @click="handleBackButton">
-                        <i class="fa-solid fa-coins"></i> Flip
-                    </button>
+                    <div @click="handleBackButton" class="item-flip">
+                        <!-- <i class="fa-solid fa-coins"></i> Flip -->
+                    </div>
+                </router-link>
+                <router-link to="/inventory">
+                    <div @click="handleBackButton" class="item-inventory"></div>
                 </router-link>
             </div>
 

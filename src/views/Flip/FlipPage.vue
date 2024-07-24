@@ -139,10 +139,7 @@
                 <div
                     class="img"
                     :style="{
-                        backgroundImage: `url(${
-                            this.urlImgWinner ||
-                            './../../../public/assets/logo.jpg'
-                        })`,
+                        backgroundImage: `url(${getImageUrl()})`,
                     }"
                 />
             </div>
@@ -236,6 +233,13 @@ export default defineComponent({
         };
     },
     methods: {
+        getImageUrl() {
+            if (this.status === "placed") {
+                return this.urlImg || "./../../../public/assets/logo.jpg";
+            } else {
+                return this.urlImgWinner || "./../../../public/assets/logo.jpg";
+            }
+        },
         handleYesToken() {
             this.isToken = false;
             window.Telegram.WebApp.openTelegramLink(
@@ -381,8 +385,13 @@ export default defineComponent({
                     }
                     this.timeoutPopup();
                 } else {
-                    this.startCountdown();
-                    this.renderErr(res?.data?.Reason);
+                    if (res?.data?.SecurityToken) {
+                        this.isToken = true;
+                        return;
+                    } else {
+                        this.startCountdown();
+                        this.renderErr(res?.data?.Reason);
+                    }
                 }
             } catch (error) {
                 console.log(error);

@@ -210,7 +210,7 @@ export default defineComponent({
         }
         return {
             loading: false,
-            userId: userInfo?.user?.id || 2123800227,
+            userId: userInfo?.user?.id,
             fullName: `${userInfo?.user?.first_name} ${userInfo?.user?.last_name}`,
             tokenUser: startParam,
             isPopup: false,

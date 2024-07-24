@@ -155,7 +155,7 @@
 
     <PopupConfirm
         v-if="isToken"
-        :text="`Click yes to invoke your security token!`"
+        :text="`Click yes to invoke your security token`"
         :visible="isToken"
         @yes="handleYesToken"
         @no="handleNoToken"
@@ -244,7 +244,7 @@ export default defineComponent({
             window.Telegram.WebApp.close();
         },
         handleNoToken() {
-            // this.loadingSubmit = false;
+            this.loadingSubmit = false;
             this.isToken = false;
         },
         showPopup() {
@@ -394,14 +394,12 @@ export default defineComponent({
             this.getRate();
 
             try {
-                const response = await predictService.getHistoryFlip(
-                    this.userId
-                );
+                const res = await predictService.getHistoryFlip(this.userId);
 
                 this.loading = false;
-                this.dataHistory = response;
+                this.dataHistory = res;
 
-                this.lights = response?.map((item) => item?.Status);
+                this.lights = res?.map((item) => item?.Status);
             } catch (error) {
                 this.loading = false;
             }
@@ -412,7 +410,7 @@ export default defineComponent({
             const totalCount = response?.WonCount + response?.LostCount;
             const winRate = (response?.WonCount / totalCount) * 100;
 
-            this.winRate = isNaN(winRate) ? "0" : winRate.toFixed(2);
+            this.winRate = isNaN(winRate) ? "0" : winRate?.toFixed(2);
         },
     },
 });

@@ -133,7 +133,6 @@
         <div v-bind:class="{ 'overlay-popup': isPopup }"></div>
         <div :class="['popup', { 'closing-popup': !isPopup }]" v-if="isPopup">
             <div class="icon-win" v-if="status !== 'placed'">
-                <!-- <i class="fa-solid fa-crown"></i> -->
                 <div>Winner</div>
             </div>
             <div class="box-img">
@@ -141,15 +140,13 @@
                     class="img"
                     :style="{
                         backgroundImage: `url(${
-                            this.urlImg || './../../../public/assets/logo.jpg'
+                            this.urlImgWinner ||
+                            './../../../public/assets/logo.jpg'
                         })`,
                     }"
                 />
             </div>
 
-            <!-- <div class="icon-lose" v-if="status == 'lose'">
-                <i class="fa-solid fa-flag"></i>
-            </div> -->
             <div class="text">{{ text }}</div>
             <div class="desc">{{ descWinner }}</div>
             <button @click="hidePopup" class="btn-close">Close</button>
@@ -158,7 +155,7 @@
 
     <PopupConfirm
         v-if="isToken"
-        :text="`Click yes to invoke your security token!`"
+        :text="`Click yes to invoke your security token`"
         :visible="isToken"
         @yes="handleYesToken"
         @no="handleNoToken"
@@ -213,7 +210,7 @@ export default defineComponent({
         }
         return {
             loading: false,
-            userId: userInfo?.user?.id || "",
+            userId: userInfo?.user?.id,
             fullName: `${userInfo?.user?.first_name} ${userInfo?.user?.last_name}`,
             tokenUser: startParam,
             isPopup: false,
@@ -247,7 +244,7 @@ export default defineComponent({
             window.Telegram.WebApp.close();
         },
         handleNoToken() {
-            // this.loadingSubmit = false;
+            this.loadingSubmit = false;
             this.isToken = false;
         },
         showPopup() {
@@ -279,6 +276,7 @@ export default defineComponent({
                     this.animateCounter();
                     this.timeCountdown -= 1;
                 } else {
+                    this.timeCountdown = 60;
                     this.loadingSubmit = false;
                     clearInterval(countdown);
                 }
@@ -338,11 +336,12 @@ export default defineComponent({
 
         async handleSubmit() {
             try {
-                var securityToken = await secureStorage.get("SECURITY_TOKEN");
+                const securityToken = await secureStorage.get("SECURITY_TOKEN");
                 if (!securityToken) {
                     this.isToken = true;
                     return;
                 }
+
                 const data = {
                     gameId: 58,
                     userId: this.userId,
@@ -350,7 +349,7 @@ export default defineComponent({
                     value: 200,
                     valueType: "QFP",
                     side: 0,
-                    securityToken: String(securityToken),
+                    securityToken: securityToken?.toString(),
                 };
                 const res = await predictService.makeFlip(data);
 
@@ -395,14 +394,12 @@ export default defineComponent({
             this.getRate();
 
             try {
-                const response = await predictService.getHistoryFlip(
-                    this.userId
-                );
+                const res = await predictService.getHistoryFlip(this.userId);
 
                 this.loading = false;
-                this.dataHistory = response;
+                this.dataHistory = res;
 
-                this.lights = response?.map((item) => item?.Status);
+                this.lights = res?.map((item) => item?.Status);
             } catch (error) {
                 this.loading = false;
             }
@@ -413,7 +410,7 @@ export default defineComponent({
             const totalCount = response?.WonCount + response?.LostCount;
             const winRate = (response?.WonCount / totalCount) * 100;
 
-            this.winRate = isNaN(winRate) ? "0" : winRate.toFixed(2);
+            this.winRate = isNaN(winRate) ? "0" : winRate?.toFixed(2);
         },
     },
 });
@@ -772,6 +769,7 @@ export default defineComponent({
 }
 .btn-close {
     border-radius: 5px;
+    font-size: 12px;
 }
 @keyframes slideIn {
     from {

@@ -55,10 +55,19 @@ export default {
                 last_name = user.last_name || "";
             }
         }
-        if(window.Telegram.WebApp.initDataUnsafe.start_param &&
-            window.Telegram.WebApp.initDataUnsafe.start_param.startsWith('TOKEN_')
-        ){
-            secureStorage.set('SECURITY_TOKEN', String(window.Telegram.WebApp.initDataUnsafe.start_param.replace('TOKEN_','')));
+        if (
+            window.Telegram.WebApp.initDataUnsafe.start_param &&
+            window.Telegram.WebApp.initDataUnsafe.start_param?.startsWith(
+                "TOKEN_"
+            )
+        ) {
+            secureStorage.set(
+                "SECURITY_TOKEN",
+                window.Telegram.WebApp.initDataUnsafe.start_param?.replace(
+                    "TOKEN_",
+                    ""
+                )
+            );
         }
         return {
             isTelegramLogin: !!first_name || !!last_name,
@@ -66,7 +75,7 @@ export default {
             last_name: last_name,
             idUser:
                 window.Telegram.WebApp.initDataUnsafe.user?.id?.toString() ??
-                "",
+                "1927324767",
             telegram_bot_link:
                 telegram_bot_link +
                     window.Telegram.WebApp.initDataUnsafe.user?.id || "",
@@ -631,13 +640,13 @@ export default {
                 </button> -->
             </div>
 
-            <div class="wr-flip">
+            <!-- <div class="wr-flip">
                 <router-link to="/flip">
                     <button @click="handleBackButton">
                         <i class="fa-solid fa-coins"></i> Flip
                     </button>
                 </router-link>
-            </div>
+            </div> -->
 
             <div class="wrap-commit_reward" :style="beforeStyle">
                 <div class="box-info">
@@ -687,6 +696,15 @@ export default {
                             Mining
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <div class="box-flip">
+                <div class="img"></div>
+                <div>
+                    <router-link to="/flip">
+                        <button @click="handleBackButton">Flip coin</button>
+                    </router-link>
                 </div>
             </div>
 

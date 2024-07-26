@@ -29,6 +29,10 @@ import { transferToken } from "@/crypto_utils/networks";
 import type { Wallet } from "quais";
 import NotificationToast from "@/components/NotificationToast.vue";
 import { title } from "process";
+import userServiceTelebot from "@/services/useServiceTeleBot";
+import { calcExpPercentage, calcLevel, nextExpLevel } from "@/utils/exp";
+import { ILevel } from "@/interface";
+import InfoUser from "@/views/InfoUser/InfoUser.vue";
 
 const REF_MESS_PREFIX: string = "start r_";
 const REF_TOKEN_PREFIX: string = "TOKEN_";
@@ -40,47 +44,32 @@ export default {
         BoosterForm,
         CheckinForm,
         NotificationToast,
+        InfoUser,
     },
     data() {
         const telegram_bot_link =
             "Invite Link: https://t.me/QFanClubBot?start=r_";
 
-        let first_name = "";
-        let last_name = "";
+        const dataUserTele = window?.Telegram?.WebApp?.initDataUnsafe;
 
-        if (window?.Telegram?.WebApp?.initDataUnsafe) {
-            const user = window.Telegram.WebApp.initDataUnsafe.user;
-            if (user) {
-                first_name = user.first_name || "";
-                last_name = user.last_name || "";
-            }
-        }
+        let first_name = dataUserTele?.user?.first_name || "Su";
+        let last_name = dataUserTele?.user?.last_name || "Fly_007";
+
         if (
-            window.Telegram.WebApp.initDataUnsafe.start_param &&
-            window.Telegram.WebApp.initDataUnsafe.start_param?.startsWith(
-                "TOKEN_"
-            )
+            dataUserTele.start_param &&
+            dataUserTele.start_param?.startsWith("TOKEN_")
         ) {
             secureStorage.set(
                 "SECURITY_TOKEN",
-                window.Telegram.WebApp.initDataUnsafe.start_param?.replace(
-                    "TOKEN_",
-                    ""
-                )
+                dataUserTele.start_param?.replace("TOKEN_", "")
             );
         }
         return {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            idUser:
-                window.Telegram.WebApp.initDataUnsafe.user?.id?.toString() ??
-                "1927324767",
-            telegram_bot_link:
-                telegram_bot_link +
-                    window.Telegram.WebApp.initDataUnsafe.user?.id || "",
-            // idUser: "1927324767",
-            // telegram_bot_link: telegram_bot_link + 212380022 || "",
+            idUser: dataUserTele.user?.id?.toString() ?? "",
+            telegram_bot_link: telegram_bot_link + dataUserTele.user?.id || "",
 
             showCoomingSoon: false,
             isSuccess: false,
@@ -91,9 +80,6 @@ export default {
                 lastTakeRewardTime: "",
                 nextTakeRewardTime: "",
                 rewardAmount: "",
-                createdAt: "",
-                updatedAt: "",
-                publishedAt: "",
                 rewardScheduleHour: 0,
             },
             increasePerSecond: 0,
@@ -122,6 +108,13 @@ export default {
                 type: "",
             },
             widthWining: 0,
+
+            urlAvt: null,
+            dataLevel: {} as ILevel,
+            expLevelNext: {} as ILevel,
+            percentageLevel: 0,
+            isMaxLv: false,
+            isAnimated: false,
         };
     },
     computed: {
@@ -137,6 +130,12 @@ export default {
         },
     },
     methods: {
+        triggerAnimation() {
+            this.isAnimated = true;
+            setTimeout(() => {
+                this.isAnimated = false;
+            }, 1000);
+        },
         showPopupCoomingSoon() {
             this.showCoomingSoon = true;
         },
@@ -228,12 +227,14 @@ export default {
                     }
                 } else {
                     const resData = data?.data?.[0];
+
                     this.dataLogin = resData;
                     this.dataQPoint =
                         resData.attributes?.qpoint?.data?.attributes;
                     this.animatedBalance = Number(
                         resData.attributes?.qpoint?.data?.attributes?.balance
                     );
+                    this.triggerAnimation();
                     // if (!this.isClaim) {
                     //     await this.countdownFunc();
                     // }
@@ -575,6 +576,8 @@ export default {
         Telegram.WebApp.ready();
         Telegram.WebApp.setHeaderColor("#ffffff");
         await this.getInfoUser();
+        // await this.getLevels();
+        // await this.getAvt();
     },
     async updated() {
         this.updateSence();
@@ -598,19 +601,7 @@ export default {
         </button>
 
         <div class="container-game">
-            <div class="container-info" v-show="isTelegramLogin">
-                <div class="wrap-username">
-                    {{ first_name }} {{ last_name }}
-                </div>
-            </div>
-
-            <div class="wrap-score">
-                <div class="content">
-                    <!-- <img src="./../public/assets/logo.svg" /> -->
-                    <img src="@public/assets/logo.svg" />
-                    <div class="balance">Balance: {{ animatedBalance }}</div>
-                </div>
-            </div>
+            <InfoUser v-if="dataLogin" :dataLogin="dataLogin" />
 
             <div class="link-checkin">
                 <div>
@@ -629,24 +620,7 @@ export default {
                         ><i class="fa fa-spinner"></i
                     ></span>
                 </button>
-                <!-- <button
-                    @click="onAutoInteract()"
-                    v-bind:disabled="isExecAutoInteract"
-                >
-                    <i class="fa-solid fa-refresh"></i> {{ titleAutoInteract }}
-                    <span v-if="isExecAutoInteract"
-                        ><i class="fa fa-spinner"></i
-                    ></span>
-                </button> -->
             </div>
-
-            <!-- <div class="wr-flip">
-                <router-link to="/flip">
-                    <button @click="handleBackButton">
-                        <i class="fa-solid fa-coins"></i> Flip
-                    </button>
-                </router-link>
-            </div> -->
 
             <div class="wrap-commit_reward" :style="beforeStyle">
                 <div class="box-info">
@@ -691,7 +665,9 @@ export default {
                         >
                             <img
                                 src="@public/assets/mining/icon-auto.png"
-                                :class="{ rotateMining: isExecAutoInteract }"
+                                :class="{
+                                    rotateMining: isExecAutoInteract,
+                                }"
                             />
                             Mining
                         </div>
@@ -700,12 +676,15 @@ export default {
             </div>
 
             <div class="box-flip">
-                <div class="img"></div>
-                <div>
+                <router-link to="/flip">
+                    <div class="img" @click="handleBackButton"></div>
+                </router-link>
+
+                <!-- <div>
                     <router-link to="/flip">
                         <button @click="handleBackButton">Flip coin</button>
                     </router-link>
-                </div>
+                </div> -->
             </div>
 
             <MainGame ref="phaserRef" />

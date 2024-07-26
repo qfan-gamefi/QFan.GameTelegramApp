@@ -115,7 +115,7 @@ const userService = {
             const dataForm = {
                 playerId: userId,
                 address: toAddress,
-                hash
+                hash,
             };
             const res = await networkAxiosInstance.post(
                 `interact/daily-checkin`,
@@ -126,14 +126,13 @@ const userService = {
             console.log(error);
             return error?.response?.data;
         }
-
     },
     async autoInteract(userId: string, toAddress: string, hash: string) {
         try {
             const dataForm = {
                 playerId: userId,
                 address: toAddress,
-                hash
+                hash,
             };
             const res = await networkAxiosInstance.post(
                 `interact/auto-interact`,
@@ -144,13 +143,12 @@ const userService = {
             console.log(error);
             return error?.response?.data;
         }
-
     },
     async faucet(userId: string, toAddress: string) {
         try {
             const dataForm = {
                 playerId: userId,
-                toAddress
+                toAddress,
             };
             const res = await networkAxiosInstance.post(
                 `faucet/send-faucet`,
@@ -161,13 +159,12 @@ const userService = {
             console.log(error);
             return error?.response?.data;
         }
-
     },
     async registerAddress(userId: string, address: string) {
         try {
             const dataForm = {
                 playerId: userId,
-                address
+                address,
             };
             const res = await networkAxiosInstance.post(
                 `user/register-address`,
@@ -178,7 +175,11 @@ const userService = {
             console.log(error);
             return error?.response?.data;
         }
-    }
+    },
+    async getLevels() {
+        const res = await axiosInstance.get(`/player-levels`);
+        return res?.data?.data;
+    },
 };
 
 export default userService;

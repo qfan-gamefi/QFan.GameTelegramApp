@@ -29,8 +29,6 @@ import { transferToken } from "@/crypto_utils/networks";
 import type { Wallet } from "quais";
 import NotificationToast from "@/components/NotificationToast.vue";
 import { title } from "process";
-import userServiceTelebot from "@/services/useServiceTeleBot";
-import { calcExpPercentage, calcLevel, nextExpLevel } from "@/utils/exp";
 import { ILevel } from "@/interface";
 import InfoUser from "@/views/InfoUser/InfoUser.vue";
 
@@ -622,54 +620,71 @@ export default {
                 </button>
             </div>
 
-            <div class="wrap-commit_reward" :style="beforeStyle">
-                <div class="box-info">
-                    <div v-if="isClaim" class="box-left-train">
-                        Click "Claim" to take +{{
-                            Number(dataQPoint?.rewardAmount) *
-                            dataQPoint?.rewardScheduleHour
+            <div class="contaner-balance">
+                <div class="wr-balance">
+                    Balance:
+                    <div
+                        class="text-balance"
+                        :class="{ 'animate-text': isAnimated }"
+                    >
+                        {{
+                            dataLogin?.attributes?.qpoint?.data?.attributes
+                                ?.balance / 1000
                         }}
-                        <img src="@public/assets/logo.svg" />
                     </div>
-
-                    <div v-else class="box-left">
-                        <div class="content">Remain time: {{ countdown }}</div>
-                    </div>
-
-                    <div class="box-right">
-                        <button
-                            class="btn-commit_reward"
-                            @click="handleReward"
-                            :disabled="isCountingDown"
-                        >
-                            {{ isClaim ? "Claim" : "Training..." }}
-                        </button>
-                    </div>
+                    <img src="@public/assets/logo.svg" />
                 </div>
-
-                <div class="box-info" :style="styleWining">
-                    <div class="auto-left">
-                        <div class="woodwork-loader">
-                            <div class="runner" :style="styleWining"></div>
+                <div class="wrap-commit_reward" :style="beforeStyle">
+                    <div class="box-info">
+                        <div v-if="isClaim" class="box-left-train">
+                            Click "Claim" to take +{{
+                                Number(dataQPoint?.rewardAmount) *
+                                dataQPoint?.rewardScheduleHour
+                            }}
+                            <img src="@public/assets/logo.svg" />
                         </div>
 
-                        <div class="box-woodwork">
-                            <img src="@public/assets/mining/woodwork.png" />
+                        <div v-else class="box-left">
+                            <div class="content">
+                                Remain time: {{ countdown }}
+                            </div>
+                        </div>
+
+                        <div class="box-right">
+                            <button
+                                class="btn-commit_reward"
+                                @click="handleReward"
+                                :disabled="isCountingDown"
+                            >
+                                {{ isClaim ? "Claim" : "Training..." }}
+                            </button>
                         </div>
                     </div>
-                    <div class="box-right">
-                        <div
-                            class="btn-mining"
-                            @click="onAutoInteract()"
-                            :class="{ active: isExecAutoInteract }"
-                        >
-                            <img
-                                src="@public/assets/mining/icon-auto.png"
-                                :class="{
-                                    rotateMining: isExecAutoInteract,
-                                }"
-                            />
-                            Mining
+
+                    <div class="box-info" :style="styleWining">
+                        <div class="auto-left">
+                            <div class="woodwork-loader">
+                                <div class="runner" :style="styleWining"></div>
+                            </div>
+
+                            <div class="box-woodwork">
+                                <img src="@public/assets/mining/woodwork.png" />
+                            </div>
+                        </div>
+                        <div class="box-right">
+                            <div
+                                class="btn-mining"
+                                @click="onAutoInteract()"
+                                :class="{ active: isExecAutoInteract }"
+                            >
+                                <img
+                                    src="@public/assets/mining/icon-auto.png"
+                                    :class="{
+                                        rotateMining: isExecAutoInteract,
+                                    }"
+                                />
+                                Mining
+                            </div>
                         </div>
                     </div>
                 </div>

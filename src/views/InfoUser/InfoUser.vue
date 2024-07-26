@@ -11,7 +11,7 @@
             <div class="wrap-username-lv">
                 <div class="username">{{ first_name }} {{ last_name }}</div>
                 <div class="lv">
-                    <div class="wr-balance">
+                    <!-- <div class="wr-balance">
                         <img src="@public/assets/logo.svg" />
                         <div
                             class="text-balance"
@@ -22,7 +22,7 @@
                                     ?.balance / 1000
                             }}
                         </div>
-                    </div>
+                    </div> -->
 
                     <div class="text">
                         Level {{ dataLevel?.attributes?.level }}

@@ -52,8 +52,8 @@ export default {
 
         const dataUserTele = window?.Telegram?.WebApp?.initDataUnsafe;
 
-        let first_name = dataUserTele?.user?.first_name || "Su";
-        let last_name = dataUserTele?.user?.last_name || "Fly_007";
+        let first_name = dataUserTele?.user?.first_name || "";
+        let last_name = dataUserTele?.user?.last_name || "";
 
         if (
             dataUserTele.start_param &&

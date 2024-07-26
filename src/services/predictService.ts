@@ -40,9 +40,9 @@ const predictService = {
 
     async getRateFlip(idUser: number) {
         const headers = {
-            Authorization:
-                "Bearer 660787f4d83b0ac80df01fc58696d85b409f92bfccc6ee30b4a5eac5488513b8fc58dbcdf0005885f3aa5d95ed67a3af1ed7d9a1f517bebdea657e867dbfc1c03dfb072d987cd3c0472cbfa46170d58ebb26f044921ca1b9b9fd8df8499a143d932221c0393f3324b7d00100b8b8869cb1475b8e80d95e3e02ed87a97c350319",
-            "Content-Type": "application/json",
+            // Authorization:
+            //     "Bearer 660787f4d83b0ac80df01fc58696d85b409f92bfccc6ee30b4a5eac5488513b8fc58dbcdf0005885f3aa5d95ed67a3af1ed7d9a1f517bebdea657e867dbfc1c03dfb072d987cd3c0472cbfa46170d58ebb26f044921ca1b9b9fd8df8499a143d932221c0393f3324b7d00100b8b8869cb1475b8e80d95e3e02ed87a97c350319",
+            // "Content-Type": "application/json",
             Accept: "*/*",
             "ngrok-skip-browser-warning": "1",
         };

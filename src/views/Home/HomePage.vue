@@ -31,6 +31,7 @@ import NotificationToast from "@/components/NotificationToast.vue";
 import { title } from "process";
 import { ILevel } from "@/interface";
 import InfoUser from "@/views/InfoUser/InfoUser.vue";
+import { formattedBalance } from "@/utils";
 
 const REF_MESS_PREFIX: string = "start r_";
 const REF_TOKEN_PREFIX: string = "TOKEN_";
@@ -225,6 +226,8 @@ export default {
                     }
                 } else {
                     const resData = data?.data?.[0];
+
+                    secureStorage.set("data_login", resData);
 
                     this.dataLogin = resData;
                     this.dataQPoint =
@@ -628,8 +631,10 @@ export default {
                         :class="{ 'animate-text': isAnimated }"
                     >
                         {{
-                            dataLogin?.attributes?.qpoint?.data?.attributes
-                                ?.balance / 1000
+                            formattedBalance(
+                                dataLogin?.attributes?.qpoint?.data?.attributes
+                                    ?.balance
+                            )
                         }}
                     </div>
                     <img src="@public/assets/logo.svg" />

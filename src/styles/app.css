@@ -25,44 +25,24 @@
     padding: 5px;
     transition: background-color 0.3s, box-shadow 0.3s, transform 0.3s ease;
     position: relative;
-    /* border-right: 1px solid rgba(0, 0, 0, 0.1); */
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     background-image: url("./../../public/assets/button-icons/bg-btn.png");
     background-position: center;
-    /* background-repeat: no-repeat; */
     background-size: 100% 100%;
 }
-
-/* .btn-item:last-child {
-    border-right: none;
-} */
 
 .btn-item:hover {
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
     transform: translateY(-2px);
 }
 
-/* .btn-item:not(:last-child)::after {
-    content: "";
-    position: absolute;
-    top: 10%;
-    right: 0;
-    bottom: 10%;
-    width: 1px;
-    background: linear-gradient(to bottom, transparent, #ccc, transparent);
-} */
-
 .btn-item.active {
     background-image: url("./../../public/assets/button-icons/bg-btn-active.png");
-    /* background-color: #ffa53a; */
     z-index: 1000;
-    /* border-top-left-radius: 5px;
-    border-top-right-radius: 5px; */
     margin-top: -5px;
-    /* border-top: 1px solid #8c8181; */
 }
 
 .item-img img {
@@ -82,9 +62,7 @@
 .item-title {
     font-size: 10px;
     color: #fff;
-    text-shadow: 1px 1px 0 #9f8900, -1px -1px 0 #9f8900, 1px -1px 0 #9f8900,
-        -1px 1px 0 #9f8900, 1px 0 0 #9f8900, -1px 0 0 #9f8900, 0 1px 0 #9f8900,
-        0 -1px 0 #9f8900;
+    text-shadow: 1px 1px 0 #9f8900, -1px -1px 0 #9f8900, 1px -1px 0 #9f8900, -1px 1px 0 #9f8900, 1px 0 0 #9f8900, -1px 0 0 #9f8900, 0 1px 0 #9f8900, 0 -1px 0 #9f8900;
 }
 
 .item-title.active {
@@ -105,8 +83,7 @@
     justify-content: end;
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
-    box-shadow: inset 2px 2px 3px #ac772e, inset -2px -2px 3px #ac772e,
-        inset -2px 2px 3px #ac772e, inset 2px -2px 3px #ac772e;
+    box-shadow: inset 2px 2px 3px #ac772e, inset -2px -2px 3px #ac772e, inset -2px 2px 3px #ac772e, inset 2px -2px 3px #ac772e;
 }
 
 .booster .item-img img {
@@ -121,6 +98,7 @@
 .booster .item-title {
     font-size: 14px;
 }
+
 
 /*  */
 
@@ -154,20 +132,6 @@
 
 .container-game {
     position: relative;
-}
-
-.container-info {
-    width: 100%;
-    position: absolute;
-    display: flex;
-    justify-content: space-between;
-    font-size: 13px;
-    top: 2%;
-    left: 2%;
-}
-
-.wrap-username {
-    margin: 5px;
 }
 
 .popup-cooming-soon {
@@ -250,11 +214,22 @@
     border-radius: 5px;
 }
 
-.wrap-commit_reward {
+.contaner-balance {
     position: absolute;
-    top: 30%;
+    top: 25%;
     left: 50%;
     transform: translate(-50%, -50%);
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.wrap-commit_reward {
+    /* position: absolute;
+    top: 25%;
+    left: 50%;
+    transform: translate(-50%, -50%); */
     width: 80%;
     background: rgb(0 31 63 / 40%);
     padding: 15px;
@@ -263,6 +238,7 @@
     display: flex;
     flex-direction: column;
     gap: 5px;
+    position: relative;
 }
 
 .btn-commit_reward:disabled {
@@ -277,16 +253,8 @@
 }
 
 .wrap-commit_reward .box-left {
-    text-shadow: 1px 1px 0 #9f8900, -1px -1px 0 #9f8900, 1px -1px 0 #9f8900,
-        -1px 1px 0 #9f8900, 1px 0 0 #9f8900, -1px 0 0 #9f8900, 0 1px 0 #9f8900,
-        0 -1px 0 #9f8900;
+    text-shadow: 1px 1px 0 #9f8900, -1px -1px 0 #9f8900, 1px -1px 0 #9f8900, -1px 1px 0 #9f8900, 1px 0 0 #9f8900, -1px 0 0 #9f8900, 0 1px 0 #9f8900, 0 -1px 0 #9f8900;
 }
-
-/* .wrap-commit_reward .box-right {
-    text-shadow: 2px 2px 0 #9f8900, -2px -2px 0 #9f8900, 2px -2px 0 #9f8900,
-        -2px 2px 0 #9f8900, 2px 0 0 #9f8900, -2px 0 0 #9f8900, 0 2px 0 #9f8900,
-        0 -2px 0 #9f8900;
-} */
 
 .box-left .content {
     font-size: 12px;
@@ -297,7 +265,8 @@
     top: 3%;
     right: 3%;
     display: flex;
-    gap: 10px;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .link-checkin a {
@@ -312,75 +281,12 @@
     padding: 10px;
 }
 
-.wr-flip {
-    position: absolute;
-    top: 7%;
-    right: 3%;
-    display: flex;
-}
-
-.wr-flip a {
-    color: #fff;
-    text-decoration: none;
-}
-
-.wr-flip button {
-    border: none;
-    border-radius: 8px;
-    font-size: 10px;
-    padding: 10px;
-}
-
-.wrap-score {
-    width: 70%;
-    position: absolute;
-    top: 14%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    margin: 5px;
-    border-radius: 10px;
-}
-
-.wrap-score .balance {
-    /* transition: all 1s ease-in-out; */
-    animation: counter 5s infinite alternate ease-in-out;
-}
-
-.wrap-score::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    /* background: #67bdef; */
-    filter: blur(20px);
-    z-index: -1;
-    border-radius: 30%;
-}
-
-.wrap-score .content {
-    text-align: center;
-    text-shadow: 1px 1px 0 #9f8900, -1px -1px 0 #9f8900, 1px -1px 0 #9f8900,
-        -1px 1px 0 #9f8900, 1px 0 0 #9f8900, -1px 0 0 #9f8900, 0 1px 0 #9f8900,
-        0 -1px 0 #9f8900;
-}
-
-.wrap-score .content img {
-    width: 50px;
-    height: 50px;
-    border-radius: 5px;
-}
-
-.content .score {
-    font-size: 28px;
-}
-
 .btn-commit_reward {
     border-radius: 10px;
     border: none;
     font-size: 10px;
     width: 108px;
+    border-radius: 15px;
 }
 
 .wrap-commit_reward::after {
@@ -646,4 +552,55 @@
 
 .fa-spinner {
     animation: fa-spin 2s infinite linear;
+}
+
+.box-flip {
+    position: absolute;
+    top: 35%;
+    right: 5%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+}
+
+.box-flip .img {
+    background-image: url("./../../public/assets/event/FlipCoin.gif");
+    width: 50px;
+    height: 50px;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.box-flip a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.box-flip button {
+    border: none;
+    border-radius: 8px;
+    font-size: 10px;
+    padding: 10px;
+}
+
+.wr-balance {
+    display: flex;
+    gap: 3px;
+    align-items: end;
+    width: fit-content;
+    padding: 5px 15px;
+    margin: 0 auto;
+    text-shadow: 1px 1px 0 #3b0000, -1px -1px 0 #3b0000, 1px -1px 0 #3b0000, -1px 1px 0 #3b0000, 1px 0 0 #3b0000, -1px 0 0 #3b0000, 0 1px 0 #3b0000, 0 -1px 0 #3b0000;
+    img {
+        width: 20px;
+        height: 20px;
+    }
+    .text-balance {
+        transition: all 1s ease;
+    }
+    .animate-text {
+        transform: scale(1.1);
+    }
 }

@@ -88,7 +88,7 @@ export default defineComponent({
             last_name: last_name,
             isAnimated: false,
 
-            urlAvt: null,
+            urlAvt: "./../../../public/assets/no-img.jpg",
             dataLevel: {} as ILevel,
             expLevelNext: {} as ILevel,
             percentageLevel: 0,

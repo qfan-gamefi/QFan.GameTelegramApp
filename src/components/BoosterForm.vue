@@ -379,7 +379,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .close-booster {
     cursor: pointer;
     display: flex;

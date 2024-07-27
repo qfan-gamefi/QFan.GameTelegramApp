@@ -60,8 +60,20 @@
                     </button>
                 </div>
 
-                <div class="re-load" @click="history">
-                    <i class="fa-solid fa-rotate"></i>
+                <div class="wr-bottom">
+                    <div class="your-balance">
+                        Your balance:
+                        {{
+                            formattedBalance(
+                                dataLogin?.attributes?.qpoint?.data?.attributes
+                                    ?.balance
+                            )
+                        }}
+                        <img src="@public/assets/logo.svg" />
+                    </div>
+                    <div class="re-load" @click="history">
+                        <i class="fa-solid fa-rotate"></i>
+                    </div>
                 </div>
             </div>
 
@@ -109,14 +121,17 @@
                             </div>
                         </div>
                         <div class="reward">
-                            Point: {{ parseReward(item?.Reward).point }}
+                            Exp: 5
+                            <!-- {{ parseReward(item?.Reward).point }} -->
                             <br />
-                            {{ item?.ValueType }}:
-                            {{
-                                parseReward(item?.Reward)?.[
-                                    item?.ValueType.toLowerCase()
-                                ]
-                            }}
+                            <div>
+                                {{ item?.ValueType }}:
+                                {{
+                                    parseReward(item?.Reward)?.[
+                                        item?.ValueType.toLowerCase()
+                                    ]
+                                }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -164,7 +179,7 @@ import LoadingForm from "@/components/LoadingForm.vue";
 import NotificationToast from "@/components/NotificationToast.vue";
 import PopupConfirm from "@/components/PopupConfirm.vue";
 import userServiceTelebot from "@/services/useServiceTeleBot";
-import { formatDateTimeUS } from "@/utils";
+import { formatDateTimeUS, formattedBalance } from "@/utils";
 import { defineComponent } from "vue";
 import { secureStorage } from "@/storage/storage";
 import predictService from "@/services/predictService";
@@ -185,10 +200,11 @@ export default defineComponent({
     //         fullName: (state) => state?.fullName,
     //     }),
     // },
-    created() {
+    async created() {
         this.getAvt();
         this.history();
         this.getRate();
+        this.dataLogin = await secureStorage.get("data_login");
     },
     data() {
         const userInfo = window.Telegram.WebApp.initDataUnsafe;
@@ -205,9 +221,11 @@ export default defineComponent({
                     ""
                 );
         }
+
         return {
+            dataLogin: null,
             loading: false,
-            userId: userInfo?.user?.id,
+            userId: userInfo?.user?.id || "",
             fullName: `${userInfo?.user?.first_name} ${userInfo?.user?.last_name}`,
             tokenUser: startParam,
             isPopup: false,
@@ -218,7 +236,7 @@ export default defineComponent({
             status: "",
             loadingSubmit: false,
 
-            timeCountdown: 60,
+            timeCountdown: 10,
             isAnimating: false,
 
             showNotification: false,
@@ -260,6 +278,7 @@ export default defineComponent({
             this.getRate();
         },
         formatDateTimeUS,
+        formattedBalance,
         async renderNotification(message, type) {
             this.notificationMessage = message;
             this.notificationType = type;
@@ -280,7 +299,7 @@ export default defineComponent({
                     this.animateCounter();
                     this.timeCountdown -= 1;
                 } else {
-                    this.timeCountdown = 60;
+                    this.timeCountdown = 10;
                     this.loadingSubmit = false;
                     clearInterval(countdown);
                 }
@@ -323,11 +342,12 @@ export default defineComponent({
             const timeoutId = setTimeout(() => {
                 this.showPopup();
                 clearTimeout(timeoutId);
-            }, 3000);
+            }, 5000);
         },
         async flipCoin() {
             this.loadingSubmit = true;
-
+            this.status = "";
+            this.flipClass = "";
             await this.handleSubmit();
         },
 
@@ -336,6 +356,13 @@ export default defineComponent({
                 this.userId
             );
             this.urlImg = response;
+        },
+        async getAvtOpponent(idOpponent: number) {
+            const response = await userServiceTelebot.getAvtTelegram(
+                idOpponent
+            );
+
+            this.urlImgWinner = response;
         },
 
         async handleSubmit() {
@@ -358,8 +385,8 @@ export default defineComponent({
                 const res = await predictService.makeFlip(data);
 
                 if (res.success) {
-                    const result = res?.data;
                     this.startCountdown();
+                    const result = res?.data;
 
                     if (result?.Status === "Placed") {
                         this.status = "placed";
@@ -372,8 +399,10 @@ export default defineComponent({
                             this.status = "win";
                             this.flipClass = "tails";
                             this.descWinner = "You Win";
+                            this.urlImgWinner = this.urlImg;
                         }
                         if (result?.Status === "Lose") {
+                            this.getAvtOpponent(result?.WinnerInfo?.UserId);
                             this.status = "lose";
                             this.flipClass = "heads";
                             this.descWinner = "You Lose";
@@ -381,7 +410,6 @@ export default defineComponent({
                         const text = `${result?.WinnerInfo?.UserName}`;
 
                         this.text = text;
-                        this.urlImgWinner = result?.WinnerInfo?.UserPhotoUrl;
                     }
                     this.timeoutPopup();
                 } else {
@@ -389,7 +417,7 @@ export default defineComponent({
                         this.isToken = true;
                         return;
                     } else {
-                        this.startCountdown();
+                        this.loadingSubmit = false;
                         this.renderErr(res?.data?.Reason);
                     }
                 }
@@ -404,10 +432,8 @@ export default defineComponent({
 
             try {
                 const res = await predictService.getHistoryFlip(this.userId);
-
                 this.loading = false;
                 this.dataHistory = res;
-
                 this.lights = res?.map((item) => item?.Status);
             } catch (error) {
                 this.loading = false;
@@ -415,10 +441,8 @@ export default defineComponent({
         },
         async getRate() {
             const response = await predictService.getRateFlip(this.userId);
-
             const totalCount = response?.WonCount + response?.LostCount;
             const winRate = (response?.WonCount / totalCount) * 100;
-
             this.winRate = isNaN(winRate) ? "0" : winRate?.toFixed(2);
         },
     },
@@ -556,16 +580,16 @@ export default defineComponent({
     transform-style: preserve-3d;
 }
 #coin.heads {
-    -webkit-animation: flipHeads 3s ease-out forwards;
-    -moz-animation: flipHeads 3s ease-out forwards;
-    -o-animation: flipHeads 3s ease-out forwards;
-    animation: flipHeads 3s ease-out forwards;
+    -webkit-animation: flipHeads 5s ease-out forwards;
+    -moz-animation: flipHeads 5s ease-out forwards;
+    -o-animation: flipHeads 5s ease-out forwards;
+    animation: flipHeads 5s ease-out forwards;
 }
 #coin.tails {
-    -webkit-animation: flipTails 3s ease-out forwards;
-    -moz-animation: flipTails 3s ease-out forwards;
-    -o-animation: flipTails 3s ease-out forwards;
-    animation: flipTails 3s ease-out forwards;
+    -webkit-animation: flipTails 5s ease-out forwards;
+    -moz-animation: flipTails 5s ease-out forwards;
+    -o-animation: flipTails 5s ease-out forwards;
+    animation: flipTails 5s ease-out forwards;
 }
 #coin div {
     position: absolute;
@@ -598,9 +622,9 @@ export default defineComponent({
         transform: rotateY(0);
     }
     to {
-        -webkit-transform: rotateY(1800deg);
-        -moz-transform: rotateY(1800deg);
-        transform: rotateY(1800deg);
+        -webkit-transform: rotateY(3600deg);
+        -moz-transform: rotateY(3600deg);
+        transform: rotateY(3600deg);
     }
 }
 @keyframes flipTails {
@@ -610,9 +634,9 @@ export default defineComponent({
         transform: rotateY(0);
     }
     to {
-        -webkit-transform: rotateY(1980deg);
-        -moz-transform: rotateY(1980deg);
-        transform: rotateY(1980deg);
+        -webkit-transform: rotateY(3780deg);
+        -moz-transform: rotateY(3780deg);
+        transform: rotateY(3780deg);
     }
 }
 
@@ -638,9 +662,7 @@ export default defineComponent({
 }
 
 .box-submit {
-    margin-bottom: 20px;
     .btn-submit {
-        // background-color: #3eff3a;
         padding: 10px;
         border-radius: 5px;
         width: fit-content;
@@ -656,7 +678,7 @@ export default defineComponent({
 
 .wr-history {
     background-color: #500d79;
-    height: calc(100% - 406px);
+    height: calc(100% - 436px);
     margin-top: 15px;
     border: 2px solid #d631ff;
     border-radius: 10px;
@@ -771,11 +793,6 @@ export default defineComponent({
     }
 }
 
-.re-load {
-    position: absolute;
-    bottom: 3%;
-    right: 3%;
-}
 .btn-close {
     border-radius: 5px;
     font-size: 12px;
@@ -797,5 +814,25 @@ export default defineComponent({
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 999;
+}
+
+.your-balance {
+    display: flex;
+    font-size: 10px;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.4);
+    width: fit-content;
+    padding: 3px;
+    border-radius: 10px;
+    img {
+        margin-left: 3px;
+        width: 15px;
+        height: 15px;
+    }
+}
+.wr-bottom {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 10px 5px;
 }
 </style>

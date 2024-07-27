@@ -478,7 +478,7 @@ export default defineComponent({
     z-index: 999;
     animation: fadeInDetailEvent 0.1s ease forwards;
     color: #fff;
-    background-image: url("./../../public/assets/event/background-flip.png");
+    background-image: url("./../../../public/assets/event/background-flip.png");
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;

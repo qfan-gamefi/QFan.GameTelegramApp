@@ -72,6 +72,7 @@ export default defineComponent({
             deep: true,
             handler() {
                 this.triggerAnimation();
+                this.getLevels();
             },
         },
     },

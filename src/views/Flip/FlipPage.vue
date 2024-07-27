@@ -14,11 +14,15 @@
                         ></div>
                         <div class="name-rate">
                             <div>{{ fullName }}</div>
-                            <div>
-                                Win rate:
+                            <div class="text-rate">
+                                Win Rate 50 Flips:
                                 <span v-bind:class="{ 'loader-rate': loading }"
                                     >{{ winRate }}%</span
                                 >
+                            </div>
+                            <div>
+                                Total W/L:
+                                <span>{{ winFlip }}/{{ lostFlip }}</span>
                             </div>
                         </div>
                     </div>
@@ -57,18 +61,14 @@
                         :disabled="loadingSubmit"
                     >
                         Flip the coin - 200
+                        <img src="@public/assets/logo.svg" />
                     </button>
                 </div>
 
                 <div class="wr-bottom">
                     <div class="your-balance">
                         Your balance:
-                        {{
-                            formattedBalance(
-                                dataLogin?.attributes?.qpoint?.data?.attributes
-                                    ?.balance
-                            )
-                        }}
+                        {{ formattedBalance(balance) }}
                         <img src="@public/assets/logo.svg" />
                     </div>
                     <div class="re-load" @click="history">
@@ -183,6 +183,8 @@ import { formatDateTimeUS, formattedBalance } from "@/utils";
 import { defineComponent } from "vue";
 import { secureStorage } from "@/storage/storage";
 import predictService from "@/services/predictService";
+import userService from "@/services/userService";
+import { TFlipClass, TStatusFlip } from "@/interface";
 
 // import { mapState } from "vuex";
 
@@ -201,25 +203,20 @@ export default defineComponent({
     //     }),
     // },
     async created() {
+        this.getInfo();
         this.getAvt();
         this.history();
         this.getRate();
-        this.dataLogin = await secureStorage.get("data_login");
+        // this.dataLogin = await secureStorage.get("data_login");
     },
     data() {
         const userInfo = window.Telegram.WebApp.initDataUnsafe;
         let startParam = "";
         if (
-            window.Telegram.WebApp.initDataUnsafe.start_param &&
-            window.Telegram.WebApp.initDataUnsafe.start_param?.startsWith(
-                "TOKEN_"
-            )
+            userInfo.start_param &&
+            userInfo.start_param?.startsWith("TOKEN_")
         ) {
-            startParam =
-                window.Telegram.WebApp.initDataUnsafe.start_param?.replace(
-                    "TOKEN_",
-                    ""
-                );
+            startParam = userInfo.start_param?.replace("TOKEN_", "");
         }
 
         return {
@@ -229,11 +226,11 @@ export default defineComponent({
             fullName: `${userInfo?.user?.first_name} ${userInfo?.user?.last_name}`,
             tokenUser: startParam,
             isPopup: false,
-            flipClass: "",
+            flipClass: "" as TFlipClass,
             urlImg: null,
             urlImgWinner: null,
             dataHistory: null,
-            status: "",
+            status: "" as TStatusFlip,
             loadingSubmit: false,
 
             timeCountdown: 10,
@@ -248,6 +245,9 @@ export default defineComponent({
             isToken: false,
             winRate: 0,
             lights: [],
+            balance: 0,
+            winFlip: 0,
+            lostFlip: 0,
         };
     },
     methods: {
@@ -276,6 +276,7 @@ export default defineComponent({
             this.isPopup = false;
             this.history();
             this.getRate();
+            this.getInfo();
         },
         formatDateTimeUS,
         formattedBalance,
@@ -385,6 +386,7 @@ export default defineComponent({
                 const res = await predictService.makeFlip(data);
 
                 if (res.success) {
+                    this.balance = Number(this.balance) - 200;
                     this.startCountdown();
                     const result = res?.data;
 
@@ -429,12 +431,13 @@ export default defineComponent({
         async history() {
             this.loading = true;
             this.getRate();
-
+            this.getInfo();
             try {
                 const res = await predictService.getHistoryFlip(this.userId);
                 this.loading = false;
                 this.dataHistory = res;
-                this.lights = res?.map((item) => item?.Status);
+                this.lights = res?.slice(0, 20)?.map((item) => item?.Status);
+                // res?.map((item) => item?.Status);
             } catch (error) {
                 this.loading = false;
             }
@@ -443,7 +446,23 @@ export default defineComponent({
             const response = await predictService.getRateFlip(this.userId);
             const totalCount = response?.WonCount + response?.LostCount;
             const winRate = (response?.WonCount / totalCount) * 100;
+
+            this.winFlip = response?.WonCount || 0;
+            this.lostFlip = response?.LostCount || 0;
             this.winRate = isNaN(winRate) ? "0" : winRate?.toFixed(2);
+        },
+        async getInfo() {
+            try {
+                const data = await userService.getInfo(this.userId);
+                const resData = data?.data?.[0];
+
+                this.dataLogin = resData;
+                this.balance = Number(
+                    resData?.attributes?.qpoint?.data?.attributes?.balance
+                );
+            } catch (error) {
+                console.log(error);
+            }
         },
     },
 });
@@ -501,7 +520,8 @@ export default defineComponent({
     .box-info {
         display: flex;
         justify-content: space-between;
-        padding: 15px 15px 0;
+        padding: 15px 10px 0;
+        gap: 10px;
         .user {
             display: flex;
             gap: 10px;
@@ -518,7 +538,7 @@ export default defineComponent({
                 background-size: contain;
             }
             .name-rate {
-                font-size: 12px;
+                font-size: 10px;
                 display: flex;
                 flex-direction: column;
                 gap: 5px;
@@ -529,11 +549,11 @@ export default defineComponent({
         }
         .title {
             text-align: center;
-            font-size: 20px;
+            font-size: 16px;
             color: #e6b2ff;
         }
         .time {
-            font-size: 20px;
+            font-size: 16px;
             color: #ffcf56;
             text-align: center;
             transition: transform 0.5s ease-in-out;
@@ -669,6 +689,10 @@ export default defineComponent({
         margin: 0 auto;
         cursor: pointer;
         font-size: 12px;
+        img {
+            width: 15px;
+            height: 15px;
+        }
     }
     .btn-submit:disabled {
         opacity: 0.6;

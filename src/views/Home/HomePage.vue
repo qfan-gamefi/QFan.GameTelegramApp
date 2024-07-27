@@ -457,11 +457,6 @@ export default {
             try {
                 this.titleCheckin = "Processing";
                 this.isExecCheckin = true;
-                const address = localStorage.getItem("address");
-                if (!address || address == "null") {
-                    this.$router.push({ name: "WalletCreate" });
-                    return;
-                }
                 const keyringService = new KeyringService();
                 const isUnlock = await keyringService.unlock(
                     secureStorage.getPassword() as string,
@@ -514,17 +509,22 @@ export default {
             }
         },
         async onAutoInteract() {
-            const address = localStorage.getItem("address");
-            if (!address || address == "null") {
-                this.$router.push({ name: "WalletCreate" });
-                return;
-            }
-
             const keyringService = new KeyringService();
             await keyringService.unlock(
                 secureStorage.getPassword() as string,
                 false
             );
+
+            const activeWallet = (await keyringService
+                ?.getPrivateKeys()
+                ?.at(0)) as Wallet;
+
+            const address = await activeWallet?.getAddress();
+
+            if (!address) {
+                this.$router.push({ name: "WalletCreate" });
+                return;
+            }
 
             // this.titleAutoInteract = "Mining...";
             this.calcWidthMining();

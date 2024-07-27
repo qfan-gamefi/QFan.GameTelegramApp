@@ -261,7 +261,6 @@ export default defineComponent({
         handleYesToken() {
             this.isToken = false;
             window.Telegram.WebApp.openTelegramLink(
-                // "https://t.me/Sampletwabot?start=invoketoken"
                 "https://t.me/QFanClubBot?start=invoketoken"
             );
             window.Telegram.WebApp.close();

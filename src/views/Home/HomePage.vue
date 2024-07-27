@@ -28,7 +28,7 @@ import KeyringService from "@/crypto_utils/KDKeyringService";
 import { transferToken } from "@/crypto_utils/networks";
 import type { Wallet } from "quais";
 import NotificationToast from "@/components/NotificationToast.vue";
-import { title } from "process";
+// import { title } from "process";
 import { ILevel } from "@/interface";
 import InfoUser from "@/views/InfoUser/InfoUser.vue";
 import { formattedBalance } from "@/utils";
@@ -227,7 +227,7 @@ export default {
                 } else {
                     const resData = data?.data?.[0];
 
-                    secureStorage.set("data_login", resData);
+                    // secureStorage.set("data_login", resData);
 
                     this.dataLogin = resData;
                     this.dataQPoint =
@@ -236,9 +236,6 @@ export default {
                         resData.attributes?.qpoint?.data?.attributes?.balance
                     );
                     this.triggerAnimation();
-                    // if (!this.isClaim) {
-                    //     await this.countdownFunc();
-                    // }
                 }
             } catch (error) {
                 console.error("Error fetching API data:", error);
@@ -460,6 +457,11 @@ export default {
             try {
                 this.titleCheckin = "Processing";
                 this.isExecCheckin = true;
+                const address = localStorage.getItem("address");
+                if (!address || address == "null") {
+                    this.$router.push({ name: "WalletCreate" });
+                    return;
+                }
                 const keyringService = new KeyringService();
                 const isUnlock = await keyringService.unlock(
                     secureStorage.getPassword() as string,
@@ -467,8 +469,15 @@ export default {
                 );
                 if (isUnlock) {
                     const activeWallet = (await keyringService
-                        .getPrivateKeys()
-                        .at(0)) as Wallet;
+                        ?.getPrivateKeys()
+                        ?.at(0)) as Wallet;
+
+                    const address = await activeWallet?.getAddress();
+
+                    if (!address) {
+                        this.$router.push({ name: "WalletCreate" });
+                        return;
+                    }
 
                     const tx = await transferToken(
                         activeWallet.privateKey,
@@ -505,6 +514,18 @@ export default {
             }
         },
         async onAutoInteract() {
+            const address = localStorage.getItem("address");
+            if (!address || address == "null") {
+                this.$router.push({ name: "WalletCreate" });
+                return;
+            }
+
+            const keyringService = new KeyringService();
+            await keyringService.unlock(
+                secureStorage.getPassword() as string,
+                false
+            );
+
             // this.titleAutoInteract = "Mining...";
             this.calcWidthMining();
             this.isExecAutoInteract = true;

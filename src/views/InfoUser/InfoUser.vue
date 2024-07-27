@@ -34,7 +34,7 @@
                             :style="{ width: percentageLevel + '%' }"
                         />
                         <div class="progress-text">
-                            <div v-if="isMaxLv">Max</div>
+                            <div class="number" v-if="isMaxLv">Max</div>
                             <div class="number" v-else>
                                 {{ percentageLevel?.toFixed(2) }}%
                             </div>

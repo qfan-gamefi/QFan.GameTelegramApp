@@ -20,6 +20,7 @@ export default {
         visible: {
             type: Boolean,
             required: true,
+            default: false,
         },
     },
     methods: {
@@ -48,6 +49,7 @@ export default {
 }
 
 .popup-content {
+    font-size: 12px;
     background: white;
     padding: 20px;
     border-radius: 5px;

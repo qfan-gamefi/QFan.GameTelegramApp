@@ -186,7 +186,8 @@
                                     {{ item?.UserName || item?.UserId }}
                                 </div>
                                 <div class="your-point">
-                                    {{ item?.Balance }}
+                                    Point: {{ item?.Balance }} <br />
+                                    QFP: {{ item?.QFP_VALUE || 0 }}
                                 </div>
                             </div>
                         </div>
@@ -306,7 +307,7 @@
 </template>
 
 <script lang="ts">
-import betService from "../../services/betService";
+import predictService from "../../services/predictService";
 import Notification from "../../components/NotificationToast.vue";
 import PopupConfirm from "../../components/PopupConfirm.vue";
 import dayjs from "dayjs";
@@ -506,7 +507,7 @@ export default {
                     userName: nameTele,
                 };
 
-                const dataPredict = await betService.addBidding(data);
+                const dataPredict = await predictService.addBidding(data);
 
                 if (dataPredict?.bid) {
                     this.bidValue = null;
@@ -547,7 +548,7 @@ export default {
 
             if (!this.detailEvent) return;
             try {
-                const games = await betService.getListGame(
+                const games = await predictService.getListGame(
                     this.idUser,
                     this.detailEvent
                 );
@@ -561,24 +562,26 @@ export default {
                     };
                 });
 
-                this.leaderboard = await betService.getFilterData(
-                    "balancePoints",
-                    { order: [["Balance", "DESC"]] }
+                this.leaderboard = await predictService.getLeaderBoard(
+                    this.detailEvent?.attributes?.domainCode
                 );
-                this.history = await betService.getFilterData("bids", {
+                this.history = await predictService.getFilterData("bids", {
                     where: { UserId: this.idUser },
                     order: [["createdAt", "DESC"]],
                     include: "Games",
                 });
 
-                const userPointdata = await betService.getFilterData(
+                const userPointdata = await predictService.getFilterData(
                     "balancePoints",
                     { where: { UserId: this.idUser } }
                 );
 
-                const dataRankCurrent = await betService.getYourRank(
+                const dataTele = window.Telegram.WebApp.initDataUnsafe?.user;
+                const nameTele = `${dataTele.first_name} ${dataTele.last_name}`;
+                const dataRankCurrent = await predictService.getYourRank(
                     this.idUser,
-                    this.detailEvent
+                    this.detailEvent,
+                    nameTele
                 );
 
                 if (dataRankCurrent?.length > 0) {
@@ -1048,6 +1051,7 @@ export default {
     border-radius: 3px;
     min-width: 90px;
     max-width: 90px;
+    font-size: 11px;
 }
 
 .list-history {

@@ -37,16 +37,18 @@ export const calcExpPercentage = (
     const beforeDataLevel = levelAll?.find(
         (item) =>
             Number(item?.attributes?.level) ==
-            Number(currentLv?.attributes?.level) - 1
+            Number(currentLv?.attributes?.level)
     );
 
     const nextDataLevel = nextExpLevel(levelAll, currentLv);
-    if (!beforeDataLevel || !nextDataLevel) {
-        return 0;
-    }
 
-    const beforeExp = Number(beforeDataLevel.attributes.exp);
-    const nextExp = Number(nextDataLevel.attributes.exp);
+    if (!nextDataLevel?.attributes?.exp) return 100;
+    // if (!beforeDataLevel || !nextDataLevel) {
+    //     return 0;
+    // }
+
+    const beforeExp = Number(beforeDataLevel?.attributes?.exp);
+    const nextExp = Number(nextDataLevel?.attributes?.exp);
 
     return ((dataExpCurrent - beforeExp) / (nextExp - beforeExp)) * 100;
 };

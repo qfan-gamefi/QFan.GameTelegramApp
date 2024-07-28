@@ -658,7 +658,10 @@ export default {
                             )
                         }}
                     </div>
-                    <img src="@public/assets/logo.svg" />
+                   
+                        <img src="@public/assets/logo.svg" />
+                   
+                    
                 </div>
                 <div class="wrap-commit_reward" :style="beforeStyle">
                     <div class="box-info">

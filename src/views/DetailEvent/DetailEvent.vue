@@ -6,6 +6,7 @@
                 class="banner-event"
                 :style="{
                     backgroundImage: `url(${apiBaseUrl}${detailEvent?.attributes?.banner?.data?.attributes?.formats?.small?.url})`,
+                    // backgroundImage: `url(${detailEvent?.attributes?.banner?.data?.attributes?.formats?.small?.url})`,
                 }"
             >
                 <div class="text-banner">
@@ -18,7 +19,7 @@
                         </div>
                     </div>
 
-                    <div class="box-time">
+                    <!-- <div class="box-time">
                         <span
                             ><i class="fa-solid fa-clock"></i>
                             {{
@@ -31,19 +32,18 @@
                     </div>
                     <div class="box-time">
                         <span>Your Points:{{ this.userPoint }}</span>
-                    </div>
+                    </div> -->
                 </div>
-
-                <div class="btn-banner">
-                    <div
-                        v-for="(button, index) in buttonsBanner"
-                        :key="index"
-                        class="btn-item-banner"
-                        :class="{ active: activeButton === button?.name }"
-                        @click="setActiveButton(button?.name)"
-                    >
-                        {{ button.label }}
-                    </div>
+            </div>
+            <div class="btn-banner">
+                <div
+                    v-for="(button, index) in buttonsBanner"
+                    :key="index"
+                    class="btn-item-banner"
+                    :class="{ active: activeButton === button?.name }"
+                    @click="setActiveButton(button?.name)"
+                >
+                    {{ button.label }}
                 </div>
             </div>
 
@@ -553,8 +553,6 @@ export default {
                     this.detailEvent
                 );
 
-                console.log(games);
-
                 this.games = games.map((game) => {
                     return {
                         ...game,
@@ -653,6 +651,7 @@ export default {
 } */
 .banner-event {
     width: 100%;
+    height: 17vh;
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
@@ -661,8 +660,8 @@ export default {
 
 .btn-banner {
     display: flex;
-    bottom: 0;
-    position: absolute;
+    /* bottom: 0;
+    position: absolute; */
     width: 100%;
     padding: 7px 0;
     background-color: #0d2779;
@@ -914,7 +913,7 @@ export default {
 /*  */
 .list-leaderboard {
     padding: 10px 20px;
-    height: calc(100% - 350px);
+    height: calc(100% - 340px);
     display: flex;
     flex-direction: column;
     gap: 5px;
@@ -1064,7 +1063,7 @@ export default {
 }
 .box-history {
     background-color: #0c2678;
-    padding: 10px;
+    padding: 5px;
     border-radius: 10px;
     height: 100%;
     overflow: auto;

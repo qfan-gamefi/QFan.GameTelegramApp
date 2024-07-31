@@ -139,8 +139,7 @@ export default {
             }
         },
         handleJoin(itemDetail: IEvent) {
-            this.detailEvent = itemDetail;
-                        this.isJoinNow = true;
+           
             const { actionType, status, route } = itemDetail?.attributes || {};
 
             if (actionType === "POST") {

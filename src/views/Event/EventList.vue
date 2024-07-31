@@ -11,7 +11,9 @@
                     :key="index"
                     :style="{
                         backgroundImage: `url(${apiBaseUrl}${item?.attributes?.banner?.data?.attributes?.formats?.small?.url})`,
+                        // backgroundImage: `url(${item?.attributes?.banner?.data?.attributes?.formats?.small?.url})`,
                     }"
+                    @click="handleJoin(item)"
                 >
                     <div class="box-content-event">
                         <div class="title-item">
@@ -23,13 +25,10 @@
                             </div>
                         </div>
 
-                        <div class="btn-join-now">
-                            <!-- <button @click="$emit('openCoomSoon')">
-                                Join Now
-                            </button> -->
+                        <!-- <div class="btn-join-now">
                             <button @click="handleJoin(item)">Join Now</button>
-                        </div>
-                        <div class="box-time">
+                        </div> -->
+                        <!-- <div class="box-time">
                             <span
                                 ><i class="fa-solid fa-clock"></i>
                                 {{
@@ -39,7 +38,7 @@
                                     )
                                 }}</span
                             >
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>
@@ -139,9 +138,25 @@ export default {
                 this.loading = false;
             }
         },
-        handleJoin(itemDetail) {
-            this.detailEvent = itemDetail;
-            this.isJoinNow = true;
+        handleJoin(itemDetail: IEvent) {
+           
+            const { actionType, status, route } = itemDetail?.attributes || {};
+
+            if (actionType === "POST") {
+                return this.$router.push(route);
+            } else if (actionType === "REDIRECT_EXTERNAL") {
+                return (window.location.href = route);
+            } else {
+                switch (status) {
+                    case "PENDING_TO_ACTIVE":
+                        this.$emit("openComingSoon");
+                        break;
+                    case "ACTIVE":
+                        this.detailEvent = itemDetail;
+                        this.isJoinNow = true;
+                        break;
+                }
+            }
         },
     },
     computed: {
@@ -152,7 +167,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .popup-event {
     height: 100%;
     position: absolute;
@@ -209,7 +224,9 @@ export default {
 
 .item-event {
     width: 100%;
-    height: 100%;
+    /* height: 100%; */
+    /* height: 140px; */
+    height: 17vh;
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
@@ -217,14 +234,17 @@ export default {
 }
 
 .box-content-event {
-    height: calc(100% - 20px);
+    position: relative;
+    height: 100%;
+    /* padding: 80px; */
+    /* height: calc(100% - 20px);
     padding: 10px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     gap: 15px;
     font-family: monospace;
-    font-weight: bold;
+    font-weight: bold; */
 }
 
 .event-title {
@@ -253,9 +273,14 @@ export default {
     align-items: center;
 }
 
+.btn-join-now {
+    position: absolute;
+    bottom: 25%;
+    left: 17px;
+}
 .btn-join-now button {
     width: auto;
-    border-radius: 10px;
+    border-radius: 15px;
     font-size: 12px;
 }
 
@@ -276,4 +301,14 @@ export default {
     top: 1%;
     right: 2%;
 }
+
+/* @media (max-width: 360px) {
+    .btn-join-now {
+        bottom: 23%;
+        left: 15px;
+    }
+    button {
+        padding: 12px 20px;
+    }
+} */
 </style>

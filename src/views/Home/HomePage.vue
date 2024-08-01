@@ -50,7 +50,7 @@ export default {
             "Invite Link: https://t.me/QFanClubBot?start=r_";
 
         const dataUserTele = window.Telegram?.WebApp?.initDataUnsafe;
-        
+
         let first_name = dataUserTele?.user?.first_name || "";
         let last_name = dataUserTele?.user?.last_name || "";
 

@@ -139,7 +139,6 @@ export default {
             }
         },
         handleJoin(itemDetail: IEvent) {
-           
             const { actionType, status, route } = itemDetail?.attributes || {};
 
             if (actionType === "POST") {
@@ -149,7 +148,7 @@ export default {
             } else {
                 switch (status) {
                     case "PENDING_TO_ACTIVE":
-                        this.$emit("openComingSoon");
+                        this.$emit("openCoomSoon");
                         break;
                     case "ACTIVE":
                         this.detailEvent = itemDetail;
@@ -224,13 +223,11 @@ export default {
 
 .item-event {
     width: 100%;
-    /* height: 100%; */
-    /* height: 140px; */
-    height: 17vh;
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
-    border-radius: 10px;
+    border-radius: 15px;
+    /* height: 17vh; */
 }
 
 .box-content-event {
@@ -301,14 +298,4 @@ export default {
     top: 1%;
     right: 2%;
 }
-
-/* @media (max-width: 360px) {
-    .btn-join-now {
-        bottom: 23%;
-        left: 15px;
-    }
-    button {
-        padding: 12px 20px;
-    }
-} */
 </style>

@@ -721,12 +721,6 @@ export default {
                 <router-link to="/flip">
                     <div class="img" @click="handleBackButton"></div>
                 </router-link>
-
-                <!-- <div>
-                    <router-link to="/flip">
-                        <button @click="handleBackButton">Flip coin</button>
-                    </router-link>
-                </div> -->
             </div>
 
             <MainGame ref="phaserRef" />

@@ -44,5 +44,8 @@ export interface IEvent {
                 };
             };
         };
+        status: "ACTIVE" | "INACTIVE" | "PENDING_TO_ACTIVE";
+        route: string;
+        actionType: "PREDICTION" | "POST" | "REDIRECT_EXTERNAL";
     };
 }

@@ -49,14 +49,14 @@ export default {
         const telegram_bot_link =
             "Invite Link: https://t.me/QFanClubBot?start=r_";
 
-        const dataUserTele = window?.Telegram?.WebApp?.initDataUnsafe;
+        const dataUserTele = window.Telegram?.WebApp?.initDataUnsafe;
 
         let first_name = dataUserTele?.user?.first_name || "";
         let last_name = dataUserTele?.user?.last_name || "";
 
         if (
-            dataUserTele.start_param &&
-            dataUserTele.start_param?.startsWith("TOKEN_")
+            dataUserTele?.start_param &&
+            dataUserTele?.start_param?.startsWith("TOKEN_")
         ) {
             secureStorage.set(
                 "SECURITY_TOKEN",
@@ -67,8 +67,8 @@ export default {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            idUser: dataUserTele.user?.id?.toString() ?? "",
-            telegram_bot_link: telegram_bot_link + dataUserTele.user?.id || "",
+            idUser: dataUserTele?.user?.id?.toString() ?? "",
+            telegram_bot_link: telegram_bot_link + dataUserTele?.user?.id || "",
 
             showCoomingSoon: false,
             isSuccess: false,
@@ -658,10 +658,8 @@ export default {
                             )
                         }}
                     </div>
-                   
-                        <img src="@public/assets/logo.svg" />
-                   
-                    
+
+                    <img src="@public/assets/logo.svg" />
                 </div>
                 <div class="wrap-commit_reward" :style="beforeStyle">
                     <div class="box-info">
@@ -723,12 +721,6 @@ export default {
                 <router-link to="/flip">
                     <div class="img" @click="handleBackButton"></div>
                 </router-link>
-
-                <!-- <div>
-                    <router-link to="/flip">
-                        <button @click="handleBackButton">Flip coin</button>
-                    </router-link>
-                </div> -->
             </div>
 
             <MainGame ref="phaserRef" />

@@ -25,7 +25,7 @@
                     </div> -->
 
                     <div class="text">
-                        Level {{ dataLevel?.attributes?.level }}
+                        {{ dataLevel?.attributes?.levelName }}
                     </div>
 
                     <div class="exp-lv">
@@ -128,7 +128,9 @@ export default defineComponent({
                 currentLv
             );
 
-            if (dataLv?.length - 1 == Number(currentLv?.attributes?.level)) {
+            const maxLV = dataLv?.pop();
+
+            if (maxLV?.attributes?.level == currentLv?.attributes?.level) {
                 this.percentageLevel = 100;
                 this.isMaxLv = true;
             } else {

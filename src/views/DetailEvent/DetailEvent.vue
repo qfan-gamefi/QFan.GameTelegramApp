@@ -6,6 +6,7 @@
                 class="banner-event"
                 :style="{
                     backgroundImage: `url(${apiBaseUrl}${detailEvent?.attributes?.banner?.data?.attributes?.formats?.small?.url})`,
+                    // backgroundImage: `url(${detailEvent?.attributes?.banner?.data?.attributes?.formats?.small?.url})`,
                 }"
             >
                 <div class="text-banner">
@@ -18,7 +19,7 @@
                         </div>
                     </div>
 
-                    <div class="box-time">
+                    <!-- <div class="box-time">
                         <span
                             ><i class="fa-solid fa-clock"></i>
                             {{
@@ -31,19 +32,18 @@
                     </div>
                     <div class="box-time">
                         <span>Your Points:{{ this.userPoint }}</span>
-                    </div>
+                    </div> -->
                 </div>
-
-                <div class="btn-banner">
-                    <div
-                        v-for="(button, index) in buttonsBanner"
-                        :key="index"
-                        class="btn-item-banner"
-                        :class="{ active: activeButton === button?.name }"
-                        @click="setActiveButton(button?.name)"
-                    >
-                        {{ button.label }}
-                    </div>
+            </div>
+            <div class="btn-banner">
+                <div
+                    v-for="(button, index) in buttonsBanner"
+                    :key="index"
+                    class="btn-item-banner"
+                    :class="{ active: activeButton === button?.name }"
+                    @click="setActiveButton(button?.name)"
+                >
+                    {{ button.label }}
                 </div>
             </div>
 
@@ -553,8 +553,6 @@ export default {
                     this.detailEvent
                 );
 
-                console.log(games);
-
                 this.games = games.map((game) => {
                     return {
                         ...game,
@@ -566,7 +564,11 @@ export default {
                     this.detailEvent?.attributes?.domainCode
                 );
                 this.history = await predictService.getFilterData("bids", {
-                    where: { UserId: this.idUser },
+                    where: {
+                        UserId: this.idUser,
+                        "$Game.ListCode$":
+                            this.detailEvent?.attributes?.listingCode,
+                    },
                     order: [["createdAt", "DESC"]],
                     include: "Games",
                 });
@@ -653,6 +655,7 @@ export default {
 } */
 .banner-event {
     width: 100%;
+    /* height: 17vh; */
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
@@ -661,8 +664,8 @@ export default {
 
 .btn-banner {
     display: flex;
-    bottom: 0;
-    position: absolute;
+    /* bottom: 0;
+    position: absolute; */
     width: 100%;
     padding: 7px 0;
     background-color: #0d2779;
@@ -914,7 +917,7 @@ export default {
 /*  */
 .list-leaderboard {
     padding: 10px 20px;
-    height: calc(100% - 350px);
+    height: calc(100% - 320px);
     display: flex;
     flex-direction: column;
     gap: 5px;
@@ -942,7 +945,7 @@ export default {
     display: flex;
     flex-direction: column;
     position: absolute;
-    bottom: 70px;
+    bottom: calc(2% + 58px);
     background-color: #ffa53a;
     width: calc(100% - 40px);
     padding: 5px 20px 10px;
@@ -1064,7 +1067,7 @@ export default {
 }
 .box-history {
     background-color: #0c2678;
-    padding: 10px;
+    padding: 5px;
     border-radius: 10px;
     height: 100%;
     overflow: auto;
@@ -1151,5 +1154,60 @@ export default {
 .time-end {
     display: flex;
     gap: 3px;
+}
+
+@media (min-width: 320px) {
+    .list-history,
+    .list-matches {
+        height: calc(100% - 255px);
+    }
+}
+@media (min-width: 360px) {
+    .list-history,
+    .list-matches {
+        height: calc(100% - 255px);
+    }
+}
+@media (min-width: 375px) {
+    .list-history,
+    .list-matches {
+        height: calc(100% - 275px);
+    }
+}
+@media (min-width: 390px) {
+    .list-history,
+    .list-matches {
+        height: calc(100% - 275px);
+    }
+}
+@media (min-width: 460px) {
+    .list-history,
+    .list-matches {
+        height: calc(100% - 290px);
+    }
+}
+@media (min-width: 490px) {
+    .list-history,
+    .list-matches {
+        height: calc(100% - 310px);
+    }
+}
+@media (min-width: 560px) {
+    .list-history,
+    .list-matches {
+        height: calc(100% - 330px);
+    }
+}
+@media (min-width: 768px) {
+    .list-history,
+    .list-matches {
+        height: calc(100% - 420px);
+    }
+}
+@media (min-width: 1024px) {
+    .list-history,
+    .list-matches {
+        height: calc(100% - 480px);
+    }
 }
 </style>

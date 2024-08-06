@@ -177,7 +177,9 @@ const userService = {
         }
     },
     async getLevels() {
-        const res = await axiosInstance.get(`/player-levels`);
+        const res = await axiosInstance.get(
+            `/player-levels?pagination[pageSize]=9999`
+        );
         return res?.data?.data;
     },
 };

@@ -28,7 +28,11 @@ import KeyringService from "@/crypto_utils/KDKeyringService";
 import { transferToken } from "@/crypto_utils/networks";
 import type { Wallet } from "quais";
 import NotificationToast from "@/components/NotificationToast.vue";
-import { title } from "process";
+// import { title } from "process";
+import { ILevel } from "@/interface";
+import InfoUser from "@/views/InfoUser/InfoUser.vue";
+import { formattedBalance } from "@/utils";
+import axios from "axios";
 
 const REF_MESS_PREFIX: string = "start r_";
 const REF_TOKEN_PREFIX: string = "TOKEN_";
@@ -40,49 +44,32 @@ export default {
         BoosterForm,
         CheckinForm,
         NotificationToast,
+        InfoUser,
     },
     data() {
         const telegram_bot_link =
             "Invite Link: https://t.me/QFanClubBot?start=r_";
 
-        let first_name = "";
-        let last_name = "";
+        const dataUserTele = window.Telegram?.WebApp?.initDataUnsafe;
 
-        if (window?.Telegram?.WebApp?.initDataUnsafe) {
-            const user = window.Telegram.WebApp.initDataUnsafe.user;
-            if (user) {
-                first_name = user.first_name || "";
-                last_name = user.last_name || "";
-            }
-        }
+        let first_name = dataUserTele?.user?.first_name || "";
+        let last_name = dataUserTele?.user?.last_name || "";
+
         if (
-            window.Telegram.WebApp.initDataUnsafe.start_param &&
-            window.Telegram.WebApp.initDataUnsafe.start_param.startsWith(
-                "TOKEN_"
-            )
+            dataUserTele?.start_param &&
+            dataUserTele?.start_param?.startsWith("TOKEN_")
         ) {
             secureStorage.set(
                 "SECURITY_TOKEN",
-                String(
-                    window.Telegram.WebApp.initDataUnsafe.start_param.replace(
-                        "TOKEN_",
-                        ""
-                    )
-                )
+                dataUserTele.start_param?.replace("TOKEN_", "")
             );
         }
         return {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            idUser:
-                window.Telegram.WebApp.initDataUnsafe.user?.id?.toString() ??
-                "2123800227",
-            telegram_bot_link:
-                telegram_bot_link +
-                    window.Telegram.WebApp.initDataUnsafe.user?.id || "",
-            // idUser: "1927324767",
-            // telegram_bot_link: telegram_bot_link + 212380022 || "",
+            idUser: dataUserTele?.user?.id?.toString() ?? "",
+            telegram_bot_link: telegram_bot_link + dataUserTele?.user?.id || "",
 
             showCoomingSoon: false,
             isSuccess: false,
@@ -93,9 +80,6 @@ export default {
                 lastTakeRewardTime: "",
                 nextTakeRewardTime: "",
                 rewardAmount: "",
-                createdAt: "",
-                updatedAt: "",
-                publishedAt: "",
                 rewardScheduleHour: 0,
             },
             increasePerSecond: 0,
@@ -124,6 +108,13 @@ export default {
                 type: "",
             },
             widthWining: 0,
+
+            urlAvt: null,
+            dataLevel: {} as ILevel,
+            expLevelNext: {} as ILevel,
+            percentageLevel: 0,
+            isMaxLv: false,
+            isAnimated: false,
         };
     },
     computed: {
@@ -139,6 +130,12 @@ export default {
         },
     },
     methods: {
+        triggerAnimation() {
+            this.isAnimated = true;
+            setTimeout(() => {
+                this.isAnimated = false;
+            }, 1000);
+        },
         showPopupCoomingSoon() {
             this.showCoomingSoon = true;
         },
@@ -230,15 +227,16 @@ export default {
                     }
                 } else {
                     const resData = data?.data?.[0];
+
+                    // secureStorage.set("data_login", resData);
+
                     this.dataLogin = resData;
                     this.dataQPoint =
                         resData.attributes?.qpoint?.data?.attributes;
                     this.animatedBalance = Number(
                         resData.attributes?.qpoint?.data?.attributes?.balance
                     );
-                    // if (!this.isClaim) {
-                    //     await this.countdownFunc();
-                    // }
+                    this.triggerAnimation();
                 }
             } catch (error) {
                 console.error("Error fetching API data:", error);
@@ -467,8 +465,15 @@ export default {
                 );
                 if (isUnlock) {
                     const activeWallet = (await keyringService
-                        .getPrivateKeys()
-                        .at(0)) as Wallet;
+                        ?.getPrivateKeys()
+                        ?.at(0)) as Wallet;
+
+                    const address = await activeWallet?.getAddress();
+
+                    if (!address) {
+                        this.$router.push({ name: "WalletCreate" });
+                        return;
+                    }
 
                     const tx = await transferToken(
                         activeWallet.privateKey,
@@ -505,6 +510,23 @@ export default {
             }
         },
         async onAutoInteract() {
+            const keyringService = new KeyringService();
+            await keyringService.unlock(
+                secureStorage.getPassword() as string,
+                false
+            );
+
+            const activeWallet = (await keyringService
+                ?.getPrivateKeys()
+                ?.at(0)) as Wallet;
+
+            const address = await activeWallet?.getAddress();
+
+            if (!address) {
+                this.$router.push({ name: "WalletCreate" });
+                return;
+            }
+
             // this.titleAutoInteract = "Mining...";
             this.calcWidthMining();
             this.isExecAutoInteract = true;
@@ -546,6 +568,7 @@ export default {
                         this.widthWining = 0;
                         this.renderSuccess(`Mining success +${30}QFP`);
                         this.calcWidthMining();
+                        this.dropItem();
                     }
                 } else {
                     this.$router.push({ name: "WalletCreate" });
@@ -572,11 +595,38 @@ export default {
                 }
             }, updateInterval);
         },
+        async dropItem() {
+            let data = JSON.stringify({
+                treasureName: "MiningDrop",
+                userId: this.idUser,
+            });
+
+            let config = {
+                method: "post",
+                maxBodyLength: Infinity,
+                url: "https://a9ca-171-224-177-81.ngrok-free.app/api/v1/treasure/triggerTreasure",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                data: data,
+            };
+
+            await axios
+                .request(config)
+                .then((response) => {
+                    console.log(JSON.stringify(response.data));
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        },
     },
     async mounted() {
         Telegram.WebApp.ready();
         Telegram.WebApp.setHeaderColor("#ffffff");
         await this.getInfoUser();
+        // await this.getLevels();
+        // await this.getAvt();
     },
     async updated() {
         this.updateSence();
@@ -600,19 +650,7 @@ export default {
         </button>
 
         <div class="container-game">
-            <div class="container-info" v-show="isTelegramLogin">
-                <div class="wrap-username">
-                    {{ first_name }} {{ last_name }}
-                </div>
-            </div>
-
-            <div class="wrap-score">
-                <div class="content">
-                    <!-- <img src="./../public/assets/logo.svg" /> -->
-                    <img src="@public/assets/logo.svg" />
-                    <div class="balance">Balance: {{ animatedBalance }}</div>
-                </div>
-            </div>
+            <InfoUser v-if="dataLogin" :dataLogin="dataLogin" />
 
             <div class="link-checkin">
                 <div>
@@ -631,77 +669,88 @@ export default {
                         ><i class="fa fa-spinner"></i
                     ></span>
                 </button>
-                <!-- <button
-                    @click="onAutoInteract()"
-                    v-bind:disabled="isExecAutoInteract"
-                >
-                    <i class="fa-solid fa-refresh"></i> {{ titleAutoInteract }}
-                    <span v-if="isExecAutoInteract"
-                        ><i class="fa fa-spinner"></i
-                    ></span>
-                </button> -->
             </div>
 
-            <div class="wr-flip">
-                <router-link to="/flip">
-                    <div @click="handleBackButton" class="item-flip">
-                        <!-- <i class="fa-solid fa-coins"></i> Flip -->
-                    </div>
-                </router-link>
-                <router-link to="/inventory">
-                    <div @click="handleBackButton" class="item-inventory"></div>
-                </router-link>
-            </div>
-
-            <div class="wrap-commit_reward" :style="beforeStyle">
-                <div class="box-info">
-                    <div v-if="isClaim" class="box-left-train">
-                        Click "Claim" to take +{{
-                            Number(dataQPoint?.rewardAmount) *
-                            dataQPoint?.rewardScheduleHour
+            <div class="contaner-balance">
+                <div class="wr-balance">
+                    Balance:
+                    <div
+                        class="text-balance"
+                        :class="{ 'animate-text': isAnimated }"
+                    >
+                        {{
+                            formattedBalance(
+                                dataLogin?.attributes?.qpoint?.data?.attributes
+                                    ?.balance
+                            )
                         }}
-                        <img src="@public/assets/logo.svg" />
                     </div>
 
-                    <div v-else class="box-left">
-                        <div class="content">Remain time: {{ countdown }}</div>
+                    <img src="@public/assets/logo.svg" />
+                </div>
+                <div class="wrap-commit_reward" :style="beforeStyle">
+                    <div class="box-info">
+                        <div v-if="isClaim" class="box-left-train">
+                            Click "Claim" to take +{{
+                                Number(dataQPoint?.rewardAmount) *
+                                dataQPoint?.rewardScheduleHour
+                            }}
+                            <img src="@public/assets/logo.svg" />
+                        </div>
+
+                        <div v-else class="box-left">
+                            <div class="content">
+                                Remain time: {{ countdown }}
+                            </div>
+                        </div>
+
+                        <div class="box-right">
+                            <button
+                                class="btn-commit_reward"
+                                @click="handleReward"
+                                :disabled="isCountingDown"
+                            >
+                                {{ isClaim ? "Claim" : "Training..." }}
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="box-right">
-                        <button
-                            class="btn-commit_reward"
-                            @click="handleReward"
-                            :disabled="isCountingDown"
-                        >
-                            {{ isClaim ? "Claim" : "Training..." }}
-                        </button>
+                    <div class="box-info" :style="styleWining">
+                        <div class="auto-left">
+                            <div class="woodwork-loader">
+                                <div class="runner" :style="styleWining"></div>
+                            </div>
+
+                            <div class="box-woodwork">
+                                <img src="@public/assets/mining/woodwork.png" />
+                            </div>
+                        </div>
+                        <div class="box-right">
+                            <div
+                                class="btn-mining"
+                                @click="onAutoInteract()"
+                                :class="{ active: isExecAutoInteract }"
+                            >
+                                <img
+                                    src="@public/assets/mining/icon-auto.png"
+                                    :class="{
+                                        rotateMining: isExecAutoInteract,
+                                    }"
+                                />
+                                Mining
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="box-info" :style="styleWining">
-                    <div class="auto-left">
-                        <div class="woodwork-loader">
-                            <div class="runner" :style="styleWining"></div>
-                        </div>
-
-                        <div class="box-woodwork">
-                            <img src="@public/assets/mining/woodwork.png" />
-                        </div>
-                    </div>
-                    <div class="box-right">
-                        <div
-                            class="btn-mining"
-                            @click="onAutoInteract()"
-                            :class="{ active: isExecAutoInteract }"
-                        >
-                            <img
-                                src="@public/assets/mining/icon-auto.png"
-                                :class="{ rotateMining: isExecAutoInteract }"
-                            />
-                            Mining
-                        </div>
-                    </div>
-                </div>
+            <div class="box-action">
+                <router-link to="/inventory">
+                    <div class="img-inventory" @click="handleBackButton"></div>
+                </router-link>
+                <router-link to="/flip">
+                    <div class="img-flip" @click="handleBackButton"></div>
+                </router-link>
             </div>
 
             <MainGame ref="phaserRef" />

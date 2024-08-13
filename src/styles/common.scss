@@ -1,0 +1,143 @@
+@media (min-width: 320px) {
+    .item-event,
+    .banner-event {
+        height: 115px;
+    }
+
+     //invetory
+    .list-inventory .item-img {
+        height: 120px;
+    }
+    .banner-inventory{
+        height: 85px;
+    }
+}
+
+@media (min-width: 360px) {
+    .item-event,
+    .banner-event {
+        height: 125px;
+    }
+
+    //invetory
+    .box-item .item-img {
+        height: 130px;
+    }
+    .banner-inventory{
+        height: 90px;
+    }
+}
+
+@media (min-width: 375px) {
+    .item-event,
+    .banner-event {
+        height: 135px;
+    }
+
+    .box-item .item-img {
+        height: 140px;
+    }
+    .banner-inventory{
+        height: 95px;
+    }
+}
+
+@media (min-width: 390px) {
+    .item-event,
+    .banner-event {
+        height: 140px;
+    }
+
+    .box-item .item-img {
+        height: 145px;
+    }
+    .banner-inventory{
+        height: 100px;
+    }
+}
+
+@media (min-width: 430px) {
+    .item-event,
+    .banner-event {
+        height: 150px;
+    }
+
+    .box-item .item-img {
+        height: 160px;
+    }
+    .banner-inventory{
+        height: 105px;
+    }
+}
+
+//app tele desktop
+@media (min-width: 460px) {
+    .item-event,
+    .banner-event {
+        height: 160px;
+    }
+
+    .box-item .item-img {
+        height: 175px;
+    }
+    .banner-inventory{
+        height: 110px;
+    }
+}
+
+@media (min-width: 490px) {
+    .item-event,
+    .banner-event {
+        height: 180px;
+    }
+
+    .box-item .item-img {
+        height: 185px;
+    }
+    .banner-inventory{
+        height: 120px;
+    }
+}
+
+//tele web pc
+@media (min-width: 560px) {
+    .item-event,
+    .banner-event {
+        height: 200px;
+    }
+
+    .box-item .item-img {
+        height: 215px;
+    }
+    .banner-inventory{
+        height: 130px;
+    }
+}
+
+@media (min-width: 768px) {
+    .item-event,
+    .banner-event {
+        height: 295px;
+    }
+
+    .box-item .item-img {
+        height: 215px;
+    }
+    .banner-inventory{
+        height: 300px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .item-event,
+    .banner-event {
+        height: 350px;
+    }
+
+    .box-item .item-img {
+        height: 215px;
+    }
+    .banner-inventory{
+        height: 400px;
+    }
+}

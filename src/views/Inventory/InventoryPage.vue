@@ -24,9 +24,11 @@
                     >
                         <div
                             class="item-img"
-                            :style="{ backgroundImage: `url(${item})` }"
+                            :style="{
+                                backgroundImage: `url(${item?.ItemDef?.ImageUrl})`,
+                            }"
                         ></div>
-                        <div class="slot-item">x5</div>
+                        <div class="slot-item">x{{ item?.ItemCount }}</div>
                         <div class="item-btn">
                             <button @click="showCoomingSoon = true">
                                 Fusion
@@ -56,8 +58,12 @@
 </template>
 
 <script lang="ts">
-import axios from "axios";
 import { defineComponent } from "vue";
+import userServiceInventory from "@/services/inventoryService";
+import axios from "axios";
+import { EItemDefType, IInventory, IItemInventory } from "@/interface";
+import "./../../styles/common.scss";
+
 // import LoadingForm from '@/components/LoadingForm.vue';
 // import NotificationToast from '@/components/NotificationToast.vue';
 
@@ -76,9 +82,12 @@ export default defineComponent({
         this.getDataInventor();
     },
     data() {
+        const userInfo = window.Telegram.WebApp.initDataUnsafe;
+
         return {
             showCoomingSoon: false,
             apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
+            userId: userInfo?.user?.id || "",
             activeButton: "Inventory" as string,
             buttonInventory: [
                 { name: "Inventory", label: "Inventory" },
@@ -86,12 +95,13 @@ export default defineComponent({
                 { name: "History", label: "History" },
             ] as Button[],
 
-            itemsInventory: [
-                "./../../public/assets/inventory/platinum.png",
-                "./../../public/assets/inventory/gold.png",
-                "./../../public/assets/inventory/silver.png",
-                "./../../public/assets/inventory/bronze.png",
-            ],
+            // itemsInventory: [
+            //     "./../../public/assets/inventory/platinum.png",
+            //     "./../../public/assets/inventory/gold.png",
+            //     "./../../public/assets/inventory/silver.png",
+            //     "./../../public/assets/inventory/bronze.png",
+            // ],
+            itemsInventory: [] as IItemInventory[],
         };
     },
     methods: {
@@ -99,23 +109,39 @@ export default defineComponent({
             this.activeButton = button;
         },
         async getDataInventor() {
-            try {
-                const config = {
-                    method: "get",
-                    maxBodyLength: Infinity,
-                    url: "https://0d39-171-224-181-129.ngrok-free.app/api/v1/getInventory?userId=5314337740",
-                    headers: {
-                        "ngrok-skip-browser-warning": "1",
-                    },
-                };
+            axios
+                .get(
+                    `https://6ade-171-224-177-81.ngrok-free.app/api/v1/inventory/getInventory?userId=${this.userId}`,
+                    {
+                        headers: {
+                            "Content-Type": "application/json",
+                            "ngrok-skip-browser-warning": "1",
+                        },
+                    }
+                )
+                .then((response) => {
+                    const data: IInventory = JSON.parse(response.data.message);
 
-                const response = await axios.request(config);
-                console.log(response);
+                    const filterData = data?.Items?.filter(
+                        (item) => item?.ItemDef?.Type === EItemDefType.Common
+                    );
 
-                console.log(JSON.parse(response.data?.message));
-            } catch (error) {
-                console.error(error);
-            }
+                        this.itemsInventory = filterData;
+                    
+                })
+                .catch((error) => {
+                    console.error("Có lỗi xảy ra:", error);
+                });
+
+            // try {
+            //     const res = await userServiceInventory.getListInventory(
+            //         Number(this.userId)
+            //     );
+
+            //     console.log(res);
+            // } catch (error) {
+            //     console.error(error);
+            // }
         },
     },
 });
@@ -154,7 +180,7 @@ export default defineComponent({
     background-repeat: no-repeat;
     background-size: cover;
     width: 100%;
-    height: 100px;
+    // height: 100px;
 }
 
 .btn-inventory {
@@ -180,12 +206,14 @@ export default defineComponent({
     height: 100%;
     padding: 15px;
     .list-inventory {
-        height: calc(100% - 170px);
+        height: calc(100% - 180px);
         display: flex;
         flex-direction: column;
         gap: 10px;
         background-color: #00175f;
         border-radius: 10px;
+        overflow-y: auto;
+        scrollbar-width: none;
     }
     .box-item {
         display: grid;
@@ -207,7 +235,7 @@ export default defineComponent({
             background-position: center;
             background-repeat: no-repeat;
             background-size: cover;
-            height: 150px;
+            // height: 150px;
             border-radius: 5px;
         }
         .slot-item {

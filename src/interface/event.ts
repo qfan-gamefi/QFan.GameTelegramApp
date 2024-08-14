@@ -49,3 +49,15 @@ export interface IEvent {
         actionType: "PREDICTION" | "POST" | "REDIRECT_EXTERNAL";
     };
 }
+
+
+export interface IGameExtraData {
+        "OnLose": [
+            {
+                "ValueType": "Point",
+                "Value": number
+            }
+        ],
+        "Min": number,
+        "Max": number
+}

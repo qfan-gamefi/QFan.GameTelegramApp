@@ -568,7 +568,7 @@ export default {
                         this.widthWining = 0;
                         this.renderSuccess(`Mining success +${30}QFP`);
                         this.calcWidthMining();
-                        this.dropItem();
+                        // this.dropItem();
                     }
                 } else {
                     this.$router.push({ name: "WalletCreate" });

@@ -1,12 +1,9 @@
 <template>
     <div class="container-info" v-show="isTelegramLogin">
         <div class="info-user">
-            <div
-                class="wr-avt"
-                :style="{
-                    backgroundImage: `url(${urlAvt})`,
-                }"
-            />
+            <div class="wr-avt" :style="{
+                backgroundImage: `url(${urlAvt})`,
+            }" />
 
             <div class="wrap-username-lv">
                 <div class="username">{{ first_name }} {{ last_name }}</div>
@@ -29,10 +26,7 @@
                     </div>
 
                     <div class="exp-lv">
-                        <div
-                            class="progress-bar"
-                            :style="{ width: percentageLevel + '%' }"
-                        />
+                        <div class="progress-bar" :style="{ width: percentageLevel + '%' }" />
                         <div class="progress-text">
                             <div class="number" v-if="isMaxLv">Max</div>
                             <div class="number" v-else>
@@ -47,12 +41,9 @@
 
         <div class="wr-badge">
             <div v-for="(item, index) in itemsBadge" :key="index">
-                <div
-                    class="badge-img"
-                    :style="{
-                        backgroundImage: `url(${item?.ItemDef?.ImageUrl})`,
-                    }"
-                ></div>
+                <div class="badge-img" :style="{
+                    backgroundImage: `url(${item?.ItemDef?.ImageUrl})`,
+                }"></div>
             </div>
 
             <!-- <img src="@public/assets//event/beta test.png" /> -->
@@ -66,8 +57,8 @@ import userService from "@/services/userService";
 import userServiceTelebot from "@/services/useServiceTeleBot";
 import { calcExpPercentage, calcLevel, nextExpLevel } from "@/utils/exp";
 import { defineComponent } from "vue";
-import { EItemDefType, IInventory, IItemInventory } from "@/interface";
-import axios from "axios";
+import { EItemDefType, IItemInventory } from "@/interface";
+import userServiceInventory from "@/services/inventoryService";
 
 export default defineComponent({
     name: "InfoUserPage",
@@ -157,26 +148,18 @@ export default defineComponent({
             }
         },
         async getListInventorHome() {
-            axios
-                .get(
-                    `https://6ade-171-224-177-81.ngrok-free.app/api/v1/inventory/getInventory?userId=${this.idUser}`,
-                    {
-                        headers: {
-                            "Content-Type": "application/json",
-                            "ngrok-skip-browser-warning": "1",
-                        },
-                    }
-                )
-                .then((response) => {
-                    const data: IInventory = JSON.parse(response.data.message);
-                    const filterBadge = data?.Items?.filter(
+            try {
+                const res = await userServiceInventory.getListInventory(
+                    Number(this.idUser)
+                );
+                    const filterBadge = res?.Items?.filter(
                         (item) => item?.ItemDef?.Type === EItemDefType.Medal
                     );
                     this.itemsBadge = filterBadge;
-                })
-                .catch((error) => {
-                    console.error("Có lỗi xảy ra:", error);
-                });
+
+            } catch (error) {
+                console.error(error);
+            }
         },
     },
     async mounted() {
@@ -207,7 +190,6 @@ $deep-teal: #005662;
     left: 2%;
     display: flex;
     flex-direction: column;
-    gap: 5px;
 }
 
 .info-user {
@@ -230,6 +212,7 @@ $deep-teal: #005662;
     display: flex;
     flex-direction: column;
     gap: 3px;
+
     .lv {
         display: flex;
         flex-direction: column;
@@ -265,6 +248,7 @@ $deep-teal: #005662;
     font-family: monospace;
     font-weight: bold;
     font-size: 8px;
+
     .number {
         position: absolute;
         top: 50%;
@@ -273,6 +257,7 @@ $deep-teal: #005662;
         width: 100%;
         justify-content: center;
     }
+
     .exp {
         position: absolute;
         top: 50%;
@@ -289,14 +274,17 @@ $deep-teal: #005662;
     color: $white;
     font-size: 10px;
     border-radius: 8px;
+
     img {
         width: 15px;
         height: 15px;
     }
+
     .text-balance {
         transition: all 1s ease;
         @include text-shadow($dark-red);
     }
+
     .animate-text {
         transform: scale(1.2);
     }
@@ -306,6 +294,7 @@ $deep-teal: #005662;
     margin-left: 60px;
     display: flex;
     gap: 5px;
+
     .badge-img {
         width: 25px;
         height: 25px;

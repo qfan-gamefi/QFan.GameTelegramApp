@@ -8,15 +8,16 @@
                 :key="index"
                 class="btn-item-inventory"
                 :class="{ active: activeButton === button?.name }"
+                @click="setActiveButton(button?.name)"
             >
-                <!-- @click="setActiveButton(button?.name)" -->
+                
                 {{ button.label }}
             </div>
         </div>
 
         <div class="wr-box">
-            <div class="list-inventory">
-                <div class="box-item">
+            <div class="inventory-detail" >
+                <div class="box-item" v-if="activeButton === 'Inventory'">
                     <div
                         class="item"
                         v-for="(item, index) in itemsInventory"
@@ -32,6 +33,21 @@
                         <div class="item-btn">
                             <button @click="showCoomingSoon = true">
                                 Fusion
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="box-item" v-if="activeButton === 'Badges'">
+                    <div
+                        class="item-badge"
+                        v-for="(item, index) in itemsBadge"
+                        :key="index"
+                    >
+                        <img class="img-badge" :src="item?.ItemDef?.ImageUrl" />
+                        <div class="item-btn">
+                            <button @click="showCoomingSoon = true">
+                                Use
                             </button>
                         </div>
                     </div>
@@ -60,8 +76,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import userServiceInventory from "@/services/inventoryService";
-import axios from "axios";
-import { EItemDefType, IInventory, IItemInventory } from "@/interface";
+import { EItemDefType, IItemInventory } from "@/interface";
 import "./../../styles/common.scss";
 
 // import LoadingForm from '@/components/LoadingForm.vue';
@@ -91,6 +106,7 @@ export default defineComponent({
             activeButton: "Inventory" as string,
             buttonInventory: [
                 { name: "Inventory", label: "Inventory" },
+                { name: "Badges", label: "Badges" },
                 { name: "Fusion", label: "Fusion" },
                 { name: "History", label: "History" },
             ] as Button[],
@@ -102,6 +118,7 @@ export default defineComponent({
             //     "./../../public/assets/inventory/bronze.png",
             // ],
             itemsInventory: [] as IItemInventory[],
+            itemsBadge: [] as IItemInventory[],
         };
     },
     methods: {
@@ -109,39 +126,25 @@ export default defineComponent({
             this.activeButton = button;
         },
         async getDataInventor() {
-            axios
-                .get(
-                    `https://6ade-171-224-177-81.ngrok-free.app/api/v1/inventory/getInventory?userId=${this.userId}`,
-                    {
-                        headers: {
-                            "Content-Type": "application/json",
-                            "ngrok-skip-browser-warning": "1",
-                        },
-                    }
-                )
-                .then((response) => {
-                    const data: IInventory = JSON.parse(response.data.message);
+            try {
+                const res = await userServiceInventory.getListInventory(
+                    Number(this.userId)
+                );
+                console.log(res);
 
-                    const filterData = data?.Items?.filter(
-                        (item) => item?.ItemDef?.Type === EItemDefType.Common
-                    );
+                const filterData = res?.Items?.filter(
+                    (item) => item?.ItemDef?.Type === EItemDefType.Common
+                );
+                const filterBadge = res?.Items?.filter(
+                        (item) => item?.ItemDef?.Type === EItemDefType.Medal
+                );
+                
+                this.itemsBadge = filterBadge;
+                this.itemsInventory = filterData;
 
-                        this.itemsInventory = filterData;
-                    
-                })
-                .catch((error) => {
-                    console.error("Có lỗi xảy ra:", error);
-                });
-
-            // try {
-            //     const res = await userServiceInventory.getListInventory(
-            //         Number(this.userId)
-            //     );
-
-            //     console.log(res);
-            // } catch (error) {
-            //     console.error(error);
-            // }
+            } catch (error) {
+                console.error(error);
+            }
         },
     },
 });
@@ -205,7 +208,7 @@ export default defineComponent({
 .wr-box {
     height: 100%;
     padding: 15px;
-    .list-inventory {
+    .inventory-detail {
         height: calc(100% - 180px);
         display: flex;
         flex-direction: column;
@@ -230,6 +233,15 @@ export default defineComponent({
             display: flex;
             flex-direction: column;
             gap: 7px;
+        }
+        .item-badge {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 7px; 
+            .img-badge {
+                width: 100%;
+            }
         }
         .item-img {
             background-position: center;

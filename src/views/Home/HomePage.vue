@@ -32,7 +32,6 @@ import NotificationToast from "@/components/NotificationToast.vue";
 import { ILevel } from "@/interface";
 import InfoUser from "@/views/InfoUser/InfoUser.vue";
 import { formattedBalance } from "@/utils";
-import axios from "axios";
 
 const REF_MESS_PREFIX: string = "start r_";
 const REF_TOKEN_PREFIX: string = "TOKEN_";
@@ -568,7 +567,6 @@ export default {
                         this.widthWining = 0;
                         this.renderSuccess(`Mining success +${30}QFP`);
                         this.calcWidthMining();
-                        // this.dropItem();
                     }
                 } else {
                     this.$router.push({ name: "WalletCreate" });
@@ -595,38 +593,11 @@ export default {
                 }
             }, updateInterval);
         },
-        async dropItem() {
-            let data = JSON.stringify({
-                treasureName: "MiningDrop",
-                userId: this.idUser,
-            });
-
-            let config = {
-                method: "post",
-                maxBodyLength: Infinity,
-                url: "https://a9ca-171-224-177-81.ngrok-free.app/api/v1/treasure/triggerTreasure",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                data: data,
-            };
-
-            await axios
-                .request(config)
-                .then((response) => {
-                    console.log(JSON.stringify(response.data));
-                })
-                .catch((error) => {
-                    console.log(error);
-                });
-        },
     },
     async mounted() {
         Telegram.WebApp.ready();
         Telegram.WebApp.setHeaderColor("#ffffff");
         await this.getInfoUser();
-        // await this.getLevels();
-        // await this.getAvt();
     },
     async updated() {
         this.updateSence();

@@ -487,6 +487,10 @@ export default {
                     }
                     this.handleMedium(item?.['GameTemplate.ExtraData'])
                 });
+                
+                this.sliderValue = this.games?.map((item) =>
+                    this.handleMedium(item?.['GameTemplate.ExtraData'])
+                );
 
                 this.leaderboard = await predictService.getLeaderBoard(
                     this.detailEvent?.attributes?.domainCode
@@ -544,7 +548,7 @@ export default {
         },
         handleMedium(extraData){
             const gameExtraData: IGameExtraData = JSON.parse(extraData)
-            return gameExtraData?.Max / 2
+            return (gameExtraData?.Min + gameExtraData?.Max) / 2
         },
         handleMinValue(extraData) {
             const gameExtraData: IGameExtraData = JSON.parse(extraData)

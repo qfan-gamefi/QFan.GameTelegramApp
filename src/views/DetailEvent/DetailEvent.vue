@@ -52,13 +52,13 @@
                             <div class="matches-title-img" :style="{
                                 backgroundImage: `url(${apiBaseUrl}/uploads/${item?.Name?.split(
                                     '-'
-                                )?.[0]?.toUpperCase()}.png)`,
+                                )?.[0]?.toUpperCase()}.PNG)`,
                             }"></div>
                             {{ item?.Description }}
                             <div class="matches-title-img" :style="{
                                 backgroundImage: `url(${apiBaseUrl}/uploads/${item?.Name?.split(
                                     '-'
-                                )?.[1]?.toUpperCase()}.png)`,
+                                )?.[1]?.toUpperCase()}.PNG)`,
                             }"></div>
                         </div>
 
@@ -274,6 +274,7 @@ export default {
         },
     },
     data() {
+        
         return {
             apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
             dataTelegram: null,
@@ -573,7 +574,7 @@ export default {
     width: 100%;
     top: 0%;
     left: 0;
-    z-index: 999;
+    z-index: 1000;
     animation: fadeInDetailEvent 0.1s ease forwards;
     color: #fff;
     background-image: url("./../../public/assets/event/background-event.png");

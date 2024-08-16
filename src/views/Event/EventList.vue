@@ -138,7 +138,7 @@ export default {
                 this.loading = false;
             }
         },
-        handleJoin(itemDetail: IEvent) {
+        handleJoin(itemDetail: IEvent) {     
             const { actionType, status, route } = itemDetail?.attributes || {};
             if (actionType === "POST") {
                 return this.$router.push(route);
@@ -165,7 +165,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 .popup-event {
     height: 100%;
     position: absolute;

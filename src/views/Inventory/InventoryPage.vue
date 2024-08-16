@@ -178,7 +178,7 @@ export default defineComponent({
 }
 
 .banner-inventory {
-    background-image: url("./../../public/assets/inventory/banner-inventory.png");
+    background-image: url("./../../../public/assets/inventory/inventory-banner.png");
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;

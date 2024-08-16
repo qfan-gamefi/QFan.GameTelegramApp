@@ -625,8 +625,6 @@ export default {
         Telegram.WebApp.ready();
         Telegram.WebApp.setHeaderColor("#ffffff");
         await this.getInfoUser();
-        // await this.getLevels();
-        // await this.getAvt();
     },
     async updated() {
         this.updateSence();

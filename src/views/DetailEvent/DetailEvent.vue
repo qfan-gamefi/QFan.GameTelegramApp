@@ -479,6 +479,13 @@ export default {
                         ...game,
                         selectedIndex: null,
                     };
+                });                
+                
+                this.sliderValue = this.games?.map((item) => {
+                    if(item?.BidData?.Value){
+                        return item?.BidData?.Value
+                    }
+                    this.handleMedium(item?.['GameTemplate.ExtraData'])
                 });
                 
                 this.sliderValue = this.games?.map((item) =>

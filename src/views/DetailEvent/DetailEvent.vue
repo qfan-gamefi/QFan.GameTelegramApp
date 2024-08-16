@@ -1146,7 +1146,6 @@ export default {
 }
 
 @media (min-width: 320px) {
-
     .list-history,
     .list-matches {
         height: calc(100% - 255px);

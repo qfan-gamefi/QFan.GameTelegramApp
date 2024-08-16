@@ -568,6 +568,7 @@ export default {
                         this.widthWining = 0;
                         this.renderSuccess(`Mining success +${30}QFP`);
                         this.calcWidthMining();
+                        // this.dropItem();
                     }
                 } else {
                     this.$router.push({ name: "WalletCreate" });
@@ -593,6 +594,31 @@ export default {
                     clearInterval(this.intervalId);
                 }
             }, updateInterval);
+        },
+        async dropItem() {
+            let data = JSON.stringify({
+                treasureName: "MiningDrop",
+                userId: this.idUser,
+            });
+
+            let config = {
+                method: "post",
+                maxBodyLength: Infinity,
+                url: "https://a9ca-171-224-177-81.ngrok-free.app/api/v1/treasure/triggerTreasure",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                data: data,
+            };
+
+            await axios
+                .request(config)
+                .then((response) => {
+                    console.log(JSON.stringify(response.data));
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
         },
     },
     async mounted() {

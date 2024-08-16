@@ -481,7 +481,6 @@ export default {
                         selectedIndex: null,
                     };
                 });                
-                console.log(this.games);
                 
                 this.sliderValue = this.games?.map((item) => {
                     if(item?.BidData?.Value){
@@ -568,7 +567,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .popup-detail-event {
     height: 100%;
     position: absolute;

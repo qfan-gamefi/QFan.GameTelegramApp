@@ -103,7 +103,7 @@ export default defineComponent({
             showCoomingSoon: false,
             apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
             userId: userInfo?.user?.id || "",
-            activeButton: "Inventory" as string,
+            activeButton: "Badges" as string,
             buttonInventory: [
                 { name: "Inventory", label: "Inventory" },
                 { name: "Badges", label: "Badges" },
@@ -123,14 +123,14 @@ export default defineComponent({
     },
     methods: {
         setActiveButton(button: string) {
-            this.activeButton = button;
+            this.showCoomingSoon = true;
+            // this.activeButton = button;
         },
         async getDataInventor() {
             try {
                 const res = await userServiceInventory.getListInventory(
                     Number(this.userId)
                 );
-                console.log(res);
 
                 const filterData = res?.Items?.filter(
                     (item) => item?.ItemDef?.Type === EItemDefType.Common

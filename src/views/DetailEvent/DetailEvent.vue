@@ -577,7 +577,7 @@ export default {
     z-index: 1000;
     animation: fadeInDetailEvent 0.1s ease forwards;
     color: #fff;
-    background-image: url("./../../public/assets/event/background-event.png");
+    background-image: url("./../../../public/assets/event/background-event.png");
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;

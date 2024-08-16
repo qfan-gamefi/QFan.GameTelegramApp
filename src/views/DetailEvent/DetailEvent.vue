@@ -192,7 +192,7 @@
                             <div class="match" :class="item?.Status?.toLowerCase()">
                                 {{ item?.Status }}
                             </div>
-                            <div>{{ item?.Game?.Name }}</div>
+                            <div>{{ item?.Game?.Description }}</div>
                         </div>
                         <div class="history-item-col">
                             {{ renderSide(item) }}

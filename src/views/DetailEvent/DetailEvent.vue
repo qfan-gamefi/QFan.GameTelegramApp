@@ -2,13 +2,9 @@
     <div class="popup-detail-event" v-if="isDetailEvent">
         <Loading :loading="loading" />
         <div class="box-detail-event">
-            <div
-                class="banner-event"
-                :style="{
-                    backgroundImage: `url(${apiBaseUrl}${detailEvent?.attributes?.banner?.data?.attributes?.formats?.small?.url})`,
-                    // backgroundImage: `url(${detailEvent?.attributes?.banner?.data?.attributes?.formats?.small?.url})`,
-                }"
-            >
+            <div class="banner-event" :style="{
+                backgroundImage: `url(${apiBaseUrl}${detailEvent?.attributes?.banner?.data?.attributes?.formats?.small?.url})`,
+            }">
                 <div class="text-banner">
                     <div class="title-item">
                         <div class="event-title-detail">
@@ -18,101 +14,60 @@
                             {{ detailEvent?.attributes?.description }}
                         </div>
                     </div>
-
-                    <!-- <div class="box-time">
-                        <span
-                            ><i class="fa-solid fa-clock"></i>
-                            {{
-                                detailEvent?.attributes?.content?.[1]?.children?.[0]?.text?.replace(
-                                    "Time: ",
-                                    ""
-                                )
-                            }}</span
-                        >
-                    </div>
-                    <div class="box-time">
-                        <span>Your Points:{{ this.userPoint }}</span>
-                    </div> -->
                 </div>
             </div>
             <div class="btn-banner">
-                <div
-                    v-for="(button, index) in buttonsBanner"
-                    :key="index"
-                    class="btn-item-banner"
-                    :class="{ active: activeButton === button?.name }"
-                    @click="setActiveButton(button?.name)"
-                >
+                <div v-for="(button, index) in buttonsBanner" :key="index" class="btn-item-banner"
+                    :class="{ active: activeButton === button?.name }" @click="setActiveButton(button?.name)">
                     {{ button.label }}
                 </div>
             </div>
 
             <div class="list-matches" v-if="activeButton === 'Predict'">
                 <div class="box-matches">
-                    <div
-                        v-for="(item, index) in games"
-                        :key="index"
-                        :class="[
-                            'matches-item',
-                            getBorderClass(
-                                item?.BidSideNames?.split(','),
-                                item?.BidData?.Side
-                            ),
-                            {
-                                'matches-item-disable': item?.BidData,
-                            },
-                        ]"
-                    >
+                    <div v-for="(item, index) in games" :key="index" :class="[
+                        'matches-item',
+                        getBorderClass(
+                            item?.BidSideNames?.split(','),
+                            item?.BidData?.Side
+                        ),
+                        {
+                            'matches-item-disable': item?.BidData,
+                        },
+                    ]">
                         <div class="matches-time">
                             <div class="time-start">
                                 {{ getTimeRemaining(item?.StopBiddingTime) }}
                             </div>
-                            <div
-                                class="time-end"
-                                v-if="
-                                    item?.CloseCountDown &&
-                                    item?.CloseCountDown !== -1
-                                "
-                            >
+                            <div class="time-end" v-if="
+                                item?.CloseCountDown &&
+                                item?.CloseCountDown !== -1
+                            ">
                                 Close in:
-                                <CountDown
-                                    :countDownValue="item?.CloseCountDown"
-                                />
+                                <CountDown :countDownValue="item?.CloseCountDown" />
                             </div>
                         </div>
 
                         <div class="matches-title">
-                            <div
-                                class="matches-title-img"
-                                :style="{
-                                    backgroundImage: `url(${apiBaseUrl}/uploads/${item?.Name?.split(
-                                        '-'
-                                    )?.[0]?.toUpperCase()}.png)`,
-                                }"
-                            ></div>
+                            <div class="matches-title-img" :style="{
+                                backgroundImage: `url(${apiBaseUrl}/uploads/${item?.Name?.split(
+                                    '-'
+                                )?.[0]?.toUpperCase()}.png)`,
+                            }"></div>
                             {{ item?.Description }}
-                            <div
-                                class="matches-title-img"
-                                :style="{
-                                    backgroundImage: `url(${apiBaseUrl}/uploads/${item?.Name?.split(
-                                        '-'
-                                    )?.[1]?.toUpperCase()}.png)`,
-                                }"
-                            ></div>
+                            <div class="matches-title-img" :style="{
+                                backgroundImage: `url(${apiBaseUrl}/uploads/${item?.Name?.split(
+                                    '-'
+                                )?.[1]?.toUpperCase()}.png)`,
+                            }"></div>
                         </div>
 
-                        <div
-                            class="box-btn-predict"
+                        <div class="box-btn-predict" 
                             :class="{
-                                disable: !item?.CloseCountDown,
+                            disable: !item?.CloseCountDown,
                             }"
                         >
-                            <div
-                                v-for="(
-                                    side, indexSide
-                                ) in item?.BidSideNames?.split(',')"
-                                :key="indexSide"
-                                :class="[
+                            <div v-for="(side, indexSide) in item?.BidSideNames?.split(',')" :key="indexSide" :class="[
                                     // getDynamicClass(side),
                                     'team',
                                     {
@@ -120,13 +75,10 @@
                                             item?.selectedIndex === indexSide ||
                                             item?.BidData?.Side === indexSide,
                                     },
-                                ]"
-                            >
+                                ]">
                                 <div @click="handleSelectBid(index, indexSide)">
                                     <div>{{ side }}</div>
-                                    <div
-                                        v-if="item?.RateData?.[indexSide] !== 0"
-                                    >
+                                    <div v-if="item?.RateData?.[indexSide] !== 0">
                                         {{ renderRate(item, indexSide) }}
                                     </div>
                                 </div>
@@ -134,19 +86,33 @@
                         </div>
 
                         <div class="predict-point">
-                            <div
-                                @click="handlePredict(item, index)"
+                            <div class="slider-container" v-if="!item?.['GameTemplate.DefaultBidValue']">
+                           
+                                <input type="range" 
+                                    :min="handleMinValue(item?.['GameTemplate.ExtraData'])"
+                                    :max="handleMaxValue(item?.['GameTemplate.ExtraData'])" 
+                                    :step="stepValue"
+                                    :value="sliderValue[index]" 
+                                    @input="handleSliderInput($event, index)" 
+                                    :class="[
+                                        'slider',
+                                        {
+                                            'btn-predict-disable': item?.BidData || !item?.CloseCountDown,
+                                        },
+                                    ]" />
+                            </div>
+
+                            <div @click="handlePredict(item, index)" 
                                 :class="[
-                                    'predict-point-content',
-                                    {
-                                        'btn-predict-disable':
-                                            item?.BidData ||
-                                            !item?.CloseCountDown,
-                                    },
-                                ]"
-                            >
-                                Predict
-                                {{ item?.["GameTemplate.DefaultBidValue"] }}
+                                'predict-point-content',
+                                {
+                                    'btn-predict-disable': item?.BidData || !item?.CloseCountDown,
+                                },
+                            ]">
+
+                                <div>Predict&nbsp;</div>
+                                <div v-if="item?.['GameTemplate.DefaultBidValue']"> {{ item?.["GameTemplate.DefaultBidValue"] }}</div>
+                                <div v-else>{{ sliderValue[index] }}</div>
                                 <img src="./../../../public/assets/logo.svg" />
                             </div>
                         </div>
@@ -155,31 +121,17 @@
             </div>
 
             <div class="list-leaderboard" v-if="activeButton === 'Leaderboard'">
-                <div
-                    class="box-leaderboard"
-                    v-for="(item, index) in leaderboard"
-                    :key="index"
-                >
+                <div class="box-leaderboard" v-for="(item, index) in leaderboard" :key="index">
                     <div class="leaderboard-item">
                         <div class="content-your-rank">
-                            <div
-                                class="your-rank-lv"
-                                :class="'position-' + (index + 1)"
-                            >
+                            <div class="your-rank-lv" :class="'position-' + (index + 1)">
                                 <span>{{ index + 1 }}</span>
                             </div>
                             <div class="avt-your-rank">
-                                <div
-                                    v-if="item?.UserPhotoUrl"
-                                    class="lv-img"
-                                    :style="{
-                                        backgroundImage: `url(${item?.UserPhotoUrl})`,
-                                    }"
-                                ></div>
-                                <img
-                                    v-if="!item?.UserPhotoUrl"
-                                    src="./../../../public/assets/logo.jpg"
-                                />
+                                <div v-if="item?.UserPhotoUrl" class="lv-img" :style="{
+                                    backgroundImage: `url(${item?.UserPhotoUrl})`,
+                                }"></div>
+                                <img v-if="!item?.UserPhotoUrl" src="./../../../public/assets/logo.jpg" />
                             </div>
                             <div class="your-name-point">
                                 <div class="your-name">
@@ -202,17 +154,10 @@
                         <span>{{ dataRankCurrent?.rank }}</span>
                     </div>
                     <div class="avt-your-rank">
-                        <div
-                            v-if="dataRankCurrent?.UserPhotoUrl"
-                            class="lv-img"
-                            :style="{
-                                backgroundImage: `url(${dataRankCurrent?.UserPhotoUrl})`,
-                            }"
-                        />
-                        <img
-                            v-if="!dataRankCurrent?.UserPhotoUrl"
-                            src="./../../../public/assets/logo.jpg"
-                        />
+                        <div v-if="dataRankCurrent?.UserPhotoUrl" class="lv-img" :style="{
+                            backgroundImage: `url(${dataRankCurrent?.UserPhotoUrl})`,
+                        }" />
+                        <img v-if="!dataRankCurrent?.UserPhotoUrl" src="./../../../public/assets/logo.jpg" />
                     </div>
                     <div class="your-name-point">
                         <div class="your-name">
@@ -239,19 +184,12 @@
                         <div class="title-columns">Profit</div>
                     </div>
 
-                    <div
-                        class="history-item"
-                        v-for="(item, index) in history"
-                        :key="index"
-                    >
+                    <div class="history-item" v-for="(item, index) in history" :key="index">
                         <div class="history-item-col">
                             {{ index + 1 }}
                         </div>
                         <div class="history-item-col">
-                            <div
-                                class="match"
-                                :class="item?.Status?.toLowerCase()"
-                            >
+                            <div class="match" :class="item?.Status?.toLowerCase()">
                                 {{ item?.Status }}
                             </div>
                             <div>{{ item?.Game?.Name }}</div>
@@ -263,17 +201,13 @@
                             {{ formatDateToDDMMMYY(item.createdAt) }}
                         </div>
                         <div class="history-item-col">
-                            <div
-                                v-if="
-                                    item?.Status?.toLowerCase() === 'win' ||
-                                    item?.Status?.toLowerCase() === 'lose'
-                                "
-                            >
+                            <div v-if="
+                                item?.Status?.toLowerCase() === 'win' ||
+                                item?.Status?.toLowerCase() === 'lose'
+                            ">
                                 <div>
                                     {{ renderProfitQFP(item) }}
-                                    <img
-                                        src="./../../../public/assets/logo.svg"
-                                    />
+                                    <img src="./../../../public/assets/logo.svg" />
                                 </div>
                                 <div>
                                     {{ renderProfitPoint(item) }}
@@ -289,20 +223,11 @@
         </div>
         <EmptyForm v-if="showEmptyDetailEvent" />
 
-        <Notification
-            v-if="showNotification"
-            :message="notificationMessage"
-            :type="notificationType"
-            @close="showNotification = false"
-        />
+        <Notification v-if="showNotification" :message="notificationMessage" :type="notificationType"
+            @close="showNotification = false" />
 
-        <PopupConfirm
-            v-if="showPopup"
-            :text="`Do you want Predict`"
-            :visible="showPopup"
-            @yes="handleYesPredict"
-            @no="handleNoPredict"
-        />
+        <PopupConfirm v-if="showPopup" :text="`Do you want Predict`" :visible="showPopup" @yes="handleYesPredict"
+            @no="handleNoPredict" />
     </div>
 </template>
 
@@ -313,7 +238,7 @@ import PopupConfirm from "../../components/PopupConfirm.vue";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import EmptyForm from "../../components/EmptyForm.vue";
-import { IEvent } from "../../interface";
+import { IEvent, IGameExtraData } from "../../interface";
 import CountDown from "../../components/count-down/CountDown.vue";
 import { formatDateToDDMMMYY } from "../../utils";
 
@@ -382,6 +307,9 @@ export default {
             countdown: "",
             intervalId: null,
             bidValue: null,
+
+            stepValue: 50,
+            sliderValue: [] as number[],
         };
     },
     watch: {
@@ -464,8 +392,6 @@ export default {
             return dayjs(stopBiddingTime).format("DD.MM.YYYY, HH:mm");
         },
         handleSelectBid(itemIndex, sideIndex) {
-            // item["selectedSide"] = index;
-            // this.selectedIndex = index;
             this.games[itemIndex].selectedIndex = sideIndex;
         },
         handlePredict(item, index) {
@@ -490,21 +416,18 @@ export default {
             if (
                 typeof this.games[this.indexPredict].selectedIndex === "number"
             ) {
-                const dataTele = window.Telegram.WebApp.initDataUnsafe?.user;
+                const dataTele = this.dataTelegram?.user;
                 const nameTele = `${dataTele.first_name} ${dataTele.last_name}`;
 
+                const valueBid = this.games[this.indexPredict]?.["GameTemplate.DefaultBidValue"] || this.sliderValue[this.indexPredict]                
+                
                 const data = {
                     gameId: this.idPredict,
                     userId: this.idUser,
-                    value: this.games[this.indexPredict]?.[
-                        "GameTemplate.DefaultBidValue"
-                    ],
-                    valueType:
-                        this.games[this.indexPredict]?.[
-                            "GameTemplate.ValueType"
-                        ],
+                    value: valueBid,
+                    valueType: this.games[this.indexPredict]?.["GameTemplate.ValueType"],
                     side: this.games[this.indexPredict]?.selectedIndex,
-                    userName: nameTele,
+                    userName: nameTele
                 };
 
                 const dataPredict = await predictService.addBidding(data);
@@ -517,8 +440,6 @@ export default {
                     await this.renderErr();
                     await this.fetchData();
                 }
-            } else {
-                alert("Choose your side");
             }
         },
         handleYesPredict() {
@@ -558,11 +479,23 @@ export default {
                         ...game,
                         selectedIndex: null,
                     };
+                });                
+                
+                this.sliderValue = this.games?.map((item) => {
+                    if(item?.BidData?.Value){
+                        return item?.BidData?.Value
+                    }
+                    this.handleMedium(item?.['GameTemplate.ExtraData'])
                 });
+                
+                this.sliderValue = this.games?.map((item) =>
+                    this.handleMedium(item?.['GameTemplate.ExtraData'])
+                );
 
                 this.leaderboard = await predictService.getLeaderBoard(
                     this.detailEvent?.attributes?.domainCode
-                );
+                );                
+
                 this.history = await predictService.getFilterData("bids", {
                     where: {
                         UserId: this.idUser,
@@ -578,7 +511,7 @@ export default {
                     { where: { UserId: this.idUser } }
                 );
 
-                const dataTele = window.Telegram.WebApp.initDataUnsafe?.user;
+                const dataTele = this.dataTelegram?.user;
                 const nameTele = `${dataTele.first_name} ${dataTele.last_name}`;
                 const dataRankCurrent = await predictService.getYourRank(
                     this.idUser,
@@ -613,11 +546,27 @@ export default {
                 selectedIndex: null,
             }));
         },
+        handleMedium(extraData){
+            const gameExtraData: IGameExtraData = JSON.parse(extraData)
+            return (gameExtraData?.Min + gameExtraData?.Max) / 2
+        },
+        handleMinValue(extraData) {
+            const gameExtraData: IGameExtraData = JSON.parse(extraData)
+            return gameExtraData?.Min || 200
+        },
+        handleMaxValue(extraData) {
+            const gameExtraData: IGameExtraData = JSON.parse(extraData)
+            return gameExtraData?.Max || 2000
+        },
+        handleSliderInput(event, index) {
+            const value = Number(event.target.value);
+            this.sliderValue[index] = value
+        },
     },
 };
 </script>
 
-<style>
+<style scoped>
 .popup-detail-event {
     height: 100%;
     position: absolute;
@@ -733,6 +682,7 @@ export default {
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
+
 .box-matches::-webkit-scrollbar {
     display: none;
 }
@@ -743,6 +693,7 @@ export default {
     padding: 0 10px;
     font-size: 10px;
 }
+
 .matches-title {
     display: flex;
     justify-content: center;
@@ -750,6 +701,7 @@ export default {
     gap: 10px;
     font-weight: bold;
 }
+
 .matches-title-img {
     width: 25px;
     height: 25px;
@@ -757,6 +709,7 @@ export default {
     background-repeat: no-repeat;
     background-size: cover;
 }
+
 .matches-item {
     text-align: center;
     background-color: #0c2678;
@@ -766,10 +719,12 @@ export default {
     flex-direction: column;
     gap: 15px;
 }
+
 .matches-item-disable {
     pointer-events: none;
     opacity: 0.8;
 }
+
 .bet-info {
     display: flex;
     flex-direction: column;
@@ -783,9 +738,11 @@ export default {
     border-bottom: 1px solid #81818147;
     gap: 30px;
 }
+
 .bet-info-row:last-child {
     border-bottom: none;
 }
+
 .bet-info-label {
     font-weight: bold;
     flex: 1;
@@ -797,12 +754,15 @@ export default {
     text-align: left;
     font-weight: bold;
 }
+
 .bet-info-value.lose {
     color: #d40000;
 }
+
 .bet-info-value.draw {
     color: #f3db00;
 }
+
 /* .border-draw {
     border: 5px solid #f3db00;
     border-top: none;
@@ -811,6 +771,7 @@ export default {
 .bet-info-value.win {
     color: #04cc00;
 }
+
 /* .border-win {
     border: 5px solid #04cc00;
     border-top: none;
@@ -828,6 +789,7 @@ export default {
     justify-content: center;
     gap: 10px;
 }
+
 .box-btn-predict.disable {
     pointer-events: none;
     opacity: 0.5;
@@ -847,11 +809,13 @@ export default {
     background-color: #04cc00;
     transition: background-color 0.3s ease;
 }
+
 .team-draw.selected {
     background-color: #f3db00;
     color: #760000;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
+
 .team-lose.selected {
     background-color: #d40000;
     transition: background-color 0.3s ease;
@@ -864,6 +828,7 @@ export default {
     background-color: rgb(80 80 80);
     transition: background-color 0.3s ease, color 0.3s ease;
 }
+
 .team.selected {
     background-color: #04cc00;
     transition: background-color 0.3s ease;
@@ -876,6 +841,8 @@ export default {
 .predict-point {
     display: flex;
     justify-content: center;
+    flex-direction: column;
+    align-items: center;
 }
 
 .predict-point img {
@@ -892,10 +859,12 @@ export default {
     border-radius: 5px;
     width: fit-content;
 }
+
 .predict-point-disabled {
     /* pointer-events: none; */
     opacity: 0.5;
 }
+
 .btn-predict-disable {
     pointer-events: none;
     opacity: 0.5;
@@ -928,9 +897,11 @@ export default {
     scrollbar-width: none;
     animation: fadeIn 0.3s ease forwards;
 }
+
 .list-leaderboard::-webkit-scrollbar {
     display: none;
 }
+
 @keyframes fadeIn {
     0% {
         opacity: 0;
@@ -1025,6 +996,7 @@ export default {
     font-size: 18px;
     font-weight: bold;
 }
+
 .lv-img {
     width: 30px;
     height: 30px;
@@ -1033,6 +1005,7 @@ export default {
     background-size: cover;
     border-radius: 50%;
 }
+
 .avt-your-rank img {
     width: 30px;
     height: 30px;
@@ -1065,6 +1038,7 @@ export default {
     gap: 10px;
     animation: fadeIn 0.3s ease forwards;
 }
+
 .box-history {
     background-color: #0c2678;
     padding: 5px;
@@ -1078,6 +1052,7 @@ export default {
 .box-history::-webkit-scrollbar {
     display: none;
 }
+
 .box-title-columns {
     display: flex;
     font-size: 12px;
@@ -1085,13 +1060,16 @@ export default {
     padding: 10px 0;
     border-bottom: 1px solid #fff;
 }
+
 .title-columns {
     text-align: center;
 }
+
 .title-columns:nth-child(1) {
     /* flex: 0 0 4%; */
     width: 8%;
 }
+
 .title-columns:nth-child(n + 2) {
     /* flex: 0 0 24%; */
     width: 23%;
@@ -1104,18 +1082,22 @@ export default {
     border-bottom: 1px solid #ffffff5c;
     font-size: 11px;
 }
+
 /* .history-item:last-child {
     border-bottom: none;
 } */
 .history-item-col {
     text-align: center;
 }
+
 .history-item-col:nth-child(1) {
     width: 8%;
 }
+
 .history-item-col:nth-child(n + 2) {
     width: 23%;
 }
+
 .history-item-col img {
     width: 10px;
 }
@@ -1123,18 +1105,23 @@ export default {
 .match {
     font-weight: bold;
 }
+
 .match.lose {
     color: #d40000;
 }
+
 .match.new {
     color: #f3fb02;
 }
+
 .match.win {
     color: #04cc00;
 }
+
 .match.placed {
     color: #ffa53a;
 }
+
 .match.pending {
     color: #ffa53a;
 }
@@ -1142,11 +1129,13 @@ export default {
 .title-item {
     font-weight: bold;
 }
+
 .event-title-detail {
     font-size: 24px;
     color: #ff0000;
     text-shadow: 1px 1px 1px white;
 }
+
 .event-content-detail {
     margin-left: 2px;
 }
@@ -1162,52 +1151,77 @@ export default {
         height: calc(100% - 255px);
     }
 }
+
 @media (min-width: 360px) {
+
     .list-history,
     .list-matches {
         height: calc(100% - 255px);
     }
 }
+
 @media (min-width: 375px) {
+
     .list-history,
     .list-matches {
         height: calc(100% - 275px);
     }
 }
+
 @media (min-width: 390px) {
+
     .list-history,
     .list-matches {
         height: calc(100% - 275px);
     }
 }
+
 @media (min-width: 460px) {
+
     .list-history,
     .list-matches {
         height: calc(100% - 290px);
     }
 }
+
 @media (min-width: 490px) {
+
     .list-history,
     .list-matches {
         height: calc(100% - 310px);
     }
 }
+
 @media (min-width: 560px) {
+
     .list-history,
     .list-matches {
         height: calc(100% - 330px);
     }
 }
+
 @media (min-width: 768px) {
+
     .list-history,
     .list-matches {
         height: calc(100% - 420px);
     }
 }
+
 @media (min-width: 1024px) {
+
     .list-history,
     .list-matches {
         height: calc(100% - 480px);
     }
+}
+
+.slider-container {
+    width: 200px;
+    text-align: center;
+}
+
+.slider {
+    width: 100%;
 }
 </style>

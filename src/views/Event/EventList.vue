@@ -140,7 +140,6 @@ export default {
         },
         handleJoin(itemDetail: IEvent) {
             const { actionType, status, route } = itemDetail?.attributes || {};
-
             if (actionType === "POST") {
                 return this.$router.push(route);
             } else if (actionType === "REDIRECT_EXTERNAL") {

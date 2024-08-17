@@ -11,7 +11,6 @@
                     :key="index"
                     :style="{
                         backgroundImage: `url(${apiBaseUrl}${item?.attributes?.banner?.data?.attributes?.formats?.small?.url})`,
-                        // backgroundImage: `url(${item?.attributes?.banner?.data?.attributes?.formats?.small?.url})`,
                     }"
                     @click="handleJoin(item)"
                 >

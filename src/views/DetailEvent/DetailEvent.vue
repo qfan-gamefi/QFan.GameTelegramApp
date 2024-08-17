@@ -192,7 +192,7 @@
                             <div class="match" :class="item?.Status?.toLowerCase()">
                                 {{ item?.Status }}
                             </div>
-                            <div>{{ item?.Game?.Name }}</div>
+                            <div>{{ item?.Game?.Description }}</div>
                         </div>
                         <div class="history-item-col">
                             {{ renderSide(item) }}
@@ -488,10 +488,6 @@ export default {
                     }
                     this.handleMedium(item?.['GameTemplate.ExtraData'])
                 });
-                
-                this.sliderValue = this.games?.map((item) =>
-                    this.handleMedium(item?.['GameTemplate.ExtraData'])
-                );
 
                 this.leaderboard = await predictService.getLeaderBoard(
                     this.detailEvent?.attributes?.domainCode

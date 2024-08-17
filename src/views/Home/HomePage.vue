@@ -697,7 +697,7 @@ export default {
                                 <img src="@public/assets/mining/woodwork.png" />
                             </div>
                         </div>
-                        <div class="box-right">
+                        <!-- <div class="box-right">
                             <div
                                 class="btn-mining"
                                 @click="onAutoInteract()"
@@ -711,7 +711,7 @@ export default {
                                 />
                                 Mining
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>

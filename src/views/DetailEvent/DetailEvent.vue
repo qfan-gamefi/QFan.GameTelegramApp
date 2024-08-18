@@ -2,9 +2,12 @@
     <div class="popup-detail-event" v-if="isDetailEvent">
         <Loading :loading="loading" />
         <div class="box-detail-event">
-            <div class="banner-event" :style="{
-                backgroundImage: `url(${apiBaseUrl}${detailEvent?.attributes?.banner?.data?.attributes?.formats?.small?.url})`,
-            }">
+            <div
+                class="banner-event"
+                :style="{
+                    backgroundImage: `url(${apiBaseUrl}${detailEvent?.attributes?.banner?.data?.attributes?.formats?.small?.url})`,
+                }"
+            >
                 <div class="text-banner">
                     <div class="title-item">
                         <div class="event-title-detail">
@@ -17,57 +20,83 @@
                 </div>
             </div>
             <div class="btn-banner">
-                <div v-for="(button, index) in buttonsBanner" :key="index" class="btn-item-banner"
-                    :class="{ active: activeButton === button?.name }" @click="setActiveButton(button?.name)">
+                <div
+                    v-for="(button, index) in buttonsBanner"
+                    :key="index"
+                    class="btn-item-banner"
+                    :class="{ active: activeButton === button?.name }"
+                    @click="setActiveButton(button?.name)"
+                >
                     {{ button.label }}
                 </div>
             </div>
 
             <div class="list-matches" v-if="activeButton === 'Predict'">
                 <div class="box-matches">
-                    <div v-for="(item, index) in games" :key="index" :class="[
-                        'matches-item',
-                        getBorderClass(
-                            item?.BidSideNames?.split(','),
-                            item?.BidData?.Side
-                        ),
-                        {
-                            'matches-item-disable': item?.BidData,
-                        },
-                    ]">
+                    <div
+                        v-for="(item, index) in games"
+                        :key="index"
+                        :class="[
+                            'matches-item',
+                            getBorderClass(
+                                item?.BidSideNames?.split(','),
+                                item?.BidData?.Side
+                            ),
+                            {
+                                'matches-item-disable': item?.BidData,
+                            },
+                        ]"
+                    >
                         <div class="matches-time">
                             <div class="time-start">
                                 {{ getTimeRemaining(item?.StopBiddingTime) }}
                             </div>
-                            <div class="time-end" v-if="
-                                item?.CloseCountDown &&
-                                item?.CloseCountDown !== -1
-                            ">
+                            <div
+                                class="time-end"
+                                v-if="
+                                    item?.CloseCountDown &&
+                                    item?.CloseCountDown !== -1
+                                "
+                            >
                                 Close in:
-                                <CountDown :countDownValue="item?.CloseCountDown" />
+                                <CountDown
+                                    :countDownValue="item?.CloseCountDown"
+                                />
                             </div>
                         </div>
 
                         <div class="matches-title">
-                            <div class="matches-title-img" :style="{
-                                backgroundImage: `url(${apiBaseUrl}/uploads/${item?.Name?.split(
-                                    '-'
-                                )?.[0]?.toUpperCase()}.PNG)`,
-                            }"></div>
+                            <div
+                                class="matches-title-img"
+                                :style="{
+                                    backgroundImage: `url(${apiBaseUrl}/uploads/${item?.Name?.split(
+                                        '-'
+                                    )?.[0]?.toUpperCase()}.PNG)`,
+                                }"
+                            ></div>
                             {{ item?.Description }}
-                            <div class="matches-title-img" :style="{
-                                backgroundImage: `url(${apiBaseUrl}/uploads/${item?.Name?.split(
-                                    '-'
-                                )?.[1]?.toUpperCase()}.PNG)`,
-                            }"></div>
+                            <div
+                                class="matches-title-img"
+                                :style="{
+                                    backgroundImage: `url(${apiBaseUrl}/uploads/${item?.Name?.split(
+                                        '-'
+                                    )?.[1]?.toUpperCase()}.PNG)`,
+                                }"
+                            ></div>
                         </div>
 
-                        <div class="box-btn-predict" 
+                        <div
+                            class="box-btn-predict"
                             :class="{
-                            disable: !item?.CloseCountDown,
+                                disable: !item?.CloseCountDown,
                             }"
                         >
-                            <div v-for="(side, indexSide) in item?.BidSideNames?.split(',')" :key="indexSide" :class="[
+                            <div
+                                v-for="(
+                                    side, indexSide
+                                ) in item?.BidSideNames?.split(',')"
+                                :key="indexSide"
+                                :class="[
                                     // getDynamicClass(side),
                                     'team',
                                     {
@@ -75,10 +104,13 @@
                                             item?.selectedIndex === indexSide ||
                                             item?.BidData?.Side === indexSide,
                                     },
-                                ]">
+                                ]"
+                            >
                                 <div @click="handleSelectBid(index, indexSide)">
                                     <div>{{ side }}</div>
-                                    <div v-if="item?.RateData?.[indexSide] !== 0">
+                                    <div
+                                        v-if="item?.RateData?.[indexSide] !== 0"
+                                    >
                                         {{ renderRate(item, indexSide) }}
                                     </div>
                                 </div>
@@ -86,32 +118,55 @@
                         </div>
 
                         <div class="predict-point">
-                            <div class="slider-container" v-if="!item?.['GameTemplate.DefaultBidValue']">
-                           
-                                <input type="range" 
-                                    :min="handleMinValue(item?.['GameTemplate.ExtraData'])"
-                                    :max="handleMaxValue(item?.['GameTemplate.ExtraData'])" 
+                            <div
+                                class="slider-container"
+                                v-if="!item?.['GameTemplate.DefaultBidValue']"
+                            >
+                                <input
+                                    type="range"
+                                    :min="
+                                        handleMinValue(
+                                            item?.['GameTemplate.ExtraData']
+                                        )
+                                    "
+                                    :max="
+                                        handleMaxValue(
+                                            item?.['GameTemplate.ExtraData']
+                                        )
+                                    "
                                     :step="stepValue"
-                                    :value="sliderValue[index]" 
-                                    @input="handleSliderInput($event, index)" 
+                                    :value="sliderValue[index]"
+                                    @input="handleSliderInput($event, index)"
                                     :class="[
                                         'slider',
                                         {
-                                            'btn-predict-disable': item?.BidData || !item?.CloseCountDown,
+                                            'btn-predict-disable':
+                                                item?.BidData ||
+                                                !item?.CloseCountDown,
                                         },
-                                    ]" />
+                                    ]"
+                                />
                             </div>
 
-                            <div @click="handlePredict(item, index)" 
+                            <div
+                                @click="handlePredict(item, index)"
                                 :class="[
-                                'predict-point-content',
-                                {
-                                    'btn-predict-disable': item?.BidData || !item?.CloseCountDown,
-                                },
-                            ]">
-
+                                    'predict-point-content',
+                                    {
+                                        'btn-predict-disable':
+                                            item?.BidData ||
+                                            !item?.CloseCountDown,
+                                    },
+                                ]"
+                            >
                                 <div>Predict&nbsp;</div>
-                                <div v-if="item?.['GameTemplate.DefaultBidValue']"> {{ item?.["GameTemplate.DefaultBidValue"] }}</div>
+                                <div
+                                    v-if="
+                                        item?.['GameTemplate.DefaultBidValue']
+                                    "
+                                >
+                                    {{ item?.["GameTemplate.DefaultBidValue"] }}
+                                </div>
                                 <div v-else>{{ sliderValue[index] }}</div>
                                 <img src="./../../../public/assets/logo.svg" />
                             </div>
@@ -121,17 +176,31 @@
             </div>
 
             <div class="list-leaderboard" v-if="activeButton === 'Leaderboard'">
-                <div class="box-leaderboard" v-for="(item, index) in leaderboard" :key="index">
+                <div
+                    class="box-leaderboard"
+                    v-for="(item, index) in leaderboard"
+                    :key="index"
+                >
                     <div class="leaderboard-item">
                         <div class="content-your-rank">
-                            <div class="your-rank-lv" :class="'position-' + (index + 1)">
+                            <div
+                                class="your-rank-lv"
+                                :class="'position-' + (index + 1)"
+                            >
                                 <span>{{ index + 1 }}</span>
                             </div>
                             <div class="avt-your-rank">
-                                <div v-if="item?.UserPhotoUrl" class="lv-img" :style="{
-                                    backgroundImage: `url(${item?.UserPhotoUrl})`,
-                                }"></div>
-                                <img v-if="!item?.UserPhotoUrl" src="./../../../public/assets/logo.jpg" />
+                                <div
+                                    v-if="item?.UserPhotoUrl"
+                                    class="lv-img"
+                                    :style="{
+                                        backgroundImage: `url(${item?.UserPhotoUrl})`,
+                                    }"
+                                ></div>
+                                <img
+                                    v-if="!item?.UserPhotoUrl"
+                                    src="./../../../public/assets/logo.jpg"
+                                />
                             </div>
                             <div class="your-name-point">
                                 <div class="your-name">
@@ -154,10 +223,17 @@
                         <span>{{ dataRankCurrent?.rank }}</span>
                     </div>
                     <div class="avt-your-rank">
-                        <div v-if="dataRankCurrent?.UserPhotoUrl" class="lv-img" :style="{
-                            backgroundImage: `url(${dataRankCurrent?.UserPhotoUrl})`,
-                        }" />
-                        <img v-if="!dataRankCurrent?.UserPhotoUrl" src="./../../../public/assets/logo.jpg" />
+                        <div
+                            v-if="dataRankCurrent?.UserPhotoUrl"
+                            class="lv-img"
+                            :style="{
+                                backgroundImage: `url(${dataRankCurrent?.UserPhotoUrl})`,
+                            }"
+                        />
+                        <img
+                            v-if="!dataRankCurrent?.UserPhotoUrl"
+                            src="./../../../public/assets/logo.jpg"
+                        />
                     </div>
                     <div class="your-name-point">
                         <div class="your-name">
@@ -184,12 +260,19 @@
                         <div class="title-columns">Profit</div>
                     </div>
 
-                    <div class="history-item" v-for="(item, index) in history" :key="index">
+                    <div
+                        class="history-item"
+                        v-for="(item, index) in history"
+                        :key="index"
+                    >
                         <div class="history-item-col">
                             {{ index + 1 }}
                         </div>
                         <div class="history-item-col">
-                            <div class="match" :class="item?.Status?.toLowerCase()">
+                            <div
+                                class="match"
+                                :class="item?.Status?.toLowerCase()"
+                            >
                                 {{ item?.Status }}
                             </div>
                             <div>{{ item?.Game?.Description }}</div>
@@ -201,13 +284,17 @@
                             {{ formatDateToDDMMMYY(item.createdAt) }}
                         </div>
                         <div class="history-item-col">
-                            <div v-if="
-                                item?.Status?.toLowerCase() === 'win' ||
-                                item?.Status?.toLowerCase() === 'lose'
-                            ">
+                            <div
+                                v-if="
+                                    item?.Status?.toLowerCase() === 'win' ||
+                                    item?.Status?.toLowerCase() === 'lose'
+                                "
+                            >
                                 <div>
                                     {{ renderProfitQFP(item) }}
-                                    <img src="./../../../public/assets/logo.svg" />
+                                    <img
+                                        src="./../../../public/assets/logo.svg"
+                                    />
                                 </div>
                                 <div>
                                     {{ renderProfitPoint(item) }}
@@ -223,11 +310,20 @@
         </div>
         <EmptyForm v-if="showEmptyDetailEvent" />
 
-        <Notification v-if="showNotification" :message="notificationMessage" :type="notificationType"
-            @close="showNotification = false" />
+        <Notification
+            v-if="showNotification"
+            :message="notificationMessage"
+            :type="notificationType"
+            @close="showNotification = false"
+        />
 
-        <PopupConfirm v-if="showPopup" :text="`Do you want Predict`" :visible="showPopup" @yes="handleYesPredict"
-            @no="handleNoPredict" />
+        <PopupConfirm
+            v-if="showPopup"
+            :text="`Do you want Predict`"
+            :visible="showPopup"
+            @yes="handleYesPredict"
+            @no="handleNoPredict"
+        />
     </div>
 </template>
 
@@ -274,7 +370,6 @@ export default {
         },
     },
     data() {
-        
         return {
             apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
             dataTelegram: null,
@@ -420,15 +515,21 @@ export default {
                 const dataTele = this.dataTelegram?.user;
                 const nameTele = `${dataTele.first_name} ${dataTele.last_name}`;
 
-                const valueBid = this.games[this.indexPredict]?.["GameTemplate.DefaultBidValue"] || this.sliderValue[this.indexPredict]                
-                
+                const valueBid =
+                    this.games[this.indexPredict]?.[
+                        "GameTemplate.DefaultBidValue"
+                    ] || this.sliderValue[this.indexPredict];
+
                 const data = {
                     gameId: this.idPredict,
                     userId: this.idUser,
                     value: valueBid,
-                    valueType: this.games[this.indexPredict]?.["GameTemplate.ValueType"],
+                    valueType:
+                        this.games[this.indexPredict]?.[
+                            "GameTemplate.ValueType"
+                        ],
                     side: this.games[this.indexPredict]?.selectedIndex,
-                    userName: nameTele
+                    userName: nameTele,
                 };
 
                 const dataPredict = await predictService.addBidding(data);
@@ -480,18 +581,21 @@ export default {
                         ...game,
                         selectedIndex: null,
                     };
-                });                
-                
+                });
+
                 this.sliderValue = this.games?.map((item) => {
-                    if(item?.BidData?.Value){
-                        return item?.BidData?.Value
+                    if (item?.BidData?.Value) {
+                        return item?.BidData?.Value;
+                    } else {
+                        return this.handleMedium(
+                            item?.["GameTemplate.ExtraData"]
+                        );
                     }
-                    this.handleMedium(item?.['GameTemplate.ExtraData'])
                 });
 
                 this.leaderboard = await predictService.getLeaderBoard(
                     this.detailEvent?.attributes?.domainCode
-                );                
+                );
 
                 this.history = await predictService.getFilterData("bids", {
                     where: {
@@ -543,21 +647,21 @@ export default {
                 selectedIndex: null,
             }));
         },
-        handleMedium(extraData){
-            const gameExtraData: IGameExtraData = JSON.parse(extraData)
-            return (gameExtraData?.Min + gameExtraData?.Max) / 2
+        handleMedium(extraData) {
+            const gameExtraData: IGameExtraData = JSON.parse(extraData);
+            return (gameExtraData?.Min + gameExtraData?.Max) / 2;
         },
         handleMinValue(extraData) {
-            const gameExtraData: IGameExtraData = JSON.parse(extraData)
-            return gameExtraData?.Min || 200
+            const gameExtraData: IGameExtraData = JSON.parse(extraData);
+            return gameExtraData?.Min || 200;
         },
         handleMaxValue(extraData) {
-            const gameExtraData: IGameExtraData = JSON.parse(extraData)
-            return gameExtraData?.Max || 2000
+            const gameExtraData: IGameExtraData = JSON.parse(extraData);
+            return gameExtraData?.Max || 2000;
         },
         handleSliderInput(event, index) {
             const value = Number(event.target.value);
-            this.sliderValue[index] = value
+            this.sliderValue[index] = value;
         },
     },
 };
@@ -1150,7 +1254,6 @@ export default {
 }
 
 @media (min-width: 360px) {
-
     .list-history,
     .list-matches {
         height: calc(100% - 255px);
@@ -1158,7 +1261,6 @@ export default {
 }
 
 @media (min-width: 375px) {
-
     .list-history,
     .list-matches {
         height: calc(100% - 275px);
@@ -1166,7 +1268,6 @@ export default {
 }
 
 @media (min-width: 390px) {
-
     .list-history,
     .list-matches {
         height: calc(100% - 275px);
@@ -1174,7 +1275,6 @@ export default {
 }
 
 @media (min-width: 460px) {
-
     .list-history,
     .list-matches {
         height: calc(100% - 290px);
@@ -1182,7 +1282,6 @@ export default {
 }
 
 @media (min-width: 490px) {
-
     .list-history,
     .list-matches {
         height: calc(100% - 310px);
@@ -1190,7 +1289,6 @@ export default {
 }
 
 @media (min-width: 560px) {
-
     .list-history,
     .list-matches {
         height: calc(100% - 330px);
@@ -1198,7 +1296,6 @@ export default {
 }
 
 @media (min-width: 768px) {
-
     .list-history,
     .list-matches {
         height: calc(100% - 420px);
@@ -1206,7 +1303,6 @@ export default {
 }
 
 @media (min-width: 1024px) {
-
     .list-history,
     .list-matches {
         height: calc(100% - 480px);

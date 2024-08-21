@@ -31,8 +31,9 @@ import NotificationToast from "@/components/NotificationToast.vue";
 // import { title } from "process";
 import { ILevel } from "@/interface";
 import InfoUser from "@/views/InfoUser/InfoUser.vue";
+import LoadingScreen from "@/views/LoadingScreen/LoadingScreen.vue";
+import { mapState, mapMutations } from "vuex";
 import { formattedBalance } from "@/utils";
-import axios from "axios";
 
 const REF_MESS_PREFIX: string = "start r_";
 const REF_TOKEN_PREFIX: string = "TOKEN_";
@@ -45,6 +46,7 @@ export default {
         CheckinForm,
         NotificationToast,
         InfoUser,
+        LoadingScreen,
     },
     data() {
         const telegram_bot_link =
@@ -65,10 +67,11 @@ export default {
             );
         }
         return {
+            isLoadingCreen: true,
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            idUser: dataUserTele?.user?.id?.toString() ?? "",
+            idUser: dataUserTele?.user?.id?.toString() ?? "2123800227",
             telegram_bot_link: telegram_bot_link + dataUserTele?.user?.id || "",
 
             showCoomingSoon: false,
@@ -118,6 +121,7 @@ export default {
         };
     },
     computed: {
+        ...mapState(["hasLoaded"]),
         beforeStyle() {
             return {
                 "--pseudo-width": `${this.apiDataWidth}%`,
@@ -594,11 +598,21 @@ export default {
                 }
             }, updateInterval);
         },
+        ...mapMutations(["setHasLoaded"]),
+        async initializeApp() {
+            await this.getInfoUser();
+            // setTimeout(() => {
+            //     this.setHasLoaded(true);
+            // }, 2000);
+        },
     },
     async mounted() {
         Telegram.WebApp.ready();
         Telegram.WebApp.setHeaderColor("#ffffff");
-        await this.getInfoUser();
+        // await this.getInfoUser();
+        if (!this.hasLoaded) {
+            this.initializeApp();
+        }
     },
     async updated() {
         this.updateSence();
@@ -616,11 +630,9 @@ export default {
 </style>
 
 <template>
-    <div class="container">
-        <button class="absolute-training-btn button-decoration">
-            START TRAINING
-        </button>
+    <LoadingScreen v-if="!hasLoaded" :hasLoaded="hasLoaded" />
 
+    <div class="container" v-else>
         <div class="container-game">
             <InfoUser v-if="dataLogin" :dataLogin="dataLogin" />
 
@@ -631,10 +643,6 @@ export default {
                         Wallet
                     </button>
                 </div>
-                <!-- <a
-                    v-bind:href="`https://qfan-dapp.qcloud.asia/?playerId=${idUser}`"
-                    target="'_blank"
-                > -->
                 <button @click="onCheckIn()" v-bind:disabled="isExecCheckin">
                     <i class="fa-solid fa-calendar-days"></i> {{ titleCheckin }}
                     <span v-if="isExecCheckin"

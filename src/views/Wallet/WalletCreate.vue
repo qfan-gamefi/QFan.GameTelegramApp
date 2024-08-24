@@ -98,7 +98,7 @@ export default defineComponent({
                 type: SignerSourceTypes.privateKey,
                 privateKey: this.mnemonic
             });
-            
+
             await keyring.unlock();
             //get address
             const address = await keyring
@@ -106,6 +106,7 @@ export default defineComponent({
 
             if (address) {
                 await storage.set("address", address);
+                localStorage.setItem("walletType", "GOLDEN_AGE_WALLET");
                 this.$router.push("/wallet/detail");
             } else {
                 localStorage.clear();

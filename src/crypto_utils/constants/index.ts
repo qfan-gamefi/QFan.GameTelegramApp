@@ -7,3 +7,4 @@ export * from "./coin-types"
 export * from "./base-assets"
 export * from "./network-fees"
 export * from "./networks"
+export * from './QFPToken'

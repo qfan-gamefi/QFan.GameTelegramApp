@@ -1,11 +1,10 @@
 /* eslint-disable prefer-const */
-import type { TransactionRequest as EthersTransactionRequest } from "@quais/abstract-provider";
-import type { Transaction } from "@quais/transactions";
 import { ChainData, QUAI_CONTEXTS, QUAI_NETWORK } from "./constants/networks";
 import type { Slip44CoinType } from "./constants";
 import type { HexString, UNIXTime } from "@/storage/types";
-import { providers, quais, utils, Wallet } from "quais";
+import { quais, Wallet } from "quais";
 import { QFPTokenABI } from "./constants/QFPToken";
+import type { QuaiTransactionRequest } from "quais/providers";
 
 /**
  * Each supported network family is generally incompatible with others from a
@@ -256,14 +255,6 @@ export type EVMLog = {
  * information about the gas actually used to execute the transaction, as well
  * as the block hash and block height at which the transaction was included.
  */
-export type ConfirmedEVMTransaction = EVMTransaction & {
-    gasUsed: bigint;
-    status: number;
-    blockHash: string;
-    blockHeight: number;
-    etxs: Transaction[];
-    logs: EVMLog[] | undefined;
-};
 
 /**
  * An EVM transaction that failed to be confirmed. Includes information about
@@ -310,29 +301,7 @@ export type SignedTransaction =
     | SignedEIP1559Transaction
     | SignedLegacyEVMTransaction;
 
-/**
- * An EVM transaction that has all signature fields and has been included in a
- * block.
- */
-export type SignedConfirmedEVMTransaction = SignedEIP1559Transaction &
-    ConfirmedEVMTransaction;
 
-/**
- * Any EVM transaction, confirmed or unconfirmed and signed or unsigned.
- */
-export type AnyEVMTransaction =
-    | EVMTransaction
-    | ConfirmedEVMTransaction
-    | AlmostSignedEVMTransaction
-    | SignedTransaction
-    | FailedConfirmationEVMTransaction;
-
-/**
- * The estimated gas prices for including a transaction in the next block.
- *
- * The estimated prices include a percentage (confidence) that a transaction with
- * the given `baseFeePerGas` will be included in the next block.
- */
 export type BlockPrices = {
     network: Network;
     blockNumber: number;
@@ -400,11 +369,11 @@ export const sameChainID = (chainID: string, other: string): boolean => {
     return toHexChainID(chainID) === toHexChainID(other);
 };
 
-export const activeProvider = () => {
+export const activeProvider = (): quais.JsonRpcProvider => {
     const fromChain = QUAI_NETWORK.chains?.find(
         (x) => x.shard === "cyprus-1"
     ) as ChainData;
-    const provider = new providers.JsonRpcProvider(fromChain.rpc);
+    const provider = new quais.JsonRpcProvider(fromChain.rpc);
     return provider;
 };
 
@@ -540,17 +509,15 @@ export async function fetchActivity(address: string) {
 }
 
 export function getAddressLinkToExplorer(address: string) {
-    return `${
-        QUAI_NETWORK.chains?.find((x) => x.shard === "cyprus-1")
-            ?.blockExplorerUrl
-    }/address/${address}`;
+    return `${QUAI_NETWORK.chains?.find((x) => x.shard === "cyprus-1")
+        ?.blockExplorerUrl
+        }/address/${address}`;
 }
 
 export function getTxLinkToExplorer(txHash: string) {
-    return `${
-        QUAI_NETWORK.chains?.find((x) => x.shard === "cyprus-1")
-            ?.blockExplorerUrl
-    }/tx/${txHash}`;
+    return `${QUAI_NETWORK.chains?.find((x) => x.shard === "cyprus-1")
+        ?.blockExplorerUrl
+        }/tx/${txHash}`;
 }
 
 export const parseAndValidateSignedTransaction = (
@@ -601,23 +568,23 @@ export const parseAndValidateSignedTransaction = (
 
     const signedTx: SignedTransaction =
         typeof maxPriorityFeePerGas === "undefined" ||
-        typeof maxFeePerGas === "undefined"
+            typeof maxFeePerGas === "undefined"
             ? {
-                  ...baseSignedTx,
-                  gasPrice: gasPrice?.toBigInt() ?? null,
-                  maxFeePerGas: null,
-                  maxPriorityFeePerGas: null,
-              }
+                ...baseSignedTx,
+                gasPrice: gasPrice?.toBigInt() ?? null,
+                maxFeePerGas: null,
+                maxPriorityFeePerGas: null,
+            }
             : {
-                  ...baseSignedTx,
-                  gasPrice: null,
-                  maxFeePerGas: maxFeePerGas.toBigInt(),
-                  maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
-                  externalGasLimit: externalGasLimit?.toBigInt(),
-                  externalGasPrice: externalGasPrice?.toBigInt(),
-                  externalGasTip: externalGasTip?.toBigInt(),
-                  type: type as 0 | 2 | 1 | 100 | null,
-              };
+                ...baseSignedTx,
+                gasPrice: null,
+                maxFeePerGas: maxFeePerGas.toBigInt(),
+                maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
+                externalGasLimit: externalGasLimit?.toBigInt(),
+                externalGasPrice: externalGasPrice?.toBigInt(),
+                externalGasTip: externalGasTip?.toBigInt(),
+                type: type as 0 | 2 | 1 | 100 | null,
+            };
 
     return signedTx;
 };
@@ -629,7 +596,7 @@ export const parseAndValidateSignedTransaction = (
  */
 export async function signAndSendTransaction(
     privateKey: string,
-    transaction: providers.TransactionRequest
+    transaction: QuaiTransactionRequest
 ) {
     const provider = activeProvider();
     const signingWallet = new Wallet(privateKey, provider);
@@ -648,7 +615,7 @@ export async function signAndSendTransaction(
 
     const rawTransaction = {
         to: transaction.to,
-        value: utils.parseEther(transaction.value as string),
+        value: quais.parseQuai(transaction.value as string),
         nonce: transaction.nonce,
         maxFeePerGas: feeData.maxFeePerGas,
         maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
@@ -662,20 +629,3 @@ export async function signAndSendTransaction(
     const tx = await signingWallet.sendTransaction(rawTransaction);
     return tx;
 }
-
-export const transferToken = async (
-    privateKey: string,
-    toAddress: string,
-    amount: string
-) => {
-    // define provider, wallet, and contract
-    const provider = activeProvider();
-    const wallet = new Wallet(privateKey, provider);
-    const erc20 = new quais.Contract(
-        "0x0BE8BD7911111C3BF55488Ad7b11bC98a755a3C3",
-        QFPTokenABI,
-        wallet
-    ); // deployed contract instance
-    const tx = await erc20.transfer(toAddress, quais.utils.parseEther(amount));
-    return tx;
-};

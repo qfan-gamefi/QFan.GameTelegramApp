@@ -41,8 +41,7 @@ async function generateSalt(): Promise<string> {
 function requireCryptoGlobal(message?: string) {
     if (global.crypto === undefined) {
         throw new Error(
-            `${
-                message || "Pelagus"
+            `${message || "Pelagus"
             } requires WebCrypto API support — is this being run in a modern browser?`
         );
     }
@@ -130,6 +129,8 @@ export async function encryptVault<V>(
     const initializationVector = crypto.getRandomValues(new Uint8Array(16));
 
     const encodedPlaintext = encoder.encode(JSON.stringify(vault));
+    console.log("encodedPlaintext", JSON.stringify(vault));
+
 
     const cipherText = await crypto.subtle.encrypt(
         // note we use GCM mode to get authentication guarantees / tamper
@@ -181,5 +182,6 @@ export async function decryptVault<V>(
         base64ToBuffer(cipherText)
     );
 
-    return JSON.parse(new TextDecoder().decode(plaintext));
+    const decryptedText = new TextDecoder().decode(plaintext);
+    return JSON.parse(decryptedText);
 }

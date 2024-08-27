@@ -3,7 +3,7 @@ import type { EVMNetwork } from "../networks"
 import {
   JsonRpcProvider as QuaisJsonRpcProvider,
   WebSocketProvider as QuaisWebSocketProvider,
-} from "@quais/providers"
+} from "quais/providers"
 import { QUAI, QUAI_LOCAL } from "./base-assets"
 import type SerialFallbackProvider from "../serial-fallback-provider"
 import { makeSerialFallbackProvider } from "../serial-fallback-provider"
@@ -41,57 +41,9 @@ export const DEFAULT_QUAI_TESTNET = {
     {
       name: "Cyprus One",
       shard: "cyprus-1",
-      rpc: "https://rpc.cyprus1.colosseum.quaiscan.io",
-      blockExplorerUrl: "https://cyprus1.colosseum.quaiscan.io",
-    },
-    {
-      name: "Cyprus Two",
-      shard: "cyprus-2",
-      rpc: "https://rpc.cyprus2.colosseum.quaiscan.io",
-      blockExplorerUrl: "https://cyprus2.colosseum.quaiscan.io",
-    },
-    {
-      name: "Cyprus Three",
-      shard: "cyprus-3",
-      rpc: "https://rpc.cyprus3.colosseum.quaiscan.io",
-      blockExplorerUrl: "https://cyprus3.colosseum.quaiscan.io",
-    },
-    {
-      name: "Paxos One",
-      shard: "paxos-1",
-      rpc: "https://rpc.paxos1.colosseum.quaiscan.io",
-      blockExplorerUrl: "https://paxos1.colosseum.quaiscan.io",
-    },
-    {
-      name: "Paxos Two",
-      shard: "paxos-2",
-      rpc: "https://rpc.paxos2.colosseum.quaiscan.io",
-      blockExplorerUrl: "https://paxos2.colosseum.quaiscan.io",
-    },
-    {
-      name: "Paxos Three",
-      shard: "paxos-3",
-      rpc: "https://rpc.paxos3.colosseum.quaiscan.io",
-      blockExplorerUrl: "https://paxos3.colosseum.quaiscan.io",
-    },
-    {
-      name: "Hydra One",
-      shard: "hydra-1",
-      rpc: "https://rpc.hydra1.colosseum.quaiscan.io",
-      blockExplorerUrl: "https://hydra1.colosseum.quaiscan.io",
-    },
-    {
-      name: "Hydra Two",
-      shard: "hydra-2",
-      rpc: "https://rpc.hydra2.colosseum.quaiscan.io",
-      blockExplorerUrl: "https://hydra2.colosseum.quaiscan.io",
-    },
-    {
-      name: "Hydra Three",
-      shard: "hydra-3",
-      rpc: "https://rpc.hydra3.colosseum.quaiscan.io",
-      blockExplorerUrl: "https://hydra3.colosseum.quaiscan.io",
-    },
+      rpc: "http://rpc.sandbox.quai.network:9200",
+      blockExplorerUrl: "https://quaiscan.io",
+    }
   ],
 } as Network
 

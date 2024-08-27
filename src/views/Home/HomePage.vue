@@ -32,8 +32,9 @@ import NotificationToast from "@/components/NotificationToast.vue";
 import { ILevel } from "@/interface";
 import InfoUser from "@/views/InfoUser/InfoUser.vue";
 import LoadingScreen from "@/views/LoadingScreen/LoadingScreen.vue";
-import { mapState, mapMutations } from "vuex";
 import { formattedBalance } from "@/utils";
+import { mapState } from "vuex";
+import { preloadImages } from "@/utils/preloadImages";
 
 const REF_MESS_PREFIX: string = "start r_";
 const REF_TOKEN_PREFIX: string = "TOKEN_";
@@ -71,7 +72,7 @@ export default {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            idUser: dataUserTele?.user?.id?.toString() ?? "2123800227",
+            idUser: dataUserTele?.user?.id?.toString() ?? "",
             telegram_bot_link: telegram_bot_link + dataUserTele?.user?.id || "",
 
             showCoomingSoon: false,
@@ -598,18 +599,17 @@ export default {
                 }
             }, updateInterval);
         },
-        ...mapMutations(["setHasLoaded"]),
         async initializeApp() {
-            await this.getInfoUser();
-            // setTimeout(() => {
-            //     this.setHasLoaded(true);
-            // }, 2000);
+            setTimeout(() => {
+                // this.setHasLoaded(true);
+                this.$store.commit("setHasLoaded", true);
+            }, 2000);
         },
     },
     async mounted() {
         Telegram.WebApp.ready();
         Telegram.WebApp.setHeaderColor("#ffffff");
-        // await this.getInfoUser();
+        await this.getInfoUser();
         if (!this.hasLoaded) {
             this.initializeApp();
         }
@@ -630,9 +630,9 @@ export default {
 </style>
 
 <template>
-    <LoadingScreen v-if="!hasLoaded" :hasLoaded="hasLoaded" />
+    <LoadingScreen />
 
-    <div class="container" v-else>
+    <div class="container" v-if="hasLoaded">
         <div class="container-game">
             <InfoUser v-if="dataLogin" :dataLogin="dataLogin" />
 

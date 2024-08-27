@@ -30,20 +30,16 @@ import NotificationToast from "@/components/NotificationToast.vue";
 // import { title } from "process";
 import type { ILevel } from "@/interface";
 import InfoUser from "@/views/InfoUser/InfoUser.vue";
-<<<<<<< HEAD
 import LoadingScreen from "@/views/LoadingScreen/LoadingScreen.vue";
 import { formattedBalance } from "@/utils";
 import { mapState } from "vuex";
 import { preloadImages } from "@/utils/preloadImages";
-=======
 import HDKeyring from "@/crypto_utils/HDKeyring";
 import type { PrivateKey } from "@/crypto_utils/type";
 import type { QuaiTransactionRequest, QuaiTransactionResponse } from "quais/lib/esm/providers";
 import { QFPContractAddress, QFPOwerWalletAddress } from "@/crypto_utils/constants";
 import { DEFAULT_QUAI_TESNTET } from "@/services/network/chains";
 import { getAddress, parseEther, toBigInt } from "ethers";
-import { formattedBalance } from "@/utils";
->>>>>>> 645fc1bfe8f9971e5e0d7a898ff8407e20446de0
 
 const REF_MESS_PREFIX: string = "start r_";
 const REF_TOKEN_PREFIX: string = "TOKEN_";
@@ -618,17 +614,14 @@ export default {
         Telegram.WebApp.ready();
         Telegram.WebApp.setHeaderColor("#ffffff");
         await this.getInfoUser();
-<<<<<<< HEAD
         if (!this.hasLoaded) {
             this.initializeApp();
-=======
-
+        }
         const walletType = localStorage.getItem("walletType");
         if (walletType !== "GOLDEN_AGE_WALLET") {
             localStorage.removeItem("tallyVaults");
             localStorage.removeItem("address");
             this.$router.push({ name: "WalletCreate" });
->>>>>>> 645fc1bfe8f9971e5e0d7a898ff8407e20446de0
         }
     },
     async updated() {

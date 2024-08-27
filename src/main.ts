@@ -12,6 +12,7 @@ import { Buffer } from "buffer";
 // @ts-ignore
 window.Buffer = Buffer;
 window.global = window;
+console.log("Buffer", global.crypto);
 
 // createApp(SampleGame).mount("#app");
 const app = createApp(SampleGame);

@@ -7,7 +7,7 @@ import {
 import {
   JsonRpcProvider as QuaisJsonRpcProvider,
   WebSocketProvider as QuaisWebSocketProvider,
-} from "@quais/providers"
+} from "quais/providers"
 import { hexlify } from "ethers"
 import {
   ShardFromRpcUrl,
@@ -15,7 +15,7 @@ import {
   NETWORK_BY_CHAIN_ID,
 } from "./constants"
 import type { AnyEVMTransaction } from "./networks"
-import { logger } from "quais"
+import logger from "./logger"
 
 export const SECOND = 1000
 export const MINUTE = 60 * SECOND
@@ -434,7 +434,7 @@ export default class SerialFallbackProvider extends QuaisJsonRpcProvider {
     const hasCodeCache = Object.keys(this.latestHasCodeCache)
     if (balanceCache.length > 0) {
       logger.info(
-        `Cleaning up ${this.network.chainId} balance cache, ${balanceCache.length} entries`
+        `Cleaning up ${this._network.chainId} balance cache, ${balanceCache.length} entries`
       )
       const now = Date.now()
       balanceCache.forEach(([address, balance]) => {
@@ -446,7 +446,7 @@ export default class SerialFallbackProvider extends QuaisJsonRpcProvider {
 
     if (hasCodeCache.length > 0) {
       logger.info(
-        `Cleaning up ${this.network.chainId} hasCode cache, ${hasCodeCache.length} entries`
+        `Cleaning up ${this._network.chainId} hasCode cache, ${hasCodeCache.length} entries`
       )
 
       this.latestHasCodeCache = {}

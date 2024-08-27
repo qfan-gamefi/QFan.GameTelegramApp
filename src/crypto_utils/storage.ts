@@ -1,7 +1,6 @@
-import { secureStorage, storage } from "@/storage/storage"
-import type { UNIXTime } from "@/storage/types"
-import type { EncryptedVault } from "./encryption"
-import logger from "./logger"
+import { storage } from "@/storage/storage"
+import { type EncryptedVault } from "./encryption"
+import { type UNIXTime } from "./type"
 
 type SerializedEncryptedVault = {
   timeSaved: UNIXTime
@@ -13,24 +12,20 @@ type SerializedEncryptedVaults = {
   vaults: SerializedEncryptedVault[]
 }
 
-export const VAULT_KEY = "tallyVaults";
-export const KEYRING_KEY = "Keyrings";
-
 /**
  * Retrieve all serialized encrypted vaults from extension storage.
  *
  * @returns a schema version and array of serialized vaults
  */
 export async function getEncryptedVaults(): Promise<SerializedEncryptedVaults> {
-  const data = await storage.get<any>(VAULT_KEY) || {}
-  logger.info("Retrieved encrypted vaults from storage", data)
-  if (!("tallyVaults" in data)) {
+  const data = await storage.get<SerializedEncryptedVaults>("tallyVaults")
+  if (!data) {
     return {
       version: 1,
       vaults: [],
     }
   }
-  const { tallyVaults } = data
+  const tallyVaults = data
   if (
     "version" in tallyVaults &&
     tallyVaults.version === 1 &&
@@ -39,7 +34,7 @@ export async function getEncryptedVaults(): Promise<SerializedEncryptedVaults> {
   ) {
     return tallyVaults as SerializedEncryptedVaults
   }
-  throw new Error("Encrypted vaults are using an unkown serialization format")
+  throw new Error("Encrypted vaults are using an unknown serialization format")
 }
 
 function equalVaults(vault1: EncryptedVault, vault2: EncryptedVault): boolean {
@@ -76,17 +71,15 @@ export async function writeLatestEncryptedVault(
   const oldVault = currentLatest && currentLatest.vault
   // if there's been a change, persist the vault
   if (!oldVault || !equalVaults(oldVault, encryptedVault)) {
-    await storage.set(VAULT_KEY, {
-      tallyVaults: {
-        ...serializedVaults,
-        vaults: [
-          ...serializedVaults.vaults,
-          {
-            timeSaved: Date.now(),
-            vault: encryptedVault,
-          },
-        ],
-      },
+    await storage.set("tallyVaults", {
+      ...serializedVaults,
+      vaults: [
+        ...serializedVaults.vaults,
+        {
+          timeSaved: Date.now(),
+          vault: encryptedVault,
+        },
+      ],
     })
   }
 }

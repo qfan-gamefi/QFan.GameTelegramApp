@@ -24,18 +24,26 @@ import userService from "@/services/userService";
 import EventList from "@/views/Event/EventList.vue";
 import CheckinForm from "@/views/Checkin/CheckinForm.vue";
 import { secureStorage, storage } from "@/storage/storage";
-import KeyringService from "@/crypto_utils/KDKeyringService";
-import { transferToken } from "@/crypto_utils/networks";
-import type { Wallet } from "quais";
+import { quais, type Wallet } from "quais";
 import NotificationToast from "@/components/NotificationToast.vue";
 // import { title } from "process";
-import { ILevel } from "@/interface";
+// import { title } from "process";
+import type { ILevel } from "@/interface";
 import InfoUser from "@/views/InfoUser/InfoUser.vue";
+import LoadingScreen from "@/views/LoadingScreen/LoadingScreen.vue";
 import { formattedBalance } from "@/utils";
-import axios from "axios";
+import { mapState } from "vuex";
+import { preloadImages } from "@/utils/preloadImages";
+import HDKeyring from "@/crypto_utils/HDKeyring";
+import type { PrivateKey } from "@/crypto_utils/type";
+import type { QuaiTransactionRequest, QuaiTransactionResponse } from "quais/lib/esm/providers";
+import { QFPContractAddress, QFPOwerWalletAddress } from "@/crypto_utils/constants";
+import { DEFAULT_QUAI_TESNTET } from "@/services/network/chains";
+import { getAddress, parseEther, toBigInt } from "ethers";
 
 const REF_MESS_PREFIX: string = "start r_";
 const REF_TOKEN_PREFIX: string = "TOKEN_";
+const MINING_INTERVAL = 1000 * 60 * 1 + 5000;
 export default {
     components: {
         InviteFrens,
@@ -45,6 +53,7 @@ export default {
         CheckinForm,
         NotificationToast,
         InfoUser,
+        LoadingScreen,
     },
     data() {
         const telegram_bot_link =
@@ -64,11 +73,13 @@ export default {
                 dataUserTele.start_param?.replace("TOKEN_", "")
             );
         }
+
         return {
+            isLoadingCreen: true,
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            idUser: dataUserTele?.user?.id?.toString() ?? "",
+            idUser: dataUserTele?.user?.id?.toString() ?? "2123800227",
             telegram_bot_link: telegram_bot_link + dataUserTele?.user?.id || "",
 
             showCoomingSoon: false,
@@ -114,10 +125,11 @@ export default {
             expLevelNext: {} as ILevel,
             percentageLevel: 0,
             isMaxLv: false,
-            isAnimated: false,
+            isAnimated: false
         };
     },
     computed: {
+        ...mapState(["hasLoaded"]),
         beforeStyle() {
             return {
                 "--pseudo-width": `${this.apiDataWidth}%`,
@@ -318,10 +330,10 @@ export default {
         async updateSence() {
             const phaserRef: any = this.$refs.phaserRef as
                 | {
-                      scene?: {
-                          changeScene: () => void;
-                      };
-                  }
+                    scene?: {
+                        changeScene: () => void;
+                    };
+                }
                 | undefined;
             const scene = toRaw(phaserRef?.scene);
             const givenDateTimeString = this.dataQPoint.nextTakeRewardTime;
@@ -447,8 +459,9 @@ export default {
         },
         async handleWallet() {
             this.handleBackButton();
-            const isSigned = (await storage.get<boolean>("signed_in")) || false;
-            if (isSigned) {
+            const keyringService = new HDKeyring();
+            const isUnlock = await keyringService.unlock();
+            if (isUnlock && keyringService.isSigning) {
                 this.$router.push({ name: "WalletDetail" });
             } else {
                 this.$router.push({ name: "WalletForm" });
@@ -458,34 +471,32 @@ export default {
             try {
                 this.titleCheckin = "Processing";
                 this.isExecCheckin = true;
-                const keyringService = new KeyringService();
-                const isUnlock = await keyringService.unlock(
-                    secureStorage.getPassword() as string,
-                    false
-                );
+                const keyringService = new HDKeyring();
+                const isUnlock = await keyringService.unlock();
                 if (isUnlock) {
-                    const activeWallet = (await keyringService
-                        ?.getPrivateKeys()
-                        ?.at(0)) as Wallet;
-
-                    const address = await activeWallet?.getAddress();
+                    const activeWallet = keyringService.getActiveWallet();
+                    const address = await activeWallet?.address;
 
                     if (!address) {
                         this.$router.push({ name: "WalletCreate" });
                         return;
                     }
 
-                    const tx = await transferToken(
-                        activeWallet.privateKey,
-                        activeWallet.address,
-                        "0"
-                    );
+                    const request: QuaiTransactionRequest = {
+                        from: address,
+                        to: QFPOwerWalletAddress,
+                    }
+
+                    const tx = await keyringService.sendTokenTransaction(request) as QuaiTransactionResponse;
+
                     const claimCheckin = await userService.claimCheckin(
                         this.idUser,
                         activeWallet?.address as string,
                         tx.hash as string
                     );
-                    // console.log("claimCheckin", claimCheckin);
+
+                    console.log("claimCheckin", claimCheckin);
+
                     await this.getInfoUser();
                     if (claimCheckin.error) {
                         // alert(claimCheckin?.error?.message);
@@ -510,17 +521,12 @@ export default {
             }
         },
         async onAutoInteract() {
-            const keyringService = new KeyringService();
-            await keyringService.unlock(
-                secureStorage.getPassword() as string,
-                false
-            );
+            const keyringService = new HDKeyring();
+            await keyringService.unlock();
 
-            const activeWallet = (await keyringService
-                ?.getPrivateKeys()
-                ?.at(0)) as Wallet;
+            const activeWallet = keyringService.getWallets()?.at(0) as PrivateKey;
 
-            const address = await activeWallet?.getAddress();
+            const address = await activeWallet?.addresses?.at(0);
 
             if (!address) {
                 this.$router.push({ name: "WalletCreate" });
@@ -530,31 +536,34 @@ export default {
             // this.titleAutoInteract = "Mining...";
             this.calcWidthMining();
             this.isExecAutoInteract = true;
-            await this.autoInteract();
+            await this.autoInteract(keyringService);
 
             this.autoInteractInterval = setInterval(async () => {
                 await this.calcWidthMining();
-                await this.autoInteract();
-            }, 1000 * 60 * 2 + 10000);
+                await this.autoInteract(keyringService);
+            }, MINING_INTERVAL);
         },
-        async autoInteract() {
+        async autoInteract(keyringService: HDKeyring) {
             try {
-                const keyringService = new KeyringService();
-                const isUnlock = await keyringService.unlock(
-                    secureStorage.getPassword() as string,
-                    false
-                );
-                if (isUnlock) {
+                if (keyringService.getWallets().length > 0) {
                     this.isExecAutoInteract = true;
-                    const activeWallet = (await keyringService
-                        .getPrivateKeys()
-                        .at(0)) as Wallet;
+                    const activeWallet = keyringService.getActiveWallet();
+                    if (!activeWallet) {
+                        this.$router.push({ name: "WalletCreate" });
+                        return;
+                    }
 
-                    const tx = await transferToken(
-                        activeWallet.privateKey,
-                        activeWallet.address,
-                        "0"
-                    );
+                    const address = await activeWallet?.address;
+
+                    const request: QuaiTransactionRequest = {
+                        from: address,
+                        to: QFPOwerWalletAddress,
+                    }
+
+                    const tx = await keyringService.sendTokenTransaction(request) as QuaiTransactionResponse;
+
+                    console.log("autoInteract TX", tx);
+
                     const autoInteract = await userService.autoInteract(
                         this.idUser,
                         activeWallet?.address as string,
@@ -568,7 +577,6 @@ export default {
                         this.widthWining = 0;
                         this.renderSuccess(`Mining success +${30}QFP`);
                         this.calcWidthMining();
-                        // this.dropItem();
                     }
                 } else {
                     this.$router.push({ name: "WalletCreate" });
@@ -579,9 +587,9 @@ export default {
             }
         },
         calcWidthMining() {
-            const totalTime = 130000;
+            const totalTime = MINING_INTERVAL;
             const updateInterval = 1000;
-            const increment = (100 / totalTime) * updateInterval;
+            const increment = (100 * updateInterval) / totalTime / 2;
 
             this.intervalId = setInterval(() => {
                 if (this.widthWining < 100) {
@@ -595,36 +603,27 @@ export default {
                 }
             }, updateInterval);
         },
-        async dropItem() {
-            let data = JSON.stringify({
-                treasureName: "MiningDrop",
-                userId: this.idUser,
-            });
-
-            let config = {
-                method: "post",
-                maxBodyLength: Infinity,
-                url: "https://a9ca-171-224-177-81.ngrok-free.app/api/v1/treasure/triggerTreasure",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                data: data,
-            };
-
-            await axios
-                .request(config)
-                .then((response) => {
-                    console.log(JSON.stringify(response.data));
-                })
-                .catch((error) => {
-                    console.log(error);
-                });
+        async initializeApp() {
+            setTimeout(() => {
+                // this.setHasLoaded(true);
+                this.$store.commit("setHasLoaded", true);
+            }, 2000);
         },
     },
     async mounted() {
         Telegram.WebApp.ready();
         Telegram.WebApp.setHeaderColor("#ffffff");
         await this.getInfoUser();
+
+        if (!this.hasLoaded) {
+            this.initializeApp();
+        }
+        const walletType = localStorage.getItem("walletType");
+        if (walletType !== "GOLDEN_AGE_WALLET") {
+            localStorage.removeItem("tallyVaults");
+            localStorage.removeItem("address");
+            this.$router.push({ name: "WalletCreate" });
+        }
     },
     async updated() {
         this.updateSence();
@@ -642,11 +641,9 @@ export default {
 </style>
 
 <template>
-    <div class="container">
-        <button class="absolute-training-btn button-decoration">
-            START TRAINING
-        </button>
+    <LoadingScreen />
 
+    <div class="container" v-if="hasLoaded">
         <div class="container-game">
             <InfoUser v-if="dataLogin" :dataLogin="dataLogin" />
 
@@ -657,25 +654,16 @@ export default {
                         Wallet
                     </button>
                 </div>
-                <!-- <a
-                    v-bind:href="`https://qfan-dapp.qcloud.asia/?playerId=${idUser}`"
-                    target="'_blank"
-                > -->
                 <button @click="onCheckIn()" v-bind:disabled="isExecCheckin">
                     <i class="fa-solid fa-calendar-days"></i> {{ titleCheckin }}
-                    <span v-if="isExecCheckin"
-                        ><i class="fa fa-spinner"></i
-                    ></span>
+                    <span v-if="isExecCheckin"><i class="fa fa-spinner"></i></span>
                 </button>
             </div>
 
             <div class="contaner-balance">
                 <div class="wr-balance">
                     Balance:
-                    <div
-                        class="text-balance"
-                        :class="{ 'animate-text': isAnimated }"
-                    >
+                    <div class="text-balance" :class="{ 'animate-text': isAnimated }">
                         {{
                             formattedBalance(
                                 dataLogin?.attributes?.qpoint?.data?.attributes
@@ -703,11 +691,7 @@ export default {
                         </div>
 
                         <div class="box-right">
-                            <button
-                                class="btn-commit_reward"
-                                @click="handleReward"
-                                :disabled="isCountingDown"
-                            >
+                            <button class="btn-commit_reward" @click="handleReward" :disabled="isCountingDown">
                                 {{ isClaim ? "Claim" : "Training..." }}
                             </button>
                         </div>
@@ -724,17 +708,10 @@ export default {
                             </div>
                         </div>
                         <div class="box-right">
-                            <div
-                                class="btn-mining"
-                                @click="onAutoInteract()"
-                                :class="{ active: isExecAutoInteract }"
-                            >
-                                <img
-                                    src="@public/assets/mining/icon-auto.png"
-                                    :class="{
-                                        rotateMining: isExecAutoInteract,
-                                    }"
-                                />
+                            <div class="btn-mining" @click="onAutoInteract()" :class="{ active: isExecAutoInteract }">
+                                <img src="@public/assets/mining/icon-auto.png" :class="{
+                                    rotateMining: isExecAutoInteract,
+                                }" />
                                 Mining
                             </div>
                         </div>
@@ -755,46 +732,27 @@ export default {
         </div>
 
         <div class="box-button">
-            <div
-                class="btn-item"
-                @click="handleButtonTab('mission')"
-                :class="{ active: activeButton === 'mission' }"
-            >
+            <div class="btn-item" @click="handleButtonTab('mission')" :class="{ active: activeButton === 'mission' }">
                 <div class="item-img">
                     <img src="@public/assets/button-icons/mission.svg" />
                 </div>
                 <div class="item-title">Mission</div>
             </div>
-            <div
-                class="btn-item"
-                @click="handleButtonTab('event')"
-                :class="{ active: activeButton === 'event' }"
-            >
+            <div class="btn-item" @click="handleButtonTab('event')" :class="{ active: activeButton === 'event' }">
                 <div class="item-img">
                     <img src="@public/assets/button-icons/event.svg" />
                 </div>
                 <div class="item-title">Event</div>
             </div>
-            <div
-                class="btn-item"
-                @click="handleButtonTab('booster')"
-                :class="{ active: activeButton === 'booster' }"
-            >
+            <div class="btn-item" @click="handleButtonTab('booster')" :class="{ active: activeButton === 'booster' }">
                 <div class="item-img">
                     <img src="@public/assets/button-icons/booster.svg" />
                 </div>
-                <div
-                    class="item-title"
-                    :class="{ active: activeButton === 'booster' }"
-                >
+                <div class="item-title" :class="{ active: activeButton === 'booster' }">
                     Booster
                 </div>
             </div>
-            <div
-                class="btn-item"
-                @click="handleButtonTab('invite')"
-                :class="{ active: activeButton === 'invite' }"
-            >
+            <div class="btn-item" @click="handleButtonTab('invite')" :class="{ active: activeButton === 'invite' }">
                 <div class="item-img">
                     <img src="@public/assets/button-icons/invite-friend.svg" />
                 </div>
@@ -813,15 +771,8 @@ export default {
             <div class="popup-referer-code">
                 <div class="referer-code">Referer code</div>
                 <form @submit.prevent="submitCode">
-                    <input
-                        class="code-input"
-                        :class="{ 'input-error': errorMessage }"
-                        type="text"
-                        v-model="code"
-                        id="code"
-                        @input="clearError"
-                        placeholder="Enter code"
-                    />
+                    <input class="code-input" :class="{ 'input-error': errorMessage }" type="text" v-model="code"
+                        id="code" @input="clearError" placeholder="Enter code" />
                     <div v-if="errorMessage" class="text-err-code">
                         {{ errorMessage }}
                     </div>
@@ -833,34 +784,19 @@ export default {
         </div>
 
         <MissionList :visible="showMission" :idUser="idUser" />
-        <EventList
-            :visible="showEvent"
-            :idUser="idUser"
-            :dataQPoint="dataQPoint"
-            @openCoomSoon="showPopupCoomingSoon"
-        />
+        <EventList :visible="showEvent" :idUser="idUser" :dataQPoint="dataQPoint"
+            @openCoomSoon="showPopupCoomingSoon" />
 
-        <InviteFrens
-            :visible="showInvite"
-            :idUser="idUser"
-            :rewardAmount="dataQPoint.rewardAmount"
-            :telegram_bot_link="telegram_bot_link"
-        />
-        <BoosterForm
-            :visible="showBooster"
-            :rewardScheduleHour="dataQPoint.rewardScheduleHour"
-            :idUser="idUser"
-        />
+        <InviteFrens :visible="showInvite" :idUser="idUser" :rewardAmount="dataQPoint.rewardAmount"
+            :telegram_bot_link="telegram_bot_link" />
+        <BoosterForm :visible="showBooster" :rewardScheduleHour="dataQPoint.rewardScheduleHour" :idUser="idUser" />
 
         <CheckinForm :isCheckin="isCheckin" @closeCheckin="closeCheckin" />
 
-        <div
-            :class="[
-                'popup-cooming-soon',
-                { 'closing-popup': !showCoomingSoon },
-            ]"
-            v-if="showCoomingSoon"
-        >
+        <div :class="[
+            'popup-cooming-soon',
+            { 'closing-popup': !showCoomingSoon },
+        ]" v-if="showCoomingSoon">
             <p>Coming soon</p>
             <button @click="hidePopupCoomingSoon" class="btn-close-coming-soon">
                 Close
@@ -871,11 +807,7 @@ export default {
             <span>Success!</span>
         </div>
 
-        <NotificationToast
-            v-if="notification.show"
-            :message="notification.message"
-            :type="notification.type"
-            @close="notification.show = false"
-        />
+        <NotificationToast v-if="notification.show" :message="notification.message" :type="notification.type"
+            @close="notification.show = false" />
     </div>
 </template>

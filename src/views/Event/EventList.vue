@@ -11,7 +11,6 @@
                     :key="index"
                     :style="{
                         backgroundImage: `url(${apiBaseUrl}${item?.attributes?.banner?.data?.attributes?.formats?.small?.url})`,
-                        // backgroundImage: `url(${item?.attributes?.banner?.data?.attributes?.formats?.small?.url})`,
                     }"
                     @click="handleJoin(item)"
                 >
@@ -138,7 +137,7 @@ export default {
                 this.loading = false;
             }
         },
-        handleJoin(itemDetail: IEvent) {
+        handleJoin(itemDetail: IEvent) {     
             const { actionType, status, route } = itemDetail?.attributes || {};
            
             if (actionType === "POST") {
@@ -166,7 +165,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 .popup-event {
     height: 100%;
     position: absolute;

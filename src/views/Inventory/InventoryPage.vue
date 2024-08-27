@@ -103,7 +103,7 @@ export default defineComponent({
             showCoomingSoon: false,
             apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
             userId: userInfo?.user?.id || "",
-            activeButton: "Inventory" as string,
+            activeButton: "Badges" as string,
             buttonInventory: [
                 { name: "Inventory", label: "Inventory" },
                 { name: "Badges", label: "Badges" },
@@ -123,14 +123,14 @@ export default defineComponent({
     },
     methods: {
         setActiveButton(button: string) {
-            this.activeButton = button;
+            this.showCoomingSoon = true;
+            // this.activeButton = button;
         },
         async getDataInventor() {
             try {
                 const res = await userServiceInventory.getListInventory(
                     Number(this.userId)
                 );
-                console.log(res);
 
                 const filterData = res?.Items?.filter(
                     (item) => item?.ItemDef?.Type === EItemDefType.Common
@@ -160,7 +160,7 @@ export default defineComponent({
     z-index: 999;
     animation: fadeInDetailEvent 0.1s ease forwards;
     color: #fff;
-    background-image: url("./../../public/assets/inventory/background-inventory.png");
+    background-image: url("./../../../public/assets/inventory/background-inventory.png");
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
@@ -178,7 +178,7 @@ export default defineComponent({
 }
 
 .banner-inventory {
-    background-image: url("./../../public/assets/inventory/banner-inventory.png");
+    background-image: url("./../../../public/assets/inventory/inventory-banner.png");
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;

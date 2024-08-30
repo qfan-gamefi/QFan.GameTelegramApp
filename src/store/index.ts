@@ -5,7 +5,6 @@ const store = createStore({
         return {
             userId: null,
             fullName: "",
-            hasLoaded: false,
         };
     },
     mutations: {
@@ -14,9 +13,6 @@ const store = createStore({
         },
         setFullName(state: any, name: string) {
             state.fullName = name;
-        },
-        setHasLoaded(state, status) {
-            state.hasLoaded = status;
         },
     },
 });

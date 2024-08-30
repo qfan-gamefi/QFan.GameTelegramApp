@@ -59,7 +59,6 @@ export default {
         CheckinForm,
         NotificationToast,
         InfoUser,
-        LoadingScreen,
     },
     data() {
         const telegram_bot_link =
@@ -81,7 +80,6 @@ export default {
         }
 
         return {
-            isLoadingCreen: true,
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
@@ -135,7 +133,6 @@ export default {
         };
     },
     computed: {
-        ...mapState(["hasLoaded"]),
         beforeStyle() {
             return {
                 "--pseudo-width": `${this.apiDataWidth}%`,
@@ -615,12 +612,6 @@ export default {
                 }
             }, updateInterval);
         },
-        async initializeApp() {
-            setTimeout(() => {
-                // this.setHasLoaded(true);
-                this.$store.commit("setHasLoaded", true);
-            }, 2000);
-        },
     },
     async mounted() {
         Telegram.WebApp.ready();
@@ -631,11 +622,11 @@ export default {
             this.initializeApp();
         }
         const walletType = localStorage.getItem("walletType");
-        // if (walletType !== "GOLDEN_AGE_WALLET") {
-        //     localStorage.removeItem("tallyVaults");
-        //     localStorage.removeItem("address");
-        //     this.$router.push({ name: "WalletCreate" });
-        // }
+        if (walletType !== "GOLDEN_AGE_WALLET") {
+            localStorage.removeItem("tallyVaults");
+            localStorage.removeItem("address");
+            this.$router.push({ name: "WalletCreate" });
+        }
     },
     async updated() {
         this.updateSence();
@@ -653,9 +644,11 @@ export default {
 </style>
 
 <template>
-    <LoadingScreen />
+    <div class="container">
+        <button class="absolute-training-btn button-decoration">
+            START TRAINING
+        </button>
 
-    <div class="container" v-if="hasLoaded">
         <div class="container-game">
             <InfoUser v-if="dataLogin" :dataLogin="dataLogin" />
 
@@ -666,6 +659,10 @@ export default {
                         Wallet
                     </button>
                 </div>
+                <!-- <a
+                    v-bind:href="`https://qfan-dapp.qcloud.asia/?playerId=${idUser}`"
+                    target="'_blank"
+                > -->
                 <button @click="onCheckIn()" v-bind:disabled="isExecCheckin">
                     <i class="fa-solid fa-calendar-days"></i> {{ titleCheckin }}
                     <span v-if="isExecCheckin"

@@ -10,13 +10,12 @@
                 :class="{ active: activeButton === button?.name }"
                 @click="setActiveButton(button?.name)"
             >
-                
                 {{ button.label }}
             </div>
         </div>
 
         <div class="wr-box">
-            <div class="inventory-detail" >
+            <div class="inventory-detail">
                 <div class="box-item" v-if="activeButton === 'Inventory'">
                     <div
                         class="item"
@@ -46,9 +45,62 @@
                     >
                         <img class="img-badge" :src="item?.ItemDef?.ImageUrl" />
                         <div class="item-btn">
-                            <button @click="showCoomingSoon = true">
-                                Use
-                            </button>
+                            <button @click="showCoomingSoon = true">Use</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="box-fusion" v-if="activeButton === 'Fusion'">
+                    <div
+                        class="item-fusion"
+                        v-for="(item, index) in listFusion"
+                        :key="index"
+                    >
+                        <div class="item">
+                            <div class="left">
+                                <div
+                                    class="el"
+                                    v-for="(el, idx) in parseItemDef(
+                                        item.ResourcesItemDefIds
+                                    )"
+                                    :key="idx"
+                                >
+                                    <div class="text">
+                                        {{ numberWithItem(el.ItemDefId) }}/{{
+                                            el.Count
+                                        }}
+                                    </div>
+                                    <img :src="el.ImageUrl" />
+                                </div>
+                            </div>
+
+                            <div class="right">
+                                <div class="img">
+                                    <img
+                                        src="@public/assets/inventory/triangle.png"
+                                    />
+                                </div>
+                                <div class="content">
+                                    <div>{{ item.Name }}</div>
+                                    <div class="img">
+                                        <img :src="item.Treasure.ImageUrl" />
+                                    </div>
+                                    <div
+                                        class=""
+                                        :class="[
+                                            'btn-fusion',
+                                            {
+                                                disable:
+                                                    checkDisableFusion(item),
+                                            },
+                                        ]"
+                                    >
+                                        <button @click="handleFausion(item.id)">
+                                            Claim
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -70,31 +122,46 @@
                 Close
             </button>
         </div>
+
+        <NotificationToast
+            v-if="showNotification"
+            :message="notificationMessage"
+            :type="notificationType"
+            @close="showNotification = false"
+        />
     </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import userServiceInventory from "@/services/inventoryService";
-import { EItemDefType, IItemInventory } from "@/interface";
+import { EItemDefType, IFusion, IItemInventory } from "@/interface";
 import "./../../styles/common.scss";
+import userService from "@/services/userService";
+import axios from "axios";
 
 // import LoadingForm from '@/components/LoadingForm.vue';
-// import NotificationToast from '@/components/NotificationToast.vue';
-
+import NotificationToast from "@/components/NotificationToast.vue";
+enum ButtonName {
+    Inventory = "Inventory",
+    Badges = "Badges",
+    Fusion = "Fusion",
+    History = "History",
+}
 interface Button {
-    name: string;
+    name: ButtonName;
     label: string;
 }
 
 export default defineComponent({
     name: "InventoryPage",
     components: {
-        // NotificationToast,
+        NotificationToast,
         // LoadingForm,
     },
     created() {
         this.getDataInventor();
+        this.getFausion();
     },
     data() {
         const userInfo = window.Telegram.WebApp.initDataUnsafe;
@@ -103,7 +170,10 @@ export default defineComponent({
             showCoomingSoon: false,
             apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
             userId: userInfo?.user?.id || "",
-            activeButton: "Badges" as string,
+            showNotification: false,
+            notificationMessage: "",
+            notificationType: "",
+            activeButton: ButtonName.Badges as ButtonName,
             buttonInventory: [
                 { name: "Inventory", label: "Inventory" },
                 { name: "Badges", label: "Badges" },
@@ -119,12 +189,56 @@ export default defineComponent({
             // ],
             itemsInventory: [] as IItemInventory[],
             itemsBadge: [] as IItemInventory[],
+
+            listFusion: [] as IFusion[],
         };
     },
     methods: {
-        setActiveButton(button: string) {
-            this.showCoomingSoon = true;
-            // this.activeButton = button;
+        async renderNotification(message, type) {
+            this.notificationMessage = message;
+            this.notificationType = type;
+            this.showNotification = true;
+            setTimeout(() => {
+                this.showNotification = false;
+            }, 2000);
+        },
+        async renderSuccess(text: string) {
+            this.renderNotification(text, "success");
+        },
+        async renderErr(text) {
+            this.renderNotification(text, "error");
+        },
+        setActiveButton(button: ButtonName) {
+            if (button === ButtonName.Fusion || button === ButtonName.Badges) {
+                this.activeButton = button;
+            } else {
+                this.showCoomingSoon = true;
+            }
+        },
+        numberWithItem(itemId: number) {
+            this.itemsInventory;
+            const filterIdItem: IItemInventory = this.itemsInventory?.find(
+                (el) => el.ItemDefId === itemId
+            );
+            return filterIdItem?.ItemCount || 0;
+        },
+        parseItemDef(item: string) {
+            const data = JSON.parse(item);
+            return data;
+        },
+        checkDisableFusion(item) {
+            const count = JSON.parse(item.ResourcesItemDefIds);
+
+            const result = count.every((itemA) => {
+                const matchingItemB = this.itemsInventory.find(
+                    (itemB) => itemB.ItemDefId === itemA.ItemDefId
+                );
+                return matchingItemB
+                    ? itemA.Count < matchingItemB.ItemCount
+                    : true;
+            });
+
+            return result ? "" : "disable";
         },
         async getDataInventor() {
             try {
@@ -136,15 +250,77 @@ export default defineComponent({
                     (item) => item?.ItemDef?.Type === EItemDefType.Common
                 );
                 const filterBadge = res?.Items?.filter(
-                        (item) => item?.ItemDef?.Type === EItemDefType.Medal
+                    (item) => item?.ItemDef?.Type === EItemDefType.Medal
                 );
-                
+
                 this.itemsBadge = filterBadge;
                 this.itemsInventory = filterData;
-
             } catch (error) {
                 console.error(error);
             }
+        },
+        async getFausion() {
+            try {
+                const response = await axios.get(
+                    "https://a025-171-224-180-141.ngrok-free.app/api/v1/fusion/getFusions",
+                    {
+                        headers: {
+                            "ngrok-skip-browser-warning": "1",
+                        },
+                    }
+                );
+                const data = JSON.parse(response.data.message);
+                this.listFusion = data;
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+
+            //hàm gọi đây a
+            // try {
+            //     const res = await userService.getFusion();
+            //     console.error(res);
+            // } catch (error) {
+            //     console.error(error);
+            // }
+        },
+        async handleFausion(idFusion: number) {
+            try {
+                const response = await axios.post(
+                    "https://a025-171-224-180-141.ngrok-free.app/api/v1/fusion/makeFusion",
+                    {
+                        UserId: 2123800227, // this.userId,
+                        CombineId: idFusion,
+                    },
+                    {
+                        headers: {
+                            "ngrok-skip-browser-warning": "1",
+                        },
+                    }
+                );
+                const data = JSON.parse(response.data.message);
+                if (data.data.success) {
+                    await this.renderSuccess(
+                        `Received ${data?.data?.data?.Name}`
+                    );
+                    await this.getDataInventor();
+                    await this.getFausion();
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+
+            //hàm gọi đây a
+            // try {
+            // const data = {
+            //     UserId:  this.userId,
+            //     CombineId: idFusion,
+            // }
+            //     const res = await userService.makeFusion(data);
+            // neu thanh cong goi rendersuccess va api nhu tren ngrok
+            //     console.error(res);
+            // } catch (error) {
+            //     console.error(error);
+            // }
         },
     },
 });
@@ -238,7 +414,7 @@ export default defineComponent({
             position: relative;
             display: flex;
             flex-direction: column;
-            gap: 7px; 
+            gap: 7px;
             .img-badge {
                 width: 100%;
             }
@@ -255,6 +431,75 @@ export default defineComponent({
             padding: 5px;
             position: absolute;
             top: 0;
+        }
+    }
+    .box-fusion {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px 0;
+    }
+    .item-fusion {
+        padding: 0 10px;
+        font-size: 12px;
+        .item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border: 2px solid #56d6ff;
+            border-radius: 5px;
+            .left {
+                display: flex;
+                gap: 10px;
+                align-items: center;
+                .el {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 5px;
+                    .text {
+                        background-color: #2cde00;
+                        text-align: center;
+                        padding: 3px;
+                        border-radius: 5px;
+                    }
+                    img {
+                        width: 70px;
+                    }
+                }
+            }
+            .right {
+                display: flex;
+                gap: 15px;
+                .img {
+                    display: flex;
+                    align-items: center;
+                    img {
+                        width: 15px;
+                        height: auto;
+                    }
+                }
+                .content {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                    .img {
+                        display: flex;
+                        img {
+                            width: 70px;
+                            border-radius: 5px;
+                        }
+                    }
+                    button {
+                        font-size: 10px;
+                        padding: 5px;
+                        border-radius: 8px;
+                    }
+                    .disable {
+                        pointer-events: none;
+                        opacity: 0.8;
+                    }
+                }
+            }
         }
     }
 }

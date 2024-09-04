@@ -617,12 +617,7 @@ export default {
         if (!this.hasLoaded) {
             this.initializeApp();
         }
-        const walletType = localStorage.getItem("walletType");
-        if (walletType !== "GOLDEN_AGE_WALLET") {
-            localStorage.removeItem("tallyVaults");
-            localStorage.removeItem("address");
-            this.$router.push({ name: "WalletCreate" });
-        }
+        
     },
     async updated() {
         this.updateSence();

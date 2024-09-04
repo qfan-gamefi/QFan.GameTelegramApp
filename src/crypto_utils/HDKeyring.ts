@@ -1,247 +1,472 @@
-import type { TransactionRequest } from "@ethersproject/abstract-provider"
-import type { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer"
-import type { Bytes } from "@ethersproject/bytes"
-import { HDNode } from "@quais/hdnode"
-import { Wallet } from "@quais/wallet"
-import { langEs as es } from "@quais/wordlists/lib/lang-es"
+import { Contract, getAddress, isQuaiAddress, JsonRpcProvider, QuaiHDWallet, randomBytes, SigningKey, Zone, type AddressLike } from "quais"
+import { Wallet } from "quais"
+import { normalizeHexAddress } from "./utils"
+import { Mnemonic } from "quais/wallet"
+import { SignerImportSource, SignerSourceTypes, type InternalSignerPrivateKey, type InternalSignerWithType, type PrivateKey, type SerializedPrivateKey, type SerializedVaultData, type SignerImportMetadata, type WalletInfo } from "./type"
+import { KeyringTypes } from "@/storage/types"
+import { getEncryptedVaults, writeLatestEncryptedVault } from "./storage"
+import { decryptVault, deriveSymmetricKeyFromPassword, encryptVault, type SaltedKey } from "./encryption"
+import logger from "./logger"
+import type { SerializedHDWallet } from "node_modules/quais/lib/esm/wallet/hdwallet"
+import type { HexString } from "quais/utils"
+import { secureStorage, storage } from "@/storage/storage"
+import type { QuaiTransactionRequest, QuaiTransactionResponse } from "quais/providers"
+import { activeProvider } from "./networks"
+import { QFPContractAddress } from "./constants"
+import { ERC20_INTERFACE } from "./erc20"
 
-import { generateMnemonic, wordlists } from "bip39"
-import { normalizeHexAddress, validateAndFormatMnemonic } from "./utils"
+export default class HDKeyring {
+    private cachedKey: SaltedKey | null = null
 
+    private wallets: Wallet[] = []
 
-export type Options = {
-    strength?: number
-    path?: string
-    mnemonic?: string | null
-    passphrase?: string | null
-}
+    private quaiHDWallets: QuaiHDWallet[] = []
 
-const defaultOptions = {
-    // default path is BIP-44, where depth 5 is the address index
-    path: "m/44'/994'/0'/0",
-    strength: 256,
-    mnemonic: null,
-    passphrase: null,
-}
+    private readonly quaiHDWalletAccountIndex: number = 0
 
-export type SerializedHDKeyring = {
-    version: number
-    id: string
-    mnemonic: string
-    path: string
-    keyringType: string
-    addressIndex: number
-}
+    private keyringMetadata: {
+        [keyringId: string]: { source: SignerImportSource }
+    } = {}
 
-export interface Keyring<T> {
-    serialize(): Promise<T>
-    getAddresses(): Promise<string[]>
-    addAddresses(n?: number): Promise<string[]>
-    signTransaction(
-        address: string,
-        transaction: TransactionRequest
-    ): Promise<string>
-    signTypedData(
-        address: string,
-        domain: TypedDataDomain,
-        types: Record<string, Array<TypedDataField>>,
-        value: Record<string, unknown>
-    ): Promise<string>
-    signMessage(address: string, message: string): Promise<string>
-}
-
-export interface KeyringClass<T> {
-    new(): Keyring<T>
-    deserialize(serializedKeyring: T): Promise<Keyring<T>>
-}
-
-export default class HDKeyring implements Keyring<SerializedHDKeyring> {
-    static readonly type: string = "bip32"
-
-    readonly path: string
-
-    readonly id: string
-
-    #hdNode: HDNode
-
-    #addressIndex: number
-
-    #wallets: Wallet[]
-
-    #addressToWallet: { [address: string]: Wallet }
-
-    #mnemonic: string
-
-    constructor(options: Options = {}) {
-        const hdOptions: Required<Options> = {
-            ...defaultOptions,
-            ...options,
-        }
-
-        const mnemonic = validateAndFormatMnemonic(
-            hdOptions.mnemonic || generateMnemonic(hdOptions.strength, undefined, wordlists.spanish), wordlists.spanish
-        )
-
-        if (!mnemonic) {
-            throw new Error("Invalid mnemonic.")
-        }
-
-        this.#mnemonic = mnemonic
-
-        const passphrase = hdOptions.passphrase ?? ""
-        this.path = hdOptions.path
-
-        this.#hdNode = HDNode.fromMnemonic(mnemonic, passphrase, es).derivePath(
-            this.path
-        )
-
-        this.id = this.#hdNode.fingerprint
-        this.#addressIndex = 0
-        this.#wallets = []
-        this.#addressToWallet = {}
+    get isSigning(): boolean {
+        return this.wallets && this.wallets.length > 0
     }
 
-    serializeSync(): SerializedHDKeyring {
-        return {
-            version: 1,
-            id: this.id,
-            mnemonic: this.#mnemonic,
-            keyringType: HDKeyring.type,
-            path: this.path,
-            addressIndex: this.#addressIndex,
-        }
+    get password() {
+        return secureStorage.getPassword() as string;
     }
 
-    async serialize(): Promise<SerializedHDKeyring> {
-        return this.serializeSync()
-    }
-
-    static deserialize(obj: SerializedHDKeyring, passphrase?: string): HDKeyring {
-        const { version, keyringType, mnemonic, path, addressIndex } = obj
-        if (version !== 1) {
-            throw new Error(`Unknown serialization version ${obj.version}`)
+    public async unlock(
+        ignoreExistingVaults = false
+    ): Promise<boolean> {
+        if (!this.locked()) {
+            logger.warn("KeyringService is already unlocked!")
+            return true
         }
 
-        if (keyringType !== HDKeyring.type) {
-            throw new Error("HDKeyring only supports BIP-32/44 style HD wallets.")
+        if (!ignoreExistingVaults) {
+            await this.loadKeyrings()
         }
 
-        const keyring = new HDKeyring({
-            mnemonic,
-            path,
-            passphrase,
-        })
-
-        keyring.addAddressesSync(addressIndex)
-
-        return keyring
-    }
-
-    async signTransaction(
-        address: string,
-        transaction: TransactionRequest
-    ): Promise<string> {
-        const normAddress = normalizeHexAddress(address)
-        if (!this.#addressToWallet[normAddress]) {
-            throw new Error("Address not found!")
+        // if there's no vault, or we want to force a new vault, generate a new key and unlock
+        if (!this.cachedKey) {
+            this.cachedKey = await deriveSymmetricKeyFromPassword(this.password)
+            await this.persistKeyrings()
         }
-        return this.#addressToWallet[normAddress].signTransaction(transaction)
+
+        return true
     }
 
-    async signTypedData(
-        address: string,
-        domain: TypedDataDomain,
-        types: Record<string, Array<TypedDataField>>,
-        value: Record<string, unknown>
-    ): Promise<string> {
-        const normAddress = normalizeHexAddress(address)
-        if (!this.#addressToWallet[normAddress]) {
-            throw new Error("Address not found!")
-        }
-        // eslint-disable-next-line no-underscore-dangle
-        return this.#addressToWallet[normAddress]._signTypedData(
-            domain,
-            types,
-            value
-        )
+    locked() {
+        return this.cachedKey === null
     }
 
-    async signMessage(address: string, message: string): Promise<string> {
-        const normAddress = normalizeHexAddress(address)
-        if (!this.#addressToWallet[normAddress]) {
-            throw new Error("Address not found!")
-        }
-        return this.#addressToWallet[normAddress].signMessage(message)
-    }
-
-    async signMessageBytes(address: string, message: Bytes): Promise<string> {
-        // Explicitly guard so non-TypeScript callers don't get an
-        // impossible-to-track-down bad signature by accidentally passing a string
-        // here.
-        if (typeof message === "string") {
+    /**
+   * Generate a new hd wallet mnemonic
+   *
+   * @param type - the type of keyring to generate
+   * @returns An object containing the string ID of the new keyring and the
+   *          mnemonic for the new keyring. Note that the mnemonic can only be
+   *          accessed at generation time through this return value.
+   */
+    public async generateQuaiHDWalletMnemonic(
+        type: KeyringTypes
+    ): Promise<{ id: string; mnemonic: string[] }> {
+        if (type !== KeyringTypes.mnemonicBIP39S256) {
             throw new Error(
-                "signMessageBytes cannot be used to sign strings or hex strings; please convert to a byte array first."
+                "KeyringService only supports generating 256-bit HD key trees"
             )
         }
-        const normAddress = normalizeHexAddress(address)
-        if (!this.#addressToWallet[normAddress]) {
-            throw new Error("Address not found!")
-        }
-        return this.#addressToWallet[normAddress].signMessage(message)
+
+        const randomBytes = this.generateRandomBytes(24)
+        const { phrase } = Mnemonic.fromEntropy(randomBytes)
+
+        // used only for redux, so we can use quaiHDWallets length as id
+        const keyringIdToVerify = this.quaiHDWallets.length.toString()
+
+        return { id: keyringIdToVerify, mnemonic: phrase.split(" ") }
     }
 
-    addAddressesSync(numNewAccounts = 1): string[] {
-        const numAddresses = this.#addressIndex
-
-        if (numNewAccounts < 0 || numAddresses + numNewAccounts > 2 ** 31 - 1) {
-            throw new Error("New account index out of range")
-        }
-
-        for (let i = 0; i < numNewAccounts; i += 1) {
-            this.#deriveChildWallet(i + numAddresses)
-        }
-
-        this.#addressIndex += numNewAccounts
-        const addresses = this.getAddressesSync()
-        return addresses.slice(-numNewAccounts)
+    generateRandomBytes = (numWords: number): Uint8Array => {
+        const strength = (numWords / 3) * 32
+        return randomBytes(strength / 8)
     }
 
-    async addAddresses(numNewAccounts = 1): Promise<string[]> {
-        return this.addAddressesSync(numNewAccounts)
-    }
+    // -------------------------------------------------------------------
+    /**
+     * Import new internal signer
+     *
+     * @param signerMetadata any signer with type and metadata
+     * @returns null | string - if new account was added or existing account was found then returns an address
+     */
+    public async importKeyring(
+        signerMetadata: SignerImportMetadata
+    ): Promise<string> {
 
-    #deriveChildWallet(index: number): void {
-        const newPath = `${index}`
+        try {
+            let address: string
 
-        const childNode = this.#hdNode.derivePath(newPath)
-        const wallet = new Wallet(childNode.privateKey)
+            switch (signerMetadata.type) {
+                case SignerSourceTypes.privateKey:
+                    address = this.importWalletWithPrivateKey(signerMetadata.privateKey)
+                    break
+                case SignerSourceTypes.keyring:
+                    address = await this.importQuaiHDWalletWithMnemonic(
+                        signerMetadata.mnemonic,
+                        signerMetadata.source
+                    )
+                    break
+                default:
+                    throw new Error(`Unsupported signer type`)
+            }
 
-        this.#wallets.push(wallet)
-        const address = normalizeHexAddress(wallet.address)
-        this.#addressToWallet[address] = wallet
-    }
+            if (!address) {
+                throw new Error("Failed to import keyring")
+            }
 
-    exportPrivateKey(
-        address: string,
-        confirmation: "I solemnly swear that I am treating this private key material with great care."
-    ): string | null {
-        if (
-            confirmation ===
-            "I solemnly swear that I am treating this private key material with great care."
-        ) {
-            const wallet = this.#addressToWallet[address]
-            return wallet ? wallet.privateKey : null
+            this.cachedKey = await deriveSymmetricKeyFromPassword(this.password)
+            await this.persistKeyrings()
+            return address
+        } catch (error) {
+            logger.error("Signer import failed:", error)
+            return ""
         }
-        throw new Error(
-            "Confirmation constant string must be provided to acknowledge the danger of exporting a private key"
+    }
+
+    /**
+   * Import wallet with private key
+   * @param privateKey - string
+   * @returns string - address of imported or existing account
+   */
+    private importWalletWithPrivateKey(privateKey: string): string {
+        const newWallet = new Wallet(privateKey)
+        const { address } = newWallet
+
+        if (!this.isGoldenAgeQuaiAddress(address)) return ""
+
+        if (this.findSigner(address)) return address
+
+        this.wallets.push(newWallet)
+        this.keyringMetadata[address] = {
+            source: SignerImportSource.import,
+        }
+        return address
+    }
+
+    private findSigner(address: AddressLike): InternalSignerWithType | null {
+        // we format the address because it can also come from a request from outside the wallet,
+        // which may be in the wrong format
+        const formatedAddress = getAddress(address as string)
+
+        const HDWallet = this.findQuaiHDWalletByAddress(address)
+        if (HDWallet) {
+            return {
+                signer: HDWallet,
+                address: formatedAddress,
+                type: SignerSourceTypes.keyring,
+            } as any
+        }
+
+        const privateKey = this.findWalletByAddress(address)
+        if (privateKey) {
+            return {
+                signer: privateKey,
+                address: formatedAddress,
+                type: SignerSourceTypes.privateKey,
+            } as any
+        }
+
+        return null
+    }
+
+    findQuaiHDWalletByAddress(address: AddressLike): QuaiHDWallet | null {
+        const foundedHDWallet = this.quaiHDWallets.find((HDWallet) =>
+            HDWallet.getAddressesForAccount(this.quaiHDWalletAccountIndex).find(
+                (HDWalletAddress: any) =>
+                    this.sameQuaiAddress(HDWalletAddress.address, address as string)
+            )
         )
+
+        return foundedHDWallet ?? null
+    }
+
+    isGoldenAgeQuaiAddress = (addressToValidate: string): boolean => {
+        if (!isQuaiAddress(addressToValidate)) return false
+
+        const prefix = addressToValidate.slice(0, 4)
+        return this.isValidZone(prefix)
+    }
+
+    isValidZone = (prefix: string): prefix is Zone => {
+        return Object.values(Zone).includes(prefix as Zone)
+    }
+
+    private async importQuaiHDWalletWithMnemonic(
+        mnemonic: string,
+        source: SignerImportSource
+    ): Promise<string> {
+        const quaiMnemonic = Mnemonic.fromPhrase(mnemonic)
+        const newQuaiHDWallet = QuaiHDWallet.fromMnemonic(quaiMnemonic)
+
+        const existingQuaiHDWallet = this.quaiHDWallets.find(
+            (HDWallet) => HDWallet.xPub === newQuaiHDWallet.xPub
+        )
+        if (existingQuaiHDWallet) {
+            const { address } = existingQuaiHDWallet.getAddressesForAccount(
+                this.quaiHDWalletAccountIndex
+            )[0]
+            return address
+        }
+
+        this.quaiHDWallets.push(newQuaiHDWallet)
+
+        const { address } = await newQuaiHDWallet.getNextAddress(
+            this.quaiHDWalletAccountIndex,
+            Zone.Cyprus1
+        )
+
+        // If address was previously imported as a private key then remove it
+        if (this.findWalletByAddress(address)) {
+            await this.removeWallet(address)
+        }
+
+        this.keyringMetadata[newQuaiHDWallet.xPub] = { source }
+
+        return address
+    }
+
+    public async removeWallet(address: HexString): Promise<void> {
+        const filteredPrivateKeys = this.wallets.filter(
+            (wallet) => !this.sameQuaiAddress(wallet.address, address)
+        )
+
+        if (filteredPrivateKeys.length === this.wallets.length) {
+            throw new Error(
+                `Attempting to remove wallet that does not exist. Address: (${address})`
+            )
+        }
+
+        this.wallets = filteredPrivateKeys
+        delete this.keyringMetadata[address]
+
+        await this.persistKeyrings()
+    }
+
+    private findWalletByAddress(address: AddressLike): Wallet | null {
+        const foundedWallet = this.wallets.find((wallet: Wallet) =>
+            this.sameQuaiAddress(wallet.address, address as string)
+        )
+
+        return foundedWallet ?? null
+    }
+
+    public getWallets(): PrivateKey[] {
+        return this.wallets.map((wallet) => ({
+            type: KeyringTypes.singleSECP,
+            addresses: [wallet.address],
+            id: wallet.signingKey.publicKey,
+            path: null,
+        }))
+    }
+
+    public getActiveWallet(): WalletInfo {
+        return this.wallets.map((wallet) => ({
+            type: KeyringTypes.singleSECP,
+            address: wallet.address,
+            id: wallet.signingKey.publicKey,
+            path: null,
+        }))?.at(0) as WalletInfo;
+    }
+
+    public getHDWallet(): QuaiHDWallet {
+        return this.quaiHDWallets?.at(0) as QuaiHDWallet;
+    }
+
+    public getActiveAddress(): string | null | undefined {
+        return this.getActiveWallet()?.address;
+    }
+
+    sameQuaiAddress(
+        address1: string | undefined | null,
+        address2: string | undefined | null
+    ): boolean {
+        if (
+            typeof address1 === "undefined" ||
+            typeof address2 === "undefined" ||
+            address1 === null ||
+            address2 === null
+        )
+            return false
+
+        return getAddress(address1) === getAddress(address2)
+    }
+
+
+    public async loadKeyrings() {
+        try {
+            const password = secureStorage.getPassword() || "";
+            const { vaults } = await getEncryptedVaults()
+            const currentEncryptedVault = vaults.slice(-1)[0]?.vault
+            if (!currentEncryptedVault) return
+
+            const saltedKey = await deriveSymmetricKeyFromPassword(
+                password,
+                currentEncryptedVault.salt
+            )
+
+            const plainTextVault: SerializedVaultData = await decryptVault(
+                currentEncryptedVault,
+                saltedKey
+            )
+
+            this.cachedKey = saltedKey
+            this.wallets = []
+            this.quaiHDWallets = []
+            this.keyringMetadata = {}
+
+            plainTextVault.wallets?.forEach((wallet) =>
+                this.wallets.push(new Wallet(wallet.privateKey))
+            )
+            const deserializedHDWallets = await Promise.all(
+                plainTextVault.quaiHDWallets.map((HDWallet) =>
+                    QuaiHDWallet.deserialize(HDWallet)
+                )
+            )
+            this.quaiHDWallets.push(...deserializedHDWallets)
+            this.keyringMetadata = {
+                ...plainTextVault.metadata,
+            }
+        } catch (err) {
+            logger.error("Error while loading vault", err)
+        }
+    }
+
+    public async persistKeyrings() {
+        const serializedQuaiHDWallets: SerializedHDWallet[] =
+            this.quaiHDWallets.map((HDWallet) => HDWallet.serialize())
+
+        const serializedWallets: SerializedPrivateKey[] = this.wallets.map(
+            (wallet) => {
+                const { privateKey } = wallet
+                const signingKey = new SigningKey(privateKey)
+                const { publicKey } = signingKey
+
+                return {
+                    version: 1,
+                    id: publicKey,
+                    privateKey,
+                }
+            }
+        )
+
+        const metadata = { ...this.keyringMetadata }
+
+        const serializedVaultData: SerializedVaultData = {
+            wallets: serializedWallets,
+            quaiHDWallets: serializedQuaiHDWallets,
+            metadata,
+        }
+        const encryptedVault = await encryptVault(
+            serializedVaultData,
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore this.cachedKey won't be undefined | null due to requireUnlocked
+            this.cachedKey
+        )
+
+        await writeLatestEncryptedVault(encryptedVault)
     }
 
     getAddressesSync(): string[] {
-        return this.#wallets.map((w) => normalizeHexAddress(w.address))
+        return this.wallets.map((w) => normalizeHexAddress(w.address))
     }
 
     async getAddresses(): Promise<string[]> {
         return this.getAddressesSync()
     }
+
+    public async signAndSendQuaiTransaction(
+        transactionRequest: QuaiTransactionRequest
+    ): Promise<QuaiTransactionResponse> {
+        const { from: fromAddress } = transactionRequest
+
+        const signerWithType = this.findSigner(fromAddress)
+        if (!signerWithType) {
+            throw new Error(
+                `Signing transaction failed. Signer for address ${fromAddress} was not found.`
+            )
+        }
+
+        const jsonRpcProvider = activeProvider()
+
+        if (this.isSignerPrivateKeyType(signerWithType)) {
+            const walletResponse = await signerWithType.signer
+                .connect(jsonRpcProvider)
+                .sendTransaction(transactionRequest)
+
+            return walletResponse as QuaiTransactionResponse
+        }
+
+        signerWithType.signer.connect(jsonRpcProvider)
+        const quaiHDWalletResponse = await signerWithType.signer
+            .sendTransaction(transactionRequest)
+            .catch((e) => {
+                console.error(e)
+                throw new Error("Failed send transaction")
+            })
+
+        return quaiHDWalletResponse as QuaiTransactionResponse
+    }
+
+    async sendTokenTransaction(transactionRequest: QuaiTransactionRequest): Promise<QuaiTransactionResponse | undefined> {
+        console.log("transactionRequest", transactionRequest);
+        const { from: fromAddress } = transactionRequest
+
+        const signerWithType = this.findSigner(fromAddress)
+        if (!signerWithType) {
+            throw new Error(
+                `Signing transaction failed. Signer for address ${fromAddress} was not found.`
+            )
+        }
+
+        const jsonRpcProvider = activeProvider()
+
+        if (this.isSignerPrivateKeyType(signerWithType)) {
+            const tokenContract = new Contract(
+                QFPContractAddress,
+                ERC20_INTERFACE,
+                signerWithType.signer
+            )
+
+            transactionRequest.value = 0n
+
+            const transactionDetails =
+                await tokenContract.transfer.populateTransaction(
+                    transactionRequest.to,
+                    transactionRequest.value
+                )
+
+            transactionRequest.to = transactionDetails.to
+            transactionRequest.data = transactionDetails.data
+
+            console.log("transactionRequest", transactionRequest);
+
+            try {
+                const walletResponse = await signerWithType.signer
+                    .connect(jsonRpcProvider)
+                    .sendTransaction(transactionRequest)
+
+                return walletResponse as QuaiTransactionResponse
+            } catch (error) {
+                console.log("error", error);
+                throw error;
+            }
+        }
+    }
+
+
+
+    isSignerPrivateKeyType = (
+        signer: InternalSignerWithType
+    ): signer is InternalSignerPrivateKey =>
+        signer.type === SignerSourceTypes.privateKey
 }

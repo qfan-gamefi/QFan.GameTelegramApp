@@ -5,7 +5,7 @@
             <div
                 class="banner-event"
                 :style="{
-                    backgroundImage: `url(${apiBaseUrl}${detailEvent?.attributes?.banner?.data?.attributes?.formats?.small?.url})`,
+                    backgroundImage: `url(${apiBaseUrl}${detailEvent?.attributes?.banner?.data?.attributes?.url})`,
                 }"
             >
                 <div class="text-banner">

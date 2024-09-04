@@ -10,7 +10,7 @@
                     v-for="(item, index) in eventData"
                     :key="index"
                     :style="{
-                        backgroundImage: `url(${apiBaseUrl}${item?.attributes?.banner?.data?.attributes?.formats?.small?.url})`,
+                        backgroundImage: `url(${apiBaseUrl}${item?.attributes?.banner?.data?.attributes?.url})`,
                     }"
                     @click="handleJoin(item)"
                 >
@@ -137,7 +137,7 @@ export default {
                 this.loading = false;
             }
         },
-        handleJoin(itemDetail: IEvent) {     
+        handleJoin(itemDetail: IEvent) {
             const { actionType, status, route } = itemDetail?.attributes || {};
             if (actionType === "POST") {
                 return this.$router.push(route);

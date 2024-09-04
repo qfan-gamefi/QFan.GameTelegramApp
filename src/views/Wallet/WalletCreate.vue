@@ -15,37 +15,17 @@
                 <div class="title-pass">Wallet Password</div>
                 <div class="wl-addr">
                     <div class="title-addr">Password</div>
-                    <input
-                        class="code-input"
-                        :class="{ 'input-error': errorMessage }"
-                        type="password"
-                        v-model="walletPassword"
-                        id="code"
-                        @input="clearError"
-                        placeholder="Enter password"
-                    />
+                    <input class="code-input" :class="{ 'input-error': errorMessage }" type="password"
+                        v-model="walletPassword" id="code" @input="clearError" placeholder="Enter password" />
                     <div class="title-addr">Confirm password</div>
-                    <input
-                        class="code-input"
-                        :class="{ 'input-error': errorMessage }"
-                        type="password"
-                        v-model="confirmPassword"
-                        id="code"
-                        @input="clearError"
-                        placeholder="Enter password"
-                    />
+                    <input class="code-input" :class="{ 'input-error': errorMessage }" type="password"
+                        v-model="confirmPassword" id="code" @input="clearError" placeholder="Enter password" />
                 </div>
                 <div class="title-pass">Private Key</div>
                 <div class="wr-phrase">
-                    <textarea
-                        class="code-input"
-                        :class="{ 'input-error': errorMessage }"
-                        type="text"
-                        v-model="mnemonic"
-                        id="code"
-                        @input="clearError"
-                        placeholder="Enter private key export from Pelagus Wallet"
-                    ></textarea>
+                    <textarea class="code-input" :class="{ 'input-error': errorMessage }" type="text" v-model="mnemonic"
+                        id="code" @input="clearError"
+                        placeholder="Enter private key export from Pelagus Wallet"></textarea>
                 </div>
 
                 <div v-if="errorMessage" class="text-err-code">
@@ -62,8 +42,8 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import KeyringService from "@/crypto_utils/KDKeyringService";
-import { SignerSourceTypes } from "@/crypto_utils/type";
+import HDKeyring from "@/crypto_utils/HDKeyring";
+import { SignerImportSource, SignerSourceTypes } from "@/crypto_utils/type";
 import { secureStorage, storage } from "@/storage/storage";
 
 export default defineComponent({
@@ -112,29 +92,28 @@ export default defineComponent({
             await storage.remove("address");
             await storage.remove("tallyVaults");
 
-            const keyring: KeyringService = new KeyringService();
+            secureStorage.setPassword(this.walletPassword);
+            const keyring: HDKeyring = new HDKeyring();
             await keyring.importKeyring({
                 type: SignerSourceTypes.privateKey,
-                privateKey: this.mnemonic,
+                privateKey: this.mnemonic
             });
-            secureStorage.setPassword(this.walletPassword);
-            if (await keyring.unlock(this.walletPassword)) {
-                //get address
-                const address = await keyring
-                    .getPrivateKeys()
-                    ?.at(0)
-                    ?.getAddress();
 
-                if (address) {
-                    await storage.set("address", address);
-                    this.$router.push("/wallet/detail");
-                } else {
-                    localStorage.clear();
-                    this.errorMessage = "";
-                    setTimeout(() => {
-                        this.errorMessage = "Invalid private key";
-                    }, 200);
-                }
+            await keyring.unlock();
+            //get address
+            const address = await keyring
+                .getActiveAddress();
+
+            if (address) {
+                await storage.set("address", address);
+                localStorage.setItem("walletType", "GOLDEN_AGE_WALLET");
+                this.$router.push("/wallet/detail");
+            } else {
+                localStorage.clear();
+                this.errorMessage = "";
+                setTimeout(() => {
+                    this.errorMessage = "Invalid private key";
+                }, 200);
             }
         },
         clearError() {

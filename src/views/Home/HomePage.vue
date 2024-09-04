@@ -617,12 +617,7 @@ export default {
         if (!this.hasLoaded) {
             this.initializeApp();
         }
-        const walletType = localStorage.getItem("walletType");
-        if (walletType !== "GOLDEN_AGE_WALLET") {
-            localStorage.removeItem("tallyVaults");
-            localStorage.removeItem("address");
-            this.$router.push({ name: "WalletCreate" });
-        }
+        
     },
     async updated() {
         this.updateSence();
@@ -706,7 +701,7 @@ export default {
                                 <img src="@public/assets/mining/woodwork.png" />
                             </div>
                         </div>
-                        <!--<div class="box-right">
+                        <!-- <div class="box-right">
                             <div class="btn-mining" @click="onAutoInteract()" :class="{ active: isExecAutoInteract }">
                                 <img src="@public/assets/mining/icon-auto.png" :class="{
                                     rotateMining: isExecAutoInteract,

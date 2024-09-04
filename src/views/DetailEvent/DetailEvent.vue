@@ -2,9 +2,12 @@
     <div class="popup-detail-event" v-if="isDetailEvent">
         <Loading :loading="loading" />
         <div class="box-detail-event">
-            <div class="banner-event" :style="{
-                backgroundImage: `url(${apiBaseUrl}${detailEvent?.attributes?.banner?.data?.attributes?.formats?.small?.url})`,
-            }">
+            <div
+                class="banner-event"
+                :style="{
+                    backgroundImage: `url(${apiBaseUrl}${detailEvent?.attributes?.banner?.data?.attributes?.url})`,
+                }"
+            >
                 <div class="text-banner">
                     <div class="title-item">
                         <div class="event-title-detail">

@@ -173,7 +173,7 @@ export default defineComponent({
             showNotification: false,
             notificationMessage: "",
             notificationType: "",
-            activeButton: ButtonName.Badges as ButtonName,
+            activeButton: ButtonName.Inventory as ButtonName,
             buttonInventory: [
                 { name: "Inventory", label: "Inventory" },
                 { name: "Badges", label: "Badges" },
@@ -209,7 +209,7 @@ export default defineComponent({
             this.renderNotification(text, "error");
         },
         setActiveButton(button: ButtonName) {
-            if (button === ButtonName.Fusion || button === ButtonName.Badges) {
+            if (button !== ButtonName.History) {
                 this.activeButton = button;
             } else {
                 this.showCoomingSoon = true;

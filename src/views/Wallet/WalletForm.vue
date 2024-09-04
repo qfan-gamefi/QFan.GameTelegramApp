@@ -34,7 +34,7 @@
 </template>
 
 <script lang="ts">
-import { VAULT_KEY } from "@/crypto_utils/storage";
+import HDKeyring from "@/crypto_utils/HDKeyring";
 import { storage } from "@/storage/storage";
 import { defineComponent } from "vue";
 
@@ -49,8 +49,9 @@ export default defineComponent({
         },
     },
     async mounted() {
-        const vault = await storage.get(VAULT_KEY);
-        if (vault) {
+        const hdKeyring = new HDKeyring();
+        await hdKeyring.loadKeyrings();
+        if (hdKeyring.isSigning) {
             this.$router.push("/wallet/detail");
         }
     },
@@ -100,6 +101,7 @@ export default defineComponent({
     left: 50%;
     transform: translate(-50%, 0);
     width: 100%;
+
     button {
         margin: 0 30px;
         width: calc(100% - 60px);

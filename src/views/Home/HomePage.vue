@@ -30,13 +30,16 @@ import NotificationToast from "@/components/NotificationToast.vue";
 // import { title } from "process";
 import type { ILevel } from "@/interface";
 import InfoUser from "@/views/InfoUser/InfoUser.vue";
+import LoadingScreen from "@/views/LoadingScreen/LoadingScreen.vue";
+import { formattedBalance } from "@/utils";
+import { mapState } from "vuex";
+import { preloadImages } from "@/utils/preloadImages";
 import HDKeyring from "@/crypto_utils/HDKeyring";
 import type { PrivateKey } from "@/crypto_utils/type";
 import type { QuaiTransactionRequest, QuaiTransactionResponse } from "quais/lib/esm/providers";
 import { QFPContractAddress, QFPOwerWalletAddress } from "@/crypto_utils/constants";
 import { DEFAULT_QUAI_TESNTET } from "@/services/network/chains";
 import { getAddress, parseEther, toBigInt } from "ethers";
-import { formattedBalance } from "@/utils";
 
 const REF_MESS_PREFIX: string = "start r_";
 const REF_TOKEN_PREFIX: string = "TOKEN_";
@@ -50,6 +53,7 @@ export default {
         CheckinForm,
         NotificationToast,
         InfoUser,
+        LoadingScreen,
     },
     data() {
         const telegram_bot_link =
@@ -71,6 +75,7 @@ export default {
         }
 
         return {
+            isLoadingCreen: true,
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
@@ -124,6 +129,7 @@ export default {
         };
     },
     computed: {
+        ...mapState(["hasLoaded"]),
         beforeStyle() {
             return {
                 "--pseudo-width": `${this.apiDataWidth}%`,
@@ -597,12 +603,20 @@ export default {
                 }
             }, updateInterval);
         },
+        async initializeApp() {
+            setTimeout(() => {
+                // this.setHasLoaded(true);
+                this.$store.commit("setHasLoaded", true);
+            }, 2000);
+        },
     },
     async mounted() {
         Telegram.WebApp.ready();
         Telegram.WebApp.setHeaderColor("#ffffff");
         await this.getInfoUser();
-
+        if (!this.hasLoaded) {
+            this.initializeApp();
+        }
         const walletType = localStorage.getItem("walletType");
         if (walletType !== "GOLDEN_AGE_WALLET") {
             localStorage.removeItem("tallyVaults");
@@ -626,11 +640,9 @@ export default {
 </style>
 
 <template>
-    <div class="container">
-        <button class="absolute-training-btn button-decoration">
-            START TRAINING
-        </button>
+    <LoadingScreen />
 
+    <div class="container" v-if="hasLoaded">
         <div class="container-game">
             <InfoUser v-if="dataLogin" :dataLogin="dataLogin" />
 
@@ -641,10 +653,6 @@ export default {
                         Wallet
                     </button>
                 </div>
-                <!-- <a
-                    v-bind:href="`https://qfan-dapp.qcloud.asia/?playerId=${idUser}`"
-                    target="'_blank"
-                > -->
                 <button @click="onCheckIn()" v-bind:disabled="isExecCheckin">
                     <i class="fa-solid fa-calendar-days"></i> {{ titleCheckin }}
                     <span v-if="isExecCheckin"><i class="fa fa-spinner"></i></span>

@@ -373,6 +373,8 @@ export const activeProvider = (): quais.JsonRpcProvider => {
     const fromChain = QUAI_NETWORK.chains?.find(
         (x) => x.shard === "cyprus-1"
     ) as ChainData;
+    console.log("-------");
+    
     const provider = new quais.JsonRpcProvider(fromChain.rpc);
     return provider;
 };

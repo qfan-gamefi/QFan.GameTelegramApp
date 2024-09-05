@@ -560,14 +560,14 @@ export default {
                         to: QFPOwerWalletAddress,
                     }
 
-                    const tx = await keyringService.sendTokenTransaction(request) as QuaiTransactionResponse;
+                    // const tx = await keyringService.sendTokenTransaction(request) as QuaiTransactionResponse;
 
-                    console.log("autoInteract TX", tx);
+                    // console.log("autoInteract TX", tx);
 
                     const autoInteract = await userService.autoInteract(
                         this.idUser,
                         activeWallet?.address as string,
-                        tx.hash as string
+                        "123"// tx.hash as string
                     );
                     await this.getInfoUser();
                     if (autoInteract.error) {
@@ -701,14 +701,14 @@ export default {
                                 <img src="@public/assets/mining/woodwork.png" />
                             </div>
                         </div>
-                        <!-- <div class="box-right">
+                        <div class="box-right">
                             <div class="btn-mining" @click="onAutoInteract()" :class="{ active: isExecAutoInteract }">
                                 <img src="@public/assets/mining/icon-auto.png" :class="{
                                     rotateMining: isExecAutoInteract,
                                 }" />
                                 Mining
                             </div>
-                        </div> -->
+                        </div>
                     </div>
                 </div>
             </div>

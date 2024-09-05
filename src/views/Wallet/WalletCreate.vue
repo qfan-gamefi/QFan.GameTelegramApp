@@ -15,17 +15,37 @@
                 <div class="title-pass">Wallet Password</div>
                 <div class="wl-addr">
                     <div class="title-addr">Password</div>
-                    <input class="code-input" :class="{ 'input-error': errorMessage }" type="password"
-                        v-model="walletPassword" id="code" @input="clearError" placeholder="Enter password" />
+                    <input
+                        class="code-input"
+                        :class="{ 'input-error': errorMessage }"
+                        type="password"
+                        v-model="walletPassword"
+                        id="code"
+                        @input="clearError"
+                        placeholder="Enter password"
+                    />
                     <div class="title-addr">Confirm password</div>
-                    <input class="code-input" :class="{ 'input-error': errorMessage }" type="password"
-                        v-model="confirmPassword" id="code" @input="clearError" placeholder="Enter password" />
+                    <input
+                        class="code-input"
+                        :class="{ 'input-error': errorMessage }"
+                        type="password"
+                        v-model="confirmPassword"
+                        id="code"
+                        @input="clearError"
+                        placeholder="Enter password"
+                    />
                 </div>
                 <div class="title-pass">Private Key</div>
                 <div class="wr-phrase">
-                    <textarea class="code-input" :class="{ 'input-error': errorMessage }" type="text" v-model="mnemonic"
-                        id="code" @input="clearError"
-                        placeholder="Enter private key export from Pelagus Wallet"></textarea>
+                    <textarea
+                        class="code-input"
+                        :class="{ 'input-error': errorMessage }"
+                        type="text"
+                        v-model="mnemonic"
+                        id="code"
+                        @input="clearError"
+                        placeholder="Enter private key export from Pelagus Wallet"
+                    ></textarea>
                 </div>
 
                 <div v-if="errorMessage" class="text-err-code">
@@ -96,7 +116,7 @@ export default defineComponent({
             const keyring: HDKeyring = new HDKeyring();
             await keyring.importKeyring({
                 type: SignerSourceTypes.privateKey,
-                privateKey: this.mnemonic
+                privateKey: this.mnemonic,
             });
 
             await keyring.unlock();
@@ -255,8 +275,8 @@ export default defineComponent({
 }
 
 .wr-btn {
-    color: #0054d2;
-    margin-top: 20px;
+    width: calc(100% - 40px);
+    padding: 20px;
 
     button {
         padding: 25px;
@@ -271,10 +291,5 @@ export default defineComponent({
     padding: 10px;
     color: #fff;
     font-size: 20px;
-}
-
-.title-pass {
-    font-size: 22px;
-    font-weight: bold;
 }
 </style>

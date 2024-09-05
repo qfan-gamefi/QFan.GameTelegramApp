@@ -20,13 +20,8 @@
                 </div>
             </div>
             <div class="btn-banner">
-                <div
-                    v-for="(button, index) in buttonsBanner"
-                    :key="index"
-                    class="btn-item-banner"
-                    :class="{ active: activeButton === button?.name }"
-                    @click="setActiveButton(button?.name)"
-                >
+                <div v-for="(button, index) in buttonsBanner" :key="index" class="btn-item-banner"
+                    :class="{ active: activeButton === button?.name }" @click="setActiveButton(button?.name)">
                     {{ button.label }}
                 </div>
             </div>
@@ -581,6 +576,13 @@ export default {
                         ...game,
                         selectedIndex: null,
                     };
+                });                
+                
+                this.sliderValue = this.games?.map((item) => {
+                    if(item?.BidData?.Value){
+                        return item?.BidData?.Value
+                    }
+                    this.handleMedium(item?.['GameTemplate.ExtraData'])
                 });
 
                 this.sliderValue = this.games?.map((item) => {

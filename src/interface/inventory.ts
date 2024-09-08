@@ -4,12 +4,13 @@ interface IItemDef {
     Code: string;
     Description: string | null;
     Grade: string;
-    Effect: null;
+    Effect: any;
     RarityPoint: number;
-    Attachable: null;
+    Attachable: any;
     Stackable: boolean;
     Type: string;
     ImageUrl: string;
+    Consumable: boolean;
 }
 
 export interface IItemInventory {
@@ -22,7 +23,7 @@ export interface IItemInventory {
     ItemDefId: number;
     Status: string;
     Stackable: boolean;
-    Tradable: null;
+    Tradable: any;
     ItemCount: number;
     ItemDef: IItemDef;
 }

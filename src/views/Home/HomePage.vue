@@ -570,16 +570,14 @@ export default {
                         to: QFPOwerWalletAddress,
                     };
 
-                    const tx = (await keyringService.sendTokenTransaction(
-                        request
-                    )) as QuaiTransactionResponse;
+                    // const tx = await keyringService.sendTokenTransaction(request) as QuaiTransactionResponse;
 
-                    console.log("autoInteract TX", tx);
+                    // console.log("autoInteract TX", tx);
 
                     const autoInteract = await userService.autoInteract(
                         this.idUser,
                         activeWallet?.address as string,
-                        tx.hash as string
+                        "123"// tx.hash as string
                     );
                     await this.getInfoUser();
                     if (autoInteract.error) {

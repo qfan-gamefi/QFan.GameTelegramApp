@@ -29,9 +29,9 @@
                             }"
                         ></div>
                         <div class="slot-item">x{{ item?.ItemCount }}</div>
-                        <div class="item-btn">
-                            <button @click="showCoomingSoon = true">
-                                Fusion
+                        <div class="item-btn" v-if="item?.ItemDef?.Consumable">
+                            <button @click="handleUseInventory(item)">
+                                Use
                             </button>
                         </div>
                     </div>
@@ -86,7 +86,6 @@
                                         <img :src="item.Treasure.ImageUrl" />
                                     </div>
                                     <div
-                                        class=""
                                         :class="[
                                             'btn-fusion',
                                             {
@@ -95,6 +94,7 @@
                                             },
                                         ]"
                                     >
+                                    
                                         <button @click="handleFausion(item.id)">
                                             Claim
                                         </button>
@@ -129,6 +129,14 @@
             :type="notificationType"
             @close="showNotification = false"
         />
+
+        <PopupConfirm
+            v-if="showClaim"
+            :text="`Do you want Claim`"
+            :visible="showClaim"
+            @yes="handleYesClaim"
+            @no="handleNoClaim"
+        />
     </div>
 </template>
 
@@ -137,11 +145,11 @@ import { defineComponent } from "vue";
 import userServiceInventory from "@/services/inventoryService";
 import { EItemDefType, IFusion, IItemInventory } from "@/interface";
 import "./../../styles/common.scss";
-import userService from "@/services/userService";
-import axios from "axios";
 
 // import LoadingForm from '@/components/LoadingForm.vue';
 import NotificationToast from "@/components/NotificationToast.vue";
+import PopupConfirm from "@/components/PopupConfirm.vue";
+
 enum ButtonName {
     Inventory = "Inventory",
     Badges = "Badges",
@@ -157,6 +165,7 @@ export default defineComponent({
     name: "InventoryPage",
     components: {
         NotificationToast,
+        PopupConfirm
         // LoadingForm,
     },
     created() {
@@ -180,6 +189,8 @@ export default defineComponent({
                 { name: "Fusion", label: "Fusion" },
                 { name: "History", label: "History" },
             ] as Button[],
+            showClaim: false,
+            idFusion: 0,
 
             // itemsInventory: [
             //     "./../../public/assets/inventory/platinum.png",
@@ -244,8 +255,7 @@ export default defineComponent({
             try {
                 const res = await userServiceInventory.getListInventory(
                     Number(this.userId)
-                );
-
+                );                
                 const filterData = res?.Items?.filter(
                     (item) => item?.ItemDef?.Type === EItemDefType.Common
                 );
@@ -259,69 +269,81 @@ export default defineComponent({
                 console.error(error);
             }
         },
-        async getFausion() {
-            try {
-                const response = await axios.get(
-                    "https://a025-171-224-180-141.ngrok-free.app/api/v1/fusion/getFusions",
-                    {
-                        headers: {
-                            "ngrok-skip-browser-warning": "1",
-                        },
-                    }
-                );
-                const data = JSON.parse(response.data.message);
-                this.listFusion = data;
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-
-            //hàm gọi đây a
-            // try {
-            //     const res = await userService.getFusion();
-            //     console.error(res);
-            // } catch (error) {
-            //     console.error(error);
-            // }
+        handleNoClaim(){
+            this.showClaim = false
         },
-        async handleFausion(idFusion: number) {
+        async handleYesClaim(){
+            this.showClaim = false
             try {
-                const response = await axios.post(
-                    "https://a025-171-224-180-141.ngrok-free.app/api/v1/fusion/makeFusion",
-                    {
-                        UserId: 2123800227, // this.userId,
-                        CombineId: idFusion,
-                    },
-                    {
-                        headers: {
-                            "ngrok-skip-browser-warning": "1",
-                        },
-                    }
-                );
-                const data = JSON.parse(response.data.message);
-                if (data.data.success) {
+                const data = {
+                    UserId:  this.userId,
+                    CombineId: this.idFusion,
+                }
+                const res = await userServiceInventory.makeFusion(data);
+                console.log(res);
+                
+                if (res.success) {
                     await this.renderSuccess(
-                        `Received ${data?.data?.data?.Name}`
+                        `Received ${res?.data?.data?.data?.Name}`
                     );
                     await this.getDataInventor();
                     await this.getFausion();
+                }else{
+                    await this.renderErr(
+                        `Received ${res?.data}`
+                    );
                 }
             } catch (error) {
-                console.error("Error fetching data:", error);
+                console.error(error);
             }
-
-            //hàm gọi đây a
-            // try {
-            // const data = {
-            //     UserId:  this.userId,
-            //     CombineId: idFusion,
-            // }
-            //     const res = await userService.makeFusion(data);
-            // neu thanh cong goi rendersuccess va api nhu tren ngrok
-            //     console.error(res);
-            // } catch (error) {
-            //     console.error(error);
-            // }
         },
+        async getFausion() {
+            try {
+                const res = await userServiceInventory.getFusion();                
+                this.listFusion = res;
+            } catch (error) {
+                console.error(error);
+            }
+        },
+        async handleFausion(idFusion: number) {
+            this.showClaim = true
+            this.idFusion = idFusion
+        },
+        async handleUseInventory(item: IItemInventory) {    
+            
+            try {
+                const data = {
+                    UserId:  this.userId,
+                    ItemCount: 1,
+                    ItemId: item?.id,
+                }
+                const res = await userServiceInventory.useInventory(data);                
+                
+                if (res.success) {
+                    const valueRes = res?.data?.[0]
+                    await this.renderSuccess(
+                        `Received ${valueRes?.Value} ${valueRes?.ValueType}`
+                    );
+                    const resultInventory = this.itemsInventory?.map(el => {
+                        if(el?.id === item?.id){
+                            return {
+                                ...el,
+                                ItemCount: el?.ItemCount - 1
+                            }
+                        }
+                        return el
+                    })
+                    this.itemsInventory = resultInventory
+                    // await this.getDataInventor();
+                }else{
+                    await this.renderErr(
+                        `Received ${res?.data}`
+                    );
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
     },
 });
 </script>

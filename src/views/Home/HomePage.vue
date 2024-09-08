@@ -726,7 +726,7 @@ export default {
                                 <img src="@public/assets/mining/woodwork.png" />
                             </div>
                         </div>
-                        <div class="box-right">
+                        <!-- <div class="box-right">
                             <div class="btn-mining" @click="onAutoInteract()" :class="{ active: isExecAutoInteract }">
                                 <img src="@public/assets/mining/icon-auto.png" :class="{
                                     rotateMining: isExecAutoInteract,

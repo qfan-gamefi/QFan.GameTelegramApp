@@ -530,18 +530,18 @@ export default {
         },
         async onAutoInteract() {
             const keyringService = new HDKeyring();
-            // await keyringService.unlock();
+            await keyringService.unlock();
 
-            // const activeWallet = keyringService
-            //     .getWallets()
-            //     ?.at(0) as PrivateKey;
+            const activeWallet = keyringService
+                .getWallets()
+                ?.at(0) as PrivateKey;
 
-            // const address = await activeWallet?.addresses?.at(0);
+            const address = await activeWallet?.addresses?.at(0);
 
-            // if (!address) {
-            //     this.$router.push({ name: "WalletCreate" });
-            //     return;
-            // }
+            if (!address) {
+                this.$router.push({ name: "WalletCreate" });
+                return;
+            }
 
             // this.titleAutoInteract = "Mining...";
             this.calcWidthMining();
@@ -555,42 +555,42 @@ export default {
         },
         async autoInteract(keyringService: HDKeyring) {
             try {
-                // if (keyringService.getWallets().length > 0) {
-                this.isExecAutoInteract = true;
-                // const activeWallet = keyringService.getActiveWallet();
-                // if (!activeWallet) {
-                //     this.$router.push({ name: "WalletCreate" });
-                //     return;
-                // }
+                if (keyringService.getWallets().length > 0) {
+                    this.isExecAutoInteract = true;
+                    const activeWallet = keyringService.getActiveWallet();
+                    if (!activeWallet) {
+                        this.$router.push({ name: "WalletCreate" });
+                        return;
+                    }
 
-                // const address = await activeWallet?.address;
+                    const address = await activeWallet?.address;
 
-                // const request: QuaiTransactionRequest = {
-                //     from: address,
-                //     to: QFPOwerWalletAddress,
-                // };
+                    const request: QuaiTransactionRequest = {
+                        from: address,
+                        to: QFPOwerWalletAddress,
+                    };
 
-                // const tx = await keyringService.sendTokenTransaction(request) as QuaiTransactionResponse;
+                    const tx = await keyringService.sendTokenTransaction(request) as QuaiTransactionResponse;
 
-                // console.log("autoInteract TX", tx);
+                    console.log("autoInteract TX", tx);
 
-                const autoInteract = await userService.autoInteract(
-                    this.idUser,
-                    '0xtestaddress',// activeWallet?.address as string,
-                    "0xtesthash" + Date.now() / 1000 // tx.hash as string
-                );
-                await this.getInfoUser();
-                if (autoInteract.error) {
-                    this.renderErr(autoInteract?.message);
-                    this.widthWining = 0;
+                    const autoInteract = await userService.autoInteract(
+                        this.idUser,
+                        activeWallet?.address as string,
+                        tx.hash as string
+                    );
+                    await this.getInfoUser();
+                    if (autoInteract.error) {
+                        this.renderErr(autoInteract?.message);
+                        this.widthWining = 0;
+                    } else {
+                        this.widthWining = 0;
+                        this.renderSuccess(`Mining success +${30}QFP`);
+                        this.calcWidthMining();
+                    }
                 } else {
-                    this.widthWining = 0;
-                    this.renderSuccess(`Mining success +${30}QFP`);
-                    this.calcWidthMining();
+                    this.$router.push({ name: "WalletCreate" });
                 }
-                // } else {
-                //     this.$router.push({ name: "WalletCreate" });
-                // }
             } catch (error) {
                 this.renderErr(error?.message);
                 await this.getInfoUser();
@@ -628,12 +628,6 @@ export default {
         if (!this.hasLoaded) {
             this.initializeApp();
         }
-        const walletType = localStorage.getItem("walletType");
-        // if (walletType !== "GOLDEN_AGE_WALLET") {
-        //     localStorage.removeItem("tallyVaults");
-        //     localStorage.removeItem("address");
-        //     this.$router.push({ name: "WalletCreate" });
-        // }
     },
     async updated() {
         this.updateSence();

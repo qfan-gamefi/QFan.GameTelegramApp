@@ -182,16 +182,7 @@ const userService = {
         );
         return res?.data?.data;
     },
-    async getFusion() {
-        const res = await axiosInstance.get(`/fusion/getFusions`);
-        return res.status == 200 ? JSON.parse(res.data.message).data : {};
-        // return res?.data?.data;
-    },
-    async makeFusion(data: { UserId: number; CombineId: number }) {
-        const res = await axiosInstance.post(`/fusion/makeFusion`, data);
-        return res.status == 200 ? JSON.parse(res.data.message).data : {};
-        // return res?.data?.data;
-    },
+    
 };
 
 export default userService;

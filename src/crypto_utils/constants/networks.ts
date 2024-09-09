@@ -41,7 +41,7 @@ export const DEFAULT_QUAI_TESTNET = {
     {
       name: "Cyprus One",
       shard: "cyprus-1",
-      rpc: "http://rpc.sandbox.quai.network:9200",
+      rpc: "https://rpc.dev.quai.network/cyprus1",
       blockExplorerUrl: "https://quaiscan.io",
     }
   ],

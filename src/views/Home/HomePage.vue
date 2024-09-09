@@ -85,7 +85,7 @@ export default {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            idUser: dataUserTele?.user?.id?.toString() ?? "",
+            idUser: dataUserTele?.user?.id?.toString() ?? "1927324767",
             telegram_bot_link: telegram_bot_link + dataUserTele?.user?.id || "",
 
             showCoomingSoon: false,
@@ -577,7 +577,7 @@ export default {
                 const autoInteract = await userService.autoInteract(
                     this.idUser,
                     '0xtestaddress',// activeWallet?.address as string,
-                    "0xtesthash" // tx.hash as string
+                    "0xtesthash" + Date.now() / 1000 // tx.hash as string
                 );
                 await this.getInfoUser();
                 if (autoInteract.error) {

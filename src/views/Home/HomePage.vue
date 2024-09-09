@@ -522,6 +522,7 @@ export default {
         },
         async onAutoInteract() {
             const keyringService = new HDKeyring();
+            /*
             await keyringService.unlock();
 
             const activeWallet = keyringService.getWallets()?.at(0) as PrivateKey;
@@ -532,6 +533,7 @@ export default {
                 this.$router.push({ name: "WalletCreate" });
                 return;
             }
+            */
 
             // this.titleAutoInteract = "Mining...";
             this.calcWidthMining();
@@ -545,42 +547,42 @@ export default {
         },
         async autoInteract(keyringService: HDKeyring) {
             try {
-                if (keyringService.getWallets().length > 0) {
-                    this.isExecAutoInteract = true;
-                    const activeWallet = keyringService.getActiveWallet();
-                    if (!activeWallet) {
-                        this.$router.push({ name: "WalletCreate" });
-                        return;
-                    }
+                //if (keyringService.getWallets().length > 0) {
+                this.isExecAutoInteract = true;
+                //const activeWallet = keyringService.getActiveWallet();
+                //if (!activeWallet) {
+                //    this.$router.push({ name: "WalletCreate" });
+                //    return;
+                //}
 
-                    const address = await activeWallet?.address;
+                //const address = await activeWallet?.address;
 
-                    const request: QuaiTransactionRequest = {
-                        from: address,
-                        to: QFPOwerWalletAddress,
-                    }
+                //const request: QuaiTransactionRequest = {
+                //    from: address,
+                //    to: QFPOwerWalletAddress,
+                //}
 
-                    const tx = await keyringService.sendTokenTransaction(request) as QuaiTransactionResponse;
+                //const tx = await keyringService.sendTokenTransaction(request) as QuaiTransactionResponse;
 
-                    console.log("autoInteract TX", tx);
+                //console.log("autoInteract TX", tx);
 
-                    const autoInteract = await userService.autoInteract(
-                        this.idUser,
-                        activeWallet?.address as string,
-                        tx.hash as string
-                    );
-                    await this.getInfoUser();
-                    if (autoInteract.error) {
-                        this.renderErr(autoInteract?.message);
-                        this.widthWining = 0;
-                    } else {
-                        this.widthWining = 0;
-                        this.renderSuccess(`Mining success +${30}QFP`);
-                        this.calcWidthMining();
-                    }
+                const autoInteract = await userService.autoInteract(
+                    this.idUser,
+                    '0xtestwallet',//activeWallet?.address as string,
+                    '0xtesthash'//tx.hash as string
+                );
+                await this.getInfoUser();
+                if (autoInteract.error) {
+                    this.renderErr(autoInteract?.message);
+                    this.widthWining = 0;
                 } else {
-                    this.$router.push({ name: "WalletCreate" });
+                    this.widthWining = 0;
+                    this.renderSuccess(`Mining success +${30}QFP`);
+                    this.calcWidthMining();
                 }
+                //} else {
+                //    this.$router.push({ name: "WalletCreate" });
+                // }
             } catch (error) {
                 this.renderErr(error?.message);
                 await this.getInfoUser();
@@ -617,7 +619,7 @@ export default {
         if (!this.hasLoaded) {
             this.initializeApp();
         }
-        
+
     },
     async updated() {
         this.updateSence();

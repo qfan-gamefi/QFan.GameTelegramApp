@@ -28,10 +28,10 @@
                                 backgroundImage: `url(${item?.ItemDef?.ImageUrl})`,
                             }"
                         ></div>
-                        <div class="slot-item">x{{ item?.ItemCount }}</div>
+                        <div class="slot-item">{{ item?.ItemCount }}</div>
                         <div class="item-btn" v-if="item?.ItemDef?.Consumable">
-                            <button @click="handleUseInventory(item)">
-                                Use
+                            <button @click="handleUseInventory(item)" :disabled="loadingBtn">
+                                <div v-if="loadingBtn"><i class="fa fa-spinner fa-spin"></i></div>Use
                             </button>
                         </div>
                     </div>
@@ -95,7 +95,7 @@
                                         ]"
                                     >
                                     
-                                        <button @click="handleFausion(item.id)">
+                                        <button @click="handleFausion(item)">
                                             Claim
                                         </button>
                                     </div>
@@ -176,6 +176,7 @@ export default defineComponent({
         const userInfo = window.Telegram.WebApp.initDataUnsafe;
 
         return {
+            loadingBtn: false,
             showCoomingSoon: false,
             apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
             userId: userInfo?.user?.id || "",
@@ -190,7 +191,7 @@ export default defineComponent({
                 { name: "History", label: "History" },
             ] as Button[],
             showClaim: false,
-            idFusion: 0,
+            itemFusion: {} as IFusion,
 
             // itemsInventory: [
             //     "./../../public/assets/inventory/platinum.png",
@@ -237,18 +238,17 @@ export default defineComponent({
             const data = JSON.parse(item);
             return data;
         },
-        checkDisableFusion(item) {
+        checkDisableFusion(item) {            
             const count = JSON.parse(item.ResourcesItemDefIds);
-
+            
             const result = count.every((itemA) => {
                 const matchingItemB = this.itemsInventory.find(
                     (itemB) => itemB.ItemDefId === itemA.ItemDefId
-                );
+                );                
                 return matchingItemB
-                    ? itemA.Count < matchingItemB.ItemCount
-                    : true;
-            });
-
+                    ? itemA.Count <= matchingItemB.ItemCount
+                    : false;
+            });            
             return result ? "" : "disable";
         },
         async getDataInventor() {
@@ -273,18 +273,17 @@ export default defineComponent({
             this.showClaim = false
         },
         async handleYesClaim(){
-            this.showClaim = false
+            this.showClaim = false            
             try {
                 const data = {
                     UserId:  this.userId,
-                    CombineId: this.idFusion,
+                    CombineId: this.itemFusion.id,
                 }
                 const res = await userServiceInventory.makeFusion(data);
-                console.log(res);
                 
                 if (res.success) {
                     await this.renderSuccess(
-                        `Received ${res?.data?.data?.data?.Name}`
+                        `Received item ${this.itemFusion.Name} ${res?.data?.data?.data?.Name}`
                     );
                     await this.getDataInventor();
                     await this.getFausion();
@@ -294,54 +293,50 @@ export default defineComponent({
                     );
                 }
             } catch (error) {
-                console.error(error);
+                this.renderErr(`Error!`);
             }
         },
         async getFausion() {
             try {
-                const res = await userServiceInventory.getFusion();                
+                const res = await userServiceInventory.getFusion();                           
                 this.listFusion = res;
             } catch (error) {
                 console.error(error);
             }
         },
-        async handleFausion(idFusion: number) {
+        async handleFausion(item) {
             this.showClaim = true
-            this.idFusion = idFusion
+            this.itemFusion = item
         },
-        async handleUseInventory(item: IItemInventory) {    
-            
+        async handleUseInventory(item: IItemInventory) {                
+            this.loadingBtn = true;
             try {
                 const data = {
                     UserId:  this.userId,
                     ItemCount: 1,
                     ItemId: item?.id,
                 }
-                const res = await userServiceInventory.useInventory(data);                
-                
+                const res = await userServiceInventory.useInventory(data);                                
                 if (res.success) {
                     const valueRes = res?.data?.[0]
                     await this.renderSuccess(
                         `Received ${valueRes?.Value} ${valueRes?.ValueType}`
                     );
-                    const resultInventory = this.itemsInventory?.map(el => {
-                        if(el?.id === item?.id){
-                            return {
-                                ...el,
-                                ItemCount: el?.ItemCount - 1
-                            }
-                        }
-                        return el
-                    })
-                    this.itemsInventory = resultInventory
-                    // await this.getDataInventor();
-                }else{
-                    await this.renderErr(
-                        `Received ${res?.data}`
+                    const resultInventory = this.itemsInventory?.map(el => 
+                        el.id === item.id ? { ...el, ItemCount: el.ItemCount - 1 } : el
                     );
+                    this.itemsInventory = resultInventory
+
+                    if(item.ItemCount === 1){
+                        await this.getDataInventor();
+                    }
+                }else{
+                    this.renderErr(`Received ${res?.data?.Message}`);
                 }
             } catch (error) {
-                console.error(error);
+                this.renderErr(`Error!`);
+            }finally{
+                this.loadingBtn = false;
             }
         }
     },
@@ -453,6 +448,7 @@ export default defineComponent({
             padding: 5px;
             position: absolute;
             top: 0;
+            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
         }
     }
     .box-fusion {

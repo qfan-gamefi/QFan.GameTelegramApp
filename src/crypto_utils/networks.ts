@@ -375,7 +375,9 @@ export const activeProvider = (): quais.JsonRpcProvider => {
     ) as ChainData;
     console.log("-------");
     
-    const provider = new quais.JsonRpcProvider(fromChain.rpc);
+    const provider = new quais.JsonRpcProvider(fromChain.rpc, undefined, {
+        usePathing: true
+    });
     return provider;
 };
 

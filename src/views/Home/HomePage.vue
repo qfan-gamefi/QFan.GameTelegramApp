@@ -465,6 +465,14 @@ export default {
         },
         async handleWallet() {
             this.handleBackButton();
+
+            const walletType = localStorage.getItem("walletType");
+            if (walletType !== "GOLDEN_AGE_WALLET_V2") {
+                localStorage.removeItem("tallyVaults");
+                localStorage.removeItem("address");
+                this.$router.push({ name: "WalletCreate" });
+            }
+
             const keyringService = new HDKeyring();
             const isUnlock = await keyringService.unlock();
             if (isUnlock && keyringService.isSigning) {

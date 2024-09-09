@@ -106,7 +106,7 @@ export default defineComponent({
 
             if (address) {
                 await storage.set("address", address);
-                localStorage.setItem("walletType", "GOLDEN_AGE_WALLET");
+                localStorage.setItem("walletType", "GOLDEN_AGE_WALLET_V2");
                 this.$router.push("/wallet/detail");
             } else {
                 localStorage.clear();

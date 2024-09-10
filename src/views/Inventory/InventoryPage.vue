@@ -144,7 +144,7 @@
 import { defineComponent } from "vue";
 import userServiceInventory from "@/services/inventoryService";
 import { EItemDefType, IFusion, IItemInventory } from "@/interface";
-import "./../../styles/common.scss";
+import "./style.scss";
 
 // import LoadingForm from '@/components/LoadingForm.vue';
 import NotificationToast from "@/components/NotificationToast.vue";
@@ -371,7 +371,7 @@ export default defineComponent({
 }
 
 .banner-inventory {
-    background-image: url("./../../../public/assets/inventory/inventory-banner.png");
+    background-image: url("./../../../public/assets/inventory/banner-inventory.png");
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
@@ -402,7 +402,7 @@ export default defineComponent({
     height: 100%;
     padding: 15px;
     .inventory-detail {
-        height: calc(100% - 180px);
+        // height: calc(100% - 180px);
         display: flex;
         flex-direction: column;
         gap: 10px;
@@ -413,7 +413,7 @@ export default defineComponent({
     }
     .box-item {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(4, 1fr);
         gap: 20px 10px;
         padding: 10px;
         button {
@@ -440,7 +440,6 @@ export default defineComponent({
             background-position: center;
             background-repeat: no-repeat;
             background-size: cover;
-            // height: 150px;
             border-radius: 5px;
         }
         .slot-item {
@@ -500,6 +499,7 @@ export default defineComponent({
                     display: flex;
                     flex-direction: column;
                     gap: 10px;
+                    align-items: center;
                     .img {
                         display: flex;
                         img {

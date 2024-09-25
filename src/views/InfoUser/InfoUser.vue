@@ -1,12 +1,9 @@
 <template>
     <div class="container-info" v-show="isTelegramLogin">
         <div class="info-user">
-            <div
-                class="wr-avt"
-                :style="{
-                    backgroundImage: `url(${urlAvt})`,
-                }"
-            />
+            <div class="wr-avt" :style="{
+                backgroundImage: `url(${urlAvt})`,
+            }" />
 
             <div class="wrap-username-lv">
                 <div class="username">{{ first_name }} {{ last_name }}</div>
@@ -25,14 +22,11 @@
                     </div> -->
 
                     <div class="text">
-                        Level {{ dataLevel?.attributes?.level }}
+                        {{ dataLevel?.attributes?.levelName }}
                     </div>
 
                     <div class="exp-lv">
-                        <div
-                            class="progress-bar"
-                            :style="{ width: percentageLevel + '%' }"
-                        />
+                        <div class="progress-bar" :style="{ width: percentageLevel + '%' }" />
                         <div class="progress-text">
                             <div class="number" v-if="isMaxLv">Max</div>
                             <div class="number" v-else>
@@ -45,9 +39,15 @@
             </div>
         </div>
 
-        <!-- <div class="wr-badge">
-            <img src="@public/assets//event/beta test.png" />
-        </div> -->
+        <div class="wr-badge">
+            <div v-for="(item, index) in itemsBadge" :key="index">
+                <div class="badge-img" :style="{
+                    backgroundImage: `url(${item?.ItemDef?.ImageUrl})`,
+                }"></div>
+            </div>
+
+            <!-- <img src="@public/assets//event/beta test.png" /> -->
+        </div>
     </div>
 </template>
 
@@ -57,6 +57,8 @@ import userService from "@/services/userService";
 import userServiceTelebot from "@/services/useServiceTeleBot";
 import { calcExpPercentage, calcLevel, nextExpLevel } from "@/utils/exp";
 import { defineComponent } from "vue";
+import { EItemDefType, IItemInventory } from "@/interface";
+import userServiceInventory from "@/services/inventoryService";
 
 export default defineComponent({
     name: "InfoUserPage",
@@ -96,6 +98,7 @@ export default defineComponent({
             isMaxLv: false,
 
             urlBadge: "./../../../public/assets/event/beta test.png",
+            itemsBadge: [] as IItemInventory[],
         };
     },
     methods: {
@@ -128,7 +131,9 @@ export default defineComponent({
                 currentLv
             );
 
-            if (dataLv?.length - 1 == Number(currentLv?.attributes?.level)) {
+            const maxLV = dataLv?.pop();
+
+            if (maxLV?.attributes?.level == currentLv?.attributes?.level) {
                 this.percentageLevel = 100;
                 this.isMaxLv = true;
             } else {
@@ -142,10 +147,25 @@ export default defineComponent({
                     calcPercentage(percentageLevel, 100) || 0;
             }
         },
+        async getListInventorHome() {
+            try {
+                const res = await userServiceInventory.getListInventory(
+                    Number(this.idUser)
+                );
+                    const filterBadge = res?.Items?.filter(
+                        (item) => item?.ItemDef?.Type === EItemDefType.Medal
+                    );
+                    this.itemsBadge = filterBadge;
+
+            } catch (error) {
+                console.error(error);
+            }
+        },
     },
     async mounted() {
         await this.getLevels();
         await this.getAvt();
+        await this.getListInventorHome();
     },
 });
 </script>
@@ -170,7 +190,6 @@ $deep-teal: #005662;
     left: 2%;
     display: flex;
     flex-direction: column;
-    gap: 8px;
 }
 
 .info-user {
@@ -193,6 +212,7 @@ $deep-teal: #005662;
     display: flex;
     flex-direction: column;
     gap: 3px;
+
     .lv {
         display: flex;
         flex-direction: column;
@@ -228,6 +248,7 @@ $deep-teal: #005662;
     font-family: monospace;
     font-weight: bold;
     font-size: 8px;
+
     .number {
         position: absolute;
         top: 50%;
@@ -236,6 +257,7 @@ $deep-teal: #005662;
         width: 100%;
         justify-content: center;
     }
+
     .exp {
         position: absolute;
         top: 50%;
@@ -252,14 +274,17 @@ $deep-teal: #005662;
     color: $white;
     font-size: 10px;
     border-radius: 8px;
+
     img {
         width: 15px;
         height: 15px;
     }
+
     .text-balance {
         transition: all 1s ease;
         @include text-shadow($dark-red);
     }
+
     .animate-text {
         transform: scale(1.2);
     }
@@ -267,9 +292,17 @@ $deep-teal: #005662;
 
 .wr-badge {
     margin-left: 60px;
-    img {
+    display: flex;
+    gap: 5px;
+
+    .badge-img {
         width: 25px;
         height: 25px;
+        background-position: center;
+        background-size: contain;
+        background-repeat: no-repeat;
+        display: flex;
+        gap: 5px;
     }
 }
 </style>

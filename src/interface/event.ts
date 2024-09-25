@@ -44,5 +44,20 @@ export interface IEvent {
                 };
             };
         };
+        status: "ACTIVE" | "INACTIVE" | "PENDING_TO_ACTIVE";
+        route: string;
+        actionType: "PREDICTION" | "POST" | "REDIRECT_EXTERNAL";
     };
+}
+
+
+export interface IGameExtraData {
+        "OnLose": [
+            {
+                "ValueType": "Point",
+                "Value": number
+            }
+        ],
+        "Min": number,
+        "Max": number
 }

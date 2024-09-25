@@ -5,7 +5,7 @@
             <div
                 class="banner-event"
                 :style="{
-                    backgroundImage: `url(${apiBaseUrl}${detailEvent?.attributes?.banner?.data?.attributes?.formats?.small?.url})`,
+                    backgroundImage: `url(${apiBaseUrl}${detailEvent?.attributes?.banner?.data?.attributes?.url})`,
                 }"
             >
                 <div class="text-banner">
@@ -17,33 +17,17 @@
                             {{ detailEvent?.attributes?.description }}
                         </div>
                     </div>
-
-                    <div class="box-time">
-                        <span
-                            ><i class="fa-solid fa-clock"></i>
-                            {{
-                                detailEvent?.attributes?.content?.[1]?.children?.[0]?.text?.replace(
-                                    "Time: ",
-                                    ""
-                                )
-                            }}</span
-                        >
-                    </div>
-                    <div class="box-time">
-                        <span>Your Points:{{ this.userPoint }}</span>
-                    </div>
                 </div>
-
-                <div class="btn-banner">
-                    <div
-                        v-for="(button, index) in buttonsBanner"
-                        :key="index"
-                        class="btn-item-banner"
-                        :class="{ active: activeButton === button?.name }"
-                        @click="setActiveButton(button?.name)"
-                    >
-                        {{ button.label }}
-                    </div>
+            </div>
+            <div class="btn-banner">
+                <div
+                    v-for="(button, index) in buttonsBanner"
+                    :key="index"
+                    class="btn-item-banner"
+                    :class="{ active: activeButton === button?.name }"
+                    @click="setActiveButton(button?.name)"
+                >
+                    {{ button.label }}
                 </div>
             </div>
 
@@ -87,7 +71,7 @@
                                 :style="{
                                     backgroundImage: `url(${apiBaseUrl}/uploads/${item?.Name?.split(
                                         '-'
-                                    )?.[0]?.toUpperCase()}.png)`,
+                                    )?.[0]?.toUpperCase()}.PNG)`,
                                 }"
                             ></div>
                             {{ item?.Description }}
@@ -96,7 +80,7 @@
                                 :style="{
                                     backgroundImage: `url(${apiBaseUrl}/uploads/${item?.Name?.split(
                                         '-'
-                                    )?.[1]?.toUpperCase()}.png)`,
+                                    )?.[1]?.toUpperCase()}.PNG)`,
                                 }"
                             ></div>
                         </div>
@@ -135,6 +119,36 @@
 
                         <div class="predict-point">
                             <div
+                                class="slider-container"
+                                v-if="!item?.['GameTemplate.DefaultBidValue']"
+                            >
+                                <input
+                                    type="range"
+                                    :min="
+                                        handleMinValue(
+                                            item?.['GameTemplate.ExtraData']
+                                        )
+                                    "
+                                    :max="
+                                        handleMaxValue(
+                                            item?.['GameTemplate.ExtraData']
+                                        )
+                                    "
+                                    :step="stepValue"
+                                    :value="sliderValue[index]"
+                                    @input="handleSliderInput($event, index)"
+                                    :class="[
+                                        'slider',
+                                        {
+                                            'btn-predict-disable':
+                                                item?.BidData ||
+                                                !item?.CloseCountDown,
+                                        },
+                                    ]"
+                                />
+                            </div>
+
+                            <div
                                 @click="handlePredict(item, index)"
                                 :class="[
                                     'predict-point-content',
@@ -145,8 +159,15 @@
                                     },
                                 ]"
                             >
-                                Predict
-                                {{ item?.["GameTemplate.DefaultBidValue"] }}
+                                <div>Predict&nbsp;</div>
+                                <div
+                                    v-if="
+                                        item?.['GameTemplate.DefaultBidValue']
+                                    "
+                                >
+                                    {{ item?.["GameTemplate.DefaultBidValue"] }}
+                                </div>
+                                <div v-else>{{ sliderValue[index] }}</div>
                                 <img src="./../../../public/assets/logo.svg" />
                             </div>
                         </div>
@@ -254,7 +275,7 @@
                             >
                                 {{ item?.Status }}
                             </div>
-                            <div>{{ item?.Game?.Name }}</div>
+                            <div>{{ item?.Game?.Description }}</div>
                         </div>
                         <div class="history-item-col">
                             {{ renderSide(item) }}
@@ -313,7 +334,7 @@ import PopupConfirm from "../../components/PopupConfirm.vue";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import EmptyForm from "../../components/EmptyForm.vue";
-import { IEvent } from "../../interface";
+import { IEvent, IGameExtraData } from "../../interface";
 import CountDown from "../../components/count-down/CountDown.vue";
 import { formatDateToDDMMMYY } from "../../utils";
 
@@ -382,6 +403,9 @@ export default {
             countdown: "",
             intervalId: null,
             bidValue: null,
+
+            stepValue: 50,
+            sliderValue: [] as number[],
         };
     },
     watch: {
@@ -464,8 +488,6 @@ export default {
             return dayjs(stopBiddingTime).format("DD.MM.YYYY, HH:mm");
         },
         handleSelectBid(itemIndex, sideIndex) {
-            // item["selectedSide"] = index;
-            // this.selectedIndex = index;
             this.games[itemIndex].selectedIndex = sideIndex;
         },
         handlePredict(item, index) {
@@ -490,15 +512,18 @@ export default {
             if (
                 typeof this.games[this.indexPredict].selectedIndex === "number"
             ) {
-                const dataTele = window.Telegram.WebApp.initDataUnsafe?.user;
+                const dataTele = this.dataTelegram?.user;
                 const nameTele = `${dataTele.first_name} ${dataTele.last_name}`;
+
+                const valueBid =
+                    this.games[this.indexPredict]?.[
+                        "GameTemplate.DefaultBidValue"
+                    ] || this.sliderValue[this.indexPredict];
 
                 const data = {
                     gameId: this.idPredict,
                     userId: this.idUser,
-                    value: this.games[this.indexPredict]?.[
-                        "GameTemplate.DefaultBidValue"
-                    ],
+                    value: valueBid,
                     valueType:
                         this.games[this.indexPredict]?.[
                             "GameTemplate.ValueType"
@@ -517,8 +542,6 @@ export default {
                     await this.renderErr();
                     await this.fetchData();
                 }
-            } else {
-                alert("Choose your side");
             }
         },
         handleYesPredict() {
@@ -553,8 +576,6 @@ export default {
                     this.detailEvent
                 );
 
-                console.log(games);
-
                 this.games = games.map((game) => {
                     return {
                         ...game,
@@ -562,11 +583,26 @@ export default {
                     };
                 });
 
+                this.sliderValue = this.games?.map((item) => {
+                    if (item?.BidData?.Value) {
+                        return item?.BidData?.Value;
+                    } else {
+                        return this.handleMedium(
+                            item?.["GameTemplate.ExtraData"]
+                        );
+                    }
+                });
+
                 this.leaderboard = await predictService.getLeaderBoard(
                     this.detailEvent?.attributes?.domainCode
                 );
+
                 this.history = await predictService.getFilterData("bids", {
-                    where: { UserId: this.idUser },
+                    where: {
+                        UserId: this.idUser,
+                        "$Game.ListCode$":
+                            this.detailEvent?.attributes?.listingCode,
+                    },
                     order: [["createdAt", "DESC"]],
                     include: "Games",
                 });
@@ -576,7 +612,7 @@ export default {
                     { where: { UserId: this.idUser } }
                 );
 
-                const dataTele = window.Telegram.WebApp.initDataUnsafe?.user;
+                const dataTele = this.dataTelegram?.user;
                 const nameTele = `${dataTele.first_name} ${dataTele.last_name}`;
                 const dataRankCurrent = await predictService.getYourRank(
                     this.idUser,
@@ -611,21 +647,37 @@ export default {
                 selectedIndex: null,
             }));
         },
+        handleMedium(extraData) {
+            const gameExtraData: IGameExtraData = JSON.parse(extraData);
+            return (gameExtraData?.Min + gameExtraData?.Max) / 2;
+        },
+        handleMinValue(extraData) {
+            const gameExtraData: IGameExtraData = JSON.parse(extraData);
+            return gameExtraData?.Min || 200;
+        },
+        handleMaxValue(extraData) {
+            const gameExtraData: IGameExtraData = JSON.parse(extraData);
+            return gameExtraData?.Max || 2000;
+        },
+        handleSliderInput(event, index) {
+            const value = Number(event.target.value);
+            this.sliderValue[index] = value;
+        },
     },
 };
 </script>
 
-<style>
+<style scoped>
 .popup-detail-event {
     height: 100%;
     position: absolute;
     width: 100%;
     top: 0%;
     left: 0;
-    z-index: 999;
+    z-index: 1000;
     animation: fadeInDetailEvent 0.1s ease forwards;
     color: #fff;
-    background-image: url("./../../public/assets/event/background-event.png");
+    background-image: url("./../../../public/assets/event/background-event.png");
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
@@ -653,6 +705,7 @@ export default {
 } */
 .banner-event {
     width: 100%;
+    /* height: 17vh; */
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
@@ -661,8 +714,8 @@ export default {
 
 .btn-banner {
     display: flex;
-    bottom: 0;
-    position: absolute;
+    /* bottom: 0;
+    position: absolute; */
     width: 100%;
     padding: 7px 0;
     background-color: #0d2779;
@@ -730,6 +783,7 @@ export default {
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
+
 .box-matches::-webkit-scrollbar {
     display: none;
 }
@@ -740,6 +794,7 @@ export default {
     padding: 0 10px;
     font-size: 10px;
 }
+
 .matches-title {
     display: flex;
     justify-content: center;
@@ -747,6 +802,7 @@ export default {
     gap: 10px;
     font-weight: bold;
 }
+
 .matches-title-img {
     width: 25px;
     height: 25px;
@@ -754,6 +810,7 @@ export default {
     background-repeat: no-repeat;
     background-size: cover;
 }
+
 .matches-item {
     text-align: center;
     background-color: #0c2678;
@@ -763,10 +820,12 @@ export default {
     flex-direction: column;
     gap: 15px;
 }
+
 .matches-item-disable {
     pointer-events: none;
     opacity: 0.8;
 }
+
 .bet-info {
     display: flex;
     flex-direction: column;
@@ -780,9 +839,11 @@ export default {
     border-bottom: 1px solid #81818147;
     gap: 30px;
 }
+
 .bet-info-row:last-child {
     border-bottom: none;
 }
+
 .bet-info-label {
     font-weight: bold;
     flex: 1;
@@ -794,12 +855,15 @@ export default {
     text-align: left;
     font-weight: bold;
 }
+
 .bet-info-value.lose {
     color: #d40000;
 }
+
 .bet-info-value.draw {
     color: #f3db00;
 }
+
 /* .border-draw {
     border: 5px solid #f3db00;
     border-top: none;
@@ -808,6 +872,7 @@ export default {
 .bet-info-value.win {
     color: #04cc00;
 }
+
 /* .border-win {
     border: 5px solid #04cc00;
     border-top: none;
@@ -825,6 +890,7 @@ export default {
     justify-content: center;
     gap: 10px;
 }
+
 .box-btn-predict.disable {
     pointer-events: none;
     opacity: 0.5;
@@ -844,11 +910,13 @@ export default {
     background-color: #04cc00;
     transition: background-color 0.3s ease;
 }
+
 .team-draw.selected {
     background-color: #f3db00;
     color: #760000;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
+
 .team-lose.selected {
     background-color: #d40000;
     transition: background-color 0.3s ease;
@@ -861,6 +929,7 @@ export default {
     background-color: rgb(80 80 80);
     transition: background-color 0.3s ease, color 0.3s ease;
 }
+
 .team.selected {
     background-color: #04cc00;
     transition: background-color 0.3s ease;
@@ -873,6 +942,8 @@ export default {
 .predict-point {
     display: flex;
     justify-content: center;
+    flex-direction: column;
+    align-items: center;
 }
 
 .predict-point img {
@@ -889,10 +960,12 @@ export default {
     border-radius: 5px;
     width: fit-content;
 }
+
 .predict-point-disabled {
     /* pointer-events: none; */
     opacity: 0.5;
 }
+
 .btn-predict-disable {
     pointer-events: none;
     opacity: 0.5;
@@ -914,7 +987,7 @@ export default {
 /*  */
 .list-leaderboard {
     padding: 10px 20px;
-    height: calc(100% - 350px);
+    height: calc(100% - 320px);
     display: flex;
     flex-direction: column;
     gap: 5px;
@@ -925,9 +998,11 @@ export default {
     scrollbar-width: none;
     animation: fadeIn 0.3s ease forwards;
 }
+
 .list-leaderboard::-webkit-scrollbar {
     display: none;
 }
+
 @keyframes fadeIn {
     0% {
         opacity: 0;
@@ -942,7 +1017,7 @@ export default {
     display: flex;
     flex-direction: column;
     position: absolute;
-    bottom: 70px;
+    bottom: calc(2% + 58px);
     background-color: #ffa53a;
     width: calc(100% - 40px);
     padding: 5px 20px 10px;
@@ -1022,6 +1097,7 @@ export default {
     font-size: 18px;
     font-weight: bold;
 }
+
 .lv-img {
     width: 30px;
     height: 30px;
@@ -1030,6 +1106,7 @@ export default {
     background-size: cover;
     border-radius: 50%;
 }
+
 .avt-your-rank img {
     width: 30px;
     height: 30px;
@@ -1062,9 +1139,10 @@ export default {
     gap: 10px;
     animation: fadeIn 0.3s ease forwards;
 }
+
 .box-history {
     background-color: #0c2678;
-    padding: 10px;
+    padding: 5px;
     border-radius: 10px;
     height: 100%;
     overflow: auto;
@@ -1075,6 +1153,7 @@ export default {
 .box-history::-webkit-scrollbar {
     display: none;
 }
+
 .box-title-columns {
     display: flex;
     font-size: 12px;
@@ -1082,13 +1161,16 @@ export default {
     padding: 10px 0;
     border-bottom: 1px solid #fff;
 }
+
 .title-columns {
     text-align: center;
 }
+
 .title-columns:nth-child(1) {
     /* flex: 0 0 4%; */
     width: 8%;
 }
+
 .title-columns:nth-child(n + 2) {
     /* flex: 0 0 24%; */
     width: 23%;
@@ -1101,18 +1183,22 @@ export default {
     border-bottom: 1px solid #ffffff5c;
     font-size: 11px;
 }
+
 /* .history-item:last-child {
     border-bottom: none;
 } */
 .history-item-col {
     text-align: center;
 }
+
 .history-item-col:nth-child(1) {
     width: 8%;
 }
+
 .history-item-col:nth-child(n + 2) {
     width: 23%;
 }
+
 .history-item-col img {
     width: 10px;
 }
@@ -1120,18 +1206,23 @@ export default {
 .match {
     font-weight: bold;
 }
+
 .match.lose {
     color: #d40000;
 }
+
 .match.new {
     color: #f3fb02;
 }
+
 .match.win {
     color: #04cc00;
 }
+
 .match.placed {
     color: #ffa53a;
 }
+
 .match.pending {
     color: #ffa53a;
 }
@@ -1139,11 +1230,13 @@ export default {
 .title-item {
     font-weight: bold;
 }
+
 .event-title-detail {
     font-size: 24px;
     color: #ff0000;
     text-shadow: 1px 1px 1px white;
 }
+
 .event-content-detail {
     margin-left: 2px;
 }
@@ -1151,5 +1244,77 @@ export default {
 .time-end {
     display: flex;
     gap: 3px;
+}
+
+@media (min-width: 320px) {
+    .list-history,
+    .list-matches {
+        height: calc(100% - 255px);
+    }
+}
+
+@media (min-width: 360px) {
+    .list-history,
+    .list-matches {
+        height: calc(100% - 255px);
+    }
+}
+
+@media (min-width: 375px) {
+    .list-history,
+    .list-matches {
+        height: calc(100% - 275px);
+    }
+}
+
+@media (min-width: 390px) {
+    .list-history,
+    .list-matches {
+        height: calc(100% - 275px);
+    }
+}
+
+@media (min-width: 460px) {
+    .list-history,
+    .list-matches {
+        height: calc(100% - 290px);
+    }
+}
+
+@media (min-width: 490px) {
+    .list-history,
+    .list-matches {
+        height: calc(100% - 310px);
+    }
+}
+
+@media (min-width: 560px) {
+    .list-history,
+    .list-matches {
+        height: calc(100% - 330px);
+    }
+}
+
+@media (min-width: 768px) {
+    .list-history,
+    .list-matches {
+        height: calc(100% - 420px);
+    }
+}
+
+@media (min-width: 1024px) {
+    .list-history,
+    .list-matches {
+        height: calc(100% - 480px);
+    }
+}
+
+.slider-container {
+    width: 200px;
+    text-align: center;
+}
+
+.slider {
+    width: 100%;
 }
 </style>

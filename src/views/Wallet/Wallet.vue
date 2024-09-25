@@ -11,9 +11,7 @@
                     <div><img src="@public/assets/logo.svg" /></div>
                     <div class="name">Address</div>
                     <div class="add-wallet">
-                        (<a href="#" @click="linkToExplore($event)"
-                            >{{ activeWallet?.address.substring(0, 5) }}...</a
-                        >)
+                        (<a href="#" @click="linkToExplore($event)">{{ activeWallet?.address.substring(0, 5) }}...</a>)
                     </div>
                     <div class="copy-wallet">
                         <a href="#" @click="copyAddress($event)">
@@ -41,9 +39,7 @@
                             </div>
                         </div>
                         <div>
-                            <a href="#" @click="refreshWallet($event)"
-                                ><i class="fa-solid fa-refresh"></i
-                            ></a>
+                            <a href="#" @click="refreshWallet($event)"><i class="fa-solid fa-refresh"></i></a>
                         </div>
                     </div>
                     <div>
@@ -51,49 +47,30 @@
                     </div>
 
                     <div class="wr-btn">
-                        <button
-                            class="btn-item"
-                            @click="() => (openReceive = true)"
-                        >
+                        <button class="btn-item" @click="() => (openReceive = true)">
                             <i class="fa-solid fa-copy"></i> Receive
                         </button>
                         <button @click="onSend()" class="btn-item">
                             <i class="fa-solid fa-paper-plane"></i> Send
                         </button>
-                        <button
-                            class="btn-item"
-                            @click="faucet()"
-                            v-bind:disabled="executing"
-                        >
+                        <button class="btn-item" @click="faucet()" v-bind:disabled="executing">
                             <i class="fa-solid fa-faucet"></i> Faucet
                         </button>
                     </div>
                     <span v-if="errorMessage" class="text-err-code">{{
                         errorMessage
                     }}</span>
-                    <span class="faucet-success" v-if="transactionUrl"
-                        >Faucet success. Click
+                    <span class="faucet-success" v-if="transactionUrl">Faucet success. Click
                         <a v-bind:href="transactionUrl" target="_blank">here</a>
-                        to view transaction on explorer</span
-                    >
+                        to view transaction on explorer</span>
                 </div>
                 <LoadingForm :loading="executing" />
                 <div class="wr-coin">
                     <div class="title">
-                        <a
-                            href="#"
-                            @click="setActiveTab($event, 'token')"
-                            v-bind:class="activeTab === 'token' ? 'active' : ''"
-                            >Token</a
-                        >
-                        <a
-                            href="#"
-                            @click="setActiveTab($event, 'activities')"
-                            v-bind:class="
-                                activeTab === 'activities' ? 'active' : ''
-                            "
-                            >Activities</a
-                        >
+                        <a href="#" @click="setActiveTab($event, 'token')"
+                            v-bind:class="activeTab === 'token' ? 'active' : ''">Token</a>
+                        <a href="#" @click="setActiveTab($event, 'activities')" v-bind:class="activeTab === 'activities' ? 'active' : ''
+                            ">Activities</a>
                     </div>
                     <div class="box-content" v-if="activeTab === 'token'">
                         <div class="item-list">
@@ -115,66 +92,45 @@
                             </select>
                         </div>
                         <div class="item-list">
-                            <div
-                                class="box-item"
-                                v-for="(
+                            <div class="box-item" v-for="(
                                     transaction, index
                                 ) in activities.filter(
-                                    (x) =>
-                                        !filterStatus ||
-                                        x.status === filterStatus
-                                )"
-                                key="{{ index }}"
-                            >
+                                        (x) =>
+                                            !filterStatus ||
+                                            x.status === filterStatus
+                                    )" key="{{ index }}">
                                 <div class="item-title">
-                                    <span
-                                        ><i class="fa-solid fa-exchange"></i
-                                        >&nbsp;{{
-                                            transaction.type.toUpperCase()
-                                        }}</span
-                                    >
-                                    <a
-                                        href="#"
-                                        @click="
-                                            getLinkTx($event, transaction.hash)
-                                        "
-                                        >({{
+                                    <span><i class="fa-solid fa-exchange"></i>&nbsp;{{
+                                        transaction.type.toUpperCase()
+                                        }}</span>
+                                    <a href="#" @click="
+                                        getLinkTx($event, transaction.hash)
+                                        ">({{
                                             formatAddress(transaction.hash)
-                                        }})</a
-                                    >
+                                        }})</a>
                                     <div v-bind:class="transaction.status">
                                         {{ transaction.status.toUpperCase() }}
                                     </div>
                                 </div>
                                 <div class="item-address">
                                     <div>
-                                        <a
-                                            v-if="
-                                                transaction.type === 'receive'
-                                            "
-                                            class="address"
-                                            >From:
+                                        <a v-if="
+                                            transaction.type === 'receive'
+                                        " class="address">From:
                                             {{
                                                 formatAddress(transaction?.from)
-                                            }}</a
-                                        >
-                                        <a
-                                            v-if="transaction.type === 'send'"
-                                            class="address"
-                                            >To:
+                                            }}</a>
+                                        <a v-if="transaction.type === 'send'" class="address">To:
                                             {{
                                                 formatAddress(transaction?.to)
-                                            }}</a
-                                        >
+                                            }}</a>
                                     </div>
                                 </div>
                                 <div class="item-value">
-                                    <span class="value"
-                                        >{{ formatValue(transaction?.value) }}
+                                    <span class="value">{{ formatValue(transaction?.value) }}
                                         {{
                                             transaction?.tokenSymbol ?? "QUAI"
-                                        }}</span
-                                    >
+                                        }}</span>
                                 </div>
                             </div>
                         </div>
@@ -182,43 +138,24 @@
                 </div>
             </div>
         </div>
-        <NotificationToast
-            v-if="notification.visible"
-            :message="notification.message"
-            :type="notification.type"
-        />
+        <NotificationToast v-if="notification.visible" :message="notification.message" :type="notification.type" />
         <div v-if="openSend">
             <div class="popup-overlay"></div>
             <div class="popup-referer-code">
-                <a
-                    href="#"
-                    @click="
-                        () => {
-                            openSend = false;
-                        }
-                    "
-                    class="close"
-                    ><i class="fa fa-close"></i
-                ></a>
+                <a href="#" @click="() => {
+                    openSend = false;
+                }
+                    " class="close"><i class="fa fa-close"></i></a>
                 <div class="popup-title">Input address and value to send</div>
                 <form @submit.prevent="onSend">
                     <table>
                         <tr class="form-group">
                             <td>
-                                <label class="label" for="address"
-                                    >Address</label
-                                >
+                                <label class="label" for="address">Address</label>
                             </td>
                             <td>
-                                <input
-                                    class="code-input"
-                                    :class="{ 'input-error': errorMessage }"
-                                    type="text"
-                                    v-model="toAddress"
-                                    id="address"
-                                    @input="clearError"
-                                    placeholder="Enter address"
-                                />
+                                <input class="code-input" :class="{ 'input-error': errorMessage }" type="text"
+                                    v-model="toAddress" id="address" @input="clearError" placeholder="Enter address" />
                             </td>
                         </tr>
                         <tr>
@@ -226,50 +163,28 @@
                                 <label class="label" for="value">Value</label>
                             </td>
                             <td>
-                                <input
-                                    class="code-input"
-                                    :class="{ 'input-error': errorMessage }"
-                                    type="number"
-                                    v-model="sendValue"
-                                    id="value"
-                                    @input="clearError"
-                                    placeholder="Enter value to send"
-                                />
+                                <input class="code-input" :class="{ 'input-error': errorMessage }" type="number"
+                                    v-model="sendValue" id="value" @input="clearError"
+                                    placeholder="Enter value to send" />
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                <label class="label" for="value"
-                                    >Password</label
-                                >
+                                <label class="label" for="value">Password</label>
                             </td>
                             <td>
-                                <input
-                                    class="code-input"
-                                    :class="{ 'input-error': errorMessage }"
-                                    type="password"
-                                    v-model="sendPassword"
-                                    id="password"
-                                    @input="clearError"
-                                    placeholder="Enter password"
-                                />
+                                <input class="code-input" :class="{ 'input-error': errorMessage }" type="password"
+                                    v-model="sendPassword" id="password" @input="clearError"
+                                    placeholder="Enter password" />
                             </td>
                         </tr>
                     </table>
                     <div v-if="errorMessage" class="text-err-code">
                         {{ errorMessage }}
                     </div>
-                    <button
-                        class="btn-submit-code"
-                        @click="executeSend()"
-                        v-bind:disabled="executing"
-                        type="submit"
-                    >
-                        <span
-                            >Send
-                            <a v-if="executing"
-                                ><i class="fa fa-spinner loading"></i></a
-                        ></span>
+                    <button class="btn-submit-code" @click="executeSend()" v-bind:disabled="executing" type="submit">
+                        <span>Send
+                            <a v-if="executing"><i class="fa fa-spinner loading"></i></a></span>
                     </button>
                 </form>
             </div>
@@ -277,22 +192,15 @@
         <div v-if="openReceive">
             <div class="popup-overlay"></div>
             <div class="popup-referer-code">
-                <a
-                    href="#"
-                    @click="
-                        () => {
-                            openReceive = false;
-                        }
-                    "
-                    class="close"
-                    ><i class="fa fa-close"></i
-                ></a>
+                <a href="#" @click="() => {
+                    openReceive = false;
+                }
+                    " class="close"><i class="fa fa-close"></i></a>
                 <div class="popup-title">Receive Address</div>
                 <div class="wl-addr">
                     <div class="address-image">
                         <img
-                            v-bind:src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${activeWallet?.address}`"
-                        />
+                            v-bind:src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${activeWallet?.address}`" />
                     </div>
                     <div class="address-action">
                         <a href="#" @click="copyAddress($event)">
@@ -307,13 +215,11 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { secureStorage, storage } from "@/storage/storage";
+import { secureStorage } from "@/storage/storage";
 import userService from "@/services/userService";
-import { providers, quais, utils, Wallet } from "quais";
+import { quais, Wallet } from "quais";
 import NotificationToast from "@/components/NotificationToast.vue";
 import LoadingForm from "@/components/LoadingForm.vue";
-import KeyringService from "@/crypto_utils/KDKeyringService";
-import { VAULT_KEY } from "@/crypto_utils/storage";
 import {
     activeProvider,
     fetchActivity,
@@ -321,6 +227,10 @@ import {
     getTxLinkToExplorer,
     signAndSendTransaction,
 } from "@/crypto_utils/networks";
+import HDKeyring from "@/crypto_utils/HDKeyring";
+import { type WalletInfo } from "@/crypto_utils/type";
+import type { QuaiTransactionRequest } from "quais/lib/esm/providers";
+import { formatEther, parseEther, toBigInt } from "ethers";
 
 export default defineComponent({
     name: "WalletDetail",
@@ -330,11 +240,11 @@ export default defineComponent({
     },
     data() {
         return {
-            keyringService: new KeyringService(), // KeyringService
+            hdKeyring: new HDKeyring(), // KeyringService
             isVisible: false,
             totalBalance: "$10,000",
             isSigned: false,
-            activeWallet: null as Wallet | null,
+            activeWallet: null as WalletInfo | null,
             balance: "0",
             exploreUrl: "",
             checkinMessage: "",
@@ -367,7 +277,7 @@ export default defineComponent({
             this.isVisible = !this.isVisible;
         },
         async setActiveTab($event: Event, tab: string) {
-            $event.preventDefault();
+            $event?.preventDefault();
             this.activeTab = tab;
             if (tab === "activities") {
                 await this.fetchActivity();
@@ -454,27 +364,26 @@ export default defineComponent({
                 return;
             }
 
-            console.log("execute send", this.sendValue);
+            console.log("execute send", BigInt(Number(this.sendValue.toString())));
 
             try {
                 this.executing = true;
+                const hdKeyring = new HDKeyring();
+                await hdKeyring.unlock()
                 const transaction = {
                     from: this.activeWallet?.address as string,
                     to: this.toAddress,
-                    value: this.sendValue.toString(),
-                } as unknown as TransactionRequest;
+                    value: parseEther(this.sendValue.toString()),
+                } as unknown as QuaiTransactionRequest;
 
                 // const signedData = await this.keyringService.signTransaction(this.toAddress, transaction);
 
-                const result = await signAndSendTransaction(
-                    this.activeWallet?.privateKey as string,
-                    transaction
-                );
+                const result = await hdKeyring.signAndSendQuaiTransaction(transaction);
 
                 console.log("result", result);
                 this.openSend = false;
                 setTimeout(() => {
-                    this.setActiveTab("activities");
+                    this.setActiveTab(new Event(""), "activities");
                 }, 2000);
                 this.executing = false;
                 this.openSend = false;
@@ -485,7 +394,7 @@ export default defineComponent({
             }
         },
         formatValue(value: string) {
-            return quais.utils.formatEther(value);
+            return formatEther(value);
         },
         formatAddress(address: string) {
             const length = address.length;
@@ -502,7 +411,7 @@ export default defineComponent({
             const balance = await provider.getBalance(
                 this.activeWallet?.address as string
             );
-            this.balance = utils.formatEther(balance);
+            this.balance = formatEther(balance);
             //round 2 digits
             this.balance = parseFloat(this.balance).toFixed(2);
         },
@@ -529,25 +438,28 @@ export default defineComponent({
         //     return;
         // }
 
-        const keyringService = new KeyringService();
-        const vault = await storage.get(VAULT_KEY);
-        if (vault) {
-            const password = secureStorage.getPassword() as string;
-            const isUnlock = await keyringService.unlock(password, false);
-            if (isUnlock) {
-                this.activeWallet = keyringService
-                    .getPrivateKeys()
-                    ?.at(0) as Wallet;
-                const address = await this.activeWallet?.getAddress();
-                if (!address) {
-                    localStorage.clear();
-                    this.$router.push({ name: "WalletCreate" });
-                }
-                await this.refreshWallet();
-                setInterval(async () => {
-                    await this.getBalance();
-                }, 5000);
+        const walletType = localStorage.getItem("walletType");
+        if (walletType !== "GOLDEN_AGE_WALLET") {
+            localStorage.removeItem("tallyVaults");
+            localStorage.removeItem("address");
+            this.$router.push({ name: "WalletCreate" });
+        }
+
+        const hdKeyring = new HDKeyring();
+        await hdKeyring.unlock()
+        if (hdKeyring.isSigning) {
+            this.activeWallet = hdKeyring.getActiveWallet();
+            console.log("activeWallet", this.activeWallet);
+
+            const address = await this.activeWallet?.address;
+            if (!address) {
+                localStorage.clear();
+                this.$router.push({ name: "WalletCreate" });
             }
+            await this.refreshWallet();
+            setInterval(async () => {
+                await this.getBalance();
+            }, 5000);
         } else {
             this.$router.push({ name: "WalletCreate" });
         }

@@ -373,7 +373,6 @@ export default defineComponent({
                     this.isToken = true;
                     return;
                 }
-
                 const data = {
                     gameId: 58,
                     userId: this.userId,

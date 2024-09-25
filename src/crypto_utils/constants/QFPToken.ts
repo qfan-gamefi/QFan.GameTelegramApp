@@ -330,6 +330,13 @@ export const QFPTokenABI = [
     },
     {
         "inputs": [],
+        "name": "sendTip",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
         "name": "symbol",
         "outputs": [
             {
@@ -421,3 +428,6 @@ export const QFPTokenABI = [
         "type": "function"
     }
 ]
+
+export const QFPContractAddress = "0x00325562fD099939c02780e50F20c411cB449dE5";
+export const QFPOwerWalletAddress = "0x005F1bf66F3aD789e7392E09687C34f335f9c4eC";

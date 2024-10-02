@@ -69,6 +69,7 @@ export default {
     justify-content: center;
     font-size: 16px;
     font-weight: bold;
+    z-index: 99999;
 
     animation: fadeNotification 2s ease-in-out forwards;
 }

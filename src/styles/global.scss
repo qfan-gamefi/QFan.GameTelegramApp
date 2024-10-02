@@ -66,12 +66,17 @@ button span {
     font-size: 14px;
     line-height: 24px;
     letter-spacing: 1px;
-    background: linear-gradient( rgb(246, 245, 244) 0%, rgb(208, 204, 200) 115.91%) text;
+    background: linear-gradient(
+            rgb(246, 245, 244) 0%,
+            rgb(208, 204, 200) 115.91%
+        )
+        text;
 }
 
 .text-outline-black {
     color: white;
-    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
+        1px 1px 0 #000;
 }
 
 .t-primary-color {

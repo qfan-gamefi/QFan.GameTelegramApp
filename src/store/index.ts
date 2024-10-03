@@ -1,3 +1,4 @@
+import type { IPlayer } from "@/interface/rewardInfo";
 import { createStore } from "vuex";
 
 const store = createStore({
@@ -6,6 +7,7 @@ const store = createStore({
             userId: null,
             fullName: "",
             hasLoaded: false,
+            rewardInfo: {} as IPlayer,
         };
     },
     mutations: {
@@ -17,6 +19,9 @@ const store = createStore({
         },
         setHasLoaded(state, status) {
             state.hasLoaded = status;
+        },
+        setRewardInfo(state, rewardInfo: IPlayer) {
+            state.rewardInfo = rewardInfo;
         },
     },
 });

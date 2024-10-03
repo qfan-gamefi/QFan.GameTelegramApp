@@ -22,18 +22,62 @@
                         v-for="(item, index) in itemsInventory"
                         :key="index"
                     >
-                        <div
-                            class="item-img"
-                            :style="{
-                                backgroundImage: `url(${item?.ItemDef?.ImageUrl})`,
-                            }"
-                        ></div>
-                        <div class="slot-item">{{ item?.ItemCount }}</div>
-                        <div class="item-btn" v-if="item?.ItemDef?.Consumable">
-                            <button @click="handleUseInventory(item)" :disabled="loadingBtn">
-                                <div v-if="loadingBtn"><i class="fa fa-spinner fa-spin"></i></div>Use
-                            </button>
+                        <div class="item-img" @click="toggleButtons(index)">
+                            <img
+                                :src="item?.ItemDef?.ImageUrl"
+                                :alt="item?.Description"
+                                loading="lazy"
+                            />
+
+                            <div
+                                v-if="activeIndex === index"
+                                class="button-overlay"
+                            >
+                                <!-- <button class="overlay-btn">Button 1</button> -->
+                                <div
+                                    class="item-btn"
+                                    v-if="item?.ItemDef?.Consumable"
+                                >
+                                    <button
+                                        @click="handleUseInventory(item)"
+                                        :disabled="loadingBtn"
+                                    >
+                                        <div v-if="loadingBtn">
+                                            <i
+                                                class="fa fa-spinner fa-spin"
+                                            ></i>
+                                        </div>
+                                        Use
+                                    </button>
+                                </div>
+
+                                <div class="item-btn" v-if="item?.Tradable">
+                                    <button
+                                        @click="handleSell(item)"
+                                        :disabled="loadingBtn"
+                                    >
+                                        <div v-if="loadingBtn">
+                                            <i
+                                                class="fa fa-spinner fa-spin"
+                                            ></i>
+                                        </div>
+                                        Sell
+                                    </button>
+                                </div>
+                            </div>
                         </div>
+                        <div class="slot-item">{{ item?.ItemCount }}</div>
+                        <!-- <div class="item-btn" v-if="item?.ItemDef?.Consumable">
+                            <button
+                                @click="handleUseInventory(item)"
+                                :disabled="loadingBtn"
+                            >
+                                <div v-if="loadingBtn">
+                                    <i class="fa fa-spinner fa-spin"></i>
+                                </div>
+                                Use
+                            </button>
+                        </div> -->
                     </div>
                 </div>
 
@@ -94,7 +138,6 @@
                                             },
                                         ]"
                                     >
-                                    
                                         <button @click="handleFausion(item)">
                                             Claim
                                         </button>
@@ -137,6 +180,13 @@
             @yes="handleYesClaim"
             @no="handleNoClaim"
         />
+
+        <ViewCart
+            :isViewCart="isViewCart"
+            @close="closeViewCart"
+            :detailCart="dataDetailCart"
+            currentPage="inventory"
+        />
     </div>
 </template>
 
@@ -149,6 +199,8 @@ import "./style.scss";
 // import LoadingForm from '@/components/LoadingForm.vue';
 import NotificationToast from "@/components/NotificationToast.vue";
 import PopupConfirm from "@/components/PopupConfirm.vue";
+import ViewCart from "./../Shop/ViewCart.vue";
+import { IDetailCart } from "@/views/Shop/defination";
 
 enum ButtonName {
     Inventory = "Inventory",
@@ -165,7 +217,8 @@ export default defineComponent({
     name: "InventoryPage",
     components: {
         NotificationToast,
-        PopupConfirm
+        PopupConfirm,
+        ViewCart,
         // LoadingForm,
     },
     created() {
@@ -203,6 +256,11 @@ export default defineComponent({
             itemsBadge: [] as IItemInventory[],
 
             listFusion: [] as IFusion[],
+            showButtons: false,
+            activeIndex: null,
+
+            isViewCart: false,
+            dataDetailCart: {} as IDetailCart,
         };
     },
     methods: {
@@ -219,6 +277,10 @@ export default defineComponent({
         },
         async renderErr(text) {
             this.renderNotification(text, "error");
+        },
+        toggleButtons(index: number) {
+            // this.showButtons = !this.showButtons;
+            this.activeIndex = this.activeIndex === index ? null : index;
         },
         setActiveButton(button: ButtonName) {
             if (button !== ButtonName.History) {
@@ -238,30 +300,31 @@ export default defineComponent({
             const data = JSON.parse(item);
             return data;
         },
-        checkDisableFusion(item) {            
+        checkDisableFusion(item) {
             const count = JSON.parse(item.ResourcesItemDefIds);
-            
+
             const result = count.every((itemA) => {
                 const matchingItemB = this.itemsInventory.find(
                     (itemB) => itemB.ItemDefId === itemA.ItemDefId
-                );                
+                );
                 return matchingItemB
                     ? itemA.Count <= matchingItemB.ItemCount
                     : false;
-            });            
+            });
             return result ? "" : "disable";
         },
         async getDataInventor() {
             try {
                 const res = await userServiceInventory.getListInventory(
                     Number(this.userId)
-                );                
+                );
                 const filterData = res?.Items?.filter(
                     (item) => item?.ItemDef?.Type === EItemDefType.Common
                 );
                 const filterBadge = res?.Items?.filter(
                     (item) => item?.ItemDef?.Type === EItemDefType.Medal
                 );
+                console.log("filterData", filterData);
 
                 this.itemsBadge = filterBadge;
                 this.itemsInventory = filterData;
@@ -269,28 +332,26 @@ export default defineComponent({
                 console.error(error);
             }
         },
-        handleNoClaim(){
-            this.showClaim = false
+        handleNoClaim() {
+            this.showClaim = false;
         },
-        async handleYesClaim(){
-            this.showClaim = false            
+        async handleYesClaim() {
+            this.showClaim = false;
             try {
                 const data = {
-                    UserId:  this.userId,
+                    UserId: this.userId,
                     CombineId: this.itemFusion.id,
-                }
+                };
                 const res = await userServiceInventory.makeFusion(data);
-                
+
                 if (res.success) {
                     await this.renderSuccess(
                         `Received item ${this.itemFusion.Name} ${res?.data?.data?.data?.Name}`
                     );
                     await this.getDataInventor();
                     await this.getFausion();
-                }else{
-                    await this.renderErr(
-                        `Received ${res?.data}`
-                    );
+                } else {
+                    await this.renderErr(`Received ${res?.data}`);
                 }
             } catch (error) {
                 this.renderErr(`Error!`);
@@ -298,47 +359,57 @@ export default defineComponent({
         },
         async getFausion() {
             try {
-                const res = await userServiceInventory.getFusion();                           
+                const res = await userServiceInventory.getFusion();
                 this.listFusion = res;
             } catch (error) {
                 console.error(error);
             }
         },
         async handleFausion(item) {
-            this.showClaim = true
-            this.itemFusion = item
+            this.showClaim = true;
+            this.itemFusion = item;
         },
-        async handleUseInventory(item: IItemInventory) {                
+        async handleUseInventory(item: IItemInventory) {
             this.loadingBtn = true;
             try {
                 const data = {
-                    UserId:  this.userId,
+                    UserId: this.userId,
                     ItemCount: 1,
                     ItemId: item?.id,
-                }
-                const res = await userServiceInventory.useInventory(data);                                
+                };
+                const res = await userServiceInventory.useInventory(data);
                 if (res.success) {
-                    const valueRes = res?.data?.[0]
+                    const valueRes = res?.data?.[0];
                     await this.renderSuccess(
                         `Received ${valueRes?.Value} ${valueRes?.ValueType}`
                     );
-                    const resultInventory = this.itemsInventory?.map(el => 
-                        el.id === item.id ? { ...el, ItemCount: el.ItemCount - 1 } : el
+                    const resultInventory = this.itemsInventory?.map((el) =>
+                        el.id === item.id
+                            ? { ...el, ItemCount: el.ItemCount - 1 }
+                            : el
                     );
-                    this.itemsInventory = resultInventory
+                    this.itemsInventory = resultInventory;
 
-                    if(item.ItemCount === 1){
+                    if (item.ItemCount === 1) {
                         await this.getDataInventor();
                     }
-                }else{
+                } else {
                     this.renderErr(`Received ${res?.data?.Message}`);
                 }
             } catch (error) {
                 this.renderErr(`Error!`);
-            }finally{
+            } finally {
                 this.loadingBtn = false;
             }
-        }
+        },
+        async handleSell(item: IItemInventory) {
+            this.isViewCart = true;
+            this.dataDetailCart = item;
+        },
+        closeViewCart() {
+            this.isViewCart = false;
+            this.getDataInventor();
+        },
     },
 });
 </script>
@@ -413,13 +484,14 @@ export default defineComponent({
     }
     .box-item {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(5, 1fr);
         gap: 20px 10px;
         padding: 10px;
         button {
             padding: 12px;
             font-size: 12px;
             border-radius: 8px;
+            min-width: fit-content;
         }
         .item {
             position: relative;
@@ -437,17 +509,27 @@ export default defineComponent({
             }
         }
         .item-img {
-            background-position: center;
-            background-repeat: no-repeat;
-            background-size: cover;
-            border-radius: 5px;
+            // background-position: center;
+            // background-repeat: no-repeat;
+            // background-size: cover;
+            // border-radius: 5px;
+            width: 100%;
+            position: relative;
+            cursor: pointer;
+            img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover; /* This ensures the image fills the container */
+                border-radius: 5px; /* Add border-radius if needed */
+            }
         }
         .slot-item {
             font-size: 10px;
             padding: 5px;
             position: absolute;
             top: 0;
-            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
+                1px 1px 0 #000;
         }
     }
     .box-fusion {
@@ -563,4 +645,31 @@ export default defineComponent({
     }
 }
 //cooming-soon
+
+.button-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    // display: block;
+}
+
+.overlay-btn {
+    margin: 5px;
+    padding: 10px 20px;
+    background-color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+.overlay-btn:hover {
+    background-color: #ddd;
+}
 </style>

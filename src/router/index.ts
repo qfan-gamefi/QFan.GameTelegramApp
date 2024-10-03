@@ -6,6 +6,7 @@ import WalletForm from "@/views/Wallet/WalletForm.vue";
 import FlipPage from "@/views/Flip/FlipPage.vue";
 import Wallet from "@/views/Wallet/Wallet.vue";
 import InventoryPage from "@/views/Inventory/InventoryPage.vue";
+import ShopPage from "@/views/Shop/ShopPage.vue";
 
 const routes = [
     {
@@ -37,6 +38,11 @@ const routes = [
         path: "/inventory",
         name: "InventoryPage",
         component: InventoryPage,
+    },
+    {
+        path: "/shop",
+        name: "ShopPage",
+        component: ShopPage,
     },
 ];
 

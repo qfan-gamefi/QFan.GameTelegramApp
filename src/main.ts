@@ -8,6 +8,8 @@ import VueDragscroll from "vue-dragscroll";
 import router from "./router";
 import store from "./store";
 import { Buffer } from "buffer";
+import "./index.css";
+import "./styles/global.scss";
 
 // @ts-ignore
 window.Buffer = Buffer;

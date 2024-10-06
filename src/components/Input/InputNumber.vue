@@ -2,9 +2,11 @@
     <div class="input-wrapper">
         <div class="label" v-if="label">{{ label }}</div>
         <input
-            :type="type"
+            type="number"
             :value="modelValue"
-            @input="$emit('update:modelValue', $event.target.value)"
+            @input="onInput"
+            inputmode="numeric"
+            pattern="[0-9]*"
             class="input-field f-bangopro"
             :placeholder="placeholder"
         />
@@ -13,15 +15,11 @@
 
 <script>
 export default {
-    name: "InputField",
+    name: "InputNumber",
     props: {
         modelValue: {
             type: [String, Number],
             default: "",
-        },
-        type: {
-            type: String,
-            default: "text",
         },
         label: {
             type: String,
@@ -30,6 +28,19 @@ export default {
         placeholder: {
             type: String,
             default: "",
+        },
+    },
+    methods: {
+        onInput(event) {
+            const value = event.target.value;
+            const numericValue = value.replace(/[^0-9]/g, "");
+
+            // Nếu `modelValue` là kiểu `Number`, chuyển thành số
+            if (typeof this.modelValue === "number") {
+                this.$emit("update:modelValue", parseFloat(numericValue));
+            } else {
+                this.$emit("update:modelValue", numericValue);
+            }
         },
     },
 };

@@ -6,8 +6,8 @@
             }" />
 
             <div class="wrap-username-lv">
-                <div class="username">{{ first_name }} {{ last_name }}</div>
-                <div class="lv">
+                <div class="username f-bangopro">{{ first_name }} {{ last_name }}</div>
+                <div class="lv f-bangopro">
                     <!-- <div class="wr-balance">
                         <img src="@public/assets/logo.svg" />
                         <div
@@ -267,28 +267,28 @@ $deep-teal: #005662;
     }
 }
 
-.wr-balance {
-    display: flex;
-    gap: 5px;
-    align-items: center;
-    color: $white;
-    font-size: 10px;
-    border-radius: 8px;
+// .wr-balance {
+//     display: flex;
+//     gap: 5px;
+//     align-items: center;
+//     color: $white;
+//     font-size: 10px;
+//     border-radius: 8px;
 
-    img {
-        width: 15px;
-        height: 15px;
-    }
+//     img {
+//         width: 15px;
+//         height: 15px;
+//     }
 
-    .text-balance {
-        transition: all 1s ease;
-        @include text-shadow($dark-red);
-    }
+//     .text-balance {
+//         transition: all 1s ease;
+//         @include text-shadow($dark-red);
+//     }
 
-    .animate-text {
-        transform: scale(1.2);
-    }
-}
+//     .animate-text {
+//         transform: scale(1.2);
+//     }
+// }
 
 .wr-badge {
     margin-left: 60px;

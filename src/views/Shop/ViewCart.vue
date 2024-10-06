@@ -4,29 +4,107 @@
     <transition name="popup">
         <div class="popup-template close-popup" v-if="isViewCart">
             <div class="header">
-                <div class="title">ORDER CONFIRM</div>
+                <div class="m-auto f-bangopro">ORDER CONFIRM</div>
 
                 <div @click="handleCloseCart" class="close-view-cart">
                     <i class="fa-solid fa-rectangle-xmark"></i>
                 </div>
             </div>
 
-            <div class="shop-items">
-                <div class="shop-item" :key="detailCart?.id">
-                    <div class="item-content">
-                        <div class="item-image">
+            <div class="p-2 bg-[#00165a]">
+                <div class="bg-[#0b3393] p-1 rounded-md" :key="detailCart?.id">
+                    <div class="mb-1">
+                        <div
+                            class="flex gap-1"
+                            v-if="currentPage !== 'inventory'"
+                        >
+                            <div
+                                :class="[
+                                    'buy-sell-item',
+                                    {
+                                        active: activeTab === 'buy',
+                                        inactive: activeTab !== 'buy',
+                                    },
+                                ]"
+                                @click="setActiveTab('buy')"
+                            >
+                                Buy
+                            </div>
+                            <div
+                                :class="[
+                                    'buy-sell-item',
+                                    {
+                                        active: activeTab === 'sell',
+                                        inactive: activeTab !== 'sell',
+                                    },
+                                ]"
+                                @click="setActiveTab('sell')"
+                            >
+                                Sell
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <div class="w-[80px]">
                             <img
+                                class="w-[80px] object-cover rounded-md flex"
                                 :src="detailCart?.ItemDef?.ImageUrl"
                                 :alt="detailCart?.ItemDef?.Description"
                             />
                         </div>
-                        <div class="item-description">
-                            <div class="item-title">
-                                {{ detailCart?.ItemDef?.Code }}
+                        <div
+                            class="flex flex-col gap-1 w-[calc(100%-68px)] text-[10px] font-extrabold"
+                        >
+                            <div class="flex">
+                                <div
+                                    class="bg-[#2ebd85] px-1"
+                                    :style="{ width: calcWithTotal('buy') }"
+                                >
+                                    {{ detailCart?.TotalBuy }}
+                                </div>
+                                <div
+                                    class="bg-[#f6465d] px-1 text-right"
+                                    :style="{ width: calcWithTotal('sell') }"
+                                >
+                                    {{ detailCart?.TotalSell }}
+                                </div>
                             </div>
-                            <div class="item-price">
-                                Best price: {{ bestPrice }}
-                                {{ detailCart?.GoodPriceType }}
+
+                            <div
+                                class="flex gap-2 justify-between"
+                                v-for="(item, index) in listDetail"
+                                :key="index"
+                            >
+                                <div class="flex-1 flex relative justify-end">
+                                    <div class="absolute left-0 px-1">
+                                        {{ renderCount("buy", item) }}
+                                    </div>
+                                    <div
+                                        class="bg-[#2ebd85] text-right"
+                                        :style="{
+                                            width: calcWithItem('buy', item),
+                                        }"
+                                    >
+                                        {{ renderPrice("buy", item) }}
+                                    </div>
+                                </div>
+
+                                <div
+                                    class="flex-1 flex justify-between relative"
+                                >
+                                    <div
+                                        class="bg-[#f6465d]"
+                                        :style="{
+                                            width: calcWithItem('sell', item),
+                                        }"
+                                    >
+                                        {{ renderPrice("sell", item) }}
+                                    </div>
+                                    <div class="absolute right-0 px-1">
+                                        {{ renderCount("sell", item) }}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -34,35 +112,8 @@
             </div>
 
             <div class="cart-payment">
-                <div class="buy-sell" v-if="currentPage !== 'inventory'">
-                    <div
-                        :class="[
-                            'buy-sell-item',
-                            {
-                                active: activeTab === 'buy',
-                                inactive: activeTab !== 'buy',
-                            },
-                        ]"
-                        @click="setActiveTab('buy')"
-                    >
-                        Buy
-                    </div>
-                    <div
-                        :class="[
-                            'buy-sell-item',
-                            {
-                                active: activeTab === 'sell',
-                                inactive: activeTab !== 'sell',
-                            },
-                        ]"
-                        @click="setActiveTab('sell')"
-                    >
-                        Sell
-                    </div>
-                </div>
-
                 <div class="price-quantity">
-                    <div class="price">
+                    <div class="price flex-1">
                         <!-- <InputField
                             v-model="price"
                             label="Price"
@@ -75,17 +126,18 @@
                             placeholder="Enter price"
                             :options="quaiOptions"
                             v-model:selectedOption="selectedOption"
-                        />
-                    </div>
-                    <div class="quantity">
-                        <InputField
-                            v-model="quantity"
-                            label="Quantity"
-                            placeholder="Enter quantity"
                             type="number"
                         />
                     </div>
+                    <div class="quantity flex-1">
+                        <InputNumber
+                            v-model="quantity"
+                            label="Quantity"
+                            placeholder="Enter quantity"
+                        />
+                    </div>
                 </div>
+
                 <div class="desc-payment">
                     <div class="amount">
                         <div>Amount</div>
@@ -95,10 +147,6 @@
                         <div>Fee ({{ this.orderFee?.ValueType }})</div>
                         <div>{{ renderFee() }}</div>
                     </div>
-                    <!-- <div class="fee" v-if="activeTab === 'sell'">
-                        <div class="vat">VAT</div>
-                        <div>{{ renderVat() }}</div>
-                    </div> -->
                     <div class="total-payment">
                         <div v-if="activeTab === 'sell'">
                             Total Amount Received
@@ -112,10 +160,10 @@
                 </div>
 
                 <div>
-                    <button
+                    <div
                         @click="submitData()"
                         :class="[
-                            'order-btn',
+                            'order-btn f-bangopro',
                             {
                                 'buy-active': activeTab === 'buy',
                                 'sell-active': activeTab === 'sell',
@@ -123,7 +171,7 @@
                         ]"
                     >
                         Order
-                    </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -139,11 +187,18 @@
 
 <script lang="ts">
 import InputField from "@/components/Input/InputField.vue";
+import InputNumber from "@/components/Input/InputNumber.vue";
 import InputSelect from "@/components/Input/InputSelect.vue";
 import NotificationToast from "@/components/NotificationToast.vue";
 import { EItemDefType, IItemInventory } from "@/interface";
 import userServiceInventory from "@/services/inventoryService";
-import { IDetailCart, TabTypeBS, IFeeVat } from "@/views/Shop/defination";
+import {
+    IDetailCart,
+    TabTypeBS,
+    IFeeVat,
+    IItemOrderConfirm,
+} from "@/views/Shop/defination";
+import axios from "axios";
 import { defineComponent, PropType } from "vue";
 import { mapState } from "vuex";
 
@@ -153,6 +208,7 @@ export default defineComponent({
         InputField,
         NotificationToast,
         InputSelect,
+        InputNumber,
     },
     computed: {
         ...mapState(["rewardInfo"]),
@@ -175,6 +231,7 @@ export default defineComponent({
         isViewCart(newValue) {
             if (newValue) {
                 this.initializeValues();
+                this.getTopOrder();
             }
         },
     },
@@ -189,6 +246,7 @@ export default defineComponent({
         const userInfo = window.Telegram.WebApp.initDataUnsafe;
 
         return {
+            keyboardOpen: false,
             userId: userInfo?.user?.id || "",
             showNotification: false,
             notificationMessage: "",
@@ -204,6 +262,11 @@ export default defineComponent({
 
             selectedOption: "QFP",
             quaiOptions: ["QFP"],
+
+            countTotalBuy: 0,
+            countTotalSell: 0,
+            countTotal: 0,
+            listDetail: [],
         };
     },
     methods: {
@@ -215,6 +278,48 @@ export default defineComponent({
                 this.activeTab = "sell";
             } else {
                 this.activeTab = "buy";
+            }
+        },
+        calcWithTotal(type: "buy" | "sell") {
+            const total =
+                this.detailCart?.TotalBuy + this.detailCart?.TotalSell;
+            const result = (this.detailCart?.TotalBuy / total) * 100;
+            const roundedResult = parseFloat(result.toFixed(2));
+
+            if (type == "buy") {
+                return `${roundedResult}%`;
+            } else {
+                const value = (100 - roundedResult).toFixed(2);
+                return `${value}%`;
+            }
+        },
+        calcWithItem(type: "buy" | "sell", item: IItemOrderConfirm) {
+            if (type === "buy") {
+                const widthBuy = (item?.countBuy / this.countTotalBuy) * 100;
+                const roundedResult = parseFloat(widthBuy.toFixed(2)) || 0;
+                return `${roundedResult}%`;
+            } else {
+                const widthSell = (item?.countSell / this.countTotalSell) * 100;
+                const roundedResult = parseFloat(widthSell.toFixed(2)) || 0;
+                return `${roundedResult}%`;
+            }
+        },
+        renderCount(type: "buy" | "sell", item: IItemOrderConfirm) {
+            if (type === "buy") {
+                const result = item?.countBuy == 0 ? null : item?.countBuy;
+                return result;
+            } else {
+                const result = item?.countSell == 0 ? null : item?.countSell;
+                return result;
+            }
+        },
+        renderPrice(type: "buy" | "sell", item: IItemOrderConfirm) {
+            if (type === "buy") {
+                const result = item?.priceBuy == 0 ? null : item?.priceBuy;
+                return result;
+            } else {
+                const result = item?.priceSell == 0 ? null : item?.priceSell;
+                return result;
             }
         },
         setActiveTab(tab: TabTypeBS) {
@@ -282,6 +387,64 @@ export default defineComponent({
             } catch (error) {
                 console.error(error);
             }
+        },
+        async getTopOrder() {
+            // const response = await axios.get(
+            //     `https://6235-171-224-180-89.ngrok-free.app/api/v1/order/getTopOrder5?ItemDefId=${this.detailCart.ItemDefId}`,
+            //     {
+            //         headers: {
+            //             "ngrok-skip-browser-warning": "1",
+            //         },
+            //     }
+            // );
+            // const data = JSON.parse(response.data.message);
+            const data = await userServiceInventory.getTopOrder(
+                this.detailCart.ItemDefId
+            );
+
+            const buyList = data?.BuyList;
+            const countTotalBuy = buyList?.reduce(
+                (total, item) => total + item.Count,
+                0
+            );
+            this.countTotalBuy = countTotalBuy || 0;
+
+            const sellList = data?.SellList;
+            const countTotalSell = sellList?.reduce(
+                (total, item) => total + item.Count,
+                0
+            );
+            this.countTotalSell = countTotalSell || 0;
+
+            this.countTotal = countTotalBuy + countTotalSell;
+
+            const isBuyBiggerSell = buyList.length >= sellList.length;
+            const mergedList = (isBuyBiggerSell ? buyList : sellList).map(
+                (item, index) => {
+                    const otherItem =
+                        (isBuyBiggerSell ? sellList[index] : buyList[index]) ||
+                        {};
+
+                    return {
+                        ItemDefId: item?.ItemDefId || otherItem?.ItemDefId,
+                        priceBuy: isBuyBiggerSell
+                            ? item?.Price || 0
+                            : otherItem?.Price || 0,
+                        priceSell: isBuyBiggerSell
+                            ? otherItem?.Price || 0
+                            : item?.Price || 0,
+                        countBuy: isBuyBiggerSell
+                            ? item?.Count || 0
+                            : otherItem?.Count || 0,
+                        countSell: isBuyBiggerSell
+                            ? otherItem?.Count || 0
+                            : item?.Count || 0,
+                        priceType: item?.PriceType || otherItem?.PriceType,
+                        ItemDef: item?.ItemDef || otherItem?.ItemDef,
+                    };
+                }
+            );
+            this.listDetail = mergedList;
         },
         async submitData() {
             const detailCart: IDetailCart = this.detailCart;
@@ -355,17 +518,16 @@ export default defineComponent({
             return this.vat?.Value;
         },
         renderAmount() {
-            const value = this.price * this.quantity;
+            const value = this.price * this.quantity || 0;
             return value;
         },
         renderTotal() {
             const amount = this.price * this.quantity;
             if (this.activeTab === "sell") {
-                const fee = 0;
-                return amount * (1 - Number(this.vat?.Value) / 100);
+                return amount * (1 - Number(this.vat?.Value) / 100) || 0;
             }
             if (this.activeTab === "buy") {
-                return amount + Number(this.orderFee?.Value);
+                return amount + Number(this.orderFee?.Value) || 0;
             }
         },
     },
@@ -373,6 +535,8 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
+// @import "@/styles/global.scss";
+
 $t-white-color: rgb(255, 255, 255);
 
 .overlay-template {
@@ -381,7 +545,7 @@ $t-white-color: rgb(255, 255, 255);
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.6);
     z-index: 999;
 }
 
@@ -389,8 +553,11 @@ $t-white-color: rgb(255, 255, 255);
     height: auto;
     position: absolute;
     width: 100%;
-    bottom: 0%;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     z-index: 999;
+    padding: 0 10px;
 }
 .popup-enter-active {
     animation: slideUp 0.1s ease forwards;
@@ -432,80 +599,9 @@ $t-white-color: rgb(255, 255, 255);
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
-    border-top-right-radius: 20px;
-    border-top-left-radius: 20px;
     .title {
         margin: 0 auto;
     }
-}
-
-.shop-items {
-    padding: 10px 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    background: #00165a;
-
-    .shop-item {
-        background: #0b3393;
-        padding: 10px;
-        border-radius: 5px;
-        .item-content {
-            display: flex;
-            gap: 10px;
-            .item-image {
-                img {
-                    width: 70px;
-                    object-fit: cover;
-                    border-radius: 5px;
-                    display: flex;
-                }
-            }
-            .item-price {
-                font-size: 12px;
-            }
-            .item-title {
-                margin-bottom: 5px;
-            }
-        }
-    }
-}
-
-.item-quantity {
-    // display: flex;
-    // flex-direction: column;
-    // justify-content: center;
-    // gap: 10px;
-    // .quantity-controls {
-    //     display: flex;
-    //     justify-content: space-between;
-    //     color: $t-white-color;
-    //     gap: 3px;
-    //     .quantity-value {
-    //         padding: 5px 15px;
-    //         background: $t-white-color;
-    //         color: black;
-    //     }
-    //     .decrease {
-    //         background: #cd1900;
-    //     }
-    //     .increase {
-    //         background: #00cd52;
-    //     }
-    //     .decrease,
-    //     .increase {
-    //         padding: 5px 10px;
-    //     }
-    // }
-    // .item-total-price {
-    //     display: flex;
-    //     align-items: center;
-    //     gap: 5px;
-    //     justify-content: end;
-    //     img {
-    //         width: 18px;
-    //     }
-    // }
 }
 
 .cart-payment {
@@ -538,50 +634,47 @@ $t-white-color: rgb(255, 255, 255);
         font-size: 10px;
         color: #f8d681;
     }
-    button {
-        color: $t-white-color;
-        -webkit-text-stroke: unset;
-        border-radius: 5px;
-    }
+}
 
-    .buy-sell {
-        display: flex;
-        gap: 10px;
-        justify-content: center;
-        padding: 0 15px 10px;
-    }
-    .buy-sell-item {
-        padding: 5px;
-        cursor: pointer;
-        border-radius: 5px;
-        transition: background-color 0.3s ease;
-        display: flex;
-        align-items: center;
-        width: 100%;
-        justify-content: center;
-    }
-    .buy-sell-item:hover {
-        opacity: 0.8;
-    }
-    .buy-sell-item:nth-child(1) {
-        background-color: #2cde00;
-        color: white;
-    }
-    .buy-sell-item:nth-child(2) {
-        background-color: #ff0000;
-        color: white;
-    }
-    .active {
-        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
-    }
-    .buy-active {
-        background-color: #2cde00;
-    }
-    .sell-active {
-        background-color: #ff0000;
-    }
-    .buy-sell-item.inactive {
-        background-color: #6c757d;
-    }
+.buy-sell-item {
+    padding: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: center;
+    font-size: 14px;
+}
+.buy-sell-item:hover {
+    opacity: 0.8;
+}
+.buy-sell-item:nth-child(1) {
+    background-color: #2ebd85;
+    color: white;
+}
+.buy-sell-item:nth-child(2) {
+    background-color: #f6465d;
+    color: white;
+}
+.active {
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+}
+.buy-active {
+    background-color: #2ebd85;
+}
+.sell-active {
+    background-color: #f6465d;
+}
+.buy-sell-item.inactive {
+    background-color: #6c757d;
+}
+
+.order-btn {
+    text-align: center;
+    border-radius: 5px;
+    padding: 10px;
+    color: $t-white-color;
 }
 </style>

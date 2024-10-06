@@ -17,10 +17,10 @@
                             </div>
 
                             <div class="item-left-content">
-                                <div class="item-title-mission">
+                                <div class="item-title-mission f-bangopro">
                                     {{ item?.attributes?.title }}
                                 </div>
-                                <div class="left-desc t-primary-color">
+                                <div class="left-desc t-primary-color f-nunito">
                                     +{{ item?.attributes?.rewardAmount }}
                                     <img src="@public/assets/logo.svg" />
                                 </div>
@@ -244,6 +244,8 @@ export default defineComponent({
 </script>
 
 <style scoped>
+@import "@/styles/global.scss";
+
 .popup-mission {
     height: 100%;
     position: absolute;
@@ -308,7 +310,6 @@ export default defineComponent({
     align-items: center;
     padding: 15px;
     font-size: 12px;
-    font-family: monospace;
     border-radius: 10px;
     background-color: #00256c;
 }
@@ -330,7 +331,7 @@ export default defineComponent({
 }
 
 .item-title-mission {
-    font-size: 13px;
+    font-size: 12px;
     margin-bottom: 5px;
 }
 

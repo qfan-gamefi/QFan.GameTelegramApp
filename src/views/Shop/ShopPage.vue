@@ -1,5 +1,5 @@
 <template>
-    <div class="wr-shop-page">
+    <div class="wr-shop-page text-white">
         <div class="banner">
             <div>
                 <router-link to="/" class="close-to-home">
@@ -7,19 +7,24 @@
                 </router-link>
             </div>
 
-            <div class="desc">
-                <div class="title">Trading</div>
-                <div class="balance">
-                    <div class="item">
+            <div class="flex justify-between items-center w-full">
+                <div class="text-[24px] f-bangopro">Trading</div>
+                <div class="flex gap-4 text-[12px] f-bangopro">
+                    <div class="flex gap-1">
                         {{ infoWallet?.balance }}
                         <img
                             src="@public/assets/logo-quai.svg"
                             loading="lazy"
+                            class="w-3"
                         />
                     </div>
-                    <div class="item">
+                    <div class="flex gap-1">
                         {{ renderBalace() }}
-                        <img src="@public/assets/logo.svg" loading="lazy" />
+                        <img
+                            class="w-3"
+                            src="@public/assets/logo.svg"
+                            loading="lazy"
+                        />
                     </div>
                 </div>
                 <div>
@@ -30,9 +35,11 @@
             </div>
         </div>
 
-        <div class="header-btn">
-            <div class="btn-wrapper">
-                <div class="btn-list">
+        <div
+            class="font-extrabold text-[12px] p-[10px] px-[15px] bg-[#00165a] border-b border-b-[#2f9ad6]"
+        >
+            <div class="flex justify-between items-center mb-[10px]">
+                <div class="flex gap-1">
                     <div
                         v-for="(button, index) in btnShop"
                         :key="index"
@@ -43,18 +50,14 @@
                         {{ button.label }}
                     </div>
                 </div>
-
-                <!-- <div>
-                    <button class="view-cart-btn" @click="viewCard()">
-                        View Cart
-                    </button>
-                </div> -->
             </div>
 
-            <div class="category-wr">
-                <div class="category-label">Category</div>
+            <div class="flex" v-if="activeButton === EButtonName.MarketPlace">
+                <div class="pr-[16px] border-r-2 border-r-white uppercase">
+                    Category
+                </div>
 
-                <div class="category-btn">
+                <div class="flex gap-3 ml-4">
                     <div
                         v-for="(button, index) in btnCategory"
                         :key="index"
@@ -66,7 +69,53 @@
             </div>
         </div>
 
-        <div class="content-wr">
+        <div
+            class="h-full bg-[#00165a]"
+            v-if="activeButton === EButtonName.MarketPlace"
+        >
+            <div
+                class="flex text-[12px] border-b border-b-[#2f9ad6] font-extrabold px-4 py-2"
+            >
+                <div class="w-[10%] text-left">No.</div>
+                <div class="w-[50%] text-left">Item</div>
+                <div class="w-[20%] text-center">Quantity</div>
+                <div class="w-[20%] text-right">Floor Price</div>
+            </div>
+            <div class="overflow-scroll h-[calc(100vh-200px)] no-scrollbar">
+                <div v-for="(item, index) in listShop" :key="index">
+                    <div
+                        class="flex items-center text-[10px] overflow-y-auto border-b border-b-[#2f9ad6] mx-2 px-2 py-2"
+                        @click="addCart(item)"
+                    >
+                        <div class="w-[10%] text-left">{{ index + 1 }}</div>
+                        <div class="w-[50%] text-left flex gap-3 items-center">
+                            <img
+                                :src="item?.ItemDef?.ImageUrl"
+                                :alt="item?.ItemDef?.Description"
+                                loading="lazy"
+                                class="w-12"
+                            />
+                            <div>{{ item.ItemDef.Code }}</div>
+                        </div>
+                        <div class="w-[20%] text-center">
+                            {{ item?.TotalSell }}
+                        </div>
+                        <div class="w-[20%] text-right">
+                            <div>Starting at:</div>
+                            <div>
+                                {{ item?.GoodSellPrice }}
+                                {{ item?.GoodPriceType }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="activeButton === EButtonName.MyOrders">
+            <MyOrderPage />
+        </div>
+        <!-- <div class="content-wr">
             <div v-if="activeButton === EButtonName.MarketPlace">
                 <div class="card">
                     <div
@@ -80,9 +129,7 @@
                                 :alt="item?.ItemDef?.Description"
                                 loading="lazy"
                             />
-                            <!-- <div class="item-count">10</div> -->
                         </div>
-                        <!-- <div class="title">Legendary Card</div> -->
                         <div class="bottom-card">
                             <div class="price">
                                 <div class="title">Start At</div>
@@ -97,19 +144,7 @@
                                 <div class="type">
                                     {{ `${item?.GoodPriceType}` }}
                                 </div>
-                                <!-- <img
-                                src="./../../../public/assets/logo-quai.svg"
-                                alt="quai-logo"
-                            /> -->
                             </div>
-                            <!-- <div class="icon" @click="addCart(item)">
-                                <div
-                                    class="add-card-btn"
-                                    :class="getBtnClass(item)"
-                                >
-                                    {{ renderBtnBS(item) }}
-                                </div>
-                            </div> -->
                         </div>
                     </div>
                 </div>
@@ -117,7 +152,7 @@
             <div v-if="activeButton === EButtonName.MyOrders">
                 <MyOrderPage />
             </div>
-        </div>
+        </div> -->
 
         <ViewCart
             :isViewCart="isViewCart"
@@ -152,6 +187,7 @@ import { mapState } from "vuex";
 import { formattedBalance } from "@/utils";
 import userService from "@/services/userService";
 import userServiceInventory from "@/services/inventoryService";
+import axios from "axios";
 
 export default defineComponent({
     name: "ShopPage",
@@ -219,11 +255,11 @@ export default defineComponent({
             );
         },
         setActiveButton(button: EButtonName) {
-            this.activeButton = button;
-            // if (button !== EButtonName.MarketPlace) {
-            // } else {
-            //     this.showCoomingSoon = true;
-            // }
+            if (button === EButtonName.Transactions) {
+                // this.showCoomingSoon = true;
+            } else {
+                this.activeButton = button;
+            }
         },
         getBtnClass(item) {
             if (item?.Side === "S") {
@@ -250,6 +286,17 @@ export default defineComponent({
         },
         async getListMarket() {
             try {
+                // const response = await axios.get(
+                //     "https://6235-171-224-180-89.ngrok-free.app/api/v1/order/getMarketList",
+                //     {
+                //         headers: {
+                //             "ngrok-skip-browser-warning": "1",
+                //         },
+                //     }
+                // );
+                // const data = JSON.parse(response.data.message);
+                // this.listShop = data;
+
                 const res = await userServiceInventory.getListMarket();
                 this.listShop = res;
             } catch (error) {
@@ -288,6 +335,8 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
+@import "@/styles/global.scss";
+
 $t-white-color: rgb(255, 255, 255);
 $bg-color: #00165a;
 $border-color: #2f9ad6;
@@ -296,7 +345,6 @@ button {
     font-size: 12px;
     padding: 10px 12px;
     border-radius: 3px;
-    font-family: monospace;
     letter-spacing: 0;
 }
 .close-to-home {
@@ -335,13 +383,13 @@ button {
     background-repeat: no-repeat;
     background-size: cover;
     .desc {
-        display: flex;
-        justify-content: space-between;
-        align-items: end;
-        width: 100%;
-        img {
-            width: 14px;
-        }
+        // display: flex;
+        // justify-content: space-between;
+        // align-items: end;
+        // width: 100%;
+        // img {
+        //     width: 14px;
+        // }
 
         .title {
             font-size: 25px;
@@ -364,69 +412,38 @@ button {
     }
 }
 
-.header-btn {
-    padding: 10px 15px;
-    font-size: 12px;
-    background-color: $bg-color;
-    font-family: monospace;
-    border-bottom: 1px solid $border-color;
-    .btn-wrapper {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 10px;
-        button:hover {
-            box-shadow: #023b92 0px 6px 0px;
-            -webkit-text-fill-color: unset;
-        }
-        // .view-cart-btn {
-        //     color: $t-white-color;
-        //     -webkit-text-stroke: 0.5px $t-white-color;
-        //     background: #0065ff;
-        //     width: 80px;
-        // }
-    }
-    .btn-list {
-        display: flex;
-        gap: 5px;
-
-        .shop-btn-item.active {
-            background: #064bc5;
-            color: $t-white-color;
-        }
-
-        .shop-btn-item {
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            background: #00286f;
-            -webkit-text-stroke: 0.5px $t-white-color;
-            text-transform: uppercase;
-        }
-    }
+.shop-btn-item.active {
+    background: #064bc5;
+    color: $t-white-color;
+}
+.shop-btn-item {
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    background: #00286f;
+    text-transform: uppercase;
 }
 
-.category-wr {
-    display: flex;
-    -webkit-text-stroke: 0.5px $t-white-color;
-    .category-label {
-        padding-right: 15px;
-        border-right: 2px solid $t-white-color;
+// .category-wr {
+//     display: flex;
+//     -webkit-text-stroke: 0.5px $t-white-color;
+//     .category-label {
+//         padding-right: 15px;
+//         border-right: 2px solid $t-white-color;
 
-        text-transform: uppercase;
-    }
-    .category-btn {
-        display: flex;
-        margin-left: 15px;
-        gap: 10px;
-    }
-}
+//         text-transform: uppercase;
+//     }
+//     .category-btn {
+//         display: flex;
+//         margin-left: 15px;
+//         gap: 10px;
+//     }
+// }
 
 .content-wr {
     background-color: $bg-color;
     height: 100%;
     padding: 10px 15px;
-    font-family: monospace;
     max-height: calc(100% - 163px);
     overflow-y: auto;
     .card {
@@ -494,32 +511,6 @@ button {
                     display: flex;
                 }
             }
-
-            // .add-card-btn {
-            //     font-size: 9px;
-            //     padding: 5px 0;
-            //     color: $t-white-color;
-            //     -webkit-text-stroke: 0.5px $t-white-color;
-            //     width: 32px;
-            //     text-align: center;
-            //     border-radius: 3px;
-            //     transition: all 0.2s ease;
-            // }
-            // .sell-btn {
-            //     background: #ff0000;
-            // }
-            // .buy-btn {
-            //     background: #2cde00;
-            // }
-            // .sell-btn:hover {
-            //     background: #ff0000;
-            //     box-shadow: #970000 0px 6px 0px;
-            // }
-
-            // .buy-btn:hover {
-            //     background: #2cde00;
-            //     box-shadow: #197c00 0px 6px 0px;
-            // }
         }
     }
 }

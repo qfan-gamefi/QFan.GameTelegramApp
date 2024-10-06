@@ -74,6 +74,12 @@ const userServiceInventory = {
         );
         return res.status == 200 ? JSON.parse(res.data.message) : {};
     },
+    async getTopOrder(idItemDef: number) {
+        const res = await axiosInventory.get(
+            `/order/getTopOrder5?ItemDefId=${idItemDef}`
+        );
+        return res.status == 200 ? JSON.parse(res.data.message) : {};
+    },
 };
 
 export default userServiceInventory;

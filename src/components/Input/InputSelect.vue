@@ -6,8 +6,10 @@
                 :type="type"
                 :value="modelValue"
                 @input="$emit('update:modelValue', $event.target.value)"
-                class="input-field"
+                class="input-field f-bangopro"
                 :placeholder="placeholder"
+                inputmode="numeric"
+                pattern="[0-9]*"
             />
             <select
                 v-model="localSelectedOption"
@@ -70,6 +72,7 @@ export default {
 </script>
 
 <style scoped>
+@import "@/styles/global.scss";
 .input-wrapper {
     display: flex;
     flex-direction: column;
@@ -88,7 +91,7 @@ export default {
     border-radius: 4px;
     width: 100%;
     box-sizing: border-box;
-    font-family: "GAMERIA";
+    color: #000000ed;
 }
 
 .input-select {
@@ -96,12 +99,15 @@ export default {
     top: 0;
     right: 0;
     border: none;
-    padding: 7px;
+    padding: 9px;
     background: #f0f0f0;
     border-left: 1px solid #ccc;
     border-top-right-radius: 4px;
     border-bottom-right-radius: 4px;
     cursor: pointer;
+    appearance: none;
+    color: #000000ed;
+    font-weight: 800;
 }
 
 .label {

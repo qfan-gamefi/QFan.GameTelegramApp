@@ -415,6 +415,7 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
+@import "@/styles/global.scss";
 .wr-inventory-page {
     height: 100%;
     position: absolute;
@@ -455,8 +456,9 @@ export default defineComponent({
     width: 100%;
     padding: 7px 0;
     background-color: #0d2779;
-    font-family: monospace;
     justify-content: space-around;
+    font-size: 12px;
+    font-weight: 800;
 }
 .btn-item-inventory.active {
     background: #ffa53a;
@@ -509,22 +511,19 @@ export default defineComponent({
             }
         }
         .item-img {
-            // background-position: center;
-            // background-repeat: no-repeat;
-            // background-size: cover;
-            // border-radius: 5px;
             width: 100%;
             position: relative;
             cursor: pointer;
             img {
                 width: 100%;
                 height: 100%;
-                object-fit: cover; /* This ensures the image fills the container */
-                border-radius: 5px; /* Add border-radius if needed */
+                object-fit: cover;
+                border-radius: 5px;
             }
         }
         .slot-item {
             font-size: 10px;
+            font-weight: 800;
             padding: 5px;
             position: absolute;
             top: 0;

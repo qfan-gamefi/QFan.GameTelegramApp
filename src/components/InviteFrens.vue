@@ -4,7 +4,7 @@
 
         <div class="box-invite">
             <div class="friend-info" v-if="!loading">
-                <div class="friend-info-text">
+                <div class="friend-info-text f-bangopro">
                     {{ inviteData?.length }} Friends
                 </div>
                 <div class="friend-info-number t-primary-color">
@@ -56,7 +56,7 @@
                                 </p>
                             </div>
                         </div>
-                        <div class="item-right">
+                        <div class="item-right f-bangopro">
                             {{ el?.qpoint?.balance }}
                             <img src="./../../public/assets/logo.svg" />
                         </div>
@@ -228,6 +228,7 @@ export default {
 </script>
 
 <style scoped>
+@import "@/styles/global.scss";
 .box-title-friend {
     margin: 10px 0;
 }
@@ -285,7 +286,6 @@ export default {
     align-items: center;
     padding: 10px;
     font-size: 12px;
-    font-family: monospace;
     background-color: #00256c;
     border-radius: 10px;
 }
@@ -330,7 +330,7 @@ export default {
 .box-btn-invite {
     position: absolute;
     bottom: 90px;
-    width: calc(100% - 40px);
+    width: 100%;
     padding: 0 20px;
 }
 .invite-btn {
@@ -342,7 +342,6 @@ export default {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-family: monospace;
     background-color: #00256c;
     border-radius: 10px;
     padding: 10px 20px;
@@ -351,7 +350,6 @@ export default {
 }
 .friend-info-text {
     font-size: 16px;
-    font-weight: bold;
 }
 .friend-info-number {
     display: flex;

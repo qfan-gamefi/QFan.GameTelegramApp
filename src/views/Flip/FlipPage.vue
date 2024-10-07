@@ -6,12 +6,13 @@
             <div class="wr-cooldown">
                 <div class="box-info">
                     <div class="user">
-                        <div
+                        <!-- <div
                             class="avt"
                             :style="{
                                 backgroundImage: `url(${urlImg})`,
                             }"
-                        ></div>
+                        ></div> -->
+                        <img class="avt" :src="urlImg" loading="lazy" />
                         <div class="name-rate">
                             <div>{{ fullName }}</div>
                             <div class="text-rate">
@@ -468,6 +469,8 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
+@import "@/styles/global.scss";
+
 .wr-flip-page {
     height: 100%;
     position: absolute;
@@ -711,8 +714,8 @@ export default defineComponent({
         padding: 5px 0;
         border-bottom: 1px solid #d631ff;
         margin: 0 5px;
-        font-family: monospace;
-        font-weight: bold;
+        font-size: 12px;
+        font-weight: 800;
         .stt {
             flex: 0 0 30%;
         }
@@ -738,10 +741,8 @@ export default defineComponent({
             display: flex;
             text-align: center;
             padding: 5px;
-            font-size: 11px;
-            font-family: monospace;
+            font-size: 10px;
             align-items: center;
-            font-weight: bold;
 
             .stt {
                 flex: 0 0 30%;

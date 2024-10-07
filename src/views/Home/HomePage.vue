@@ -46,6 +46,7 @@ import {
 } from "@/crypto_utils/constants";
 import { DEFAULT_QUAI_TESNTET } from "@/services/network/chains";
 import { getAddress, parseEther, toBigInt } from "ethers";
+import BoxAction from "./BoxAction.vue";
 
 const REF_MESS_PREFIX: string = "start r_";
 const REF_TOKEN_PREFIX: string = "TOKEN_";
@@ -60,6 +61,7 @@ export default {
         NotificationToast,
         InfoUser,
         LoadingScreen,
+        BoxAction,
     },
     data() {
         const telegram_bot_link =
@@ -751,15 +753,7 @@ export default {
                 </div>
             </div>
 
-            <div class="box-action">
-                <router-link to="/inventory">
-                    <div class="img-inventory" @click="handleBackButton"></div>
-                </router-link>
-                <router-link to="/flip">
-                    <div class="img-flip" @click="handleBackButton"></div>
-                </router-link>
-            </div>
-
+            <BoxAction @back-clicked="handleBackButton" />
             <MainGame ref="phaserRef" />
         </div>
 
@@ -809,16 +803,14 @@ export default {
                 </div>
                 <div class="item-title">Invite Friend</div>
             </div>
-            <!-- @click="showPopupCoomingSoon" -->
 
-            <div class="btn-item">
-                <router-link to="/shop">
-                    <div class="item-img">
-                        <img src="@public/assets/button-icons/shop.svg" />
-                    </div>
-                    <!-- <div class="item-title">Shop</div> -->
-                    <div class="item-title" @click="handleBackButton">Shop</div>
-                </router-link>
+            <div class="btn-item" @click="showPopupCoomingSoon">
+                <!-- <router-link to=""> -->
+                <div class="item-img">
+                    <img src="@public/assets/button-icons/shop.svg" />
+                </div>
+                <div class="item-title">Shop</div>
+                <!-- </router-link> -->
             </div>
         </div>
 

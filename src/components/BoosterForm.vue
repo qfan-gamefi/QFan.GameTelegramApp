@@ -6,8 +6,8 @@
 
             <div class="box-content-booster" v-if="!loading">
                 <div class="your-balance">
-                    <div class="title-your-balance">Your Balance</div>
-                    <div class="point-balance t-primary-color">
+                    <div class="title-your-balance f-bangopro">Your Balance</div>
+                    <div class="point-balance t-primary-color f-bangopro">
                         {{ animatedBalance }}
                         <img src="./../../public/assets/logo.svg" />
                     </div>
@@ -31,7 +31,7 @@
 
                         <div class="box-stadium">
                             <div class="stadium-left">
-                                <div class="content-stadium">
+                                <div class="content-stadium f-bangopro">
                                     {{ stadiumItems?.attributes?.name }}
                                 </div>
                                 <div class="lv-stadium t-primary-color">
@@ -44,7 +44,7 @@
                             </div>
 
                             <div
-                                class="stadium-right t-primary-color"
+                                class="stadium-right f-bangopro t-primary-color"
                                 v-if="dataNextStadium"
                             >
                                 {{ dataNextStadium?.attributes?.price }}
@@ -66,7 +66,7 @@
 
                         <div class="box-stadium">
                             <div class="stadium-left">
-                                <div class="content-stadium">
+                                <div class="content-stadium f-bangopro">
                                     {{ trainingItems?.attributes?.name }}
                                 </div>
                                 <div class="lv-stadium t-primary-color">
@@ -446,9 +446,7 @@ export default {
     margin-bottom: 20px;
 }
 .title-your-balance {
-    font-size: 12px;
-    font-family: monospace;
-    font-weight: bold;
+    font-size: 16px;
 }
 .point-balance {
     display: flex;
@@ -459,14 +457,15 @@ export default {
     gap: 10px;
 }
 .point-balance img {
-    width: 35px;
-    height: 35px;
+    width: 30px;
+    height: 30px;
 }
 .desc-your-balance {
-    font-family: monospace;
+    font-size: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 3px;
 }
 .desc-your-balance img {
     width: 15px;
@@ -506,10 +505,10 @@ export default {
 }
 .lv-stadium {
     font-size: 12px;
+    font-weight: 800;
 }
 .desc-stadium {
-    font-size: 10px;
-    font-family: monospace;
+    font-size: 10px; font-weight: 800;
 }
 .stadium-right {
     display: flex;

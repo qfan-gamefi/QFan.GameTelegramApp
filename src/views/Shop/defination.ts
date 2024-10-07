@@ -86,6 +86,8 @@ export interface ItemShop {
     updatedAt: string | null;
     deletedAt: string | null;
     ItemDef: ItemDefShop;
+    TotalBuy: number;
+    TotalSell: number;
 }
 
 export interface IDetailCart extends ItemShop {}
@@ -131,4 +133,14 @@ export interface IInfoWallet {
     balance: number;
     unit: "QUAI";
     isActive: boolean;
+}
+
+export interface IItemOrderConfirm {
+    ItemDefId: number;
+    countBuy: number;
+    countSell: number;
+    priceBuy: number;
+    priceSell: number;
+    priceType: "QFP";
+    ItemDef: ItemDefShop;
 }

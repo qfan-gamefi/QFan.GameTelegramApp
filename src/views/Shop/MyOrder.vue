@@ -1,12 +1,16 @@
 <template>
-    <div class="box-item">
+    <div
+        class="box-item bg-[#00165A] h-[calc(100vh-145px)] p-[10px_15px] overflow-auto"
+    >
         <div class="order-item" v-for="(item, index) in listOrder" :key="index">
             <div class="left-item">
                 <div class="image">
                     <img :src="item?.ItemDef?.ImageUrl" />
                 </div>
                 <div class="content">
-                    <div class="title">{{ item?.ItemDef?.Code }}</div>
+                    <div class="title text-[14px]">
+                        {{ item?.ItemDef?.Code }}
+                    </div>
                     <div class="desc">
                         <div class="price-row">
                             <span>Price:</span>

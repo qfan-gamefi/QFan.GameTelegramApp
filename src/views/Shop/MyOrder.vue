@@ -1,4 +1,13 @@
 <template>
+    <div class="w-full flex justify-end bg-[#00165A] pt-2 pr-[15px]">
+        <div class="w-20">
+            <SelectBox
+                v-model:value="selectedValue"
+                :options="selectOptions"
+                label="Chọn giá trị:"
+            />
+        </div>
+    </div>
     <div
         class="box-item bg-[#00165A] h-[calc(100vh-145px)] p-[10px_15px] overflow-auto"
     >
@@ -28,16 +37,10 @@
                                 item?.OriginCount * item?.Price
                             }}</span>
                         </div>
-                        <!-- <div class="fee-row">
-                            <span>Fee:</span> <span class="fee-value">0</span>
-                        </div>
-                        <div class="total-row">
-                            <span>Total:</span>
-                            <span class="total-value">0</span>
-                        </div> -->
                     </div>
                 </div>
             </div>
+
             <div class="right-item">
                 <div class="status-container">
                     <div
@@ -57,9 +60,13 @@
                     </div>
 
                     <div class="status-time">
+                        <div class="font-extrabold" :class="classBS(item)">
+                            {{ renderBS(item) }}
+                        </div>
                         <div class="status-date">
                             {{ formatDateDDMMYYYY(item?.createdAt) }}
                         </div>
+
                         <div class="status-clock">
                             {{ formatTime(item?.createdAt) }}
                         </div>
@@ -71,6 +78,7 @@
 </template>
 
 <script lang="ts">
+import SelectBox from "@/components/Select/SelectBox.vue";
 import userServiceInventory from "@/services/inventoryService";
 import { formatDateDDMMYYYY, formatTime } from "@/utils";
 import { IOrderList } from "@/views/Shop/defination";
@@ -79,8 +87,23 @@ import { defineComponent } from "vue";
 export default defineComponent({
     name: "MyOrderPage",
     // props: {},
+    components: {
+        SelectBox,
+    },
     created() {
         this.callOrderShop();
+    },
+    // setup() {
+
+    //     watch(selectedValue, (newValue) => {
+    //   calculateSomething(newValue);
+    // })
+    watch: {
+        selectedValue(newValue) {
+            if (newValue) {
+                this.handleFilter(newValue);
+            }
+        },
     },
     data() {
         const userInfo = window.Telegram.WebApp.initDataUnsafe;
@@ -88,6 +111,14 @@ export default defineComponent({
         return {
             userId: userInfo?.user?.id || "",
             listOrder: [] as IOrderList[],
+            listOrderBuy: [] as IOrderList[],
+            listOrderSell: [] as IOrderList[],
+            selectedValue: "All",
+            selectOptions: [
+                { value: "All", text: "All" },
+                { value: "Buy", text: "Buy" },
+                { value: "Sell", text: "Sell" },
+            ],
         };
     },
     methods: {
@@ -116,11 +147,38 @@ export default defineComponent({
                 return "Cancel ";
             }
         },
+        renderBS(item: IOrderList) {
+            if (item.Side === "B") {
+                return "Buy";
+            }
+            if (item.Side === "S") {
+                return "Sell";
+            }
+        },
+        classBS(item: IOrderList) {
+            if (item.Side === "B") {
+                return `text-[#2ebd85]`;
+            }
+            if (item.Side === "S") {
+                return `text-[#f6465d]`;
+            }
+        },
+        handleFilter(value: "Buy" | "Sell") {
+            if (value == "Buy") {
+                this.listOrder = this.listOrderBuy;
+            } else if (value == "Sell") {
+                this.listOrder = this.listOrderSell;
+            } else {
+                this.listOrder = this.listOrderBuy.concat(this.listOrderSell);
+            }
+        },
         async callOrderShop() {
             try {
                 const res = await userServiceInventory.callOrderShop(
                     this.userId
                 );
+                this.listOrderBuy = res?.data?.BuyList;
+                this.listOrderSell = res?.data?.SellList;
                 this.listOrder = res?.data?.BuyList.concat(res?.data?.SellList);
             } catch (error) {
                 console.log(error);

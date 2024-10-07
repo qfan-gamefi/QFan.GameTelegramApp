@@ -100,7 +100,7 @@ export interface IOrderList {
     PriceType: string;
     Count: number;
     OriginCount: number;
-    Side: string;
+    Side: "B" | "S";
     RefItemOrderId: number | null;
     RefItemId: number | null;
     Status: string;

@@ -1,6 +1,12 @@
 <template>
     <div class="wr-inventory-page">
-        <div class="banner-inventory"></div>
+        <!-- <div class="banner-inventory"></div> -->
+
+        <img
+            class="max-w-full"
+            src="./../../../public/assets/inventory/banner-inventory.png"
+            alt="banner_inventory"
+        />
 
         <div class="btn-inventory">
             <div
@@ -15,72 +21,81 @@
         </div>
 
         <div class="wr-box">
-            <div class="inventory-detail">
-                <div class="box-item" v-if="activeButton === 'Inventory'">
+            <div class="inventory-detail p-2">
+                <div v-if="activeButton === 'Inventory'">
                     <div
-                        class="item"
-                        v-for="(item, index) in itemsInventory"
-                        :key="index"
+                        v-for="(itemTitle, key) in itemsInventory"
+                        :key="key"
+                        class="border-b border-[#2F9AD6] p-1 rounded-md animation-inventory"
                     >
-                        <div class="item-img" @click="toggleButtons(index)">
-                            <img
-                                :src="item?.ItemDef?.ImageUrl"
-                                :alt="item?.Description"
-                                loading="lazy"
-                            />
+                        <div class="text-[14px] mb-1 font-extrabold">
+                            {{ renderTitleKey(key) }}
+                        </div>
 
+                        <div class="box-item">
                             <div
-                                v-if="activeIndex === index"
-                                class="button-overlay"
+                                class="item"
+                                v-for="(item, index) in itemTitle"
+                                :key="index"
                             >
-                                <!-- <button class="overlay-btn">Button 1</button> -->
                                 <div
-                                    class="item-btn"
-                                    v-if="item?.ItemDef?.Consumable"
+                                    class="item-img"
+                                    @click="toggleButtons(item?.id)"
                                 >
-                                    <button
-                                        @click="handleUseInventory(item)"
-                                        :disabled="loadingBtn"
-                                    >
-                                        <div v-if="loadingBtn">
-                                            <i
-                                                class="fa fa-spinner fa-spin"
-                                            ></i>
-                                        </div>
-                                        Use
-                                    </button>
-                                </div>
+                                    <img
+                                        :src="item?.ItemDef?.ImageUrl"
+                                        :alt="item?.Description"
+                                        loading="lazy"
+                                    />
 
-                                <div class="item-btn" v-if="item?.Tradable">
-                                    <button
-                                        @click="handleSell(item)"
-                                        :disabled="loadingBtn"
+                                    <div
+                                        v-if="activeIndex === item?.id"
+                                        class="button-overlay"
                                     >
-                                        <div v-if="loadingBtn">
-                                            <i
-                                                class="fa fa-spinner fa-spin"
-                                            ></i>
+                                        <div
+                                            class="item-btn"
+                                            v-if="item?.ItemDef?.Consumable"
+                                        >
+                                            <button
+                                                @click="
+                                                    handleUseInventory(item)
+                                                "
+                                                :disabled="loadingBtn"
+                                            >
+                                                <div v-if="loadingBtn">
+                                                    <i
+                                                        class="fa fa-spinner fa-spin"
+                                                    ></i>
+                                                </div>
+                                                Use
+                                            </button>
                                         </div>
-                                        Sell
-                                    </button>
+
+                                        <div
+                                            class="item-btn"
+                                            v-if="item?.Tradable"
+                                        >
+                                            <button
+                                                @click="handleSell(item)"
+                                                :disabled="loadingBtn"
+                                            >
+                                                <div v-if="loadingBtn">
+                                                    <i
+                                                        class="fa fa-spinner fa-spin"
+                                                    ></i>
+                                                </div>
+                                                Sell
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="slot-item">
+                                    {{ item?.ItemCount }}
                                 </div>
                             </div>
                         </div>
-                        <div class="slot-item">{{ item?.ItemCount }}</div>
-                        <!-- <div class="item-btn" v-if="item?.ItemDef?.Consumable">
-                            <button
-                                @click="handleUseInventory(item)"
-                                :disabled="loadingBtn"
-                            >
-                                <div v-if="loadingBtn">
-                                    <i class="fa fa-spinner fa-spin"></i>
-                                </div>
-                                Use
-                            </button>
-                        </div> -->
                     </div>
                 </div>
-
                 <div class="box-item" v-if="activeButton === 'Badges'">
                     <div
                         class="item-badge"
@@ -246,13 +261,7 @@ export default defineComponent({
             showClaim: false,
             itemFusion: {} as IFusion,
 
-            // itemsInventory: [
-            //     "./../../public/assets/inventory/platinum.png",
-            //     "./../../public/assets/inventory/gold.png",
-            //     "./../../public/assets/inventory/silver.png",
-            //     "./../../public/assets/inventory/bronze.png",
-            // ],
-            itemsInventory: [] as IItemInventory[],
+            itemsInventory: {} as Record<string, IItemInventory[]>,
             itemsBadge: [] as IItemInventory[],
 
             listFusion: [] as IFusion[],
@@ -279,14 +288,13 @@ export default defineComponent({
             this.renderNotification(text, "error");
         },
         toggleButtons(index: number) {
-            // this.showButtons = !this.showButtons;
             this.activeIndex = this.activeIndex === index ? null : index;
         },
         setActiveButton(button: ButtonName) {
-            if (button !== ButtonName.History) {
-                this.activeButton = button;
-            } else {
+            if (button === ButtonName.History || button === ButtonName.Fusion) {
                 this.showCoomingSoon = true;
+            } else {
+                this.activeButton = button;
             }
         },
         numberWithItem(itemId: number) {
@@ -324,10 +332,24 @@ export default defineComponent({
                 const filterBadge = res?.Items?.filter(
                     (item) => item?.ItemDef?.Type === EItemDefType.Medal
                 );
-                console.log("filterData", filterData);
 
                 this.itemsBadge = filterBadge;
                 this.itemsInventory = filterData;
+
+                const groupedItems = filterData.reduce(
+                    (accumulator, currentItem) => {
+                        const category = currentItem.ItemDef.Category;
+                        if (!accumulator[category]) {
+                            accumulator[category] = [];
+                        }
+                        accumulator[category].push(currentItem);
+                        return accumulator;
+                    },
+                    {}
+                );
+
+                console.log(groupedItems);
+                this.itemsInventory = groupedItems;
             } catch (error) {
                 console.error(error);
             }
@@ -410,6 +432,12 @@ export default defineComponent({
             this.isViewCart = false;
             this.getDataInventor();
         },
+        renderTitleKey(key: string) {
+            return key
+                .replace(/_/g, " ")
+                .toLowerCase()
+                .replace(/^\w/, (c) => c.toUpperCase());
+        },
     },
 });
 </script>
@@ -474,8 +502,9 @@ export default defineComponent({
 .wr-box {
     height: 100%;
     padding: 15px;
+    height: calc(100% - 140px);
     .inventory-detail {
-        // height: calc(100% - 180px);
+        height: 100%;
         display: flex;
         flex-direction: column;
         gap: 10px;
@@ -488,7 +517,7 @@ export default defineComponent({
         display: grid;
         grid-template-columns: repeat(5, 1fr);
         gap: 20px 10px;
-        padding: 10px;
+        animation: slideIn 0.5s forwards;
         button {
             padding: 12px;
             font-size: 12px;
@@ -498,7 +527,6 @@ export default defineComponent({
         .item {
             position: relative;
             display: flex;
-            flex-direction: column;
             gap: 7px;
         }
         .item-badge {
@@ -626,6 +654,9 @@ export default defineComponent({
     animation: slideOut 0.5s forwards;
 }
 
+.animation-inventory {
+    animation: slideIn 0.5s forwards;
+}
 @keyframes slideIn {
     from {
         opacity: 0;

@@ -6,14 +6,16 @@
 
             <div class="box-content-booster" v-if="!loading">
                 <div class="your-balance">
-                    <div class="title-your-balance f-bangopro">Your Balance</div>
+                    <div class="title-your-balance f-bangopro">
+                        Your Balance
+                    </div>
                     <div class="point-balance t-primary-color f-bangopro">
                         {{ animatedBalance }}
                         <img src="./../../public/assets/logo.svg" />
                     </div>
                     <div class="desc-your-balance">
                         Training Speed: {{ rewardAmount }}
-                        <img src="./../../public/assets/logo.svg" />/hour
+                        <img src="./../../public/assets/logo.svg" />/ hour
                     </div>
                 </div>
 
@@ -457,8 +459,8 @@ export default {
     gap: 10px;
 }
 .point-balance img {
-    width: 30px;
-    height: 30px;
+    width: 25px;
+    /* height: 30px; */
 }
 .desc-your-balance {
     font-size: 12px;
@@ -488,8 +490,8 @@ export default {
     display: flex;
 }
 .logo-stadium img {
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    /* height: 50px; */
 }
 .box-stadium {
     display: flex;
@@ -508,7 +510,8 @@ export default {
     font-weight: 800;
 }
 .desc-stadium {
-    font-size: 10px; font-weight: 800;
+    font-size: 10px;
+    font-weight: 800;
 }
 .stadium-right {
     display: flex;

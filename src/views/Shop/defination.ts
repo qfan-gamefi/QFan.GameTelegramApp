@@ -144,3 +144,19 @@ export interface IItemOrderConfirm {
     priceType: "QFP";
     ItemDef: ItemDefShop;
 }
+
+export const selectOptions = [
+    { value: "All", text: "All" },
+    { value: "Buy", text: "Buy" },
+    { value: "Sell", text: "Sell" },
+];
+
+export const selectOptionsStatus = [
+    { value: "All", text: "All" },
+    { value: "A", text: "Active" },
+    { value: "FF", text: "Fulfilled" },
+    { value: "CC", text: "Cancel" },
+];
+
+export type BuySellOption = "Buy" | "Sell" | "All";
+export type StatusOption = "A" | "FF" | "CC" | "All";

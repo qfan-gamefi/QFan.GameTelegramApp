@@ -1,10 +1,10 @@
 <template>
     <div class="popup-container" v-if="visible">
         <div class="popup-content">
-            <p class="f-bangopro">{{ text }} <i class="fa-solid fa-question"></i></p>
+            <p class="f-bangopro">{{ text }}</p>
             <div class="popup-buttons">
-                <button @click="yes">Yes</button>
-                <button @click="no">No</button>
+                <button @click="yes()">Yes</button>
+                <button @click="no()">No</button>
             </div>
         </div>
     </div>
@@ -66,7 +66,7 @@ export default {
 
 .popup-buttons button {
     margin: 0 10px;
-    padding: 10px 20px;  
+    padding: 10px 20px;
     font-size: 12px;
 }
 </style>

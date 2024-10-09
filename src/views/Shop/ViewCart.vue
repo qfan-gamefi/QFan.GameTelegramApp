@@ -56,20 +56,34 @@
                     <div
                         class="flex flex-col gap-1 w-[calc(100%-68px)] text-[10px] font-extrabold"
                     >
-                        <div class="flex">
+                        <div
+                            class="flex justify-between px-1 text-[#6c757d] uppercase"
+                        >
+                            <div>Buy</div>
+                            <div>Price</div>
+                            <div>Sell</div>
+                        </div>
+
+                        <div class="flex relative">
                             <div
-                                class="bg-[#2ebd85] px-1"
+                                class="bg-[#2ebd856b] h-[15px]"
                                 :style="{ width: calcWithTotal('buy') }"
                             >
-                                {{ detailCart?.TotalBuy }}
+                                <div class="absolute left-1">
+                                    {{ formattedBalance(detailCart?.TotalBuy) }}
+                                </div>
                             </div>
                             <div
-                                class="bg-[#f6465d] px-1 text-right"
+                                class="bg-[#f6465d5c] text-right"
                                 :style="{
                                     width: calcWithTotal('sell'),
                                 }"
                             >
-                                {{ detailCart?.TotalSell }}
+                                <div class="absolute right-1">
+                                    {{
+                                        formattedBalance(detailCart?.TotalSell)
+                                    }}
+                                </div>
                             </div>
                         </div>
 
@@ -79,29 +93,33 @@
                             :key="index"
                         >
                             <div class="flex-1 flex relative justify-end">
-                                <div class="absolute left-0 px-1">
+                                <div class="absolute left-1">
                                     {{ renderCount("buy", item) }}
                                 </div>
                                 <div
-                                    class="bg-[#2ebd85] text-right"
+                                    class="bg-[#2ebd856b] text-right h-[15px]"
                                     :style="{
                                         width: calcWithItem('buy', item),
                                     }"
                                 >
-                                    {{ renderPrice("buy", item) }}
+                                    <div class="absolute right-1">
+                                        {{ renderPrice("buy", item) }}
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="flex-1 flex justify-between relative">
+                            <div class="flex-1 flex justify-start relative">
                                 <div
-                                    class="bg-[#f6465d]"
+                                    class="bg-[#f6465d5c] h-[15px]"
                                     :style="{
                                         width: calcWithItem('sell', item),
                                     }"
                                 >
-                                    {{ renderPrice("sell", item) }}
+                                    <div class="absolute left-1">
+                                        {{ renderPrice("sell", item) }}
+                                    </div>
                                 </div>
-                                <div class="absolute right-0 px-1">
+                                <div class="absolute right-1">
                                     {{ renderCount("sell", item) }}
                                 </div>
                             </div>
@@ -180,6 +198,14 @@
         :type="notificationType"
         @close="showNotification = false"
     />
+
+    <PopupConfirm
+        v-if="isBuySell"
+        :text="textConfirm"
+        :visible="isBuySell"
+        @yes="yesBuySell"
+        @no="noBuySell"
+    />
 </template>
 
 <script lang="ts">
@@ -187,8 +213,10 @@ import InputField from "@/components/Input/InputField.vue";
 import InputNumber from "@/components/Input/InputNumber.vue";
 import InputSelect from "@/components/Input/InputSelect.vue";
 import NotificationToast from "@/components/NotificationToast.vue";
+import PopupConfirm from "@/components/PopupConfirm.vue";
 import { EItemDefType, IItemInventory } from "@/interface";
 import userServiceInventory from "@/services/inventoryService";
+import { formattedBalance } from "@/utils";
 import {
     IDetailCart,
     TabTypeBS,
@@ -206,6 +234,7 @@ export default defineComponent({
         NotificationToast,
         InputSelect,
         InputNumber,
+        PopupConfirm,
     },
     computed: {
         ...mapState(["rewardInfo"]),
@@ -252,7 +281,7 @@ export default defineComponent({
             price: 0,
             quantity: 1,
             itemsInventory: [] as IItemInventory[],
-            bestPrice: 0,
+            // bestPrice: 0,
 
             orderFee: {} as IFeeVat,
             vat: 0,
@@ -264,12 +293,16 @@ export default defineComponent({
             countTotalSell: 0,
             countTotal: 0,
             listDetail: [],
+
+            isBuySell: false,
+            textConfirm: "Sure about this Buy order",
         };
     },
     methods: {
+        formattedBalance,
         initializeValues() {
             this.price = this.detailCart?.GoodBuyPrice || 0;
-            this.bestPrice = this.detailCart?.GoodBuyPrice || 0;
+            // this.bestPrice = this.detailCart?.GoodBuyPrice || 0;
             this.quantity = 1;
             if (this.currentPage === "inventory") {
                 this.activeTab = "sell";
@@ -281,12 +314,12 @@ export default defineComponent({
             const total =
                 this.detailCart?.TotalBuy + this.detailCart?.TotalSell;
             const result = (this.detailCart?.TotalBuy / total) * 100;
-            const roundedResult = parseFloat(result.toFixed(2));
+            const roundedResult = parseFloat(result?.toFixed(2));
 
             if (type == "buy") {
                 return `${roundedResult}%`;
             } else {
-                const value = (100 - roundedResult).toFixed(2);
+                const value = (100 - roundedResult)?.toFixed(2);
                 return `${value}%`;
             }
         },
@@ -311,24 +344,32 @@ export default defineComponent({
             }
         },
         renderPrice(type: "buy" | "sell", item: IItemOrderConfirm) {
-            if (type === "buy") {
-                const result = item?.priceBuy == 0 ? null : item?.priceBuy;
-                return result;
-            } else {
-                const result = item?.priceSell == 0 ? null : item?.priceSell;
-                return result;
-            }
+            const price = type === "buy" ? item?.priceBuy : item?.priceSell;
+            const formatted = formattedBalance(price);
+            return formatted == 0 ? null : formatted;
         },
         setActiveTab(tab: TabTypeBS) {
             this.activeTab = tab;
             this.quantity = 1;
+
             if (tab === "buy") {
-                this.price = this.detailCart?.GoodBuyPrice;
-                this.bestPrice = this.detailCart?.GoodBuyPrice;
+                const minPriceSell = Math.min(
+                    ...this.listDetail
+                        .filter((item) => item?.priceSell > 0)
+                        .map((item) => item?.priceSell)
+                ); //min sell
+
+                this.price = minPriceSell;
+                // this.price = this.detailCart?.GoodBuyPrice;
+                // this.bestPrice = this.detailCart?.GoodBuyPrice;
             }
             if (tab === "sell") {
-                this.price = this.detailCart?.GoodSellPrice;
-                this.bestPrice = this.detailCart?.GoodSellPrice;
+                const maxPriceBuy = Math.max(
+                    ...this.listDetail.map((item) => item.priceBuy)
+                ); // max buy
+                this.price = maxPriceBuy;
+                // this.price = this.detailCart?.GoodSellPrice;
+                // this.bestPrice = this.detailCart?.GoodSellPrice;
             }
         },
         async renderNotification(message, type) {
@@ -386,27 +427,18 @@ export default defineComponent({
             }
         },
         async getTopOrder() {
-            // const response = await axios.get(
-            //     `https://6235-171-224-180-89.ngrok-free.app/api/v1/order/getTopOrder5?ItemDefId=${this.detailCart.ItemDefId}`,
-            //     {
-            //         headers: {
-            //             "ngrok-skip-browser-warning": "1",
-            //         },
-            //     }
-            // );
-            // const data = JSON.parse(response.data.message);
             const data = await userServiceInventory.getTopOrder(
                 this.detailCart.ItemDefId
             );
 
-            const buyList = data?.BuyList;
+            const buyList = data?.BuyList || [];
             const countTotalBuy = buyList?.reduce(
                 (total, item) => total + item.Count,
                 0
             );
             this.countTotalBuy = countTotalBuy || 0;
 
-            const sellList = data?.SellList;
+            const sellList = data?.SellList || [];
             const countTotalSell = sellList?.reduce(
                 (total, item) => total + item.Count,
                 0
@@ -441,9 +473,17 @@ export default defineComponent({
                     };
                 }
             );
+            const minPriceSell = Math.min(
+                ...mergedList
+                    .filter((item) => item?.priceSell > 0)
+                    .map((item) => item?.priceSell)
+            ); //min sell
+
+            this.price = minPriceSell;
             this.listDetail = mergedList;
         },
-        async submitData() {
+        async yesBuySell() {
+            this.isBuySell = false;
             const detailCart: IDetailCart = this.detailCart;
             const balance =
                 this.rewardInfo?.attributes?.qpoint?.data?.attributes?.balance;
@@ -457,56 +497,55 @@ export default defineComponent({
             const valuePrice = Number(this.price);
             const total = valuePrice * valueQuantity;
 
-            if (this.activeTab === "buy") {
-                if (balance < total) {
-                    await this.renderErr(`Your balance is insufficient`);
+            const payload = {
+                itemDefId: detailCart?.ItemDefId,
+                userId: this.userId,
+                price: valuePrice,
+                count: valueQuantity,
+                priceType: detailCart?.GoodPriceType || this.selectedOption,
+            };
+
+            const handleResponse = async (response, successMsg) => {
+                if (response.success) {
+                    await this.renderSuccess(successMsg);
+                    this.$emit("closeCallApi");
                 } else {
-                    try {
+                    await this.renderErr(`Error`);
+                }
+            };
+
+            try {
+                if (this.activeTab === "buy") {
+                    if (balance < total) {
+                        await this.renderErr(`Your balance is insufficient`);
+                    } else {
                         const response =
-                            await userServiceInventory.makeBuyOrder(
-                                detailCart?.ItemDefId,
-                                this.userId,
-                                valuePrice,
-                                valueQuantity,
-                                detailCart?.GoodPriceType || this.selectedOption
-                            );
-                        if (response.success) {
-                            await this.renderSuccess(`Buy Success`);
-                            this.handleCloseCart();
-                        } else {
-                            await this.renderErr(`Error`);
-                        }
-                    } catch (error) {
-                        console.log(error);
+                            await userServiceInventory.makeBuyOrder(payload);
+                        await handleResponse(response, `Buy Success`);
+                    }
+                } else if (this.activeTab === "sell") {
+                    if (valueQuantity > countItem) {
+                        await this.renderErr(`Your quantity is insufficient`);
+                    } else {
+                        const response =
+                            await userServiceInventory.makeSellOrder(payload);
+                        await handleResponse(response, `Sell Success`);
                     }
                 }
+            } catch (error) {
+                console.log(error);
             }
-
-            if (this.activeTab === "sell") {
-                if (valueQuantity > countItem) {
-                    await this.renderErr(`Your quantity is insufficient`);
-                } else {
-                    try {
-                        const response =
-                            await userServiceInventory.makeSellOrder(
-                                detailCart?.ItemDefId,
-                                this.userId,
-                                valuePrice,
-                                valueQuantity,
-                                detailCart?.GoodPriceType || this.selectedOption
-                            );
-
-                        if (response.success) {
-                            await this.renderSuccess(`Sell Success`);
-                            this.handleCloseCart();
-                        } else {
-                            await this.renderErr(`Error`);
-                        }
-                    } catch (error) {
-                        console.log(error);
-                    }
-                }
+        },
+        noBuySell() {
+            this.isBuySell = false;
+        },
+        async submitData() {
+            if (this.activeTab == "buy") {
+                this.textConfirm = `Sure about this Buy order?`;
+            } else {
+                this.textConfirm = `Sure about this Sell order?`;
             }
+            this.isBuySell = true;
         },
         renderFee() {
             return this.orderFee?.Value;
@@ -516,7 +555,7 @@ export default defineComponent({
         },
         renderAmount() {
             const value = this.price * this.quantity || 0;
-            return value;
+            return formattedBalance(value);
         },
         renderTotal() {
             const amount = this.price * this.quantity;
@@ -527,7 +566,7 @@ export default defineComponent({
             if (this.activeTab === "buy") {
                 result = amount + Number(this.orderFee?.Value) || 0;
             }
-            return parseFloat(result.toFixed(2));
+            return formattedBalance(result); // parseFloat(result.toFixed(2));
         },
     },
 });

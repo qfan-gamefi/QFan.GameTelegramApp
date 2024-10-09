@@ -1,23 +1,39 @@
 <template>
-    <div class="w-full flex justify-end bg-[#00165A] pt-2 pr-[15px]">
-        <div class="w-20">
-            <SelectBox
-                v-model:value="selectedValue"
-                :options="selectOptions"
-                label="Chọn giá trị:"
-            />
+    <div class="bg-[#00165A]">
+        <div
+            class="flex justify-end border-b border-b-[#2f9ad6] mx-4 py-2 w-[calc(100%-30px)] gap-3 text-[12px]"
+        >
+            <div class="w-24">
+                <SelectBox
+                    v-model:value="selectedStatus"
+                    :options="selectOptionsStatus"
+                    label="Status"
+                />
+            </div>
+            <div class="w-20">
+                <SelectBox
+                    v-model:value="selectedValue"
+                    :options="selectOptions"
+                    label="Buy / Sell"
+                />
+            </div>
         </div>
     </div>
     <div
         class="box-item bg-[#00165A] h-[calc(100vh-145px)] p-[10px_15px] overflow-auto"
     >
         <div class="order-item" v-for="(item, index) in listOrder" :key="index">
-            <div class="left-item">
-                <div class="image">
-                    <img :src="item?.ItemDef?.ImageUrl" />
+            <div class="flex gap-[10px]">
+                <div class="w-[60px]">
+                    <img
+                        class="object-cover"
+                        :src="item?.ItemDef?.ImageUrl"
+                        alt="order-img"
+                        loading="lazy"
+                    />
                 </div>
-                <div class="content">
-                    <div class="title text-[14px]">
+                <div class="content text-[12px]">
+                    <div class="title">
                         {{ item?.ItemDef?.Code }}
                     </div>
                     <div class="desc">
@@ -41,15 +57,12 @@
                 </div>
             </div>
 
-            <div class="right-item">
-                <div class="status-container">
-                    <div
-                        class="status-info"
-                        :class="['status-text', statusColorClass(item)]"
-                    >
-                        <div class="status-text">{{ renderStatus(item) }}</div>
+            <div class="flex">
+                <div class="flex flex-col justify-between text-right">
+                    <div class="text-xs" :class="[statusColorClass(item)]">
+                        <div>{{ renderStatus(item) }}</div>
                         <div
-                            class="status-content"
+                            class="text-[10px]"
                             v-if="
                                 item?.Status === 'A' &&
                                 item?.Count !== item?.OriginCount
@@ -59,8 +72,11 @@
                         </div>
                     </div>
 
-                    <div class="status-time">
-                        <div class="font-extrabold" :class="classBS(item)">
+                    <div class="text-[9px]">
+                        <div
+                            class="font-extrabold text-[12px]"
+                            :class="classBS(item)"
+                        >
                             {{ renderBS(item) }}
                         </div>
                         <div class="status-date">
@@ -70,18 +86,38 @@
                         <div class="status-clock">
                             {{ formatTime(item?.createdAt) }}
                         </div>
+
+                        <div v-if="item?.Status === 'A'">
+                            <button @click="handleCancelOrder(item?.id)">
+                                Cancel
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <NotificationToast
+        v-if="showNotification"
+        :message="notificationMessage"
+        :type="notificationType"
+        @close="showNotification = false"
+    />
 </template>
 
 <script lang="ts">
+import NotificationToast from "@/components/NotificationToast.vue";
 import SelectBox from "@/components/Select/SelectBox.vue";
 import userServiceInventory from "@/services/inventoryService";
 import { formatDateDDMMYYYY, formatTime } from "@/utils";
-import { IOrderList } from "@/views/Shop/defination";
+import {
+    BuySellOption,
+    IOrderList,
+    selectOptions,
+    selectOptionsStatus,
+    StatusOption,
+} from "@/views/Shop/defination";
 import { defineComponent } from "vue";
 
 export default defineComponent({
@@ -89,19 +125,20 @@ export default defineComponent({
     // props: {},
     components: {
         SelectBox,
+        NotificationToast,
     },
     created() {
         this.callOrderShop();
     },
-    // setup() {
-
-    //     watch(selectedValue, (newValue) => {
-    //   calculateSomething(newValue);
-    // })
     watch: {
         selectedValue(newValue) {
             if (newValue) {
                 this.handleFilter(newValue);
+            }
+        },
+        selectedStatus(newValue) {
+            if (newValue) {
+                this.handleStatus(newValue);
             }
         },
     },
@@ -110,20 +147,32 @@ export default defineComponent({
 
         return {
             userId: userInfo?.user?.id || "",
+            showNotification: false,
+            notificationMessage: "success",
+            notificationType: "success",
             listOrder: [] as IOrderList[],
             listOrderBuy: [] as IOrderList[],
             listOrderSell: [] as IOrderList[],
-            selectedValue: "All",
-            selectOptions: [
-                { value: "All", text: "All" },
-                { value: "Buy", text: "Buy" },
-                { value: "Sell", text: "Sell" },
-            ],
+            selectedValue: "All" as BuySellOption,
+            selectedStatus: "All" as StatusOption,
+            selectOptions,
+            selectOptionsStatus,
         };
     },
     methods: {
         formatDateDDMMYYYY,
         formatTime,
+        async renderNotification(message, type) {
+            this.notificationMessage = message;
+            this.notificationType = type;
+            this.showNotification = true;
+        },
+        async renderSuccess(text: string) {
+            this.renderNotification(text, "success");
+        },
+        async renderErr(text) {
+            this.renderNotification(text, "error");
+        },
         statusColorClass(item) {
             if (item?.Status === "A") {
                 return "status-green";
@@ -163,14 +212,32 @@ export default defineComponent({
                 return `text-[#f6465d]`;
             }
         },
-        handleFilter(value: "Buy" | "Sell") {
-            if (value == "Buy") {
-                this.listOrder = this.listOrderBuy;
-            } else if (value == "Sell") {
-                this.listOrder = this.listOrderSell;
+        applyFilters() {
+            let filteredList = [];
+
+            // Filter by Buy/Sell
+            if (this.selectedValue === "Buy") {
+                filteredList = this.listOrderBuy;
+            } else if (this.selectedValue === "Sell") {
+                filteredList = this.listOrderSell;
             } else {
-                this.listOrder = this.listOrderBuy.concat(this.listOrderSell);
+                filteredList = this.listOrderBuy.concat(this.listOrderSell);
             }
+
+            // Filter by Status
+            if (this.selectedStatus !== "All") {
+                filteredList = filteredList.filter(
+                    (item) => item?.Status === this.selectedStatus
+                );
+            }
+
+            this.listOrder = filteredList;
+        },
+        handleFilter(value: "Buy" | "Sell" | "All") {
+            this.applyFilters();
+        },
+        handleStatus(value: "A" | "FF" | "CC" | "All") {
+            this.applyFilters();
         },
         async callOrderShop() {
             try {
@@ -184,12 +251,35 @@ export default defineComponent({
                 console.log(error);
             }
         },
+        async handleCancelOrder(id: number) {
+            try {
+                const res = await userServiceInventory.cancelOrder(id);
+                if (res.success) {
+                    this.renderSuccess("Cancel success!");
+                    await this.callOrderShop();
+                } else {
+                    this.renderErr("Cancel Error!");
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        },
     },
 });
 </script>
 
 <style lang="scss" scoped>
+@import "@/styles/global.scss";
+
 $t-white-color: rgb(255, 255, 255);
+
+button {
+    font-size: 12px;
+    padding: 10px 12px;
+    border-radius: 3px;
+    letter-spacing: 0;
+    font-weight: 600;
+}
 
 .box-item {
     display: flex;
@@ -204,19 +294,6 @@ $t-white-color: rgb(255, 255, 255);
     justify-content: space-between;
     gap: 10px;
     animation: fadeInZoom 0.1s ease forwards;
-    .left-item {
-        display: flex;
-        gap: 10px;
-    }
-    .right-item {
-        display: flex;
-    }
-    .image {
-        display: flex;
-        img {
-            width: 70px;
-        }
-    }
 
     .content {
         .title {
@@ -227,7 +304,6 @@ $t-white-color: rgb(255, 255, 255);
     .desc {
         display: flex;
         flex-direction: column;
-        font-size: 12px;
     }
 
     .desc div {
@@ -242,23 +318,6 @@ $t-white-color: rgb(255, 255, 255);
     .fee-value,
     .total-value {
         text-align: right;
-    }
-
-    .status-container {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        text-align: right;
-
-        .status-info {
-            font-size: 12px;
-            .status-content {
-                font-size: 10px;
-            }
-        }
-        .status-time {
-            font-size: 9px;
-        }
     }
 }
 

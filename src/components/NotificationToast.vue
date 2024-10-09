@@ -1,6 +1,11 @@
 <template>
-    <div v-if="visible" :class="`notification ${type}`">
-        <span>
+    <div
+        class="flex justify-between items-center gap-2 rounded"
+        v-if="visible"
+        :class="`notification ${type}`"
+        :style="{ animationDuration: `${duration / 1000}s` }"
+    >
+        <div>
             <i class="fa-solid fa-circle-check" v-if="type === 'success'"></i>
 
             <i
@@ -12,12 +17,19 @@
                 class="fa-solid fa-circle-exclamation"
                 v-if="type === 'warning'"
             ></i>
-            {{ message }}
-        </span>
+        </div>
+
+        <div>{{ message }}</div>
+
+        <div @click="closeNotification()">
+            <i class="fa-solid fa-xmark"></i>
+        </div>
     </div>
 </template>
 
 <script>
+import { ref, onMounted, onBeforeUnmount } from "vue";
+
 export default {
     props: {
         message: {
@@ -33,23 +45,38 @@ export default {
             default: 2000,
         },
     },
-    data() {
-        return {
-            visible: true,
+    setup(props, { emit }) {
+        const visible = ref(true);
+        let timer = null;
+
+        const startTimer = () => {
+            timer = setTimeout(() => {
+                closeNotification();
+            }, props.duration);
         };
-    },
-    mounted() {
-        this.startTimer();
-    },
-    methods: {
-        startTimer() {
-            setTimeout(() => {
-                this.visible = false;
-            }, this.duration);
-        },
-        closeNotification() {
-            this.visible = false;
-        },
+
+        const closeNotification = () => {
+            if (timer) {
+                clearTimeout(timer);
+            }
+            visible.value = false;
+            emit("close");
+        };
+
+        onMounted(() => {
+            startTimer();
+        });
+
+        onBeforeUnmount(() => {
+            if (timer) {
+                clearTimeout(timer);
+            }
+        });
+
+        return {
+            visible,
+            closeNotification,
+        };
     },
 };
 </script>
@@ -62,16 +89,14 @@ export default {
     color: #fff;
     display: flex;
     font-size: 16px;
-    font-family: monospace;
     transform: translate(50%, 50%);
     padding: 10px;
     width: 80%;
-    justify-content: center;
     font-size: 16px;
     font-weight: bold;
     z-index: 99999;
 
-    animation: fadeNotification 2s ease-in-out forwards;
+    animation: fadeNotification ease-in-out forwards;
 }
 .notification.success {
     background-color: rgb(7 149 66 / 69%);

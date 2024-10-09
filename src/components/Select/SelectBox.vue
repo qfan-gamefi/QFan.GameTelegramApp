@@ -1,4 +1,5 @@
 <template>
+    <div>{{ label }}</div>
     <div class="custom-select">
         <select :value="value" @change="onChange($event)">
             <option

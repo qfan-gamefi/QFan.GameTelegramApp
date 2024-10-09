@@ -33,37 +33,28 @@ const userServiceInventory = {
         const res = await axiosInventory.get(`/order/getFeeConfig`);
         return res.status == 200 ? JSON.parse(res.data.message) : {};
     },
-    async makeBuyOrder(
-        itemDefId: number,
-        userId: number,
-        price: number,
-        count: number,
-        priceType: string
-    ) {
-        const res = await axiosInventory.post(`/order/makeBuyOrder`, {
-            itemDefId: itemDefId,
-            userId: userId,
-            price: price,
-            count: count,
-            priceType: priceType,
-        });
+    async makeBuyOrder(valueForm: {
+        itemDefId: number;
+        userId: number;
+        price: number;
+        count: number;
+        priceType: string;
+    }) {
+        const res = await axiosInventory.post(`/order/makeBuyOrder`, valueForm);
 
         return res.status == 200 ? JSON.parse(res.data.message) : {};
     },
-    async makeSellOrder(
-        itemDefId: number,
-        userId: number,
-        price: number,
-        count: number,
-        priceType: string
-    ) {
-        const res = await axiosInventory.post(`/order/makeSellOrder`, {
-            itemDefId: itemDefId,
-            userId: userId,
-            price: price,
-            count: count,
-            priceType: priceType,
-        });
+    async makeSellOrder(valueForm: {
+        itemDefId: number;
+        userId: number;
+        price: number;
+        count: number;
+        priceType: string;
+    }) {
+        const res = await axiosInventory.post(
+            `/order/makeSellOrder`,
+            valueForm
+        );
 
         return res.status == 200 ? JSON.parse(res.data.message) : {};
     },
@@ -78,6 +69,13 @@ const userServiceInventory = {
         const res = await axiosInventory.get(
             `/order/getTopOrder5?ItemDefId=${idItemDef}`
         );
+        return res.status == 200 ? JSON.parse(res.data.message) : {};
+    },
+    async cancelOrder(itemOrderId: number) {
+        const data = {
+            itemOrderId: itemOrderId,
+        };
+        const res = await axiosInventory.post(`/order/cancelOrder`, data);
         return res.status == 200 ? JSON.parse(res.data.message) : {};
     },
 };

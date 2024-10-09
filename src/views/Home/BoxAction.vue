@@ -1,12 +1,13 @@
 <template>
     <div class="box-action">
-        <router-link to="/market">
+        <router-link to="/market" class="market">
             <img
                 loading="lazy"
                 class="img-market"
                 src="./../../../public/assets/shop/Market.png"
                 @click="handleBackButton"
             />
+            <div class="shine"></div>
         </router-link>
         <router-link to="/inventory">
             <img
@@ -51,7 +52,6 @@ export default {
     top: 37%;
     right: 5%;
     display: flex;
-    /* flex-direction: column; */
     align-items: center;
     gap: 20px;
 }
@@ -68,10 +68,6 @@ export default {
     -moz-animation: glowing 1500ms infinite;
     -o-animation: glowing 1500ms infinite;
     animation: glowing 1500ms infinite;
-}
-.box-action .img-market {
-    width: 70px;
-    object-fit: cover;
 }
 @-webkit-keyframes glowing {
     0% {
@@ -121,15 +117,88 @@ export default {
     }
 }
 
-/* .box-action a {
-    color: #fff;
-    text-decoration: none;
+.box-action .img-market {
+    width: 70px;
+    object-fit: cover;
 }
 
-.box-action button {
-    border: none;
-    border-radius: 8px;
-    font-size: 10px;
-    padding: 10px;
+.market {
+    position: relative;
+}
+/* .market:after {
+    content: "";
+    display: block;
+    position: absolute;
+}
+.market:after {
+    left: 0;
+    top: 0;
+    width: 4px;
+    height: 56px;
+    background: #fff;
+    z-index: 5;
+    animation: sheen 5s infinite;
+}
+@keyframes sheen {
+    0%,
+    100% {
+        left: 0;
+        opacity: 0;
+    }
+    1% {
+        opacity: 1;
+    }
+    10% {
+        left: calc(100% - 4px);
+    }
+    11%,
+    98% {
+        left: 100%;
+        opacity: 0;
+    }
 } */
+
+.shine {
+    position: absolute;
+    top: 10%;
+    left: 65%;
+    width: 1px;
+    height: 18px;
+    background: #fff;
+    transform: rotate(15deg);
+    animation: shine 5s infinite;
+}
+.shine:before,
+.shine:after {
+    content: "";
+    display: block;
+    position: absolute;
+}
+.shine:after {
+    top: 6px;
+    left: -2px;
+    width: 5px;
+    height: 5px;
+    background: #fff;
+    transform: rotate(45deg);
+    box-shadow: 0 0 8px 5px rgba(255, 255, 255, 0.75);
+}
+@keyframes shine {
+    0% {
+        opacity: 0;
+    }
+    34% {
+        opacity: 0;
+        transform: rotate(15deg);
+    }
+    40% {
+        opacity: 0.6;
+        transform: rotate(620deg);
+    }
+    48%,
+    100% {
+        opacity: 0;
+        transform: rotate(635deg);
+    }
+}
 </style>

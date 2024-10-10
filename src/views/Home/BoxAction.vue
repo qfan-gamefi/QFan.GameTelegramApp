@@ -7,7 +7,9 @@
                 src="./../../../public/assets/shop/Market.png"
                 @click="handleBackButton"
             />
-            <div class="shine"></div>
+            <div class="shine shine-1"></div>
+            <div class="shine shine-2"></div>
+            <div class="shine shine-3"></div>
         </router-link>
         <router-link to="/inventory">
             <img
@@ -118,12 +120,16 @@ export default {
 }
 
 .box-action .img-market {
-    width: 70px;
+    width: 60px;
+    padding: 5px;
     object-fit: cover;
 }
 
 .market {
     position: relative;
+    border: 1px solid #fff;
+    border-radius: 5px;
+    background: #320460;
 }
 /* .market:after {
     content: "";
@@ -200,5 +206,47 @@ export default {
         opacity: 0;
         transform: rotate(635deg);
     }
+}
+.shine-1 {
+    top: 10%;
+    left: 65%;
+    width: 1px;
+    height: 18px;
+}
+.shine-1:after {
+    top: 6px;
+    left: -2px;
+    width: 5px;
+    height: 5px;
+}
+
+/* Second shine effect */
+.shine-2 {
+    top: 50%;
+    left: 75%;
+    width: 1px;
+    height: 20px;
+    animation-delay: 1s;
+}
+.shine-2:after {
+    top: 7px;
+    left: -3px;
+    width: 6px;
+    height: 6px;
+}
+
+/* Third shine effect */
+.shine-3 {
+    top: 30%;
+    left: 10%;
+    width: 1px;
+    height: 16px;
+    animation-delay: 2s;
+}
+.shine-3:after {
+    top: 5px;
+    left: -1.5px;
+    width: 4px;
+    height: 4px;
 }
 </style>

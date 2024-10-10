@@ -297,7 +297,7 @@ export default defineComponent({
 }
 
 .wr-btn {
-    width: calc(100% - 40px);
+    // width: calc(100% - 40px);
     padding: 20px;
 
     button {

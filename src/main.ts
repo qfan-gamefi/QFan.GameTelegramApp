@@ -20,4 +20,5 @@ const app = createApp(SampleGame);
 app.use(VueDragscroll);
 app.use(router);
 app.use(store);
+
 app.mount("#app");

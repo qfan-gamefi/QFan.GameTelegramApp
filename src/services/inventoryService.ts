@@ -78,6 +78,12 @@ const userServiceInventory = {
         const res = await axiosInventory.post(`/order/cancelOrder`, data);
         return res.status == 200 ? JSON.parse(res.data.message) : {};
     },
+    async getItemMarket(idItemDef: number) {
+        const res = await axiosInventory.get(
+            `/order/getMarketList?itemDefId=${idItemDef}`
+        );
+        return res.status == 200 ? JSON.parse(res.data.message) : {};
+    },
 };
 
 export default userServiceInventory;

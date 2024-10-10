@@ -66,7 +66,7 @@
                 <div class="w-[20%] text-right">Floor Price</div>
             </div>
 
-            <div class="overflow-x-scroll h-[calc(100vh-200px)] no-scrollbar">
+            <div class="overflow-scroll h-[calc(100vh-200px)] no-scrollbar">
                 <div v-for="(item, index) in listShop" :key="index">
                     <div
                         class="flex items-center text-[10px] overflow-y-auto border-b border-b-[#2f9ad6] mx-2 px-2 py-2 animation-item-market"

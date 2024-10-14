@@ -6,17 +6,12 @@
         :style="{ animationDuration: `${duration / 1000}s` }"
     >
         <div>
-            <i class="fa-solid fa-circle-check" v-if="type === 'success'"></i>
-
+            <i class="fa-solid fa-circle-check" v-if="type == 'success'"></i>
             <i
                 class="fa-solid fa-circle-exclamation"
-                v-if="type === 'error'"
+                v-else
             ></i>
-
-            <i
-                class="fa-solid fa-circle-exclamation"
-                v-if="type === 'warning'"
-            ></i>
+            
         </div>
 
         <div>{{ message }}</div>

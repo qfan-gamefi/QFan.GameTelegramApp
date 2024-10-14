@@ -81,7 +81,7 @@
                             </div>
 
                             <div
-                                class="stadium-right t-primary-color"
+                                class="stadium-right f-bangopro t-primary-color"
                                 v-if="dataNextTraining"
                             >
                                 {{ dataNextTraining?.attributes?.price }}
@@ -113,8 +113,8 @@
             :dataNext="dataNext"
             :idUser="idUser"
             :isMax="isMax"
-            :titleUpload="'Training Room'"
-            :descUpload="'Better boosts training speed'"
+            :titleUpload="'Skill'"
+            :descUpload="'Boosts training speed'"
             :typeBooster="typeBooster"
             @closeDetailNoCall="closeDetailNoCall"
         />

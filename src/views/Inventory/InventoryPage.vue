@@ -3,7 +3,7 @@
         <!-- <div class="banner-inventory"></div> -->
 
         <img
-            class="max-w-full"
+            class="max-w-full object-cover"
             src="./../../../public/assets/inventory/banner-inventory.png"
             alt="banner_inventory"
         />
@@ -109,40 +109,62 @@
                     </div>
                 </div>
 
-                <div class="box-fusion" v-if="activeButton === 'Fusion'">
+                <div
+                    class="flex flex-col gap-[5px]"
+                    v-if="activeButton === 'Fusion'"
+                >
                     <div
-                        class="item-fusion"
+                        class="text-[10px]"
                         v-for="(item, index) in listFusion"
                         :key="index"
                     >
-                        <div class="item">
-                            <div class="left">
+                        <div
+                            class="slideIn-fusion flex justify-between p-1.5 border-2 border-[#56d6ff] rounded-md"
+                        >
+                            <div
+                                class="flex items-center gap-2.5 max-w-[220px] overflow-auto"
+                            >
                                 <div
-                                    class="el"
+                                    class="flex flex-col gap-[5px] min-w-[55px]"
                                     v-for="(el, idx) in parseItemDef(
                                         item.ResourcesItemDefIds
                                     )"
                                     :key="idx"
                                 >
-                                    <div class="text">
+                                    <div
+                                        class="bg-[#2cde00] text-center p-1 rounded-md"
+                                    >
                                         {{ numberWithItem(el.ItemDefId) }}/{{
                                             el.Count
                                         }}
                                     </div>
-                                    <img :src="el.ImageUrl" />
+                                    <img
+                                        class="w-[55px]"
+                                        :src="el.ImageUrl"
+                                        loading="lazy"
+                                    />
                                 </div>
                             </div>
 
-                            <div class="right">
-                                <div class="img">
+                            <div class="flex gap-[15px]">
+                                <div class="flex items-center">
                                     <img
+                                        class="w-2.5"
                                         src="@public/assets/inventory/triangle.png"
                                     />
                                 </div>
-                                <div class="content">
-                                    <div>{{ item.Name }}</div>
-                                    <div class="img">
-                                        <img :src="item.Treasure.ImageUrl" />
+                                <div class="flex flex-col gap-2 items-center">
+                                    <div class="font-extrabold">
+                                        {{ item.Name }}
+                                    </div>
+                                    <div class="relative">
+                                        <img
+                                            class="w-[60px] rounded-md"
+                                            :src="item.Treasure.ImageUrl"
+                                        />
+                                        <div class="slot-item">
+                                            {{ item?.TreasureCount }}
+                                        </div>
                                     </div>
                                     <div
                                         :class="[
@@ -190,7 +212,7 @@
 
         <PopupConfirm
             v-if="showClaim"
-            :text="`Do you want Claim`"
+            :text="`Do you want Claim!`"
             :visible="showClaim"
             @yes="handleYesClaim"
             @no="handleNoClaim"
@@ -201,6 +223,7 @@
             @close="closeViewCart"
             :detailCart="dataDetailCart"
             currentPage="inventory"
+            @closeCallApi="closeViewCart()"
         />
     </div>
 </template>
@@ -208,10 +231,14 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import userServiceInventory from "@/services/inventoryService";
-import { EItemDefType, IFusion, IItemInventory } from "@/interface";
+import {
+    EItemDefType,
+    IFusion,
+    IItemDefFusion,
+    IItemInventory,
+} from "@/interface";
 import "./style.scss";
 
-// import LoadingForm from '@/components/LoadingForm.vue';
 import NotificationToast from "@/components/NotificationToast.vue";
 import PopupConfirm from "@/components/PopupConfirm.vue";
 import ViewCart from "./../Shop/ViewCart.vue";
@@ -234,7 +261,6 @@ export default defineComponent({
         NotificationToast,
         PopupConfirm,
         ViewCart,
-        // LoadingForm,
     },
     created() {
         this.getDataInventor();
@@ -263,6 +289,7 @@ export default defineComponent({
 
             itemsInventory: {} as Record<string, IItemInventory[]>,
             itemsBadge: [] as IItemInventory[],
+            arrInventory: [] as IItemInventory[],
 
             listFusion: [] as IFusion[],
             showButtons: false,
@@ -277,9 +304,9 @@ export default defineComponent({
             this.notificationMessage = message;
             this.notificationType = type;
             this.showNotification = true;
-            setTimeout(() => {
-                this.showNotification = false;
-            }, 2000);
+            // setTimeout(() => {
+            //     this.showNotification = false;
+            // }, 2000);
         },
         async renderSuccess(text: string) {
             this.renderNotification(text, "success");
@@ -291,28 +318,27 @@ export default defineComponent({
             this.activeIndex = this.activeIndex === index ? null : index;
         },
         setActiveButton(button: ButtonName) {
-            if (button === ButtonName.History || button === ButtonName.Fusion) {
+            if (button === ButtonName.History) {
                 this.showCoomingSoon = true;
             } else {
                 this.activeButton = button;
             }
         },
         numberWithItem(itemId: number) {
-            this.itemsInventory;
-            const filterIdItem: IItemInventory = this.itemsInventory?.find(
+            const filterIdItem: IItemInventory = this.arrInventory?.find(
                 (el) => el.ItemDefId === itemId
             );
             return filterIdItem?.ItemCount || 0;
         },
         parseItemDef(item: string) {
-            const data = JSON.parse(item);
+            const data: IItemDefFusion[] = JSON.parse(item);
             return data;
         },
         checkDisableFusion(item) {
             const count = JSON.parse(item.ResourcesItemDefIds);
 
             const result = count.every((itemA) => {
-                const matchingItemB = this.itemsInventory.find(
+                const matchingItemB = this.arrInventory.find(
                     (itemB) => itemB.ItemDefId === itemA.ItemDefId
                 );
                 return matchingItemB
@@ -334,7 +360,7 @@ export default defineComponent({
                 );
 
                 this.itemsBadge = filterBadge;
-                this.itemsInventory = filterData;
+                this.arrInventory = filterData;
 
                 const groupedItems = filterData.reduce(
                     (accumulator, currentItem) => {
@@ -348,7 +374,6 @@ export default defineComponent({
                     {}
                 );
 
-                console.log(groupedItems);
                 this.itemsInventory = groupedItems;
             } catch (error) {
                 console.error(error);
@@ -365,11 +390,14 @@ export default defineComponent({
                     CombineId: this.itemFusion.id,
                 };
                 const res = await userServiceInventory.makeFusion(data);
-
                 if (res.success) {
-                    await this.renderSuccess(
-                        `Received item ${this.itemFusion.Name} ${res?.data?.data?.data?.Name}`
-                    );
+                    const mess = res?.data
+                        ?.map((item) => {
+                            return `${item?.count} - ${item?.Name}`;
+                        })
+                        ?.join(", ");
+
+                    await this.renderSuccess(`Received ${mess}`);
                     await this.getDataInventor();
                     await this.getFausion();
                 } else {
@@ -400,17 +428,29 @@ export default defineComponent({
                     ItemId: item?.id,
                 };
                 const res = await userServiceInventory.useInventory(data);
+
                 if (res.success) {
                     const valueRes = res?.data?.[0];
                     await this.renderSuccess(
                         `Received ${valueRes?.Value} ${valueRes?.ValueType}`
                     );
-                    const resultInventory = this.itemsInventory?.map((el) =>
-                        el.id === item.id
-                            ? { ...el, ItemCount: el.ItemCount - 1 }
-                            : el
-                    );
-                    this.itemsInventory = resultInventory;
+                    // const resultInventory = this.itemsInventory?.map((el) => {
+                    //     return el.id === item.id
+                    //         ? { ...el, ItemCount: el.ItemCount - 1 }
+                    //         : el;
+                    // });
+                    // this.itemsInventory = resultInventory;
+
+                    Object.keys(this.itemsInventory)?.forEach((key) => {
+                        const items = this.itemsInventory[key];
+                        items?.forEach((el) => {
+                            const { id } = el;
+
+                            if (id === item?.id) {
+                                el.ItemCount -= 1;
+                            }
+                        });
+                    });
 
                     if (item.ItemCount === 1) {
                         await this.getDataInventor();
@@ -425,8 +465,20 @@ export default defineComponent({
             }
         },
         async handleSell(item: IItemInventory) {
+            const res = await userServiceInventory.getItemMarket(
+                item?.ItemDefId
+            );
+            const mergeItem = {
+                ...item,
+                TotalBuy: res?.[0]?.TotalBuy || 0,
+                TotalSell: res?.[0]?.TotalSell || 0,
+                GoodPriceType: res?.[0]?.GoodPriceType,
+                GoodBuyPrice: res?.[0]?.GoodBuyPrice,
+                Side: "S",
+            };
+
             this.isViewCart = true;
-            this.dataDetailCart = item;
+            this.dataDetailCart = mergeItem;
         },
         closeViewCart() {
             this.isViewCart = false;
@@ -527,15 +579,15 @@ export default defineComponent({
         .item {
             position: relative;
             display: flex;
-            gap: 7px;
         }
         .item-badge {
             position: relative;
             display: flex;
             flex-direction: column;
-            gap: 7px;
+            gap: 5px;
             .img-badge {
                 width: 100%;
+                object-fit: cover;
             }
         }
         .item-img {
@@ -549,86 +601,32 @@ export default defineComponent({
                 border-radius: 5px;
             }
         }
-        .slot-item {
+    }
+
+    .btn-fusion {
+        button {
             font-size: 10px;
-            font-weight: 800;
             padding: 5px;
-            position: absolute;
-            top: 0;
-            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
-                1px 1px 0 #000;
+            border-radius: 8px;
         }
     }
-    .box-fusion {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        padding: 10px 0;
+    .disable {
+        pointer-events: none;
+        opacity: 0.5;
     }
-    .item-fusion {
-        padding: 0 10px;
-        font-size: 12px;
-        .item {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            border: 2px solid #56d6ff;
-            border-radius: 5px;
-            .left {
-                display: flex;
-                gap: 10px;
-                align-items: center;
-                .el {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 5px;
-                    .text {
-                        background-color: #2cde00;
-                        text-align: center;
-                        padding: 3px;
-                        border-radius: 5px;
-                    }
-                    img {
-                        width: 70px;
-                    }
-                }
-            }
-            .right {
-                display: flex;
-                gap: 15px;
-                .img {
-                    display: flex;
-                    align-items: center;
-                    img {
-                        width: 15px;
-                        height: auto;
-                    }
-                }
-                .content {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 10px;
-                    align-items: center;
-                    .img {
-                        display: flex;
-                        img {
-                            width: 70px;
-                            border-radius: 5px;
-                        }
-                    }
-                    button {
-                        font-size: 10px;
-                        padding: 5px;
-                        border-radius: 8px;
-                    }
-                    .disable {
-                        pointer-events: none;
-                        opacity: 0.8;
-                    }
-                }
-            }
-        }
-    }
+}
+.slot-item {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 5px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
+        1px 1px 0 #000;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-bottom-left-radius: 10px;
+    color: #fffb3a;
 }
 
 .popup-cooming-soon {
@@ -657,6 +655,10 @@ export default defineComponent({
 .animation-inventory {
     animation: slideIn 0.5s forwards;
 }
+.slideIn-fusion {
+    animation: slideIn 0.5s forwards;
+}
+
 @keyframes slideIn {
     from {
         opacity: 0;
@@ -674,7 +676,6 @@ export default defineComponent({
         opacity: 0;
     }
 }
-//cooming-soon
 
 .button-overlay {
     position: absolute;
@@ -686,7 +687,9 @@ export default defineComponent({
     justify-content: center;
     align-items: center;
     background-color: rgba(0, 0, 0, 0.5);
-    // display: block;
+    flex-direction: column;
+    gap: 5px;
+    z-index: 1;
 }
 
 .overlay-btn {

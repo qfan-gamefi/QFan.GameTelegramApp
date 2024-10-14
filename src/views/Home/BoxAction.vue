@@ -4,10 +4,11 @@
             <img
                 loading="lazy"
                 class="img-market"
-                src="./../../../public/assets/shop/Market.png"
+                src="./../../../public/assets/shop/market.png"
                 @click="handleBackButton"
             />
-            <div class="shine"></div>
+            <div class="shine shine-1"></div>
+            <div class="shine shine-4"></div>
         </router-link>
         <router-link to="/inventory">
             <img
@@ -118,55 +119,51 @@ export default {
 }
 
 .box-action .img-market {
-    width: 70px;
+    width: 50px;
+    /* padding: 5px; */
     object-fit: cover;
+    /* animation: zoomInOut 3s ease-in-out infinite alternate; */
+}
+@keyframes zoomInOut {
+    0% {
+        transform: scale(0.9);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 .market {
     position: relative;
+    /* border: 1px solid #fff;
+    border-radius: 5px;
+    background: #320460; */
 }
-/* .market:after {
-    content: "";
-    display: block;
+.text {
     position: absolute;
-}
-.market:after {
-    left: 0;
-    top: 0;
-    width: 4px;
-    height: 56px;
     background: #fff;
-    z-index: 5;
-    animation: sheen 5s infinite;
+    color: rebeccapurple;
+    font-weight: 800;
+    width: 60px;
+    text-align: center;
+    border-radius: 10px;
+    font-size: 12px;
+    bottom: 0;
+    left: 0;
+    transform: translate(0%, 90%);
 }
-@keyframes sheen {
-    0%,
-    100% {
-        left: 0;
-        opacity: 0;
-    }
-    1% {
-        opacity: 1;
-    }
-    10% {
-        left: calc(100% - 4px);
-    }
-    11%,
-    98% {
-        left: 100%;
-        opacity: 0;
-    }
-} */
 
 .shine {
     position: absolute;
-    top: 10%;
+    /* top: 10%;
     left: 65%;
     width: 1px;
-    height: 18px;
+    height: 18px; */
     background: #fff;
     transform: rotate(15deg);
-    animation: shine 5s infinite;
+    animation: shine 3s infinite;
 }
 .shine:before,
 .shine:after {
@@ -175,10 +172,10 @@ export default {
     position: absolute;
 }
 .shine:after {
-    top: 6px;
+    /* top: 6px;
     left: -2px;
     width: 5px;
-    height: 5px;
+    height: 5px; */
     background: #fff;
     transform: rotate(45deg);
     box-shadow: 0 0 8px 5px rgba(255, 255, 255, 0.75);
@@ -200,5 +197,58 @@ export default {
         opacity: 0;
         transform: rotate(635deg);
     }
+}
+.shine-1 {
+    top: 55%;
+    left: 15%;
+    width: 1px;
+    height: 18px;
+}
+.shine-1:after {
+    top: 6px;
+    left: -2px;
+    width: 5px;
+    height: 5px;
+}
+
+.shine-2 {
+    top: 60%;
+    left: 80%;
+    width: 1px;
+    height: 18px;
+    animation-delay: 0.5s;
+}
+.shine-2:after {
+    top: 6px;
+    left: -2px;
+    width: 5px;
+    height: 5px;
+}
+
+.shine-3 {
+    top: 10%;
+    left: 15%;
+    width: 1px;
+    height: 16px;
+    animation-delay: 1s;
+}
+.shine-3:after {
+    top: 6px;
+    left: -2px;
+    width: 5px;
+    height: 5px;
+}
+.shine-4 {
+    top: 5%;
+    left: 75%;
+    width: 1px;
+    height: 16px;
+    animation-delay: 1s;
+}
+.shine-4:after {
+    top: 6px;
+    left: -2px;
+    width: 5px;
+    height: 5px;
 }
 </style>

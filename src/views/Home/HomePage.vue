@@ -32,7 +32,7 @@ import type { ILevel } from "@/interface";
 import InfoUser from "@/views/InfoUser/InfoUser.vue";
 import LoadingScreen from "@/views/LoadingScreen/LoadingScreen.vue";
 import { formattedBalance } from "@/utils";
-import { mapState } from "vuex";
+import { mapState, useStore } from "vuex";
 import { preloadImages } from "@/utils/preloadImages";
 import HDKeyring from "@/crypto_utils/HDKeyring";
 import type { PrivateKey } from "@/crypto_utils/type";
@@ -63,6 +63,7 @@ export default {
         LoadingScreen,
         BoxAction,
     },
+
     data() {
         const telegram_bot_link =
             "Invite Link: https://t.me/QFanClubBot?start=r_";
@@ -134,11 +135,11 @@ export default {
             percentageLevel: 0,
             isMaxLv: false,
             isAnimated: false,
+            // autoMiningStore: this.$store.state.autoMining
         };
     },
     computed: {
-        ...mapState(["hasLoaded"]),
-        // ...mapState(["rewardInfo"]),
+        ...mapState(["hasLoaded", "autoMiningStore", "autoMessStore", "autoMessTextStore"]),
         beforeStyle() {
             return {
                 "--pseudo-width": `${this.apiDataWidth}%`,
@@ -148,6 +149,25 @@ export default {
             return {
                 "--pseudo-width": `${this.widthWining}%`,
             };
+        },
+    },
+    watch: {
+        autoMiningStore(){
+            if (this.autoMiningStore) {
+                this.calcWidthMining();
+                this.isExecAutoInteract = true;
+            }
+        },
+        autoMessStore(newVal, oldVal) {
+            this.widthWining = 0;
+            
+            if(this.autoMessStore){
+                this.renderSuccess(`Mining success +${30} QFP`);
+                this.calcWidthMining();
+                this.getInfoUser()
+            }else{
+                this.renderErr(`${this.autoMessTextStore}`);
+            }
         },
     },
     methods: {
@@ -171,12 +191,12 @@ export default {
                 show: true,
                 message: message,
                 type: type,
-            }),
-                setTimeout(() => {
-                    this.notification = {
-                        show: false,
-                    };
-                }, 3000);
+            })
+                // setTimeout(() => {
+                //     this.notification = {
+                //         show: false,
+                //     };
+                // }, 3000);
         },
         async renderSuccess(mess) {
             this.renderNotification(mess, "success");
@@ -541,75 +561,75 @@ export default {
             }
         },
         async onAutoInteract() {
-            const keyringService = new HDKeyring();
-            await keyringService.unlock();
+            this.$store.commit("setAutoMining", true);
 
-            const activeWallet = keyringService
-                .getWallets()
-                ?.at(0) as PrivateKey;
+            // const keyringService = new HDKeyring();
+            // await keyringService.unlock();
 
-            const address = await activeWallet?.addresses?.at(0);
+            // const activeWallet = keyringService
+            //     .getWallets()
+            //     ?.at(0) as PrivateKey;
 
-            if (!address) {
-                this.$router.push({ name: "WalletCreate" });
-                return;
-            }
+            // const address = await activeWallet?.addresses?.at(0);
 
-            // this.titleAutoInteract = "Mining...";
-            this.calcWidthMining();
-            this.isExecAutoInteract = true;
-            await this.autoInteract(keyringService);
+            // if (!address) {
+            //     this.$router.push({ name: "WalletCreate" });
+            //     return;
+            // }
+            
 
-            this.autoInteractInterval = setInterval(async () => {
-                await this.calcWidthMining();
-                await this.autoInteract(keyringService);
-            }, MINING_INTERVAL);
+            // this.calcWidthMining();
+            // this.isExecAutoInteract = true;
+            // await this.autoInteract(keyringService);
+
+            // this.autoInteractInterval = setInterval(async () => {
+            //     await this.calcWidthMining();
+            //     await this.autoInteract(keyringService);
+            // }, MINING_INTERVAL);
         },
-        async autoInteract(keyringService: HDKeyring) {
-            try {
-                if (keyringService.getWallets().length > 0) {
-                    this.isExecAutoInteract = true;
-                    const activeWallet = keyringService.getActiveWallet();
-                    if (!activeWallet) {
-                        this.$router.push({ name: "WalletCreate" });
-                        return;
-                    }
+        // async autoInteract(keyringService: HDKeyring) {
+        //     try {
+        //         if (keyringService.getWallets().length > 0) {
+        //             this.isExecAutoInteract = true;
+        //             const activeWallet = keyringService.getActiveWallet();
+        //             if (!activeWallet) {
+        //                 this.$router.push({ name: "WalletCreate" });
+        //                 return;
+        //             }
 
-                    const address = await activeWallet?.address;
+        //             const address = await activeWallet?.address;
 
-                    const request: QuaiTransactionRequest = {
-                        from: address,
-                        to: QFPOwerWalletAddress,
-                    };
+        //             const request: QuaiTransactionRequest = {
+        //                 from: address,
+        //                 to: QFPOwerWalletAddress,
+        //             };
 
-                    const tx = (await keyringService.sendTokenTransaction(
-                        request
-                    )) as QuaiTransactionResponse;
+        //             const tx = (await keyringService.sendTokenTransaction(
+        //                 request
+        //             )) as QuaiTransactionResponse;
 
-                    console.log("autoInteract TX", tx);
-
-                    const autoInteract = await userService.autoInteract(
-                        this.idUser,
-                        activeWallet?.address as string,
-                        tx.hash as string
-                    );
-                    await this.getInfoUser();
-                    if (autoInteract.error) {
-                        this.renderErr(autoInteract?.message);
-                        this.widthWining = 0;
-                    } else {
-                        this.widthWining = 0;
-                        this.renderSuccess(`Mining success +${30}QFP`);
-                        this.calcWidthMining();
-                    }
-                } else {
-                    this.$router.push({ name: "WalletCreate" });
-                }
-            } catch (error) {
-                this.renderErr(error?.message);
-                await this.getInfoUser();
-            }
-        },
+        //             const autoInteract = await userService.autoInteract(
+        //                 this.idUser,
+        //                 activeWallet?.address as string,
+        //                 tx.hash as string
+        //             );
+        //             await this.getInfoUser();
+        //             if (autoInteract.error) {
+        //                 this.renderErr(autoInteract?.message);
+        //                 this.widthWining = 0;
+        //             } else {
+        //                 this.widthWining = 0;
+        //                 this.renderSuccess(`Mining success +${30} QFP`);
+        //                 this.calcWidthMining();
+        //             }
+        //         } else {
+        //             this.$router.push({ name: "WalletCreate" });
+        //         }
+        //     } catch (error) {
+        //         this.renderErr(error?.message);
+        //         await this.getInfoUser();
+        //     }
+        // },
         calcWidthMining() {
             const totalTime = MINING_INTERVAL;
             const updateInterval = 1000;
@@ -629,7 +649,6 @@ export default {
         },
         async initializeApp() {
             setTimeout(() => {
-                // this.setHasLoaded(true);
                 this.$store.commit("setHasLoaded", true);
             }, 2000);
         },
@@ -641,6 +660,10 @@ export default {
 
         if (!this.hasLoaded) {
             this.initializeApp();
+        }
+        if (this.autoMiningStore) {
+            this.calcWidthMining();
+            this.isExecAutoInteract = true;
         }
     },
     async updated() {
@@ -727,7 +750,7 @@ export default {
                     <div class="box-info" :style="styleWining">
                         <div class="auto-left">
                             <div class="woodwork-loader">
-                                <div class="runner" :style="styleWining"></div>
+                                <div class="runner rotateMining" :style="styleWining"></div>
                             </div>
 
                             <div class="box-woodwork">

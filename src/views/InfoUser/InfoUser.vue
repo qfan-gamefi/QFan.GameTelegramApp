@@ -7,21 +7,9 @@
 
             <div class="wrap-username-lv">
                 <div class="username f-bangopro">{{ first_name }} {{ last_name }}</div>
-                <div class="lv f-bangopro">
-                    <!-- <div class="wr-balance">
-                        <img src="@public/assets/logo.svg" />
-                        <div
-                            class="text-balance"
-                            :class="{ 'animate-text': isAnimated }"
-                        >
-                            {{
-                                dataLogin?.attributes?.qpoint?.data?.attributes
-                                    ?.balance / 1000
-                            }}
-                        </div>
-                    </div> -->
+                <div class="lv">
 
-                    <div class="text">
+                    <div class="text f-bangopro">
                         {{ dataLevel?.attributes?.levelName }}
                     </div>
 
@@ -46,7 +34,6 @@
                 }"></div>
             </div>
 
-            <!-- <img src="@public/assets//event/beta test.png" /> -->
         </div>
     </div>
 </template>
@@ -245,8 +232,6 @@ $deep-teal: #005662;
 }
 
 .progress-text {
-    font-family: monospace;
-    font-weight: bold;
     font-size: 8px;
 
     .number {
@@ -256,6 +241,7 @@ $deep-teal: #005662;
         display: flex;
         width: 100%;
         justify-content: center;
+        height: 10px;
     }
 
     .exp {
@@ -263,32 +249,10 @@ $deep-teal: #005662;
         top: 50%;
         transform: translate(0%, -50%);
         display: flex;
-        right: 2%;
+        right: 2%; 
+        height: 10px;
     }
 }
-
-// .wr-balance {
-//     display: flex;
-//     gap: 5px;
-//     align-items: center;
-//     color: $white;
-//     font-size: 10px;
-//     border-radius: 8px;
-
-//     img {
-//         width: 15px;
-//         height: 15px;
-//     }
-
-//     .text-balance {
-//         transition: all 1s ease;
-//         @include text-shadow($dark-red);
-//     }
-
-//     .animate-text {
-//         transform: scale(1.2);
-//     }
-// }
 
 .wr-badge {
     margin-left: 60px;

@@ -1,5 +1,5 @@
 <template>
-    <div class="bg-[#00165A]">
+    <div class="">
         <div
             class="flex justify-end border-b border-b-[#2f9ad6] mx-4 py-2 w-[calc(100%-30px)] gap-3 text-[12px]"
         >
@@ -20,7 +20,7 @@
         </div>
     </div>
     <div
-        class="box-item bg-[#00165A] h-[calc(100vh-145px)] p-[10px_15px] overflow-auto"
+        class="box-item h-[calc(100vh-198px)] p-[10px_15px] overflow-auto"
     >
         <div class="order-item" v-for="(item, index) in listOrder" :key="index">
             <div class="flex gap-[10px]">

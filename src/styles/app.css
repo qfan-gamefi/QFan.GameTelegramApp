@@ -233,7 +233,7 @@
     top: 25%;
     left: 50%;
     transform: translate(-50%, -50%); */
-    width: 80%;
+    width: 90%;
     background: rgb(0 31 63 / 40%);
     padding: 15px;
     border-radius: 15px;
@@ -342,7 +342,7 @@
 }
 
 .box-woodwork img {
-    width: 30px;
+    width: 35px;
 }
 
 .woodwork-loader {
@@ -383,15 +383,15 @@
 
 .runner {
     position: absolute;
-    width: 15px;
-    height: 15px;
+    width: 12px;
+    height: 12px;
     background-image: url("./../../public/assets/mining/ball2.png");
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    /* animation: run 20s infinite; */
-    margin-left: -16px;
+    margin-left: -12px;
     left: var(--pseudo-width);
+    transition: left 0.5s ease-in-out;
 }
 
 @keyframes run {
@@ -558,7 +558,7 @@
 
 .wr-balance {
     display: flex;
-    font-family: 'BANGOPRO', sans-serif;
+    font-family: "BANGOPRO", sans-serif;
     gap: 3px;
     align-items: end;
     width: fit-content;
@@ -578,5 +578,4 @@
 
 .wr-balance img {
     width: 20px;
-    height: 20px;
 }

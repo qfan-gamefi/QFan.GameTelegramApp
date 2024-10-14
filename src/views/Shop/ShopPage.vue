@@ -1,5 +1,5 @@
 <template>
-    <div class="wr-shop-page text-white">
+    <div class="wr-shop-page text-white bg-[#00165A]">
         <div class="banner">
             <div>
                 <router-link to="/" class="close-to-home">
@@ -36,7 +36,7 @@
         </div>
 
         <div
-            class="font-extrabold text-[12px] p-[10px] px-[15px] bg-[#00165a] border-b border-b-[#2f9ad6]"
+            class="font-extrabold text-[12px] p-[10px] px-[15px] border-b border-b-[#2f9ad6]"
         >
             <div class="flex justify-between items-center">
                 <div class="flex gap-1">
@@ -54,7 +54,7 @@
         </div>
 
         <div
-            class="h-full bg-[#00165a]"
+            class="h-full"
             v-if="activeButton === EButtonName.MarketPlace"
         >
             <div

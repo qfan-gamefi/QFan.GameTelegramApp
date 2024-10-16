@@ -37,7 +37,6 @@
 
 <script lang="ts">
 import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
-import { TRUE } from "sass";
 
 export default {
     name: "BoxAction",

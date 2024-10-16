@@ -126,21 +126,20 @@
                             >
                                 <div
                                     class="flex flex-col gap-[5px] min-w-[55px]"
-                                    v-for="(el, idx) in parseItemDef(
-                                        item.ResourcesItemDefIds
-                                    )"
+                                    v-for="(
+                                        el, idx
+                                    ) in item?.ResourcesItemDefIds"
                                     :key="idx"
                                 >
                                     <div
-                                        class="bg-[#2cde00] text-center p-1 rounded-md"
+                                        class="text-center p-1 rounded-md"
+                                        :class="renderItemFusion(el, 'bg')"
                                     >
-                                        {{ numberWithItem(el.ItemDefId) }}/{{
-                                            el.Count
-                                        }}
+                                        {{ renderItemFusion(el, "count") }}
                                     </div>
                                     <img
                                         class="w-[55px]"
-                                        :src="el.ImageUrl"
+                                        :src="el?.ImageUrl"
                                         loading="lazy"
                                     />
                                 </div>
@@ -160,7 +159,7 @@
                                     <div class="relative">
                                         <img
                                             class="w-[60px] rounded-md"
-                                            :src="item.Treasure.ImageUrl"
+                                            :src="item?.Treasure?.ImageUrl"
                                         />
                                         <div class="slot-item">
                                             {{ item?.TreasureCount }}
@@ -187,21 +186,11 @@
             </div>
         </div>
 
-        <div
-            :class="[
-                'popup-cooming-soon',
-                { 'closing-popup': !showCoomingSoon },
-            ]"
-            v-if="showCoomingSoon"
-        >
-            <p>Coming soon</p>
-            <button
-                @click="showCoomingSoon = false"
-                class="btn-close-coming-soon"
-            >
-                Close
-            </button>
-        </div>
+        <PopupComingSoon
+            :visible="showCoomingSoon"
+            message="Coming soon!"
+            @close="showCoomingSoon = false"
+        />
 
         <NotificationToast
             v-if="showNotification"
@@ -225,6 +214,8 @@
             currentPage="inventory"
             @closeCallApi="closeViewCart()"
         />
+
+        <PopupPassword :visible="isPass" @cancel="isPass = false" />
     </div>
 </template>
 
@@ -234,6 +225,7 @@ import userServiceInventory from "@/services/inventoryService";
 import {
     EItemDefType,
     IFusion,
+    IFusionString,
     IItemDefFusion,
     IItemInventory,
 } from "@/interface";
@@ -243,6 +235,9 @@ import NotificationToast from "@/components/NotificationToast.vue";
 import PopupConfirm from "@/components/PopupConfirm.vue";
 import ViewCart from "./../Shop/ViewCart.vue";
 import { IDetailCart } from "@/views/Shop/defination";
+import PopupPassword from "@/components/popup/PopupPassword.vue";
+import { mapState } from "vuex";
+import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
 
 enum ButtonName {
     Inventory = "Inventory",
@@ -261,10 +256,15 @@ export default defineComponent({
         NotificationToast,
         PopupConfirm,
         ViewCart,
+        PopupPassword,
+        PopupComingSoon,
     },
     created() {
         this.getDataInventor();
         this.getFausion();
+    },
+    computed: {
+        ...mapState(["rewardInfo"]),
     },
     data() {
         const userInfo = window.Telegram.WebApp.initDataUnsafe;
@@ -297,6 +297,7 @@ export default defineComponent({
 
             isViewCart: false,
             dataDetailCart: {} as IDetailCart,
+            isPass: false,
         };
     },
     methods: {
@@ -324,28 +325,78 @@ export default defineComponent({
                 this.activeButton = button;
             }
         },
-        numberWithItem(itemId: number) {
+        formatNumber(num) {
+            if (num >= 1000000) {
+                return `${(num / 1000000).toFixed(2)}M`;
+            } else if (num >= 10000) {
+                return `${(num / 1000).toFixed(0)}K`;
+            } else {
+                return num?.toString();
+            }
+        },
+        renderItemFusion(item: IItemDefFusion, type: "bg" | "count") {
+            const { ItemDefId, AutoCash, CashValue, Count } = item || {};
             const filterIdItem: IItemInventory = this.arrInventory?.find(
-                (el) => el.ItemDefId === itemId
+                (el) => el.ItemDefId === ItemDefId
             );
-            return filterIdItem?.ItemCount || 0;
-        },
-        parseItemDef(item: string) {
-            const data: IItemDefFusion[] = JSON.parse(item);
-            return data;
-        },
-        checkDisableFusion(item) {
-            const count = JSON.parse(item.ResourcesItemDefIds);
+            const dataBalance =
+                this.rewardInfo?.attributes?.qpoint?.data?.attributes;
+            const formatBalace = this.formatNumber(dataBalance?.balance);
+            const countItem = filterIdItem?.ItemCount || 0;
+            const countHash = Count || 0;
 
-            const result = count.every((itemA) => {
-                const matchingItemB = this.arrInventory.find(
-                    (itemB) => itemB.ItemDefId === itemA.ItemDefId
-                );
-                return matchingItemB
-                    ? itemA.Count <= matchingItemB.ItemCount
-                    : false;
-            });
-            return result ? "" : "disable";
+            if (type === "count") {
+                if (AutoCash && AutoCash === 1) {
+                    const formatCashValue = this.formatNumber(CashValue);
+
+                    return `${formatBalace}/${formatCashValue}`;
+                } else {
+                    return `${countItem}/${countHash}`;
+                }
+            }
+            if (type === "bg") {
+                const bgRed = "bg-[#FF0000]";
+                const bgGreen = "bg-[#2cde00]";
+
+                if (AutoCash && AutoCash === 1) {
+                    return dataBalance?.balance >= CashValue ? bgGreen : bgRed;
+                } else {
+                    return countItem >= countHash ? bgGreen : bgRed;
+                }
+            }
+        },
+
+        checkDisableFusion(item) {
+            const arrRow = item.ResourcesItemDefIds;
+            const balance =
+                this.rewardInfo?.attributes?.qpoint?.data?.attributes?.balance;
+
+            const hasAutoCash = arrRow.some((item) => "AutoCash" in item);
+
+            if (hasAutoCash) {
+                const result = arrRow?.map((item) => {
+                    if (item?.AutoCashType === "QFP") {
+                        return balance >= item?.CashValue ? true : false;
+                    } else {
+                        return true;
+                    }
+                });
+
+                const hasFalseValue = !result.some((value) => value === false);
+
+                return hasFalseValue ? "" : "disable";
+            } else {
+                const result = arrRow?.every((itemA) => {
+                    const matchingItemB = this.arrInventory.find(
+                        (itemB) => itemB.ItemDefId === itemA.ItemDefId
+                    );
+                    return matchingItemB
+                        ? itemA.Count <= matchingItemB.ItemCount
+                        : false;
+                });
+
+                return result ? "" : "disable";
+            }
         },
         async getDataInventor() {
             try {
@@ -404,13 +455,28 @@ export default defineComponent({
                     await this.renderErr(`Received ${res?.data}`);
                 }
             } catch (error) {
-                this.renderErr(`Error!`);
+                if (error?.response?.status === 401) {
+                    this.isPass = true;
+                    // localStorage.getItem("storePermission") === "true";
+                } else {
+                    this.renderErr(`Error!`);
+                }
             }
         },
         async getFausion() {
             try {
-                const res = await userServiceInventory.getFusion();
-                this.listFusion = res;
+                const resFusion: IFusionString[] =
+                    await userServiceInventory.getFusion();
+                const parseFusion = resFusion?.map((item) => {
+                    return {
+                        ...item,
+                        ResourcesItemDefIds: JSON.parse(
+                            item?.ResourcesItemDefIds
+                        ),
+                    };
+                });
+
+                this.listFusion = parseFusion;
             } catch (error) {
                 console.error(error);
             }
@@ -627,29 +693,6 @@ export default defineComponent({
     background-color: rgba(0, 0, 0, 0.5);
     border-bottom-left-radius: 10px;
     color: #fffb3a;
-}
-
-.popup-cooming-soon {
-    z-index: 999;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    padding: 30px;
-    border: 1px solid #ccc;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    animation: slideIn 0.5s forwards;
-    border-radius: 10px;
-}
-
-//cooming-soon
-.popup-cooming-soon p {
-    color: black;
-}
-
-.closing-popup {
-    animation: slideOut 0.5s forwards;
 }
 
 .animation-inventory {

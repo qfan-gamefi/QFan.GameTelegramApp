@@ -1,197 +1,204 @@
 <template>
     <div v-bind:class="{ 'overlay-template': isViewCart }"></div>
+    <transition name="popup">
+        <div class="popup-template" v-if="isViewCart">
+            <div class="header">
+                <div class="m-auto f-bangopro">ORDER CONFIRM</div>
 
-    <div
-        class="popup-template"
-        v-if="isViewCart"
-        :class="isViewCart ? 'popup-enter-active' : 'popup-leave-active'"
-    >
-        <div class="header">
-            <div class="m-auto f-bangopro">ORDER CONFIRM</div>
-
-            <div @click="handleCloseCart" class="close-view-cart">
-                <i class="fa-solid fa-rectangle-xmark"></i>
-            </div>
-        </div>
-
-        <div class="p-2 bg-[#00165a]">
-            <div class="bg-[#0b3393] p-1 rounded-md" :key="detailCart?.id">
-                <div class="mb-1">
-                    <div class="flex gap-1" v-if="currentPage !== 'inventory'">
-                        <div
-                            :class="[
-                                'buy-sell-item',
-                                {
-                                    active: activeTab === 'buy',
-                                    inactive: activeTab !== 'buy',
-                                },
-                            ]"
-                            @click="setActiveTab('buy')"
-                        >
-                            Buy
-                        </div>
-                        <div
-                            :class="[
-                                'buy-sell-item',
-                                {
-                                    active: activeTab === 'sell',
-                                    inactive: activeTab !== 'sell',
-                                },
-                            ]"
-                            @click="setActiveTab('sell')"
-                        >
-                            Sell
-                        </div>
-                    </div>
+                <div @click="handleCloseCart" class="close-view-cart">
+                    <i class="fa-solid fa-rectangle-xmark"></i>
                 </div>
+            </div>
 
-                <div class="flex gap-2">
-                    <div class="w-[80px]">
-                        <img
-                            class="w-[80px] object-cover rounded-md flex"
-                            :src="detailCart?.ItemDef?.ImageUrl"
-                            :alt="detailCart?.ItemDef?.Description"
-                        />
+            <div class="p-2 bg-[#00165a]">
+                <div class="bg-[#0b3393] p-1 rounded-md" :key="detailCart?.id">
+                    <div class="mb-1">
+                        <div
+                            class="flex gap-1"
+                            v-if="currentPage !== 'inventory'"
+                        >
+                            <div
+                                :class="[
+                                    'buy-sell-item',
+                                    {
+                                        active: activeTab === 'buy',
+                                        inactive: activeTab !== 'buy',
+                                    },
+                                ]"
+                                @click="setActiveTab('buy')"
+                            >
+                                Buy
+                            </div>
+                            <div
+                                :class="[
+                                    'buy-sell-item',
+                                    {
+                                        active: activeTab === 'sell',
+                                        inactive: activeTab !== 'sell',
+                                    },
+                                ]"
+                                @click="setActiveTab('sell')"
+                            >
+                                Sell
+                            </div>
+                        </div>
                     </div>
-                    <div
-                        class="flex flex-col gap-1 w-[calc(100%-68px)] text-[10px] font-extrabold"
-                    >
-                        <div
-                            class="flex justify-between px-1 text-[#6c757d] uppercase"
-                        >
-                            <div>Buy</div>
-                            <div>Price</div>
-                            <div>Sell</div>
-                        </div>
 
-                        <div class="flex relative">
-                            <div
-                                class="bg-[#2ebd856b] h-[15px]"
-                                :style="{ width: calcWithTotal('buy') }"
-                            >
-                                <div class="absolute left-1">
-                                    {{ formattedBalance(detailCart?.TotalBuy) }}
-                                </div>
-                            </div>
-                            <div
-                                class="bg-[#f6465d5c] text-right"
-                                :style="{
-                                    width: calcWithTotal('sell'),
-                                }"
-                            >
-                                <div class="absolute right-1">
-                                    {{
-                                        formattedBalance(detailCart?.TotalSell)
-                                    }}
-                                </div>
-                            </div>
+                    <div class="flex gap-2">
+                        <div class="w-[80px]">
+                            <img
+                                class="w-[80px] object-cover rounded-md flex"
+                                :src="detailCart?.ItemDef?.ImageUrl"
+                                :alt="detailCart?.ItemDef?.Description"
+                            />
                         </div>
-
                         <div
-                            class="flex gap-2 justify-between"
-                            v-for="(item, index) in listDetail"
-                            :key="index"
+                            class="flex flex-col gap-1 w-[calc(100%-68px)] text-[10px] font-extrabold"
                         >
-                            <div class="flex-1 flex relative justify-end">
-                                <div class="absolute left-1">
-                                    {{ renderCount("buy", item) }}
+                            <div
+                                class="flex justify-between px-1 text-[#6c757d] uppercase"
+                            >
+                                <div>Buy</div>
+                                <div>Price</div>
+                                <div>Sell</div>
+                            </div>
+
+                            <div class="flex relative">
+                                <div
+                                    class="bg-[#2ebd856b] h-[15px]"
+                                    :style="{ width: calcWithTotal('buy') }"
+                                >
+                                    <div class="absolute left-1">
+                                        {{
+                                            formattedBalance(
+                                                detailCart?.TotalBuy
+                                            )
+                                        }}
+                                    </div>
                                 </div>
                                 <div
-                                    class="bg-[#2ebd856b] text-right h-[15px]"
+                                    class="bg-[#f6465d5c] text-right"
                                     :style="{
-                                        width: calcWithItem('buy', item),
+                                        width: calcWithTotal('sell'),
                                     }"
                                 >
                                     <div class="absolute right-1">
-                                        {{ renderPrice("buy", item) }}
+                                        {{
+                                            formattedBalance(
+                                                detailCart?.TotalSell
+                                            )
+                                        }}
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="flex-1 flex justify-start relative">
-                                <div
-                                    class="bg-[#f6465d5c] h-[15px]"
-                                    :style="{
-                                        width: calcWithItem('sell', item),
-                                    }"
-                                >
+                            <div
+                                class="flex gap-2 justify-between"
+                                v-for="(item, index) in listDetail"
+                                :key="index"
+                            >
+                                <div class="flex-1 flex relative justify-end">
                                     <div class="absolute left-1">
-                                        {{ renderPrice("sell", item) }}
+                                        {{ renderCount("buy", item) }}
+                                    </div>
+                                    <div
+                                        class="bg-[#2ebd856b] text-right h-[15px]"
+                                        :style="{
+                                            width: calcWithItem('buy', item),
+                                        }"
+                                    >
+                                        <div class="absolute right-1">
+                                            {{ renderPrice("buy", item) }}
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="absolute right-1">
-                                    {{ renderCount("sell", item) }}
+
+                                <div class="flex-1 flex justify-start relative">
+                                    <div
+                                        class="bg-[#f6465d5c] h-[15px]"
+                                        :style="{
+                                            width: calcWithItem('sell', item),
+                                        }"
+                                    >
+                                        <div class="absolute left-1">
+                                            {{ renderPrice("sell", item) }}
+                                        </div>
+                                    </div>
+                                    <div class="absolute right-1">
+                                        {{ renderCount("sell", item) }}
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="cart-payment">
-            <div class="price-quantity">
-                <div class="price flex-1">
-                    <!-- <InputField
+            <div class="cart-payment">
+                <div class="price-quantity">
+                    <div class="price flex-1">
+                        <!-- <InputField
                             v-model="price"
                             label="Price"
                             placeholder="Enter price"
                         /> -->
 
-                    <InputSelect
-                        v-model="price"
-                        label="Price"
-                        placeholder="Enter price"
-                        :options="quaiOptions"
-                        v-model:selectedOption="selectedOption"
-                        type="number"
-                    />
+                        <InputSelect
+                            v-model="price"
+                            label="Price"
+                            placeholder="Enter price"
+                            :options="quaiOptions"
+                            v-model:selectedOption="selectedOption"
+                            type="number"
+                        />
+                    </div>
+                    <div class="quantity flex-1">
+                        <InputNumber
+                            v-model="quantity"
+                            label="Quantity"
+                            placeholder="Enter quantity"
+                        />
+                    </div>
                 </div>
-                <div class="quantity flex-1">
-                    <InputNumber
-                        v-model="quantity"
-                        label="Quantity"
-                        placeholder="Enter quantity"
-                    />
-                </div>
-            </div>
 
-            <div class="desc-payment">
-                <div class="amount">
-                    <div>Amount</div>
-                    <div>{{ renderAmount() }}</div>
+                <div class="desc-payment">
+                    <div class="amount">
+                        <div>Amount</div>
+                        <div>{{ renderAmount() }}</div>
+                    </div>
+                    <div class="fee">
+                        <div>Fee ({{ this.orderFee?.ValueType }})</div>
+                        <div>{{ renderFee() }}</div>
+                    </div>
+                    <div class="total-payment">
+                        <div v-if="activeTab === 'sell'">
+                            Total Amount Received
+                        </div>
+                        <div v-else>Total Payment</div>
+                        <div>{{ renderTotal() }}</div>
+                    </div>
+                    <div class="text-note" v-if="activeTab === 'sell'">
+                        ( You will be charge 10% as Value Added Tax )
+                    </div>
                 </div>
-                <div class="fee">
-                    <div>Fee ({{ this.orderFee?.ValueType }})</div>
-                    <div>{{ renderFee() }}</div>
-                </div>
-                <div class="total-payment">
-                    <div v-if="activeTab === 'sell'">Total Amount Received</div>
-                    <div v-else>Total Payment</div>
-                    <div>{{ renderTotal() }}</div>
-                </div>
-                <div class="text-note" v-if="activeTab === 'sell'">
-                    ( You will be charge 10% as Value Added Tax )
-                </div>
-            </div>
 
-            <div>
-                <div
-                    @click="submitData()"
-                    :class="[
-                        'order-btn f-bangopro',
-                        {
-                            'buy-active': activeTab === 'buy',
-                            'sell-active': activeTab === 'sell',
-                        },
-                    ]"
-                >
-                    Order
+                <div>
+                    <div
+                        @click="submitData()"
+                        :class="[
+                            'order-btn f-bangopro',
+                            {
+                                'buy-active': activeTab === 'buy',
+                                'sell-active': activeTab === 'sell',
+                            },
+                        ]"
+                    >
+                        Order
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-
+    </transition>
     <NotificationToast
         v-if="showNotification"
         :message="notificationMessage"
@@ -206,13 +213,15 @@
         @yes="yesBuySell"
         @no="noBuySell"
     />
+
+    <PopupPassword :visible="isPass" @cancel="cancelPass()" />
 </template>
 
 <script lang="ts">
-import InputField from "@/components/Input/InputField.vue";
 import InputNumber from "@/components/Input/InputNumber.vue";
 import InputSelect from "@/components/Input/InputSelect.vue";
 import NotificationToast from "@/components/NotificationToast.vue";
+import PopupPassword from "@/components/popup/PopupPassword.vue";
 import PopupConfirm from "@/components/PopupConfirm.vue";
 import { EItemDefType, IItemInventory } from "@/interface";
 import userServiceInventory from "@/services/inventoryService";
@@ -223,18 +232,17 @@ import {
     IFeeVat,
     IItemOrderConfirm,
 } from "@/views/Shop/defination";
-import axios from "axios";
 import { defineComponent, PropType } from "vue";
 import { mapState } from "vuex";
 
 export default defineComponent({
     name: "ViewCartPage",
     components: {
-        InputField,
         NotificationToast,
         InputSelect,
         InputNumber,
         PopupConfirm,
+        PopupPassword,
     },
     computed: {
         ...mapState(["rewardInfo"]),
@@ -296,6 +304,7 @@ export default defineComponent({
 
             isBuySell: false,
             textConfirm: "Sure about this Buy order",
+            isPass: false,
         };
     },
     methods: {
@@ -355,7 +364,7 @@ export default defineComponent({
             if (tab === "buy") {
                 const minPriceSell = Math.min(
                     ...this.listDetail
-                        .filter((item) => item?.priceSell > 0)
+                        .filter((item) => item?.priceSell >= 0)
                         .map((item) => item?.priceSell)
                 ); //min sell
 
@@ -367,6 +376,7 @@ export default defineComponent({
                 const maxPriceBuy = Math.max(
                     ...this.listDetail.map((item) => item.priceBuy)
                 ); // max buy
+
                 this.price = maxPriceBuy;
                 // this.price = this.detailCart?.GoodSellPrice;
                 // this.bestPrice = this.detailCart?.GoodSellPrice;
@@ -473,9 +483,10 @@ export default defineComponent({
                     };
                 }
             );
+
             const minPriceSell = Math.min(
                 ...mergedList
-                    .filter((item) => item?.priceSell > 0)
+                    .filter((item) => item?.priceSell >= 0)
                     .map((item) => item?.priceSell)
             ); //min sell
 
@@ -484,6 +495,7 @@ export default defineComponent({
         },
         async yesBuySell() {
             this.isBuySell = false;
+
             const detailCart: IDetailCart = this.detailCart;
             const balance =
                 this.rewardInfo?.attributes?.qpoint?.data?.attributes?.balance;
@@ -533,7 +545,10 @@ export default defineComponent({
                     }
                 }
             } catch (error) {
-                console.log(error);
+                if (error?.response?.status === 401) {
+                    this.isPass = true;
+                    // localStorage.getItem("storePermission") === "true";
+                }
             }
         },
         noBuySell() {
@@ -568,12 +583,16 @@ export default defineComponent({
             }
             return formattedBalance(result); // parseFloat(result.toFixed(2));
         },
+        cancelPass() {
+            this.isPass = false;
+        },
     },
 });
 </script>
 
 <style scoped lang="scss">
 // @import "@/styles/global.scss";
+@import "@/styles/animation/popup.scss";
 
 $t-white-color: rgb(255, 255, 255);
 
@@ -596,33 +615,6 @@ $t-white-color: rgb(255, 255, 255);
     transform: translate(-50%, -50%);
     z-index: 999;
     padding: 0 10px;
-}
-.popup-enter-active {
-    animation: slideUp 0.5s ease forwards;
-}
-
-.popup-leave-active {
-    animation: slideDown 0.5s ease forwards;
-}
-
-@keyframes slideUp {
-    0% {
-        opacity: 0;
-    }
-
-    100% {
-        opacity: 1;
-    }
-}
-
-@keyframes slideDown {
-    0% {
-        opacity: 1;
-    }
-
-    100% {
-        opacity: 0;
-    }
 }
 
 .header {

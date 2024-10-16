@@ -35,9 +35,7 @@
             </div>
 
             <div class="btn-deposit">
-                <div>
-                    <button @click="submitDeposit()">Deposit</button>
-                </div>
+                <div class="text-center" @click="submitDeposit()">Deposit</div>
             </div>
         </div>
     </transition>
@@ -110,10 +108,12 @@ export default defineComponent({
         },
         validatePassword() {
             const getPassword = secureStorage.getPassword();
+
             if (!this.password) {
                 this.passwordError = true;
                 this.messPassError = "Password is required.";
             } else if (getPassword !== this.password) {
+                this.passwordError = true;
                 this.messPassError = "Password is incorrect.";
             } else {
                 this.passwordError = false;
@@ -142,19 +142,22 @@ export default defineComponent({
                         to: QFPOwerWalletAddress,
                         value: Number(amount),
                     };
-                    console.log(request);
 
                     const tx = (await keyringService.sendTokenTransaction(
                         request
                     )) as QuaiTransactionResponse;
 
-                    console.log(tx);
-                    // const res = await userService.postDeposit(
-                    //     id,
-                    //     address,
-                    //     amount,
-                    //     hash
-                    // );
+                    const res = await userService.postDeposit(
+                        id,
+                        address,
+                        amount,
+                        tx.hash
+                    );
+                    console.log(res);
+
+                    if (res?.status === 201 || res?.status === 200) {
+                        this.$emit("close");
+                    }
                 } catch (error) {
                     console.log(error);
                 }
@@ -175,6 +178,7 @@ $t-white-color: rgb(255, 255, 255);
     font-size: 12px;
     display: block;
     text-align: right;
+    font-weight: 800;
 }
 .overlay-template {
     position: fixed;

@@ -47,6 +47,8 @@ import {
 import { DEFAULT_QUAI_TESNTET } from "@/services/network/chains";
 import { getAddress, parseEther, toBigInt } from "ethers";
 import BoxAction from "./BoxAction.vue";
+import PopupPassword from "@/components/popup/PopupPassword.vue";
+import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
 
 const REF_MESS_PREFIX: string = "start r_";
 const REF_TOKEN_PREFIX: string = "TOKEN_";
@@ -62,6 +64,8 @@ export default {
         InfoUser,
         LoadingScreen,
         BoxAction,
+        PopupPassword,
+        PopupComingSoon,
     },
 
     data() {
@@ -85,6 +89,7 @@ export default {
 
         return {
             isLoadingCreen: true,
+            storePermission: false,
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
@@ -139,7 +144,12 @@ export default {
         };
     },
     computed: {
-        ...mapState(["hasLoaded", "autoMiningStore", "autoMessStore", "autoMessTextStore"]),
+        ...mapState([
+            "hasLoaded",
+            "autoMiningStore",
+            "autoMessStore",
+            "autoMessTextStore",
+        ]),
         beforeStyle() {
             return {
                 "--pseudo-width": `${this.apiDataWidth}%`,
@@ -152,7 +162,7 @@ export default {
         },
     },
     watch: {
-        autoMiningStore(){
+        autoMiningStore() {
             if (this.autoMiningStore) {
                 this.calcWidthMining();
                 this.isExecAutoInteract = true;
@@ -160,12 +170,12 @@ export default {
         },
         autoMessStore(newVal, oldVal) {
             this.widthWining = 0;
-            
-            if(this.autoMessStore){
+
+            if (this.autoMessStore) {
                 this.renderSuccess(`Mining success +${30} QFP`);
                 this.calcWidthMining();
-                this.getInfoUser()
-            }else{
+                this.getInfoUser();
+            } else {
                 this.renderErr(`${this.autoMessTextStore}`);
             }
         },
@@ -187,16 +197,11 @@ export default {
             this.isPopupCode = false;
         },
         async renderNotification(message, type) {
-            (this.notification = {
+            this.notification = {
                 show: true,
                 message: message,
                 type: type,
-            })
-                // setTimeout(() => {
-                //     this.notification = {
-                //         show: false,
-                //     };
-                // }, 3000);
+            };
         },
         async renderSuccess(mess) {
             this.renderNotification(mess, "success");
@@ -576,7 +581,6 @@ export default {
             //     this.$router.push({ name: "WalletCreate" });
             //     return;
             // }
-            
 
             // this.calcWidthMining();
             // this.isExecAutoInteract = true;
@@ -652,10 +656,16 @@ export default {
                 this.$store.commit("setHasLoaded", true);
             }, 2000);
         },
+        async cancelPopupPassword() {
+            this.storePermission = false;
+            await this.getInfoUser();
+        },
     },
     async mounted() {
         Telegram.WebApp.ready();
         Telegram.WebApp.setHeaderColor("#ffffff");
+        // this.storePermission =
+        //     localStorage.getItem("storePermission") === "true";
         await this.getInfoUser();
 
         if (!this.hasLoaded) {
@@ -750,7 +760,10 @@ export default {
                     <div class="box-info" :style="styleWining">
                         <div class="auto-left">
                             <div class="woodwork-loader">
-                                <div class="runner rotateMining" :style="styleWining"></div>
+                                <div
+                                    class="runner rotateMining"
+                                    :style="styleWining"
+                                ></div>
                             </div>
 
                             <div class="box-woodwork">
@@ -883,18 +896,11 @@ export default {
 
         <CheckinForm :isCheckin="isCheckin" @closeCheckin="closeCheckin" />
 
-        <div
-            :class="[
-                'popup-cooming-soon',
-                { 'closing-popup': !showCoomingSoon },
-            ]"
-            v-if="showCoomingSoon"
-        >
-            <p>Coming soon</p>
-            <button @click="hidePopupCoomingSoon" class="btn-close-coming-soon">
-                Close
-            </button>
-        </div>
+        <PopupComingSoon
+            :visible="showCoomingSoon"
+            message="Coming soon!"
+            @close="showCoomingSoon = false"
+        />
 
         <div class="enter-code-success" v-if="isSuccess">
             <span>Success!</span>
@@ -905,6 +911,11 @@ export default {
             :message="notification.message"
             :type="notification.type"
             @close="notification.show = false"
+        />
+
+        <PopupPassword
+            :visible="storePermission"
+            @cancel="cancelPopupPassword()"
         />
     </div>
 </template>

@@ -35,7 +35,6 @@ export default {
             const value = event.target.value;
             const numericValue = value.replace(/[^0-9]/g, "");
 
-            // Nếu `modelValue` là kiểu `Number`, chuyển thành số
             if (typeof this.modelValue === "number") {
                 this.$emit("update:modelValue", parseFloat(numericValue));
             } else {

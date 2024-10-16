@@ -137,24 +137,6 @@
     position: relative;
 }
 
-.popup-cooming-soon {
-    z-index: 999;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    padding: 30px;
-    border: 1px solid #ccc;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    animation: slideIn 0.5s forwards;
-    border-radius: 10px;
-}
-
-.popup-cooming-soon p {
-    color: black;
-}
-
 .closing-popup {
     animation: slideOut 0.5s forwards;
 }
@@ -560,7 +542,7 @@
     display: flex;
     font-family: "BANGOPRO", sans-serif;
     gap: 3px;
-    align-items: end;
+    align-items: center;
     width: fit-content;
     padding: 5px 15px;
     margin: 0 auto;

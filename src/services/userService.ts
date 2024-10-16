@@ -203,8 +203,11 @@ const userService = {
             unit: "QUAI",
             hash: hash,
         };
-        const res = await networkAxiosInstance.post(`/wallet/deposit`, data);
-        return res?.data;
+        const res = await networkAxiosInstance.post(
+            `/wallet/deposit-onchain`,
+            data
+        );
+        return res;
     },
     async getLevels() {
         const res = await axiosInstance.get(

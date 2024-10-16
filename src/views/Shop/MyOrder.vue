@@ -263,7 +263,10 @@ export default defineComponent({
         },
         async handleCancelOrder(id: number) {
             try {
-                const res = await userServiceInventory.cancelOrder(id);
+                const res = await userServiceInventory.cancelOrder(
+                    id,
+                    this.userId
+                );
                 if (res.success) {
                     this.renderSuccess("Cancel success!");
                     await this.callOrderShop();

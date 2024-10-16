@@ -53,10 +53,7 @@
             </div>
         </div>
 
-        <div
-            class="h-full"
-            v-if="activeButton === EButtonName.MarketPlace"
-        >
+        <div class="h-full" v-if="activeButton === EButtonName.MarketPlace">
             <div
                 class="flex text-[12px] border-b border-b-[#2f9ad6] font-extrabold px-4 py-2"
             >
@@ -113,6 +110,12 @@
             @close="handleCloseDeposit()"
             :infoWallet="infoWallet"
         />
+
+        <PopupComingSoon
+            :visible="showCoomingSoon"
+            message="Coming soon!"
+            @close="showCoomingSoon = false"
+        />
     </div>
 </template>
 
@@ -133,6 +136,7 @@ import { mapState } from "vuex";
 import { formattedBalance } from "@/utils";
 import userService from "@/services/userService";
 import userServiceInventory from "@/services/inventoryService";
+import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
 
 export default defineComponent({
     name: "ShopPage",
@@ -140,6 +144,7 @@ export default defineComponent({
         ViewCart,
         DepositInShop,
         MyOrderPage,
+        PopupComingSoon,
     },
     computed: {
         ...mapState(["rewardInfo"]),
@@ -198,7 +203,7 @@ export default defineComponent({
         },
         setActiveButton(button: EButtonName) {
             if (button === EButtonName.Transactions) {
-                // this.showCoomingSoon = true;
+                this.showCoomingSoon = true;
             } else {
                 this.activeButton = button;
             }
@@ -252,6 +257,7 @@ export default defineComponent({
         async callWalletInfo() {
             try {
                 const res = await userService.getWalletInfo(this.userId);
+
                 this.infoWallet = res?.[0];
             } catch (error) {}
         },

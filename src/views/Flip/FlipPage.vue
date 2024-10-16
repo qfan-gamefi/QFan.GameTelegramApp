@@ -186,6 +186,8 @@
         @yes="handleYesToken"
         @no="handleNoToken"
     />
+
+    <PopupPassword :visible="isPass" @cancel="isPass = false" />
 </template>
 
 <script lang="ts">
@@ -199,6 +201,8 @@ import { secureStorage } from "@/storage/storage";
 import predictService from "@/services/predictService";
 import userService from "@/services/userService";
 import { TFlipClass, TStatusFlip } from "@/interface";
+import axios from "axios";
+import PopupPassword from "@/components/popup/PopupPassword.vue";
 
 export default defineComponent({
     name: "FlipPage",
@@ -206,6 +210,7 @@ export default defineComponent({
         NotificationToast,
         LoadingForm,
         PopupConfirm,
+        PopupPassword,
     },
     props: {},
     async created() {
@@ -258,6 +263,8 @@ export default defineComponent({
             balance: 0,
             winFlip: 0,
             lostFlip: 0,
+
+            isPass: false,
         };
     },
     methods: {
@@ -303,9 +310,9 @@ export default defineComponent({
             this.notificationMessage = message;
             this.notificationType = type;
             this.showNotification = true;
-            setTimeout(() => {
-                this.showNotification = false;
-            }, 2000);
+            // setTimeout(() => {
+            //     this.showNotification = false;
+            // }, 2000);
         },
         async renderSuccess(text) {
             this.renderNotification(text, "success");
@@ -387,21 +394,34 @@ export default defineComponent({
 
         async handleSubmit() {
             try {
-                const securityToken = await secureStorage.get("SECURITY_TOKEN");
-                if (!securityToken) {
-                    this.isToken = true;
-                    return;
-                }
+                // const securityToken = await secureStorage.get("SECURITY_TOKEN");
+                // if (!securityToken) {
+                //     this.isToken = true;
+                //     return;
+                // }
                 const data = {
                     gameId: 58,
                     userId: this.userId,
-                    userName: this.fullName,
+                    userName: "su fly 007", // this.fullName,
                     value: 200,
                     valueType: "QFP",
                     side: 0,
-                    securityToken: securityToken?.toString(),
+                    // securityToken: securityToken?.toString(),
                 };
                 const res = await predictService.makeFlip(data);
+                // const res1 = await axios.post(
+                //     "https://49bb-171-224-180-89.ngrok-free.app/api/v1/flip/makeflip",
+                //     {
+                //         gameId: 58,
+                //         userId: this.userId,
+                //         userName: "su fly 007",
+                //         value: 200,
+                //         valueType: "QFP",
+                //         side: 0,
+                //     }
+                // );
+                // const res = JSON.parse(res1.data.message);
+                console.log(res);
 
                 if (res.success) {
                     this.balance = Number(this.balance) - 200;
@@ -433,16 +453,20 @@ export default defineComponent({
                     }
                     this.timeoutPopup();
                 } else {
-                    if (res?.data?.SecurityToken) {
-                        this.isToken = true;
-                        return;
-                    } else {
-                        this.loadingSubmit = false;
-                        this.renderErr(res?.data?.Reason);
-                    }
+                    this.loadingSubmit = false;
+                    this.renderErr(res?.data?.Reason);
+                    // if (res?.data?.SecurityToken) {
+                    //     return;
+                    // } else {
+                    //     this.loadingSubmit = false;
+                    //     this.renderErr(res?.data?.Reason);
+                    // }
                 }
             } catch (error) {
-                console.log(error);
+                if (error?.response?.status === 401) {
+                    this.loadingSubmit = false;
+                    this.isPass = true;
+                }
             }
         },
 
@@ -719,7 +743,7 @@ export default defineComponent({
         }
         .status {
             flex: 0 0 20%;
-            font-size: 14px;
+            font-size: 10px;
             .win {
                 color: #ffe500;
             }

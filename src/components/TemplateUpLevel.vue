@@ -30,7 +30,11 @@
                         </div>
                         <div class="content-lv" v-if="typeBooster === 'SPEED'">
                             Claim every
-                            {{ dataNext?.attributes?.applyQtty }} hour
+                            {{
+                                renderTextStadium(
+                                    dataNext?.attributes?.applyQtty
+                                )
+                            }}
                         </div>
                         <div class="content-lv" v-if="typeBooster === 'AMOUNT'">
                             Speed {{ dataNext?.attributes?.applyQtty }}
@@ -65,7 +69,9 @@
                         </div>
                         <div class="content-lv" v-if="typeBooster === 'SPEED'">
                             Claim every
-                            {{ items?.attributes?.applyQtty }} hour
+                            {{
+                                renderTextStadium(items?.attributes?.applyQtty)
+                            }}
                         </div>
                         <div class="content-lv" v-if="typeBooster === 'AMOUNT'">
                             Speed {{ items?.attributes?.applyQtty }}
@@ -82,7 +88,7 @@
                     class="box-point-up t-primary-color"
                     :class="{ 'disabled-button': isMax }"
                 >
-                    {{ dataNext?.attributes?.price }}
+                    {{ formattedBalance(dataNext?.attributes?.price) }}
                     <img src="./../../public/assets/logo.svg" />
                 </div>
 
@@ -113,6 +119,7 @@ import userService from "../services/userService";
 import Notification from "./NotificationToast.vue";
 // import EmptyForm from "./EmptyForm.vue";
 import Loading from "./LoadingForm.vue";
+import { formattedBalance } from "@/utils";
 
 export default {
     components: {
@@ -173,6 +180,7 @@ export default {
         },
     },
     methods: {
+        formattedBalance,
         handleClose() {
             this.$emit("closeDetailNoCall");
         },
@@ -200,6 +208,14 @@ export default {
                 this.showNotification = false;
                 clearInterval(intervalId);
             }, 2000);
+        },
+        renderTextStadium(time) {
+            const newTime = Number(time);
+            if (newTime >= 2) {
+                return `${newTime} hours`;
+            } else {
+                return `${newTime} hour`;
+            }
         },
     },
 };

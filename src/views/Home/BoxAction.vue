@@ -57,7 +57,7 @@ export default {
     gap: 20px;
 }
 
-.box-action .img-flip {
+img {
     width: 50px;
     object-fit: cover;
 }
@@ -118,12 +118,7 @@ export default {
     }
 }
 
-.box-action .img-market {
-    width: 50px;
-    /* padding: 5px; */
-    object-fit: cover;
-    /* animation: zoomInOut 3s ease-in-out infinite alternate; */
-}
+
 @keyframes zoomInOut {
     0% {
         transform: scale(0.9);
@@ -136,23 +131,11 @@ export default {
 }
 
 .market {
-    position: relative;
+    position: relative; 
+    border-radius: 3px;
     /* border: 1px solid #fff;
     border-radius: 5px;
     background: #320460; */
-}
-.text {
-    position: absolute;
-    background: #fff;
-    color: rebeccapurple;
-    font-weight: 800;
-    width: 60px;
-    text-align: center;
-    border-radius: 10px;
-    font-size: 12px;
-    bottom: 0;
-    left: 0;
-    transform: translate(0%, 90%);
 }
 
 .shine {

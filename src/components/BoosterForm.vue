@@ -49,7 +49,11 @@
                                 class="stadium-right f-bangopro t-primary-color"
                                 v-if="dataNextStadium"
                             >
-                                {{ dataNextStadium?.attributes?.price }}
+                                {{
+                                    formattedBalance(
+                                        dataNextStadium?.attributes?.price
+                                    )
+                                }}
                                 <img src="./../../public/assets/logo.svg" />
                             </div>
                         </div>
@@ -84,7 +88,11 @@
                                 class="stadium-right f-bangopro t-primary-color"
                                 v-if="dataNextTraining"
                             >
-                                {{ dataNextTraining?.attributes?.price }}
+                                {{
+                                    formattedBalance(
+                                        dataNextTraining?.attributes?.price
+                                    )
+                                }}
                                 <img src="./../../public/assets/logo.svg" />
                             </div>
                         </div>
@@ -101,7 +109,7 @@
             :idUser="idUser"
             :isMax="isMax"
             :titleUpload="'Stadium'"
-            :descUpload="'Better Stadium holds more QFAN and you can claim it less often'"
+            :descUpload="'Bigger Stadium holds more QFP and you can claim less often'"
             :typeBooster="typeBooster"
             @closeDetailNoCall="closeDetailNoCall"
         />
@@ -133,6 +141,7 @@ import userService from "../services/userService";
 import Loading from "./LoadingForm.vue";
 import TemplateUpLevel from "./TemplateUpLevel.vue";
 import NotificationToast from "./NotificationToast.vue";
+import { formattedBalance } from "@/utils";
 
 export default {
     props: {
@@ -199,6 +208,7 @@ export default {
     },
 
     methods: {
+        formattedBalance,
         maxLV(data) {
             const maxLevel = data.reduce((maxItem, currentItem) => {
                 return currentItem.attributes.applyLevel >
@@ -215,7 +225,7 @@ export default {
             try {
                 const data = await userService.getInfo(this.idUser);
                 const resData = data?.data?.[0];
-                this.animatedBalance = Number(
+                this.animatedBalance = formattedBalance(
                     resData.attributes?.qpoint?.data?.attributes?.balance
                 );
                 this.rewardAmount = Number(

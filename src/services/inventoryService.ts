@@ -84,6 +84,15 @@ const userServiceInventory = {
         );
         return res.status == 200 ? JSON.parse(res.data.message) : {};
     },
+
+    async createCredentials(data: { UserId: number; Password: string }) {
+        const res = await axiosInventory.post(`/credentials/create`, data);
+        return res.status == 200 ? JSON.parse(res.data.message) : {};
+    },
+    async verifyCredentials(data: { UserId: number; Password: string }) {
+        const res = await axiosInventory.post(`/credentials/verify`, data);
+        return res.status == 200 ? JSON.parse(res.data.message) : {};
+    },
 };
 
 export default userServiceInventory;

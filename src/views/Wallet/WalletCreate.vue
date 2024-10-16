@@ -183,7 +183,6 @@ export default defineComponent({
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
-    font-family: monospace;
 }
 
 @keyframes fadeIn {
@@ -297,8 +296,8 @@ export default defineComponent({
 }
 
 .wr-btn {
-    // width: calc(100% - 40px);
     padding: 20px;
+    font-weight: 800;
 
     button {
         padding: 25px;

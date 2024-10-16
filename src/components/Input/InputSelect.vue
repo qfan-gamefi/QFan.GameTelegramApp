@@ -5,7 +5,7 @@
             <input
                 :type="type"
                 :value="modelValue"
-                @input="$emit('update:modelValue', $event.target.value)"
+                @input="validateInput($event)"
                 class="input-field f-bangopro"
                 :placeholder="placeholder"
                 inputmode="numeric"
@@ -64,6 +64,13 @@ export default {
         },
     },
     methods: {
+        validateInput(event) {
+            const value = event.target.value;
+
+            const numericValue = value.replace(/\D+/g, '');
+            event.target.value = numericValue;
+            this.$emit('update:modelValue', numericValue);
+        },
         emitSelectedOption() {
             this.$emit("update:selectedOption", this.localSelectedOption);
         },

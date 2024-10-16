@@ -19,9 +19,7 @@
             </div>
         </div>
     </div>
-    <div
-        class="box-item h-[calc(100vh-198px)] p-[10px_15px] overflow-auto"
-    >
+    <div class="box-item h-[calc(100vh-198px)] p-[10px_15px] overflow-auto">
         <div class="order-item" v-for="(item, index) in listOrder" :key="index">
             <div class="flex gap-[10px]">
                 <div class="w-[60px]">
@@ -39,7 +37,9 @@
                     <div class="desc">
                         <div class="price-row">
                             <span>Price:</span>
-                            <span class="price-value">{{ item?.Price }}</span>
+                            <span class="price-value">{{
+                                formattedBalance(item?.Price)
+                            }}</span>
                         </div>
                         <div class="qty-row">
                             <span>Remain QTTY:</span>
@@ -49,9 +49,13 @@
                         </div>
                         <div class="amount-row">
                             <span>Amount:</span>
-                            <span class="amount-value">{{
-                                item?.OriginCount * item?.Price
-                            }}</span>
+                            <span class="amount-value">
+                                {{
+                                    formattedBalance(
+                                        item?.OriginCount * item?.Price
+                                    )
+                                }}</span
+                            >
                         </div>
                     </div>
                 </div>
@@ -104,13 +108,15 @@
         :type="notificationType"
         @close="showNotification = false"
     />
+
+    <PopupPassword :visible="isPass" @cancel="isPass = false" />
 </template>
 
 <script lang="ts">
 import NotificationToast from "@/components/NotificationToast.vue";
 import SelectBox from "@/components/Select/SelectBox.vue";
 import userServiceInventory from "@/services/inventoryService";
-import { formatDateDDMMYYYY, formatTime } from "@/utils";
+import { formatDateDDMMYYYY, formattedBalance, formatTime } from "@/utils";
 import {
     BuySellOption,
     IOrderList,
@@ -119,6 +125,7 @@ import {
     StatusOption,
 } from "@/views/Shop/defination";
 import { defineComponent } from "vue";
+import PopupPassword from "@/components/popup/PopupPassword.vue";
 
 export default defineComponent({
     name: "MyOrderPage",
@@ -126,6 +133,7 @@ export default defineComponent({
     components: {
         SelectBox,
         NotificationToast,
+        PopupPassword,
     },
     created() {
         this.callOrderShop();
@@ -157,11 +165,13 @@ export default defineComponent({
             selectedStatus: "All" as StatusOption,
             selectOptions,
             selectOptionsStatus,
+            isPass: false,
         };
     },
     methods: {
         formatDateDDMMYYYY,
         formatTime,
+        formattedBalance,
         async renderNotification(message, type) {
             this.notificationMessage = message;
             this.notificationType = type;
@@ -261,7 +271,10 @@ export default defineComponent({
                     this.renderErr("Cancel Error!");
                 }
             } catch (error) {
-                console.log(error);
+                if (error?.response?.status === 401) {
+                    this.isPass = true;
+                    // localStorage.getItem("storePermission") === "true";
+                }
             }
         },
     },

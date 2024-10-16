@@ -1,13 +1,15 @@
 <template>
-    <div class="popup-container" v-if="visible">
-        <div class="popup-content">
-            <p class="f-bangopro">{{ text }}</p>
-            <div class="popup-buttons">
-                <button @click="yes()">Yes</button>
-                <button @click="no()">No</button>
+    <transition name="popup">
+        <div class="popup-container" v-if="visible">
+            <div class="popup-content">
+                <p class="f-bangopro">{{ text }}</p>
+                <div class="popup-buttons">
+                    <button @click="yes()">Yes</button>
+                    <button @click="no()">No</button>
+                </div>
             </div>
         </div>
-    </div>
+    </transition>
 </template>
 
 <script>
@@ -36,6 +38,8 @@ export default {
 
 <style scoped>
 @import "@/styles/global.scss";
+@import "@/styles/animation/popup.scss";
+
 .popup-container {
     position: fixed;
     top: 0;

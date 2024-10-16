@@ -45,12 +45,13 @@ export interface IItemDefFusion {
     ItemDefId: number;
     Count: number;
     ImageUrl: string;
+    CashValue: string;
+    AutoCash: number;
 }
-export interface IFusion {
+export interface IFusionBase {
     id: number;
     Name: string;
     Code: string;
-    ResourcesItemDefIds: string; // IItemDefFusion[];
     TreasureId: number;
     TreasureCount: number;
     Active: boolean;
@@ -64,4 +65,12 @@ export interface IFusion {
         Status: "A";
         ImageUrl: string;
     };
+}
+
+export interface IFusion extends IFusionBase {
+    ResourcesItemDefIds: IItemDefFusion[];
+}
+
+export interface IFusionString extends IFusionBase {
+    ResourcesItemDefIds: string;
 }

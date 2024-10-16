@@ -402,26 +402,13 @@ export default defineComponent({
                 const data = {
                     gameId: 58,
                     userId: this.userId,
-                    userName: "su fly 007", // this.fullName,
+                    userName: this.fullName,
                     value: 200,
                     valueType: "QFP",
                     side: 0,
                     // securityToken: securityToken?.toString(),
                 };
                 const res = await predictService.makeFlip(data);
-                // const res1 = await axios.post(
-                //     "https://49bb-171-224-180-89.ngrok-free.app/api/v1/flip/makeflip",
-                //     {
-                //         gameId: 58,
-                //         userId: this.userId,
-                //         userName: "su fly 007",
-                //         value: 200,
-                //         valueType: "QFP",
-                //         side: 0,
-                //     }
-                // );
-                // const res = JSON.parse(res1.data.message);
-                console.log(res);
 
                 if (res.success) {
                     this.balance = Number(this.balance) - 200;

@@ -771,7 +771,7 @@ export default {
                             </div>
                         </div>
                         <div class="box-right">
-                            <div
+                            <!-- <div
                                 class="btn-mining"
                                 @click="onAutoInteract()"
                                 :class="{ active: isExecAutoInteract }"
@@ -783,7 +783,7 @@ export default {
                                     }"
                                 />
                                 Mining
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>

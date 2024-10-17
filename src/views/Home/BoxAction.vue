@@ -4,7 +4,7 @@
             <img
                 loading="lazy"
                 class="img-market"
-                src="./../../../public/assets/shop/market.png"
+                src="https://qfan-api.qcloud.asia/uploads/market_11371ac73e.png"
                 @click="showCoomingSoon = true"
             />
             <div class="shine shine-1"></div>

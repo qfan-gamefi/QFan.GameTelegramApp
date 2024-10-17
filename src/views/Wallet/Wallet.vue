@@ -11,7 +11,9 @@
                     <div><img src="@public/assets/logo.svg" /></div>
                     <div class="name">Address</div>
                     <div class="add-wallet">
-                        (<a href="#" @click="linkToExplore($event)">{{ activeWallet?.address.substring(0, 5) }}...</a>)
+                        (<a href="#" @click="linkToExplore($event)"
+                            >{{ activeWallet?.address.substring(0, 5) }}...</a
+                        >)
                     </div>
                     <div class="copy-wallet">
                         <a href="#" @click="copyAddress($event)">
@@ -39,7 +41,9 @@
                             </div>
                         </div>
                         <div>
-                            <a href="#" @click="refreshWallet($event)"><i class="fa-solid fa-refresh"></i></a>
+                            <a href="#" @click="refreshWallet($event)"
+                                ><i class="fa-solid fa-refresh"></i
+                            ></a>
                         </div>
                     </div>
                     <div>
@@ -47,30 +51,49 @@
                     </div>
 
                     <div class="wr-btn">
-                        <button class="btn-item" @click="() => (openReceive = true)">
+                        <button
+                            class="btn-item"
+                            @click="() => (openReceive = true)"
+                        >
                             <i class="fa-solid fa-copy"></i> Receive
                         </button>
                         <button @click="onSend()" class="btn-item">
                             <i class="fa-solid fa-paper-plane"></i> Send
                         </button>
-                        <button class="btn-item" @click="faucet()" v-bind:disabled="executing">
+                        <button
+                            class="btn-item"
+                            @click="faucet()"
+                            v-bind:disabled="executing"
+                        >
                             <i class="fa-solid fa-faucet"></i> Faucet
                         </button>
                     </div>
                     <span v-if="errorMessage" class="text-err-code">{{
                         errorMessage
                     }}</span>
-                    <span class="faucet-success" v-if="transactionUrl">Faucet success. Click
+                    <span class="faucet-success" v-if="transactionUrl"
+                        >Faucet success. Click
                         <a v-bind:href="transactionUrl" target="_blank">here</a>
-                        to view transaction on explorer</span>
+                        to view transaction on explorer</span
+                    >
                 </div>
                 <LoadingForm :loading="executing" />
                 <div class="wr-coin">
                     <div class="title">
-                        <a href="#" @click="setActiveTab($event, 'token')"
-                            v-bind:class="activeTab === 'token' ? 'active' : ''">Token</a>
-                        <a href="#" @click="setActiveTab($event, 'activities')" v-bind:class="activeTab === 'activities' ? 'active' : ''
-                            ">Activities</a>
+                        <a
+                            href="#"
+                            @click="setActiveTab($event, 'token')"
+                            v-bind:class="activeTab === 'token' ? 'active' : ''"
+                            >Token</a
+                        >
+                        <a
+                            href="#"
+                            @click="setActiveTab($event, 'activities')"
+                            v-bind:class="
+                                activeTab === 'activities' ? 'active' : ''
+                            "
+                            >Activities</a
+                        >
                     </div>
                     <div class="box-content" v-if="activeTab === 'token'">
                         <div class="item-list">
@@ -92,45 +115,66 @@
                             </select>
                         </div>
                         <div class="item-list">
-                            <div class="box-item" v-for="(
+                            <div
+                                class="box-item"
+                                v-for="(
                                     transaction, index
                                 ) in activities.filter(
-                                        (x) =>
-                                            !filterStatus ||
-                                            x.status === filterStatus
-                                    )" key="{{ index }}">
+                                    (x) =>
+                                        !filterStatus ||
+                                        x.status === filterStatus
+                                )"
+                                :key="index"
+                            >
                                 <div class="item-title">
-                                    <span><i class="fa-solid fa-exchange"></i>&nbsp;{{
-                                        transaction.type.toUpperCase()
-                                        }}</span>
-                                    <a href="#" @click="
-                                        getLinkTx($event, transaction.hash)
-                                        ">({{
+                                    <span
+                                        ><i class="fa-solid fa-exchange"></i
+                                        >&nbsp;{{
+                                            transaction.type.toUpperCase()
+                                        }}</span
+                                    >
+                                    <a
+                                        href="#"
+                                        @click="
+                                            getLinkTx($event, transaction.hash)
+                                        "
+                                        >({{
                                             formatAddress(transaction.hash)
-                                        }})</a>
+                                        }})</a
+                                    >
                                     <div v-bind:class="transaction.status">
                                         {{ transaction.status.toUpperCase() }}
                                     </div>
                                 </div>
                                 <div class="item-address">
                                     <div>
-                                        <a v-if="
-                                            transaction.type === 'receive'
-                                        " class="address">From:
+                                        <a
+                                            v-if="
+                                                transaction.type === 'receive'
+                                            "
+                                            class="address"
+                                            >From:
                                             {{
                                                 formatAddress(transaction?.from)
-                                            }}</a>
-                                        <a v-if="transaction.type === 'send'" class="address">To:
+                                            }}</a
+                                        >
+                                        <a
+                                            v-if="transaction.type === 'send'"
+                                            class="address"
+                                            >To:
                                             {{
                                                 formatAddress(transaction?.to)
-                                            }}</a>
+                                            }}</a
+                                        >
                                     </div>
                                 </div>
                                 <div class="item-value">
-                                    <span class="value">{{ formatValue(transaction?.value) }}
+                                    <span class="value"
+                                        >{{ formatValue(transaction?.value) }}
                                         {{
                                             transaction?.tokenSymbol ?? "QUAI"
-                                        }}</span>
+                                        }}</span
+                                    >
                                 </div>
                             </div>
                         </div>
@@ -138,24 +182,43 @@
                 </div>
             </div>
         </div>
-        <NotificationToast v-if="notification.visible" :message="notification.message" :type="notification.type" />
+        <NotificationToast
+            v-if="notification.visible"
+            :message="notification.message"
+            :type="notification.type"
+        />
         <div v-if="openSend">
             <div class="popup-overlay"></div>
             <div class="popup-referer-code">
-                <a href="#" @click="() => {
-                    openSend = false;
-                }
-                    " class="close"><i class="fa fa-close"></i></a>
+                <a
+                    href="#"
+                    @click="
+                        () => {
+                            openSend = false;
+                        }
+                    "
+                    class="close"
+                    ><i class="fa fa-close"></i
+                ></a>
                 <div class="popup-title">Input address and value to send</div>
                 <form @submit.prevent="onSend">
                     <table>
                         <tr class="form-group">
                             <td>
-                                <label class="label" for="address">Address</label>
+                                <label class="label" for="address"
+                                    >Address</label
+                                >
                             </td>
                             <td>
-                                <input class="code-input" :class="{ 'input-error': errorMessage }" type="text"
-                                    v-model="toAddress" id="address" @input="clearError" placeholder="Enter address" />
+                                <input
+                                    class="code-input"
+                                    :class="{ 'input-error': errorMessage }"
+                                    type="text"
+                                    v-model="toAddress"
+                                    id="address"
+                                    @input="clearError"
+                                    placeholder="Enter address"
+                                />
                             </td>
                         </tr>
                         <tr>
@@ -163,28 +226,50 @@
                                 <label class="label" for="value">Value</label>
                             </td>
                             <td>
-                                <input class="code-input" :class="{ 'input-error': errorMessage }" type="number"
-                                    v-model="sendValue" id="value" @input="clearError"
-                                    placeholder="Enter value to send" />
+                                <input
+                                    class="code-input"
+                                    :class="{ 'input-error': errorMessage }"
+                                    type="number"
+                                    v-model="sendValue"
+                                    id="value"
+                                    @input="clearError"
+                                    placeholder="Enter value to send"
+                                />
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                <label class="label" for="value">Password</label>
+                                <label class="label" for="value"
+                                    >Password</label
+                                >
                             </td>
                             <td>
-                                <input class="code-input" :class="{ 'input-error': errorMessage }" type="password"
-                                    v-model="sendPassword" id="password" @input="clearError"
-                                    placeholder="Enter password" />
+                                <input
+                                    class="code-input"
+                                    :class="{ 'input-error': errorMessage }"
+                                    type="password"
+                                    v-model="sendPassword"
+                                    id="password"
+                                    @input="clearError"
+                                    placeholder="Enter password"
+                                />
                             </td>
                         </tr>
                     </table>
                     <div v-if="errorMessage" class="text-err-code">
                         {{ errorMessage }}
                     </div>
-                    <button class="btn-submit-code" @click="executeSend()" v-bind:disabled="executing" type="submit">
-                        <span>Send
-                            <a v-if="executing"><i class="fa fa-spinner loading"></i></a></span>
+                    <button
+                        class="btn-submit-code"
+                        @click="executeSend()"
+                        v-bind:disabled="executing"
+                        type="submit"
+                    >
+                        <span
+                            >Send
+                            <a v-if="executing"
+                                ><i class="fa fa-spinner loading"></i></a
+                        ></span>
                     </button>
                 </form>
             </div>
@@ -192,15 +277,22 @@
         <div v-if="openReceive">
             <div class="popup-overlay"></div>
             <div class="popup-referer-code">
-                <a href="#" @click="() => {
-                    openReceive = false;
-                }
-                    " class="close"><i class="fa fa-close"></i></a>
+                <a
+                    href="#"
+                    @click="
+                        () => {
+                            openReceive = false;
+                        }
+                    "
+                    class="close"
+                    ><i class="fa fa-close"></i
+                ></a>
                 <div class="popup-title">Receive Address</div>
                 <div class="wl-addr">
                     <div class="address-image">
                         <img
-                            v-bind:src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${activeWallet?.address}`" />
+                            v-bind:src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${activeWallet?.address}`"
+                        />
                     </div>
                     <div class="address-action">
                         <a href="#" @click="copyAddress($event)">
@@ -249,8 +341,7 @@ export default defineComponent({
             exploreUrl: "",
             checkinMessage: "",
             playerId:
-                window.Telegram.WebApp.initDataUnsafe.user?.id.toString() ??
-                "1927324767",
+                window.Telegram.WebApp.initDataUnsafe.user?.id.toString() ?? "",
             toAddress: "",
             activeTab: "token",
             activities: [],
@@ -364,12 +455,15 @@ export default defineComponent({
                 return;
             }
 
-            console.log("execute send", BigInt(Number(this.sendValue.toString())));
+            console.log(
+                "execute send",
+                BigInt(Number(this.sendValue.toString()))
+            );
 
             try {
                 this.executing = true;
                 const hdKeyring = new HDKeyring();
-                await hdKeyring.unlock()
+                await hdKeyring.unlock();
                 const transaction = {
                     from: this.activeWallet?.address as string,
                     to: this.toAddress,
@@ -378,7 +472,9 @@ export default defineComponent({
 
                 // const signedData = await this.keyringService.signTransaction(this.toAddress, transaction);
 
-                const result = await hdKeyring.signAndSendQuaiTransaction(transaction);
+                const result = await hdKeyring.signAndSendQuaiTransaction(
+                    transaction
+                );
 
                 console.log("result", result);
                 this.openSend = false;
@@ -439,14 +535,14 @@ export default defineComponent({
         // }
 
         const walletType = localStorage.getItem("walletType");
-        if (walletType !== "GOLDEN_AGE_WALLET") {
+        if (walletType !== "GOLDEN_AGE_WALLET_V3") {
             localStorage.removeItem("tallyVaults");
             localStorage.removeItem("address");
             this.$router.push({ name: "WalletCreate" });
         }
 
         const hdKeyring = new HDKeyring();
-        await hdKeyring.unlock()
+        await hdKeyring.unlock();
         if (hdKeyring.isSigning) {
             this.activeWallet = hdKeyring.getActiveWallet();
             console.log("activeWallet", this.activeWallet);

@@ -15,17 +15,37 @@
                 <div class="title-pass">Wallet Password</div>
                 <div class="wl-addr">
                     <div class="title-addr">Password</div>
-                    <input class="code-input" :class="{ 'input-error': errorMessage }" type="password"
-                        v-model="walletPassword" id="code" @input="clearError" placeholder="Enter password" />
+                    <input
+                        class="code-input"
+                        :class="{ 'input-error': errorMessage }"
+                        type="password"
+                        v-model="walletPassword"
+                        id="code"
+                        @input="clearError"
+                        placeholder="Enter password"
+                    />
                     <div class="title-addr">Confirm password</div>
-                    <input class="code-input" :class="{ 'input-error': errorMessage }" type="password"
-                        v-model="confirmPassword" id="code" @input="clearError" placeholder="Enter password" />
+                    <input
+                        class="code-input"
+                        :class="{ 'input-error': errorMessage }"
+                        type="password"
+                        v-model="confirmPassword"
+                        id="code"
+                        @input="clearError"
+                        placeholder="Enter password"
+                    />
                 </div>
                 <div class="title-pass">Private Key</div>
                 <div class="wr-phrase">
-                    <textarea class="code-input" :class="{ 'input-error': errorMessage }" type="text" v-model="mnemonic"
-                        id="code" @input="clearError"
-                        placeholder="Enter private key export from Pelagus Wallet"></textarea>
+                    <textarea
+                        class="code-input"
+                        :class="{ 'input-error': errorMessage }"
+                        type="text"
+                        v-model="mnemonic"
+                        id="code"
+                        @input="clearError"
+                        placeholder="Enter private key export from Pelagus Wallet"
+                    ></textarea>
                 </div>
 
                 <div v-if="errorMessage" class="text-err-code">
@@ -33,7 +53,9 @@
                 </div>
 
                 <div class="wr-btn">
-                    <button @click="createWallet()">Import</button>
+                    <button @click="createWallet()" style="color: #000">
+                        Import
+                    </button>
                 </div>
             </div>
         </div>
@@ -45,11 +67,20 @@ import { defineComponent } from "vue";
 import HDKeyring from "@/crypto_utils/HDKeyring";
 import { SignerImportSource, SignerSourceTypes } from "@/crypto_utils/type";
 import { secureStorage, storage } from "@/storage/storage";
+import userService from "@/services/userService";
 
 export default defineComponent({
     name: "WalletCreate",
     data() {
+        const userInfo = window.Telegram.WebApp.initDataUnsafe;
+        let first_name = userInfo?.user?.first_name || "";
+        let last_name = userInfo?.user?.last_name || "";
+
         return {
+            userId: userInfo?.user?.id || "",
+            first_name: first_name,
+            last_name: last_name,
+
             walletPassword: "",
             confirmPassword: "",
             mnemonic: "",
@@ -96,17 +127,22 @@ export default defineComponent({
             const keyring: HDKeyring = new HDKeyring();
             await keyring.importKeyring({
                 type: SignerSourceTypes.privateKey,
-                privateKey: this.mnemonic
+                privateKey: this.mnemonic,
             });
 
             await keyring.unlock();
             //get address
-            const address = await keyring
-                .getActiveAddress();
+            const address = await keyring.getActiveAddress();
 
             if (address) {
+                await userService.registerAddress(
+                    this.userId,
+                    address,
+                    this.first_name,
+                    this.last_name
+                );
                 await storage.set("address", address);
-                localStorage.setItem("walletType", "GOLDEN_AGE_WALLET");
+                localStorage.setItem("walletType", "GOLDEN_AGE_WALLET_V3");
                 this.$router.push("/wallet/detail");
             } else {
                 localStorage.clear();
@@ -125,6 +161,12 @@ export default defineComponent({
     },
     async mounted() {
         // this.mnemonic = await generateRandomMnemonic();
+        const walletType = localStorage.getItem("walletType");
+        if (walletType !== "GOLDEN_AGE_WALLET_V3") {
+            localStorage.removeItem("tallyVaults");
+            localStorage.removeItem("address");
+            this.$router.push({ name: "WalletCreate" });
+        }
     },
 });
 </script>
@@ -141,7 +183,6 @@ export default defineComponent({
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
-    font-family: monospace;
 }
 
 @keyframes fadeIn {
@@ -255,8 +296,8 @@ export default defineComponent({
 }
 
 .wr-btn {
-    color: #0054d2;
-    margin-top: 20px;
+    padding: 20px;
+    font-weight: 800;
 
     button {
         padding: 25px;
@@ -271,10 +312,5 @@ export default defineComponent({
     padding: 10px;
     color: #fff;
     font-size: 20px;
-}
-
-.title-pass {
-    font-size: 22px;
-    font-weight: bold;
 }
 </style>

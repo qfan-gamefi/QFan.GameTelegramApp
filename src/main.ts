@@ -8,6 +8,9 @@ import VueDragscroll from "vue-dragscroll";
 import router from "./router";
 import store from "./store";
 import { Buffer } from "buffer";
+import "./index.css";
+import "./styles/global.scss";
+import AutoMining from "./views/Home/AutoMining.vue";
 
 // @ts-ignore
 window.Buffer = Buffer;
@@ -18,4 +21,5 @@ const app = createApp(SampleGame);
 app.use(VueDragscroll);
 app.use(router);
 app.use(store);
+app.component("AutoMining", AutoMining);
 app.mount("#app");

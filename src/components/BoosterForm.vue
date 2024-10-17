@@ -6,14 +6,16 @@
 
             <div class="box-content-booster" v-if="!loading">
                 <div class="your-balance">
-                    <div class="title-your-balance">Your Balance</div>
-                    <div class="point-balance t-primary-color">
+                    <div class="title-your-balance f-bangopro">
+                        Your Balance
+                    </div>
+                    <div class="point-balance t-primary-color f-bangopro">
                         {{ animatedBalance }}
                         <img src="./../../public/assets/logo.svg" />
                     </div>
                     <div class="desc-your-balance">
                         Training Speed: {{ rewardAmount }}
-                        <img src="./../../public/assets/logo.svg" />/hour
+                        <img src="./../../public/assets/logo.svg" />/ hour
                     </div>
                 </div>
 
@@ -31,7 +33,7 @@
 
                         <div class="box-stadium">
                             <div class="stadium-left">
-                                <div class="content-stadium">
+                                <div class="content-stadium f-bangopro">
                                     {{ stadiumItems?.attributes?.name }}
                                 </div>
                                 <div class="lv-stadium t-primary-color">
@@ -44,10 +46,14 @@
                             </div>
 
                             <div
-                                class="stadium-right t-primary-color"
+                                class="stadium-right f-bangopro t-primary-color"
                                 v-if="dataNextStadium"
                             >
-                                {{ dataNextStadium?.attributes?.price }}
+                                {{
+                                    formattedBalance(
+                                        dataNextStadium?.attributes?.price
+                                    )
+                                }}
                                 <img src="./../../public/assets/logo.svg" />
                             </div>
                         </div>
@@ -66,7 +72,7 @@
 
                         <div class="box-stadium">
                             <div class="stadium-left">
-                                <div class="content-stadium">
+                                <div class="content-stadium f-bangopro">
                                     {{ trainingItems?.attributes?.name }}
                                 </div>
                                 <div class="lv-stadium t-primary-color">
@@ -79,10 +85,14 @@
                             </div>
 
                             <div
-                                class="stadium-right t-primary-color"
+                                class="stadium-right f-bangopro t-primary-color"
                                 v-if="dataNextTraining"
                             >
-                                {{ dataNextTraining?.attributes?.price }}
+                                {{
+                                    formattedBalance(
+                                        dataNextTraining?.attributes?.price
+                                    )
+                                }}
                                 <img src="./../../public/assets/logo.svg" />
                             </div>
                         </div>
@@ -99,7 +109,7 @@
             :idUser="idUser"
             :isMax="isMax"
             :titleUpload="'Stadium'"
-            :descUpload="'Better Stadium holds more QFAN and you can claim it less often'"
+            :descUpload="'Bigger Stadium holds more QFP and you can claim less often'"
             :typeBooster="typeBooster"
             @closeDetailNoCall="closeDetailNoCall"
         />
@@ -111,8 +121,8 @@
             :dataNext="dataNext"
             :idUser="idUser"
             :isMax="isMax"
-            :titleUpload="'Training Room'"
-            :descUpload="'Better boosts training speed'"
+            :titleUpload="'Skill'"
+            :descUpload="'Boosts training speed'"
             :typeBooster="typeBooster"
             @closeDetailNoCall="closeDetailNoCall"
         />
@@ -131,6 +141,7 @@ import userService from "../services/userService";
 import Loading from "./LoadingForm.vue";
 import TemplateUpLevel from "./TemplateUpLevel.vue";
 import NotificationToast from "./NotificationToast.vue";
+import { formattedBalance } from "@/utils";
 
 export default {
     props: {
@@ -197,6 +208,7 @@ export default {
     },
 
     methods: {
+        formattedBalance,
         maxLV(data) {
             const maxLevel = data.reduce((maxItem, currentItem) => {
                 return currentItem.attributes.applyLevel >
@@ -213,7 +225,7 @@ export default {
             try {
                 const data = await userService.getInfo(this.idUser);
                 const resData = data?.data?.[0];
-                this.animatedBalance = Number(
+                this.animatedBalance = formattedBalance(
                     resData.attributes?.qpoint?.data?.attributes?.balance
                 );
                 this.rewardAmount = Number(
@@ -446,9 +458,7 @@ export default {
     margin-bottom: 20px;
 }
 .title-your-balance {
-    font-size: 12px;
-    font-family: monospace;
-    font-weight: bold;
+    font-size: 16px;
 }
 .point-balance {
     display: flex;
@@ -459,14 +469,15 @@ export default {
     gap: 10px;
 }
 .point-balance img {
-    width: 35px;
-    height: 35px;
+    width: 25px;
+    /* height: 30px; */
 }
 .desc-your-balance {
-    font-family: monospace;
+    font-size: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 3px;
 }
 .desc-your-balance img {
     width: 15px;
@@ -489,8 +500,8 @@ export default {
     display: flex;
 }
 .logo-stadium img {
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    /* height: 50px; */
 }
 .box-stadium {
     display: flex;
@@ -506,10 +517,11 @@ export default {
 }
 .lv-stadium {
     font-size: 12px;
+    font-weight: 800;
 }
 .desc-stadium {
     font-size: 10px;
-    font-family: monospace;
+    font-weight: 800;
 }
 .stadium-right {
     display: flex;

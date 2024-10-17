@@ -1,7 +1,7 @@
 <template>
     <div v-bind:class="{ 'overlay-template': showPopup }"></div>
 
-    <div class="popup-template" v-if="showPopup">
+    <div class="popup-template f-nunito" v-if="showPopup">
         <div class="box-template">
             <div @click="handleClose" class="close-to-booster">
                 <i class="fa-solid fa-rectangle-xmark"></i>
@@ -11,7 +11,7 @@
 
             <div class="container-level">
                 <div class="box-title-level">
-                    <div class="title-level">{{ titleUpload }}</div>
+                    <div class="title-level f-bangopro">{{ titleUpload }}</div>
                     <div class="desc-level">{{ descUpload }}</div>
                 </div>
 
@@ -25,12 +25,16 @@
                         <div class="level-lv t-primary-color">
                             Level {{ dataNext?.attributes?.applyLevel }}
                         </div>
-                        <div class="title-lv">
+                        <div class="title-lv f-bangopro">
                             {{ dataNext?.attributes?.name }}
                         </div>
                         <div class="content-lv" v-if="typeBooster === 'SPEED'">
                             Claim every
-                            {{ dataNext?.attributes?.applyQtty }} hour
+                            {{
+                                renderTextStadium(
+                                    dataNext?.attributes?.applyQtty
+                                )
+                            }}
                         </div>
                         <div class="content-lv" v-if="typeBooster === 'AMOUNT'">
                             Speed {{ dataNext?.attributes?.applyQtty }}
@@ -52,6 +56,7 @@
                     <div>
                         <img
                             :src="`${apiBaseUrl}${items?.attributes?.image?.data?.attributes?.url}`"
+                            loading="lazy"
                         />
                     </div>
                     <div class="r-lv">
@@ -59,17 +64,22 @@
                             Level
                             {{ items?.attributes?.applyLevel }}
                         </div>
-                        <div class="title-lv">
+                        <div class="title-lv f-bangopro">
                             {{ items?.attributes?.name }}
                         </div>
                         <div class="content-lv" v-if="typeBooster === 'SPEED'">
                             Claim every
-                            {{ items?.attributes?.applyQtty }} hour
+                            {{
+                                renderTextStadium(items?.attributes?.applyQtty)
+                            }}
                         </div>
                         <div class="content-lv" v-if="typeBooster === 'AMOUNT'">
                             Speed {{ items?.attributes?.applyQtty }}
-                            <img src="./../../public/assets/logo.svg" /> per
-                            hour
+                            <img
+                                src="./../../public/assets/logo.svg"
+                                loading="lazy"
+                            />
+                            per hour
                         </div>
                     </div>
                 </div>
@@ -78,7 +88,7 @@
                     class="box-point-up t-primary-color"
                     :class="{ 'disabled-button': isMax }"
                 >
-                    {{ dataNext?.attributes?.price }}
+                    {{ formattedBalance(dataNext?.attributes?.price) }}
                     <img src="./../../public/assets/logo.svg" />
                 </div>
 
@@ -109,6 +119,7 @@ import userService from "../services/userService";
 import Notification from "./NotificationToast.vue";
 // import EmptyForm from "./EmptyForm.vue";
 import Loading from "./LoadingForm.vue";
+import { formattedBalance } from "@/utils";
 
 export default {
     components: {
@@ -169,6 +180,7 @@ export default {
         },
     },
     methods: {
+        formattedBalance,
         handleClose() {
             this.$emit("closeDetailNoCall");
         },
@@ -197,11 +209,20 @@ export default {
                 clearInterval(intervalId);
             }, 2000);
         },
+        renderTextStadium(time) {
+            const newTime = Number(time);
+            if (newTime >= 2) {
+                return `${newTime} hours`;
+            } else {
+                return `${newTime} hour`;
+            }
+        },
     },
 };
 </script>
 
 <style scoped>
+@import "@/styles/global.scss";
 .overlay-template {
     position: fixed;
     top: 0;
@@ -239,7 +260,6 @@ export default {
     padding: 20px 20px 100px;
     height: calc(100% - 40px);
     color: #fff;
-    font-family: monospace;
 }
 
 .close-to-home {
@@ -254,8 +274,8 @@ export default {
 }
 .title-level {
     font-size: 16px;
-    font-weight: bold;
     text-transform: uppercase;
+    font-weight: 100;
 }
 .desc-level {
     font-size: 10px;
@@ -279,7 +299,7 @@ export default {
 }
 .title-lv {
     font-size: 15px;
-    font-weight: bold;
+    font-weight: 100;
 }
 .content-lv {
     font-size: 12px;
@@ -327,6 +347,7 @@ button {
     padding: 15px;
     background-color: #00256c;
     border-radius: 10px;
+    font-size: 12px;
 }
 .disabled-button {
     opacity: 0.5;

@@ -496,7 +496,7 @@ export default {
             this.handleBackButton();
 
             const walletType = localStorage.getItem("walletType");
-            if (walletType !== "GOLDEN_AGE_WALLET_V2") {
+            if (walletType !== "GOLDEN_AGE_WALLET_V3") {
                 localStorage.removeItem("tallyVaults");
                 localStorage.removeItem("address");
                 this.$router.push({ name: "WalletCreate" });

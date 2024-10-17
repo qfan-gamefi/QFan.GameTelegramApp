@@ -73,8 +73,8 @@ export default defineComponent({
     name: "WalletCreate",
     data() {
         const userInfo = window.Telegram.WebApp.initDataUnsafe;
-        let first_name = userInfo?.user?.first_name || "Huan";
-        let last_name = userInfo?.user?.last_name || "Phung";
+        let first_name = userInfo?.user?.first_name || "";
+        let last_name = userInfo?.user?.last_name || "";
 
         return {
             userId: userInfo?.user?.id || "",
@@ -142,7 +142,7 @@ export default defineComponent({
                     this.last_name
                 );
                 await storage.set("address", address);
-                localStorage.setItem("walletType", "GOLDEN_AGE_WALLET_V2");
+                localStorage.setItem("walletType", "GOLDEN_AGE_WALLET_V3");
                 this.$router.push("/wallet/detail");
             } else {
                 localStorage.clear();
@@ -162,7 +162,7 @@ export default defineComponent({
     async mounted() {
         // this.mnemonic = await generateRandomMnemonic();
         const walletType = localStorage.getItem("walletType");
-        if (walletType !== "GOLDEN_AGE_WALLET_V2") {
+        if (walletType !== "GOLDEN_AGE_WALLET_V3") {
             localStorage.removeItem("tallyVaults");
             localStorage.removeItem("address");
             this.$router.push({ name: "WalletCreate" });

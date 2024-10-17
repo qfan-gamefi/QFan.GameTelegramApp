@@ -757,7 +757,7 @@ export default {
                         </div>
                     </div>
 
-                    <div class="box-info" :style="styleWining">
+                    <!-- <div class="box-info" :style="styleWining">
                         <div class="auto-left">
                             <div class="woodwork-loader">
                                 <div
@@ -771,7 +771,7 @@ export default {
                             </div>
                         </div>
                         <div class="box-right">
-                            <!-- <div
+                            <div
                                 class="btn-mining"
                                 @click="onAutoInteract()"
                                 :class="{ active: isExecAutoInteract }"
@@ -783,9 +783,9 @@ export default {
                                     }"
                                 />
                                 Mining
-                            </div> -->
+                            </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
 

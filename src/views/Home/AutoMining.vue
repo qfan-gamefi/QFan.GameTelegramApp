@@ -7,7 +7,7 @@ import HDKeyring from "@/crypto_utils/HDKeyring";
 import { PrivateKey } from "@/crypto_utils/type";
 import { defineComponent, watch, onMounted, onUnmounted } from "vue";
 import { useStore } from "vuex";
-import { useRouter } from 'vue-router';
+import { useRouter } from "vue-router";
 
 import type {
     QuaiTransactionRequest,
@@ -38,6 +38,7 @@ export default defineComponent({
             const address = await activeWallet?.addresses?.at(0);
 
             if (!address) {
+                store.commit("setAutoMining", false);
                 router.push({ name: "WalletCreate" });
                 return;
             }
@@ -53,6 +54,7 @@ export default defineComponent({
             if (keyringService.getWallets().length > 0) {
                 const activeWallet = keyringService.getActiveWallet();
                 if (!activeWallet) {
+                    store.commit("setAutoMining", false);
                     router.push({ name: "WalletCreate" });
                     return;
                 }

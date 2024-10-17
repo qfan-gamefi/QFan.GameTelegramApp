@@ -757,7 +757,7 @@ export default {
                         </div>
                     </div>
 
-                    <div class="box-info" :style="styleWining">
+                    <!-- <div class="box-info" :style="styleWining">
                         <div class="auto-left">
                             <div class="woodwork-loader">
                                 <div
@@ -785,7 +785,11 @@ export default {
                                 Mining
                             </div>
                         </div>
+<<<<<<< HEAD
+                    </div> -->
+=======
                     </div>
+>>>>>>> 53193d8cd965b9ea7b4f562dd60a189c30d6846a
                 </div>
             </div>
 

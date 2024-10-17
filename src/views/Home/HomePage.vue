@@ -785,11 +785,7 @@ export default {
                                 Mining
                             </div>
                         </div>
-<<<<<<< HEAD
                     </div> -->
-=======
-                    </div>
->>>>>>> 53193d8cd965b9ea7b4f562dd60a189c30d6846a
                 </div>
             </div>
 
@@ -919,7 +915,7 @@ export default {
 
         <PopupPassword
             :visible="storePermission"
-            @cancel="cancelPopupPassword()"
+            @cancel="cancelPopupPassword"
         />
     </div>
 </template>

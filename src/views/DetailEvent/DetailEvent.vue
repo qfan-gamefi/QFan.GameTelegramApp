@@ -20,8 +20,13 @@
                 </div>
             </div>
             <div class="btn-banner f-nunito">
-                <div v-for="(button, index) in buttonsBanner" :key="index" class="btn-item-banner"
-                    :class="{ active: activeButton === button?.name }" @click="setActiveButton(button?.name)">
+                <div
+                    v-for="(button, index) in buttonsBanner"
+                    :key="index"
+                    class="btn-item-banner"
+                    :class="{ active: activeButton === button?.name }"
+                    @click="setActiveButton(button?.name)"
+                >
                     {{ button.label }}
                 </div>
             </div>
@@ -319,6 +324,8 @@
             @yes="handleYesPredict"
             @no="handleNoPredict"
         />
+
+        <PopupPassword :visible="isPass" @cancel="isPass = false" />
     </div>
 </template>
 
@@ -332,6 +339,7 @@ import EmptyForm from "../../components/EmptyForm.vue";
 import { IEvent, IGameExtraData } from "../../interface";
 import CountDown from "../../components/count-down/CountDown.vue";
 import { formatDateToDDMMMYY } from "../../utils";
+import PopupPassword from "@/components/popup/PopupPassword.vue";
 
 dayjs.extend(duration);
 
@@ -341,6 +349,7 @@ export default {
         PopupConfirm,
         EmptyForm,
         CountDown,
+        PopupPassword,
     },
     props: {
         isDetailEvent: {
@@ -401,6 +410,7 @@ export default {
 
             stepValue: 50,
             sliderValue: [] as number[],
+            isPass: false,
         };
     },
     watch: {
@@ -527,15 +537,21 @@ export default {
                     userName: nameTele,
                 };
 
-                const dataPredict = await predictService.addBidding(data);
+                try {
+                    const dataPredict = await predictService.addBidding(data);
 
-                if (dataPredict?.bid) {
-                    this.bidValue = null;
-                    await this.renderSuccess();
-                    await this.fetchData();
-                } else {
-                    await this.renderErr();
-                    await this.fetchData();
+                    if (dataPredict?.bid) {
+                        this.bidValue = null;
+                        await this.renderSuccess();
+                        await this.fetchData();
+                    } else {
+                        await this.renderErr();
+                        await this.fetchData();
+                    }
+                } catch (error) {
+                    if (error?.response?.status === 401) {
+                        this.isPass = true;
+                    }
                 }
             }
         },
@@ -576,13 +592,13 @@ export default {
                         ...game,
                         selectedIndex: null,
                     };
-                });                
-                
+                });
+
                 this.sliderValue = this.games?.map((item) => {
-                    if(item?.BidData?.Value){
-                        return item?.BidData?.Value
+                    if (item?.BidData?.Value) {
+                        return item?.BidData?.Value;
                     }
-                    this.handleMedium(item?.['GameTemplate.ExtraData'])
+                    this.handleMedium(item?.["GameTemplate.ExtraData"]);
                 });
 
                 this.sliderValue = this.games?.map((item) => {
@@ -790,7 +806,6 @@ export default {
     display: flex;
     justify-content: space-between;
     padding: 0 10px;
-    
 }
 
 .matches-title {
@@ -817,7 +832,8 @@ export default {
     padding: 10px;
     display: flex;
     flex-direction: column;
-    gap: 15px; font-size: 10px;
+    gap: 15px;
+    font-size: 10px;
 }
 
 .matches-item-disable {

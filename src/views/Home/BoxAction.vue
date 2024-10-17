@@ -1,15 +1,15 @@
 <template>
     <div class="box-action">
-        <router-link to="/market" class="market">
+        <div class="market">
             <img
                 loading="lazy"
                 class="img-market"
                 src="./../../../public/assets/shop/market.png"
-                @click="handleBackButton"
+                @click="showCoomingSoon = true"
             />
             <div class="shine shine-1"></div>
             <div class="shine shine-4"></div>
-        </router-link>
+        </div>
         <router-link to="/inventory">
             <img
                 loading="lazy"
@@ -27,11 +27,27 @@
             />
         </router-link>
     </div>
+
+    <PopupComingSoon
+        :visible="showCoomingSoon"
+        message="Coming soon!"
+        @close="showCoomingSoon = false"
+    />
 </template>
 
 <script lang="ts">
+import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
+
 export default {
     name: "BoxAction",
+    components: {
+        PopupComingSoon,
+    },
+    data() {
+        return {
+            showCoomingSoon: false,
+        };
+    },
     methods: {
         handleBackButton() {
             // Telegram.WebApp.BackButton.show();
@@ -118,7 +134,6 @@ img {
     }
 }
 
-
 @keyframes zoomInOut {
     0% {
         transform: scale(0.9);
@@ -131,7 +146,7 @@ img {
 }
 
 .market {
-    position: relative; 
+    position: relative;
     border-radius: 3px;
     /* border: 1px solid #fff;
     border-radius: 5px;

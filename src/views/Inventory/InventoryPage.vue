@@ -75,8 +75,9 @@
                                             class="item-btn"
                                             v-if="item?.Tradable"
                                         >
+                                            <!-- @click="handleSell(item)" -->
                                             <button
-                                                @click="handleSell(item)"
+                                                @click="showCoomingSoon = true"
                                                 :disabled="loadingBtn"
                                             >
                                                 <div v-if="loadingBtn">
@@ -413,7 +414,7 @@ export default defineComponent({
                 this.itemsBadge = filterBadge;
                 this.arrInventory = filterData;
 
-                const groupedItems = filterData.reduce(
+                const groupedItems = filterData?.reduce(
                     (accumulator, currentItem) => {
                         const category = currentItem.ItemDef.Category;
                         if (!accumulator[category]) {
@@ -525,7 +526,10 @@ export default defineComponent({
                     this.renderErr(`Received ${res?.data?.Message}`);
                 }
             } catch (error) {
-                this.renderErr(`Error!`);
+                // this.renderErr(`Error!`);
+                if (error?.response?.status === 401) {
+                    this.isPass = true;
+                }
             } finally {
                 this.loadingBtn = false;
             }

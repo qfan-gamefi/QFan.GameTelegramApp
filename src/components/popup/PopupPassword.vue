@@ -60,7 +60,10 @@
                     <div
                         class="text-[10px] text-[#ffa53a] font-extrabold flex justify-end"
                     >
-                        <div class="w-fit" @click="handleCreatePass()">
+                        <div
+                            class="w-fit cursor-pointer pt-1"
+                            @click="handleCreatePass()"
+                        >
                             {{
                                 !isCreatePass
                                     ? "Create password"
@@ -164,7 +167,7 @@ export default {
                         } else {
                             this.showMess = true;
                             this.isSuccess = false;
-                            this.message = response?.data;
+                            this.message = response?.data?.message;
                         }
                     } else {
                         const dataVerify = {

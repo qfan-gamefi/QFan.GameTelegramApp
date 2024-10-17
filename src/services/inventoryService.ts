@@ -71,9 +71,10 @@ const userServiceInventory = {
         );
         return res.status == 200 ? JSON.parse(res.data.message) : {};
     },
-    async cancelOrder(itemOrderId: number) {
+    async cancelOrder(itemOrderId: number, userId: number) {
         const data = {
             itemOrderId: itemOrderId,
+            userId: userId,
         };
         const res = await axiosInventory.post(`/order/cancelOrder`, data);
         return res.status == 200 ? JSON.parse(res.data.message) : {};

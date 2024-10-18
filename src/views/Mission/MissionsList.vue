@@ -1,69 +1,84 @@
 <template>
-    <div class="popup-mission" v-if="visible">
-        <LoadingForm :loading="loading" />
+    <transition name="popup">
+        <div class="popup-mission" v-if="visible">
+            <LoadingForm :loading="loading" />
 
-        <div class="box-mission" v-if="!loading">
-            <div class="box-content-mission">
-                <div class="box-desc-mission" v-dragscroll v-if="!loading">
-                    <div
-                        class="desc-item-mission"
-                        v-for="item in missionData"
-                        :key="item?.id"
-                        :class="{ 'blur-background': item.isStatus }"
-                    >
-                        <div class="item-left-mission">
-                            <div class="item-img-mission">
-                                <img src="@public/assets/logo.jpg" />
+            <div class="box-mission" v-if="!loading">
+                <div class="h-full">
+                    <div class="box-desc-mission" v-dragscroll v-if="!loading">
+                        <div
+                            class="fade-in flex justify-between items-center p-[15px] text-xs rounded-lg bg-[#00256c]"
+                            v-for="item in missionData"
+                            :key="item?.id"
+                            :class="{ 'blur-background': item.isStatus }"
+                        >
+                            <div class="flex items-center gap-2">
+                                <div>
+                                    <img
+                                        class="w-[35px] rounded-lg"
+                                        src="@public/assets/logo.jpg"
+                                        loading="lazy"
+                                    />
+                                </div>
+
+                                <div>
+                                    <div class="text-xs mb-1 f-bangopro">
+                                        {{ item?.attributes?.title }}
+                                    </div>
+                                    <div
+                                        class="flex text-[10px] t-primary-color f-nunito"
+                                    >
+                                        +{{ item?.attributes?.rewardAmount }}
+                                        <img
+                                            class="w-3 rounded ml-1"
+                                            src="@public/assets/logo.svg"
+                                            loading="lazy"
+                                        />
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="item-left-content">
-                                <div class="item-title-mission f-bangopro">
-                                    {{ item?.attributes?.title }}
-                                </div>
-                                <div class="left-desc t-primary-color f-nunito">
-                                    +{{ item?.attributes?.rewardAmount }}
-                                    <img src="@public/assets/logo.svg" />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="item-right" v-if="!item.isStatus">
-                            <a
-                                v-if="buttonText[item?.id] === 'Go'"
-                                v-bind:href="item?.attributes?.link"
-                                target="'_blank"
-                            >
-                                <button
-                                    class="mission-btn"
-                                    @click="autoClaim(item?.id, item?.id)"
+                            <div class="item-right" v-if="!item.isStatus">
+                                <a
+                                    v-if="buttonText[item?.id] === 'Go'"
+                                    v-bind:href="item?.attributes?.link"
+                                    target="'_blank"
                                 >
-                                    {{ buttonText[item?.id] }}
-                                </button>
-                            </a>
+                                    <button
+                                        class="mission-btn"
+                                        @click="autoClaim(item?.id, item?.id)"
+                                    >
+                                        {{ buttonText[item?.id] }}
+                                    </button>
+                                </a>
 
-                            <a v-if="buttonText[item?.id] !== 'Go'">
-                                <button class="verifying-btn">
-                                    <i class="fa fa-spinner fa-pulse"></i>
-                                    {{ buttonText[item?.id] }}
-                                </button>
-                            </a>
-                        </div>
-                        <div class="item-right" v-else>
-                            <img src="@public/assets/tick.svg" />
+                                <a v-if="buttonText[item?.id] !== 'Go'">
+                                    <button class="verifying-btn">
+                                        <i class="fa fa-spinner fa-pulse"></i>
+                                        {{ buttonText[item?.id] }}
+                                    </button>
+                                </a>
+                            </div>
+                            <div class="item-right" v-else>
+                                <img
+                                    src="@public/assets/tick.svg"
+                                    loading="lazy"
+                                />
+                            </div>
                         </div>
                     </div>
+
+                    <EmptyForm v-if="showEmptyFormMission" />
+
+                    <NotificationToast
+                        v-if="notification.visible"
+                        :message="notification.message"
+                        :type="notification.type"
+                    />
                 </div>
-
-                <EmptyForm v-if="showEmptyFormMission" />
-
-                <NotificationToast
-                    v-if="notification.visible"
-                    :message="notification.message"
-                    :type="notification.type"
-                />
             </div>
         </div>
-    </div>
+    </transition>
 </template>
 
 <script lang="ts">
@@ -194,11 +209,13 @@ export default defineComponent({
         },
         async fetchListMissionReward() {
             try {
+                this.loading = true;
                 const res = await userService.getListMissionReward(this.idUser);
                 this.missionRewardData = res.data;
 
                 if (res) {
                     const rawMissions = toRaw(this.missionData);
+                    console.log(rawMissions);
 
                     rawMissions.forEach((mission) => {
                         const matchingReward = res.data.find(
@@ -232,6 +249,8 @@ export default defineComponent({
                 }
             } catch (error) {
                 this.missionRewardData = [];
+            } finally {
+                this.loading = false;
             }
         },
     },
@@ -244,7 +263,8 @@ export default defineComponent({
 </script>
 
 <style scoped>
-@import "@/styles/global.scss";
+/* @import "@/styles/global.scss";
+@import "@/styles/animation/popup.scss"; */
 
 .popup-mission {
     height: 100%;
@@ -252,7 +272,6 @@ export default defineComponent({
     width: 100%;
     top: 0%;
     z-index: 999;
-    animation: fadeInMission 0.1s ease forwards;
     color: #fff;
     background-image: url("./../../../public/assets/event/background-event.png");
     background-position: center;
@@ -260,63 +279,21 @@ export default defineComponent({
     background-size: cover;
 }
 
-@keyframes fadeInMission {
-    0% {
-        opacity: 0;
-    }
-
-    100% {
-        opacity: 1;
-    }
-}
-
 .box-mission {
     padding: 20px;
-    height: calc(100% - 105px);
-}
-
-.box-content-mission {
-    height: 100%;
+    height: calc(100% - 80px);
 }
 
 .box-desc-mission {
     max-height: 100%;
     overflow-y: auto;
-    animation: fadeInDescMission 0.5s ease forwards;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
-.box-desc-mission::-webkit-scrollbar {
-    display: none;
-}
-
-@keyframes fadeInDescMission {
-    0% {
-        opacity: 0;
-    }
-
-    100% {
-        opacity: 1;
-    }
-}
-
-.desc-item-mission {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px;
-    font-size: 12px;
-    border-radius: 10px;
-    background-color: #00256c;
-}
 
 .blur-background {
-    background: #00256c;
-    opacity: 0.8;
+    opacity: 0.6;
 }
 
 .item-left {
@@ -324,42 +301,6 @@ export default defineComponent({
     align-items: center;
     gap: 10px;
     font-weight: bolder;
-}
-
-.item-left-content {
-    display: block;
-}
-
-.item-title-mission {
-    font-size: 12px;
-    margin-bottom: 5px;
-}
-
-.left-desc {
-    display: flex;
-    font-size: 10px;
-}
-
-.item-left-content .left-desc img {
-    width: 12px;
-    border-radius: 3px;
-    margin-left: 3px;
-}
-
-.item-left-mission {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-.item-img-mission {
-    display: flex;
-}
-
-.item-img-mission img {
-    width: 35px;
-    height: 35px;
-    border-radius: 5px;
 }
 
 .item-right a {

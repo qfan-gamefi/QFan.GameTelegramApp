@@ -12,6 +12,11 @@ const axiosInventory = axios.create({
 
 axiosInventory.interceptors.request.use(
     (config) => {
+        const passVerify = localStorage.getItem("passVerify");
+
+        if (passVerify) {
+            config.headers["Authorization"] = `Bearer ${passVerify}`;
+        }
         return config;
     },
     (error) => {
@@ -22,6 +27,9 @@ axiosInventory.interceptors.request.use(
 axiosInventory.interceptors.response.use(
     (response) => response,
     (error) => {
+        // if (error.response && error.response.status === 401) {
+        //     localStorage.setItem("storePermission", "true");
+        // }
         return Promise.reject(error);
     }
 );

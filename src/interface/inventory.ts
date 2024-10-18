@@ -4,15 +4,16 @@ interface IItemDef {
     Code: string;
     Description: string | null;
     Grade: string;
-    Effect:  null;
+    Effect: any;
     RarityPoint: number;
-    Attachable:  null;
+    Attachable: any;
     Stackable: boolean;
     Type: string;
     ImageUrl: string;
-  }
-  
-  export interface IItemInventory {
+    Consumable: boolean;
+}
+
+export interface IItemInventory {
     id: number;
     Name: string;
     Code: string;
@@ -22,21 +23,54 @@ interface IItemDef {
     ItemDefId: number;
     Status: string;
     Stackable: boolean;
-    Tradable: null;
+    Tradable: boolean;
     ItemCount: number;
     ItemDef: IItemDef;
-  }
-  
-  export interface IInventory {
+}
+
+export interface IInventory {
     id: number;
     UserId: string;
     Description: string | null;
     Status: string;
     Items: IItemInventory[];
-  }
+}
 
-  export enum EItemDefType {
-    Common = 'Common',
-  Medal = 'Medal'
-  }
-  
+export enum EItemDefType {
+    Common = "Common",
+    Medal = "Medal",
+}
+
+export interface IItemDefFusion {
+    ItemDefId: number;
+    Count: number;
+    ImageUrl: string;
+    CashValue: string;
+    AutoCash: number;
+}
+export interface IFusionBase {
+    id: number;
+    Name: string;
+    Code: string;
+    TreasureId: number;
+    TreasureCount: number;
+    Active: boolean;
+    Treasure: {
+        id: number;
+        Name: string;
+        Description: string;
+        AutoRefill: boolean;
+        TreasurePlayerId: string;
+        SuccessRate: number;
+        Status: "A";
+        ImageUrl: string;
+    };
+}
+
+export interface IFusion extends IFusionBase {
+    ResourcesItemDefIds: IItemDefFusion[];
+}
+
+export interface IFusionString extends IFusionBase {
+    ResourcesItemDefIds: string;
+}

@@ -160,10 +160,17 @@ const userService = {
             return error?.response?.data;
         }
     },
-    async registerAddress(userId: string, address: string) {
+    async registerAddress(
+        userId: string,
+        address: string,
+        firstName: string,
+        lastName: string
+    ) {
         try {
             const dataForm = {
                 playerId: userId,
+                firstName,
+                lastName,
                 address,
             };
             const res = await networkAxiosInstance.post(
@@ -176,14 +183,46 @@ const userService = {
             return error?.response?.data;
         }
     },
+    async getWalletInfo(id: number) {
+        const res = await networkAxiosInstance.get(
+            `/wallet/find-by-player/${id}`
+        );
+        return res?.data;
+    },
+    async postDeposit(
+        id: number,
+        address: string,
+        amount: number,
+        hash: string
+    ) {
+        const data = {
+            playerId: id,
+            walletType: "ON_CHAIN",
+            address: address,
+            amount: amount,
+            unit: "QUAI",
+            hash: hash,
+        };
+        const res = await networkAxiosInstance.post(
+            `/wallet/deposit-onchain`,
+            data
+        );
+        return res;
+    },
     async getLevels() {
         const res = await axiosInstance.get(
             `/player-levels?pagination[pageSize]=9999`
         );
         return res?.data?.data;
     },
-
-
+    // async getFeeConfig() {
+    //     const res = await axiosInstance.get(`v1/order/getFeeConfig`);
+    //     return res?.data?.data;
+    // },
+    // async getListMarket() {
+    //     const res = await axiosInstance.get(`v1/order/getMarketList`);
+    //     return res?.data?.data;
+    // },
 };
 
 export default userService;

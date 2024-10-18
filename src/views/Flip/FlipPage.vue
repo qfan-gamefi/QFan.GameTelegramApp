@@ -1,34 +1,48 @@
 <template>
-    <div class="wr-flip-page">
-        <div class="banner-flip"></div>
+    <div class="wr-flip-page fade-in">
+        <img
+            src="./../../../public/assets/event/banner-flip.png"
+            loading="lazy"
+            ref="bannerImage"
+            alt="banner-flip"
+            class="w-full"
+        />
 
-        <div class="box-detail-flip">
+        <div class="m-[15px] h-full">
             <div class="wr-cooldown">
-                <div class="box-info">
-                    <div class="user">
-                        <div
+                <div
+                    class="flex justify-between pt-[15px] px-[10px] gap-[10px]"
+                >
+                    <div class="flex gap-[10px]">
+                        <img
                             class="avt"
-                            :style="{
-                                backgroundImage: `url(${urlImg})`,
-                            }"
-                        ></div>
-                        <div class="name-rate">
+                            :src="urlImg"
+                            loading="lazy"
+                            alt="avt"
+                        />
+                        <div class="flex flex-col gap-[5px] text-[10px]">
                             <div>{{ fullName }}</div>
                             <div class="text-rate">
                                 Win Rate 50 Flips:
-                                <span v-bind:class="{ 'loader-rate': loading }"
+                                <span
+                                    class="text-[#ffcf56]"
+                                    v-bind:class="{ 'loader-rate': loading }"
                                     >{{ winRate }}%</span
                                 >
                             </div>
                             <div>
                                 Total W/L:
-                                <span>{{ winFlip }}/{{ lostFlip }}</span>
+                                <span class="text-[#ffcf56]"
+                                    >{{ winFlip }}/{{ lostFlip }}</span
+                                >
                             </div>
                         </div>
                     </div>
 
                     <div class="box-cd">
-                        <div class="title">Cooldown</div>
+                        <div class="text-center text-[16px] text-[#e6b2ff]">
+                            Cooldown
+                        </div>
                         <div
                             class="time"
                             :class="{ 'counter-animation': isAnimating }"
@@ -65,7 +79,7 @@
                     </button>
                 </div>
 
-                <div class="wr-bottom">
+                <div class="flex justify-between px-[10px] pb-[5px]">
                     <div class="your-balance">
                         Your balance:
                         {{ formattedBalance(balance) }}
@@ -77,7 +91,7 @@
                 </div>
             </div>
 
-            <div class="wr-history">
+            <div class="wr-history" :style="{ height: calculatedHeight }">
                 <div class="title">
                     <div class="stt">Opponent</div>
                     <div class="time">Time</div>
@@ -90,10 +104,12 @@
                     <div
                         v-for="(item, index) in dataHistory"
                         :key="index"
-                        class="content"
+                        class="flex text-center p-[5px] text-[10px] items-center"
                     >
                         <div class="stt">
-                            <div class="text">
+                            <div
+                                class="w-[80px] whitespace-nowrap overflow-hidden text-ellipsis"
+                            >
                                 {{ parseReward(item?.Reward).userName || "-" }}
                             </div>
                         </div>
@@ -122,13 +138,12 @@
                         </div>
                         <div class="reward">
                             Exp: 5
-                            <!-- {{ parseReward(item?.Reward).point }} -->
                             <br />
                             <div>
                                 {{ item?.ValueType }}:
                                 {{
                                     parseReward(item?.Reward)?.[
-                                        item?.ValueType.toLowerCase()
+                                        item?.ValueType?.toLowerCase()
                                     ]
                                 }}
                             </div>
@@ -167,11 +182,13 @@
 
     <PopupConfirm
         v-if="isToken"
-        :text="`Click yes to invoke your security token`"
+        :text="`Click yes to invoke your security token?`"
         :visible="isToken"
         @yes="handleYesToken"
         @no="handleNoToken"
     />
+
+    <PopupPassword :visible="isPass" @cancel="isPass = false" />
 </template>
 
 <script lang="ts">
@@ -181,12 +198,10 @@ import PopupConfirm from "@/components/PopupConfirm.vue";
 import userServiceTelebot from "@/services/useServiceTeleBot";
 import { formatDateTimeUS, formattedBalance } from "@/utils";
 import { defineComponent } from "vue";
-import { secureStorage } from "@/storage/storage";
 import predictService from "@/services/predictService";
 import userService from "@/services/userService";
 import { TFlipClass, TStatusFlip } from "@/interface";
-
-// import { mapState } from "vuex";
+import PopupPassword from "@/components/popup/PopupPassword.vue";
 
 export default defineComponent({
     name: "FlipPage",
@@ -194,20 +209,17 @@ export default defineComponent({
         NotificationToast,
         LoadingForm,
         PopupConfirm,
+        PopupPassword,
     },
     props: {},
-    // computed: {
-    //     ...mapState({
-    //         userId: (state) => state?.userId,
-    //         fullName: (state) => state?.fullName,
-    //     }),
-    // },
     async created() {
         this.getInfo();
         this.getAvt();
         this.history();
         this.getRate();
-        // this.dataLogin = await secureStorage.get("data_login");
+    },
+    mounted() {
+        this.updateHeight();
     },
     data() {
         const userInfo = window.Telegram.WebApp.initDataUnsafe;
@@ -220,6 +232,8 @@ export default defineComponent({
         }
 
         return {
+            imageHeight: 0,
+            calculatedHeight: "calc(100% - 436px)",
             dataLogin: null,
             loading: false,
             userId: userInfo?.user?.id || "",
@@ -248,9 +262,20 @@ export default defineComponent({
             balance: 0,
             winFlip: 0,
             lostFlip: 0,
+
+            isPass: false,
         };
     },
     methods: {
+        updateHeight() {
+            const img = this.$refs.bannerImage;
+            if (img) {
+                img.onload = () => {
+                    this.imageHeight = img.clientHeight;
+                    this.calculatedHeight = `calc(100% - 348px - ${this.imageHeight}px)`;
+                };
+            }
+        },
         getImageUrl() {
             if (this.status === "placed") {
                 return this.urlImg || "./../../../public/assets/logo.jpg";
@@ -284,9 +309,9 @@ export default defineComponent({
             this.notificationMessage = message;
             this.notificationType = type;
             this.showNotification = true;
-            setTimeout(() => {
-                this.showNotification = false;
-            }, 2000);
+            // setTimeout(() => {
+            //     this.showNotification = false;
+            // }, 2000);
         },
         async renderSuccess(text) {
             this.renderNotification(text, "success");
@@ -356,7 +381,7 @@ export default defineComponent({
             const response = await userServiceTelebot.getAvtTelegram(
                 this.userId
             );
-            this.urlImg = response;
+            this.urlImg = response || "./../../../public/assets/no-img.jpg";
         },
         async getAvtOpponent(idOpponent: number) {
             const response = await userServiceTelebot.getAvtTelegram(
@@ -368,11 +393,11 @@ export default defineComponent({
 
         async handleSubmit() {
             try {
-                const securityToken = await secureStorage.get("SECURITY_TOKEN");
-                if (!securityToken) {
-                    this.isToken = true;
-                    return;
-                }
+                // const securityToken = await secureStorage.get("SECURITY_TOKEN");
+                // if (!securityToken) {
+                //     this.isToken = true;
+                //     return;
+                // }
                 const data = {
                     gameId: 58,
                     userId: this.userId,
@@ -380,7 +405,7 @@ export default defineComponent({
                     value: 200,
                     valueType: "QFP",
                     side: 0,
-                    securityToken: securityToken?.toString(),
+                    // securityToken: securityToken?.toString(),
                 };
                 const res = await predictService.makeFlip(data);
 
@@ -414,16 +439,20 @@ export default defineComponent({
                     }
                     this.timeoutPopup();
                 } else {
-                    if (res?.data?.SecurityToken) {
-                        this.isToken = true;
-                        return;
-                    } else {
-                        this.loadingSubmit = false;
-                        this.renderErr(res?.data?.Reason);
-                    }
+                    this.loadingSubmit = false;
+                    this.renderErr(res?.data?.Reason);
+                    // if (res?.data?.SecurityToken) {
+                    //     return;
+                    // } else {
+                    //     this.loadingSubmit = false;
+                    //     this.renderErr(res?.data?.Reason);
+                    // }
                 }
             } catch (error) {
-                console.log(error);
+                if (error?.response?.status === 401) {
+                    this.loadingSubmit = false;
+                    this.isPass = true;
+                }
             }
         },
 
@@ -436,7 +465,6 @@ export default defineComponent({
                 this.loading = false;
                 this.dataHistory = res;
                 this.lights = res?.slice(0, 20)?.map((item) => item?.Status);
-                // res?.map((item) => item?.Status);
             } catch (error) {
                 this.loading = false;
             }
@@ -468,6 +496,8 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
+@import "@/styles/global.scss";
+
 .wr-flip-page {
     height: 100%;
     position: absolute;
@@ -475,7 +505,7 @@ export default defineComponent({
     top: 0%;
     left: 0;
     z-index: 999;
-    animation: fadeInDetailEvent 0.1s ease forwards;
+    // animation: fadeInDetailEvent 0.1s ease forwards;
     color: #fff;
     background-image: url("./../../../public/assets/event/background-flip.png");
     background-position: center;
@@ -483,30 +513,17 @@ export default defineComponent({
     background-size: cover;
 }
 
-@keyframes fadeInDetailEvent {
-    0% {
-        opacity: 0;
-        transform: translate(50%, 50%) scale(0.5);
-    }
+// @keyframes fadeInDetailEvent {
+//     0% {
+//         opacity: 0;
+//         transform: translate(50%, 50%) scale(0.5);
+//     }
 
-    100% {
-        opacity: 1;
-        transform: translate(0%, 0%) scale(1);
-    }
-}
-
-.banner-flip {
-    background-image: url("./../../../public//assets/event/banner-flip.png");
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-    height: 100px;
-}
-
-.box-detail-flip {
-    margin: 15px;
-    height: 100%;
-}
+//     100% {
+//         opacity: 1;
+//         transform: translate(0%, 0%) scale(1);
+//     }
+// }
 
 .wr-cooldown {
     background-color: #500d79;
@@ -516,50 +533,20 @@ export default defineComponent({
     display: flex;
     flex-direction: column;
     gap: 20px;
-    .box-info {
-        display: flex;
-        justify-content: space-between;
-        padding: 15px 10px 0;
-        gap: 10px;
-        .user {
-            display: flex;
-            gap: 10px;
-            .avt {
-                border: 2px solid #d83aff;
-                border-radius: 5px;
 
-                min-width: 40px;
-                height: 40px;
-                display: flex;
-
-                background-position: center;
-                background-repeat: no-repeat;
-                background-size: contain;
-            }
-            .name-rate {
-                font-size: 10px;
-                display: flex;
-                flex-direction: column;
-                gap: 5px;
-                span {
-                    color: #ffcf56;
-                }
-            }
-        }
-        .title {
-            text-align: center;
-            font-size: 16px;
-            color: #e6b2ff;
-        }
-        .time {
-            font-size: 16px;
-            color: #ffcf56;
-            text-align: center;
-            transition: transform 0.5s ease-in-out;
-        }
-        .counter-animation {
-            transform: scale(1.2);
-        }
+    .avt {
+        border: 2px solid #d83aff;
+        border-radius: 5px;
+        min-width: 40px;
+        height: 40px;
+    }
+    .time {
+        color: #ffcf56;
+        text-align: center;
+        transition: transform 0.5s ease-in-out;
+    }
+    .counter-animation {
+        transform: scale(1.2);
     }
 
     .win-lose {
@@ -659,26 +646,26 @@ export default defineComponent({
     }
 }
 
-.wr-two-coin {
-    display: flex;
-    gap: 50px;
-}
-.box-qfp {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-image: url("./../../../public/assets/event/coin-qfp.png");
-    width: 55px;
-    height: 55px;
-}
-.box-quai {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-image: url("./../../../public/assets/event/coin-quai.png");
-    width: 55px;
-    height: 55px;
-}
+// .wr-two-coin {
+//     display: flex;
+//     gap: 50px;
+// }
+// .box-qfp {
+//     background-position: center;
+//     background-repeat: no-repeat;
+//     background-size: cover;
+//     background-image: url("./../../../public/assets/event/coin-qfp.png");
+//     width: 55px;
+//     height: 55px;
+// }
+// .box-quai {
+//     background-position: center;
+//     background-repeat: no-repeat;
+//     background-size: cover;
+//     background-image: url("./../../../public/assets/event/coin-quai.png");
+//     width: 55px;
+//     height: 55px;
+// }
 
 .box-submit {
     .btn-submit {
@@ -690,7 +677,6 @@ export default defineComponent({
         font-size: 12px;
         img {
             width: 15px;
-            height: 15px;
         }
     }
     .btn-submit:disabled {
@@ -701,7 +687,7 @@ export default defineComponent({
 
 .wr-history {
     background-color: #500d79;
-    height: calc(100% - 436px);
+    // height: calc(100% - 436px);
     margin-top: 15px;
     border: 2px solid #d631ff;
     border-radius: 10px;
@@ -711,8 +697,8 @@ export default defineComponent({
         padding: 5px 0;
         border-bottom: 1px solid #d631ff;
         margin: 0 5px;
-        font-family: monospace;
-        font-weight: bold;
+        font-size: 12px;
+        font-weight: 800;
         .stt {
             flex: 0 0 30%;
         }
@@ -728,51 +714,31 @@ export default defineComponent({
     }
 
     .wr-content {
-        // max-height: calc(100% - 35px);
         height: calc(100% - 35px);
         overflow-y: auto;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
+        // scrollbar-width: none;
+        // -ms-overflow-style: none;
 
-        .content {
+        .stt {
+            flex: 0 0 30%;
             display: flex;
-            text-align: center;
-            padding: 5px;
-            font-size: 11px;
-            font-family: monospace;
-            align-items: center;
-            font-weight: bold;
-
-            .stt {
-                flex: 0 0 30%;
-                display: flex;
-                justify-content: center;
-                img {
-                    width: 30px;
-                }
-                .text {
-                    width: 80px;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                }
+            justify-content: center;
+        }
+        .time {
+            flex: 0 0 25%;
+        }
+        .status {
+            flex: 0 0 20%;
+            font-size: 10px;
+            .win {
+                color: #ffe500;
             }
-            .time {
-                flex: 0 0 25%;
+            .lose {
+                color: #fff;
             }
-            .status {
-                flex: 0 0 20%;
-                font-size: 14px;
-                .win {
-                    color: #ffe500;
-                }
-                .lose {
-                    color: #fff;
-                }
-            }
-            .reward {
-                flex: 0 0 25%;
-            }
+        }
+        .reward {
+            flex: 0 0 25%;
         }
     }
 }
@@ -845,17 +811,11 @@ export default defineComponent({
     align-items: center;
     background: rgba(0, 0, 0, 0.4);
     width: fit-content;
-    padding: 3px;
+    padding: 3px 5px;
     border-radius: 10px;
+    gap: 5px;
     img {
-        margin-left: 3px;
         width: 15px;
-        height: 15px;
     }
-}
-.wr-bottom {
-    display: flex;
-    justify-content: space-between;
-    padding: 0 10px 5px;
 }
 </style>

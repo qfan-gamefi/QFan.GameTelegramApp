@@ -19,7 +19,7 @@
                     </div>
                 </div>
             </div>
-            <div class="btn-banner">
+            <div class="btn-banner f-nunito">
                 <div
                     v-for="(button, index) in buttonsBanner"
                     :key="index"
@@ -324,6 +324,8 @@
             @yes="handleYesPredict"
             @no="handleNoPredict"
         />
+
+        <PopupPassword :visible="isPass" @cancel="isPass = false" />
     </div>
 </template>
 
@@ -337,6 +339,7 @@ import EmptyForm from "../../components/EmptyForm.vue";
 import { IEvent, IGameExtraData } from "../../interface";
 import CountDown from "../../components/count-down/CountDown.vue";
 import { formatDateToDDMMMYY } from "../../utils";
+import PopupPassword from "@/components/popup/PopupPassword.vue";
 
 dayjs.extend(duration);
 
@@ -346,6 +349,7 @@ export default {
         PopupConfirm,
         EmptyForm,
         CountDown,
+        PopupPassword,
     },
     props: {
         isDetailEvent: {
@@ -406,6 +410,7 @@ export default {
 
             stepValue: 50,
             sliderValue: [] as number[],
+            isPass: false,
         };
     },
     watch: {
@@ -532,15 +537,21 @@ export default {
                     userName: nameTele,
                 };
 
-                const dataPredict = await predictService.addBidding(data);
+                try {
+                    const dataPredict = await predictService.addBidding(data);
 
-                if (dataPredict?.bid) {
-                    this.bidValue = null;
-                    await this.renderSuccess();
-                    await this.fetchData();
-                } else {
-                    await this.renderErr();
-                    await this.fetchData();
+                    if (dataPredict?.bid) {
+                        this.bidValue = null;
+                        await this.renderSuccess();
+                        await this.fetchData();
+                    } else {
+                        await this.renderErr();
+                        await this.fetchData();
+                    }
+                } catch (error) {
+                    if (error?.response?.status === 401) {
+                        this.isPass = true;
+                    }
                 }
             }
         },
@@ -581,6 +592,13 @@ export default {
                         ...game,
                         selectedIndex: null,
                     };
+                });
+
+                this.sliderValue = this.games?.map((item) => {
+                    if (item?.BidData?.Value) {
+                        return item?.BidData?.Value;
+                    }
+                    this.handleMedium(item?.["GameTemplate.ExtraData"]);
                 });
 
                 this.sliderValue = this.games?.map((item) => {
@@ -698,7 +716,6 @@ export default {
 .box-detail-event {
     height: 100%;
     color: #fff;
-    font-family: monospace;
 }
 
 /* .close-to-event {
@@ -714,13 +731,11 @@ export default {
 
 .btn-banner {
     display: flex;
-    /* bottom: 0;
-    position: absolute; */
     width: 100%;
     padding: 7px 0;
     background-color: #0d2779;
-    font-family: monospace;
     justify-content: space-around;
+    font-size: 12px;
 }
 
 .btn-item-banner.active {
@@ -744,7 +759,6 @@ export default {
 
 .title-banner {
     font-size: 24px;
-    font-family: monospace;
     color: #ff0000;
     text-shadow: 1px 1px 1px white;
 }
@@ -792,7 +806,6 @@ export default {
     display: flex;
     justify-content: space-between;
     padding: 0 10px;
-    font-size: 10px;
 }
 
 .matches-title {
@@ -801,6 +814,7 @@ export default {
     align-items: center;
     gap: 10px;
     font-weight: bold;
+    font-size: 12px;
 }
 
 .matches-title-img {
@@ -819,6 +833,7 @@ export default {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    font-size: 10px;
 }
 
 .matches-item-disable {
@@ -949,7 +964,6 @@ export default {
 .predict-point img {
     width: 15px;
     height: 15px;
-    padding: 0 5px;
 }
 
 .predict-point-content {
@@ -959,17 +973,18 @@ export default {
     padding: 5px 10px;
     border-radius: 5px;
     width: fit-content;
+    align-items: center;
+    gap: 5px;
 }
 
 .predict-point-disabled {
-    /* pointer-events: none; */
+    pointer-events: none;
     opacity: 0.5;
 }
 
 .btn-predict-disable {
     pointer-events: none;
     opacity: 0.5;
-    /* background: rgb(80 80 80); */
 }
 
 .point-your {
@@ -1019,7 +1034,8 @@ export default {
     position: absolute;
     bottom: calc(2% + 58px);
     background-color: #ffa53a;
-    width: calc(100% - 40px);
+    width: 100%;
+    /* width: calc(100% - 40px); */
     padding: 5px 20px 10px;
 }
 
@@ -1120,6 +1136,7 @@ export default {
     font-weight: bold;
     text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
         1px 1px 0 #000;
+    font-size: 11px;
 }
 
 .your-point {
@@ -1128,7 +1145,7 @@ export default {
     border-radius: 3px;
     min-width: 90px;
     max-width: 90px;
-    font-size: 11px;
+    font-size: 10px;
 }
 
 .list-history {
@@ -1157,7 +1174,7 @@ export default {
 .box-title-columns {
     display: flex;
     font-size: 12px;
-    font-weight: bold;
+    font-weight: 800;
     padding: 10px 0;
     border-bottom: 1px solid #fff;
 }
@@ -1181,7 +1198,7 @@ export default {
     align-items: center;
     padding: 10px 0;
     border-bottom: 1px solid #ffffff5c;
-    font-size: 11px;
+    font-size: 10px;
 }
 
 /* .history-item:last-child {

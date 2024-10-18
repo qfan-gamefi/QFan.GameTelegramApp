@@ -23,7 +23,7 @@ export interface IItemInventory {
     ItemDefId: number;
     Status: string;
     Stackable: boolean;
-    Tradable: any;
+    Tradable: boolean;
     ItemCount: number;
     ItemDef: IItemDef;
 }
@@ -45,13 +45,15 @@ export interface IItemDefFusion {
     ItemDefId: number;
     Count: number;
     ImageUrl: string;
+    CashValue: string;
+    AutoCash: number;
 }
-export interface IFusion {
+export interface IFusionBase {
     id: number;
     Name: string;
     Code: string;
-    ResourcesItemDefIds: string; //IItemDefFusion[];
-    TreasureId: 2;
+    TreasureId: number;
+    TreasureCount: number;
     Active: boolean;
     Treasure: {
         id: number;
@@ -63,4 +65,12 @@ export interface IFusion {
         Status: "A";
         ImageUrl: string;
     };
+}
+
+export interface IFusion extends IFusionBase {
+    ResourcesItemDefIds: IItemDefFusion[];
+}
+
+export interface IFusionString extends IFusionBase {
+    ResourcesItemDefIds: string;
 }

@@ -1,5 +1,5 @@
 <template>
-    <div class="loading-screen" v-if="!hasLoaded">
+    <div class="loading-screen" v-if="!hasLoaded" loading="lazy">
         <!-- v-if="!hasLoaded"  -->
         <div class="woodwork-loader">
             <div class="runner"></div>

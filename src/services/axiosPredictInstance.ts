@@ -1,7 +1,6 @@
 import axios from "axios";
 const URL_API = import.meta.env.VITE_API_BASE_URL;
 
-
 const axiosPredictInstance = axios.create({
     baseURL: `${URL_API}/predict/api/v1/`,
     headers: {
@@ -11,7 +10,11 @@ const axiosPredictInstance = axios.create({
 
 axiosPredictInstance.interceptors.request.use(
     (config) => {
-        // Add any custom request configuration here, like auth tokens
+        const passVerify = localStorage.getItem("passVerify");
+
+        if (passVerify) {
+            config.headers["Authorization"] = `Bearer ${passVerify}`;
+        }
         return config;
     },
     (error) => {

@@ -60,6 +60,7 @@
 }
 
 .item-title {
+    font-weight: 800;
     font-size: 10px;
     color: #fff;
     text-shadow: 1px 1px 0 #9f8900, -1px -1px 0 #9f8900, 1px -1px 0 #9f8900,
@@ -134,24 +135,6 @@
 
 .container-game {
     position: relative;
-}
-
-.popup-cooming-soon {
-    z-index: 999;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    padding: 30px;
-    border: 1px solid #ccc;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    animation: slideIn 0.5s forwards;
-    border-radius: 10px;
-}
-
-.popup-cooming-soon p {
-    color: black;
 }
 
 .closing-popup {
@@ -232,7 +215,7 @@
     top: 25%;
     left: 50%;
     transform: translate(-50%, -50%); */
-    width: 80%;
+    width: 90%;
     background: rgb(0 31 63 / 40%);
     padding: 15px;
     border-radius: 15px;
@@ -341,7 +324,7 @@
 }
 
 .box-woodwork img {
-    width: 30px;
+    width: 35px;
 }
 
 .woodwork-loader {
@@ -382,15 +365,15 @@
 
 .runner {
     position: absolute;
-    width: 15px;
-    height: 15px;
+    width: 12px;
+    height: 12px;
     background-image: url("./../../public/assets/mining/ball2.png");
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    /* animation: run 20s infinite; */
-    margin-left: -16px;
+    margin-left: -12px;
     left: var(--pseudo-width);
+    transition: left 0.5s ease-in-out;
 }
 
 @keyframes run {
@@ -407,16 +390,13 @@
     align-items: center;
     justify-content: center;
     border-radius: 10px;
+    font-weight: 800;
     border: none;
     font-size: 10px;
     width: 108px;
-    -webkit-text-stroke: 1px rgb(139, 129, 116);
-    /* background-image: linear-gradient( to right, #25aae1, #ff7e5f, #40e495, #da45a2, #30dd8a, #ffcc29, #2bb673); */
+    letter-spacing: 0px;
+    /* -webkit-text-stroke: 1px rgb(139, 129, 116); */
     background-image: url("./../../public/assets/mining/back-btn-mining.png");
-    /* background-size: 300% 100%; */
-    /* -o-transition: all 0.4s ease-in-out;
-    -webkit-transition: all 0.4s ease-in-out;
-    transition: all 0.4s ease-in-out; */
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
@@ -558,49 +538,11 @@
     animation: fa-spin 2s infinite linear;
 }
 
-.box-action {
-    position: absolute;
-    top: 37%;
-    right: 5%;
-    display: flex;
-    /* flex-direction: column; */
-    align-items: center;
-    gap: 20px;
-}
-
-.box-action .img-flip {
-    background-image: url("./../../public/assets/event/FlipCoin.gif");
-    width: 50px;
-    height: 50px;
-    background-position: center;
-    background-size: cover;
-    background-repeat: no-repeat;
-}
-.box-action .img-inventory {
-    background-image: url("./../../public/assets/inventory/inventory.png");
-    width: 50px;
-    height: 50px;
-    background-position: center;
-    background-size: contain;
-    background-repeat: no-repeat;
-}
-
-.box-action a {
-    color: #fff;
-    text-decoration: none;
-}
-
-.box-action button {
-    border: none;
-    border-radius: 8px;
-    font-size: 10px;
-    padding: 10px;
-}
-
 .wr-balance {
     display: flex;
+    font-family: "BANGOPRO", sans-serif;
     gap: 3px;
-    align-items: end;
+    align-items: center;
     width: fit-content;
     padding: 5px 15px;
     margin: 0 auto;
@@ -618,6 +560,4 @@
 
 .wr-balance img {
     width: 20px;
-    height: 20px;
 }
-

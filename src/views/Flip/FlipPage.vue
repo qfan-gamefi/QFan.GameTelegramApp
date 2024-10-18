@@ -1,10 +1,11 @@
 <template>
-    <div class="wr-flip-page">
+    <div class="wr-flip-page fade-in">
         <img
             src="./../../../public/assets/event/banner-flip.png"
             loading="lazy"
             ref="bannerImage"
             alt="banner-flip"
+            class="w-full"
         />
 
         <div class="m-[15px] h-full">
@@ -197,11 +198,9 @@ import PopupConfirm from "@/components/PopupConfirm.vue";
 import userServiceTelebot from "@/services/useServiceTeleBot";
 import { formatDateTimeUS, formattedBalance } from "@/utils";
 import { defineComponent } from "vue";
-import { secureStorage } from "@/storage/storage";
 import predictService from "@/services/predictService";
 import userService from "@/services/userService";
 import { TFlipClass, TStatusFlip } from "@/interface";
-import axios from "axios";
 import PopupPassword from "@/components/popup/PopupPassword.vue";
 
 export default defineComponent({
@@ -382,7 +381,7 @@ export default defineComponent({
             const response = await userServiceTelebot.getAvtTelegram(
                 this.userId
             );
-            this.urlImg = response;
+            this.urlImg = response || "./../../../public/assets/no-img.jpg";
         },
         async getAvtOpponent(idOpponent: number) {
             const response = await userServiceTelebot.getAvtTelegram(
@@ -506,7 +505,7 @@ export default defineComponent({
     top: 0%;
     left: 0;
     z-index: 999;
-    animation: fadeInDetailEvent 0.1s ease forwards;
+    // animation: fadeInDetailEvent 0.1s ease forwards;
     color: #fff;
     background-image: url("./../../../public/assets/event/background-flip.png");
     background-position: center;
@@ -514,17 +513,17 @@ export default defineComponent({
     background-size: cover;
 }
 
-@keyframes fadeInDetailEvent {
-    0% {
-        opacity: 0;
-        transform: translate(50%, 50%) scale(0.5);
-    }
+// @keyframes fadeInDetailEvent {
+//     0% {
+//         opacity: 0;
+//         transform: translate(50%, 50%) scale(0.5);
+//     }
 
-    100% {
-        opacity: 1;
-        transform: translate(0%, 0%) scale(1);
-    }
-}
+//     100% {
+//         opacity: 1;
+//         transform: translate(0%, 0%) scale(1);
+//     }
+// }
 
 .wr-cooldown {
     background-color: #500d79;
@@ -717,8 +716,8 @@ export default defineComponent({
     .wr-content {
         height: calc(100% - 35px);
         overflow-y: auto;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
+        // scrollbar-width: none;
+        // -ms-overflow-style: none;
 
         .stt {
             flex: 0 0 30%;

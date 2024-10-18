@@ -1,84 +1,110 @@
 <template>
-    <div class="popup-invite" v-if="visible">
-        <Loading :loading="loading" />
+    <transition name="popup">
+        <div class="popup-invite" v-if="visible">
+            <Loading :loading="loading" />
 
-        <div class="box-invite">
-            <div class="friend-info" v-if="!loading">
-                <div class="friend-info-text f-bangopro">
-                    {{ inviteData?.length }} Friends
-                </div>
-                <div class="friend-info-number t-primary-color">
-                    ~{{ perHour }}
-                    <img src="./../../public/assets/logo.svg" /> per hour
-                </div>
-                <div class="friend-info-desc">
-                    <div>
-                        Score +{{ referalRewardLv1Percent }}% from buddies and
-                        +{{ referalRewardLv2Percent }}% from their fererrals
+            <div class="box-invite">
+                <div
+                    class="flex flex-col items-center justify-center bg-[#00256c] rounded-lg p-[10px] gap-[10px]"
+                    v-if="!loading"
+                >
+                    <div class="f-bangopro">
+                        {{ inviteData?.length }} Friends
                     </div>
-                    <div class="friend-info-desc-img">
-                        Get a <img src="./../../public/assets/logo.svg" />
-                        play pass for each fren
+                    <div class="flex items-center gap-1 t-primary-color">
+                        ~{{ perHour }}
+                        <img
+                            src="./../../public/assets/logo.svg"
+                            loading="lazy"
+                            class="w-[20px]"
+                        />
+                        per hour
+                    </div>
+                    <div class="text-center text-[10px]">
+                        <div>
+                            Score +{{ referalRewardLv1Percent }}% from buddies
+                            and +{{ referalRewardLv2Percent }}% from their
+                            fererrals
+                        </div>
+                        <div class="flex items-center justify-center gap-1">
+                            Get a
+                            <img
+                                class="w-[15px]"
+                                src="./../../public/assets/logo.svg"
+                                loading="lazy"
+                            />
+                            play pass for each fren
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="box-content" v-if="!loading">
-                <div class="box-title-friend text-outline-black">
-                    Friends list
-                </div>
+                <div class="box-content" v-if="!loading">
+                    <div class="mt-[10px] mb-1 text-outline-black">
+                        Friends list
+                    </div>
 
-                <div class="box-desc" v-if="!loading">
-                    <div
-                        class="desc-item"
-                        v-for="(el, index) in inviteData"
-                        :key="index"
-                    >
-                        <div class="item-left">
-                            <div class="item-img">
-                                <img src="./../../public/assets/logo.jpg" />
-                            </div>
-                            <div>
-                                <p class="friend-name">
-                                    {{ el?.firstName }} {{ el?.lastName }}
-                                </p>
-                                <p
-                                    v-if="el?.children?.length > 0"
-                                    class="friend-user-info"
-                                >
+                    <div class="box-desc" v-if="!loading">
+                        <div
+                            class="desc-item"
+                            v-for="(el, index) in inviteData"
+                            :key="index"
+                        >
+                            <div
+                                class="flex items-center gap-[10px] font-extrabold"
+                            >
+                                <div class="flex w-[30px]">
                                     <img
-                                        class="icon-svg"
-                                        src="./../../public/assets/user.svg"
+                                        src="./../../public/assets/logo.jpg"
+                                        class="rounded-md"
+                                        loading="lazy"
                                     />
-                                    <span class="child-text"
-                                        >+{{ el?.children?.length }}</span
+                                </div>
+                                <div>
+                                    <p>
+                                        {{ el?.firstName }} {{ el?.lastName }}
+                                    </p>
+                                    <p
+                                        v-if="el?.children?.length > 0"
+                                        class="flex items-center gap-1"
                                     >
-                                </p>
+                                        <img
+                                            class="icon-svg"
+                                            src="./../../public/assets/user.svg"
+                                            loading="lazy"
+                                        />
+                                        <span>+{{ el?.children?.length }}</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1 f-bangopro">
+                                {{ formattedBalance(el?.qpoint?.balance) }}
+                                <img
+                                    class="w-[15px]"
+                                    src="./../../public/assets/logo.svg"
+                                    loading="lazy"
+                                />
                             </div>
                         </div>
-                        <div class="item-right f-bangopro">
-                            {{ el?.qpoint?.balance }}
-                            <img src="./../../public/assets/logo.svg" />
-                        </div>
                     </div>
+
+                    <EmptyForm v-if="showEmptyForm && !loading" />
                 </div>
-
-                <EmptyForm v-if="showEmptyForm && !loading" />
             </div>
-        </div>
 
-        <div class="box-btn-invite">
-            <button @click="handleInvite" class="invite-btn">
-                Invite Friend
-            </button>
-        </div>
+            <div class="box-btn-invite">
+                <button @click="handleInvite" class="rounded-lg">
+                    Invite Friend
+                </button>
+            </div>
 
-        <NotificationToast
-            v-if="notification.isShow"
-            :message="notification.mess"
-            :type="notification.type"
-        />
-    </div>
+            <NotificationToast
+                v-if="notification.isShow"
+                :message="notification.mess"
+                :type="notification.type"
+                @close="closeNoti()"
+            />
+        </div>
+    </transition>
 </template>
 
 <script>
@@ -86,6 +112,7 @@ import userService from "./../services/userService";
 import Loading from "./LoadingForm.vue";
 import EmptyForm from "./EmptyForm.vue";
 import NotificationToast from "./NotificationToast.vue";
+import { formattedBalance } from "@/utils";
 
 export default {
     props: {
@@ -141,8 +168,8 @@ export default {
         },
     },
     methods: {
+        formattedBalance,
         handleInvite() {
-            // this.$emit("invite");
             this.notification = {
                 isShow: true,
                 type: "success",
@@ -157,12 +184,6 @@ export default {
             input.select();
             document.execCommand("copy");
             document.body.removeChild(input);
-
-            setTimeout(() => {
-                this.notification = {
-                    isShow: false,
-                };
-            }, 1000);
         },
         async fetchInviteData() {
             try {
@@ -218,6 +239,11 @@ export default {
                 console.log(error);
             }
         },
+        closeNoti() {
+            this.notification = {
+                isShow: false,
+            };
+        },
     },
     computed: {
         showEmptyForm() {
@@ -229,55 +255,36 @@ export default {
 
 <style scoped>
 @import "@/styles/global.scss";
-.box-title-friend {
-    margin: 10px 0;
-}
+@import "@/styles/animation/popup.scss";
+
 .popup-invite {
     height: 100%;
     position: absolute;
     width: 100%;
     top: 0%;
     z-index: 999;
-    animation: fadeInInvite 0.5s ease forwards;
-
     background-image: url("./../../public/assets/event/background-event.png");
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
-}
-@keyframes fadeInInvite {
-    0% {
-        opacity: 0;
-    }
-
-    100% {
-        opacity: 1;
-    }
+    color: #fff;
 }
 
 .box-invite {
     padding: 20px;
-    height: calc(100% - 110px);
+    height: calc(100% - 120px);
 }
 
 .box-content {
-    height: calc(100% - 215px);
-    color: #fff;
+    height: calc(100% - 150px);
 }
 
 .box-desc {
     max-height: 100%;
     overflow-y: auto;
-    animation: fadeInDesc 0.1s ease forwards;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-
     display: flex;
     flex-direction: column;
     gap: 10px;
-}
-.box-desc::-webkit-scrollbar {
-    display: none;
 }
 
 .desc-item {
@@ -290,30 +297,6 @@ export default {
     border-radius: 10px;
 }
 
-.item-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: bolder;
-}
-.item-left .item-img {
-    display: flex;
-    width: 30px;
-    height: 30px;
-}
-.item-left img {
-    width: 30px;
-    border-radius: 5px;
-}
-
-.item-right {
-    display: flex;
-    align-items: center;
-}
-.item-right img {
-    width: 15px;
-    margin-left: 5px;
-}
 .close-invite {
     cursor: pointer;
     display: flex;
@@ -332,62 +315,5 @@ export default {
     bottom: 90px;
     width: 100%;
     padding: 0 20px;
-}
-.invite-btn {
-    border-radius: 10px;
-}
-
-.friend-info {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background-color: #00256c;
-    border-radius: 10px;
-    padding: 10px 20px;
-    gap: 10px;
-    color: #fff;
-}
-.friend-info-text {
-    font-size: 16px;
-}
-.friend-info-number {
-    display: flex;
-    align-items: center;
-}
-.friend-info-number img {
-    width: 20px;
-    margin: 0 5px;
-}
-.friend-info-desc {
-    font-size: 10px;
-    text-align: center;
-}
-.friend-info-desc img {
-    width: 15px;
-}
-.friend-info-desc-img {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.friend-info-desc-img img {
-    margin: 0 3px;
-}
-.friend-user-info {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-.friend-user-info {
-    margin: 0;
-}
-.friend-user-info span.child-text {
-    font-size: 14px;
-    font-weight: normal;
-}
-.friend-name {
-    font-size: 14px;
-    margin: 5px 0;
 }
 </style>

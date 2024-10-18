@@ -26,3 +26,8 @@
         opacity: 0;
     }
 }
+
+/* Add a reusable class for the animation */
+.fade-in {
+    animation: slideUp 0.3s ease-in-out;
+}

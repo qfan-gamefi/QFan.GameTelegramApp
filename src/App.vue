@@ -8,10 +8,10 @@ export default {
 };
 </script>
 
-<style scoped>
+<!-- <style scoped>
 @import "./styles/global.scss";
 @import "./styles/app.css";
-</style>
+</style> -->
 
 <template>
     <AutoMining />

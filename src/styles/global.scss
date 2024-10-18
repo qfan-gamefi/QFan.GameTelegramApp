@@ -34,6 +34,8 @@ button {
     font-family: "NUNITO", sans-serif;
     outline: 0px;
     margin: 0px;
+    background: #ffa53a !important;
+    background-color: #ffa53a;
     cursor: pointer;
     user-select: none;
     vertical-align: middle;
@@ -56,7 +58,6 @@ button {
     letter-spacing: 0px;
     // -webkit-text-fill-color: unset;
     // -webkit-text-stroke: 1px rgb(139, 129, 116);
-    background: #ffa53a;
     border: none;
     position: relative;
     display: flex;
@@ -102,23 +103,11 @@ button span {
     width: 16px !important;
 }
 
-/* For webkit browsers (Chrome, Safari, Edge) */
-::-webkit-scrollbar {
-    width: 1px;
-    height: 1px;
-    // display: none;
-}
-
-::-webkit-scrollbar-thumb {
-    background-color: #888;
-}
-
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-/* For Firefox */
 * {
-    scrollbar-width: none;
-    scrollbar-color: #888 #f1f1f1;
+    scrollbar-width: none; /* For Firefox */
+    -ms-overflow-style: none; /* For Internet Explorer and Edge */
+}
+
+*::-webkit-scrollbar {
+    display: none; /* For Chrome, Safari, and Opera */
 }

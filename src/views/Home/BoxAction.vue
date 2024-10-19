@@ -4,7 +4,7 @@
             <img
                 loading="lazy"
                 class="img-market"
-                src="https://qfan-api.qcloud.asia/uploads/market_11371ac73e.png"
+                src="./../../../public/assets/shop/marketplace.png"
                 @click="showCoomingSoon = true"
             />
             <div class="shine shine-1"></div>
@@ -69,7 +69,6 @@ export default {
     top: 37%;
     right: 5%;
     display: flex;
-    align-items: center;
     gap: 20px;
 }
 
@@ -147,10 +146,12 @@ img {
 
 .market {
     position: relative;
-    border-radius: 3px;
-    /* border: 1px solid #fff;
+    border: 1px solid #fff;
     border-radius: 5px;
-    background: #320460; */
+    background: #320460;
+    display: flex;
+    align-items: center;
+    padding: 0 5px;
 }
 
 .shine {

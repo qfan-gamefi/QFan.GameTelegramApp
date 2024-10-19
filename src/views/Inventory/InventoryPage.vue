@@ -3,9 +3,10 @@
         <!-- <div class="banner-inventory"></div> -->
 
         <img
-            class="max-w-full object-cover"
+            class="w-full object-cover"
             src="./../../../public/assets/inventory/banner-inventory.png"
             alt="banner_inventory"
+            ref="bannerInventory"
         />
 
         <div class="btn-inventory">
@@ -20,7 +21,7 @@
             </div>
         </div>
 
-        <div class="wr-box">
+        <div class="wr-box" :style="{ height: calcHeightInventory }">
             <div class="inventory-detail p-2">
                 <div v-if="activeButton === 'Inventory'">
                     <div
@@ -239,6 +240,7 @@ import { IDetailCart } from "@/views/Shop/defination";
 import PopupPassword from "@/components/popup/PopupPassword.vue";
 import { mapState } from "vuex";
 import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
+import userService from "@/services/userService";
 
 enum ButtonName {
     Inventory = "Inventory",
@@ -261,8 +263,12 @@ export default defineComponent({
         PopupComingSoon,
     },
     created() {
+        this.getDataInfo();
         this.getDataInventor();
         this.getFausion();
+    },
+    mounted() {
+        this.updateHeight();
     },
     computed: {
         ...mapState(["rewardInfo"]),
@@ -271,6 +277,8 @@ export default defineComponent({
         const userInfo = window.Telegram.WebApp.initDataUnsafe;
 
         return {
+            calcHeightInventory: "calc(100% - 131px)",
+            dataInfo: null,
             loadingBtn: false,
             showCoomingSoon: false,
             apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
@@ -302,6 +310,18 @@ export default defineComponent({
         };
     },
     methods: {
+        updateHeight() {
+            const img = this.$refs.bannerInventory;
+            if (img) {
+                img.onload = () => {
+                    this.calcHeightInventory = `calc(100% - 42px - ${img.clientHeight}px)`;
+                };
+            }
+        },
+        async getDataInfo() {
+            const data = await userService.getInfo(this.userId);
+            this.dataInfo = data?.data?.[0];
+        },
         async renderNotification(message, type) {
             this.notificationMessage = message;
             this.notificationType = type;
@@ -341,7 +361,8 @@ export default defineComponent({
                 (el) => el.ItemDefId === ItemDefId
             );
             const dataBalance =
-                this.rewardInfo?.attributes?.qpoint?.data?.attributes;
+                this.dataInfo?.attributes?.qpoint?.data?.attributes;
+            // this.rewardInfo?.attributes?.qpoint?.data?.attributes;
             const formatBalace = this.formatNumber(dataBalance?.balance);
             const countItem = filterIdItem?.ItemCount || 0;
             const countHash = Count || 0;
@@ -370,7 +391,7 @@ export default defineComponent({
         checkDisableFusion(item) {
             const arrRow = item.ResourcesItemDefIds;
             const balance =
-                this.rewardInfo?.attributes?.qpoint?.data?.attributes?.balance;
+                this.dataInfo?.attributes?.qpoint?.data?.attributes?.balance;
 
             const hasAutoCash = arrRow.some((item) => "AutoCash" in item);
 
@@ -388,7 +409,7 @@ export default defineComponent({
                 return hasFalseValue ? "" : "disable";
             } else {
                 const result = arrRow?.every((itemA) => {
-                    const matchingItemB = this.arrInventory.find(
+                    const matchingItemB = this.arrInventory?.find(
                         (itemB) => itemB.ItemDefId === itemA.ItemDefId
                     );
                     return matchingItemB
@@ -400,6 +421,7 @@ export default defineComponent({
             }
         },
         async getDataInventor() {
+            
             try {
                 const res = await userServiceInventory.getListInventory(
                     Number(this.userId)
@@ -452,6 +474,7 @@ export default defineComponent({
                     await this.renderSuccess(`Received ${mess}`);
                     await this.getDataInventor();
                     await this.getFausion();
+                    await this.getDataInfo();
                 } else {
                     await this.renderErr(`Received ${res?.data}`);
                 }
@@ -593,11 +616,11 @@ export default defineComponent({
 }
 
 .banner-inventory {
-    background-image: url("./../../../public/assets/inventory/banner-inventory.png");
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-    width: 100%;
+    // background-image: url("./../../../public/assets/inventory/banner-inventory.png");
+    // background-position: center;
+    // background-repeat: no-repeat;
+    // background-size: cover;
+    // width: 100%;
     // height: 100px;
 }
 
@@ -624,7 +647,7 @@ export default defineComponent({
 .wr-box {
     height: 100%;
     padding: 15px;
-    height: calc(100% - 140px);
+    // height: calc(100% - 140px);
     .inventory-detail {
         height: 100%;
         display: flex;

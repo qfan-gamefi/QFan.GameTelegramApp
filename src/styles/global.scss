@@ -2,29 +2,47 @@ $primary-color: #ffe500;
 @font-face {
     font-family: "GAMERIA";
     src: url("../../public/assets/fonts/GAMERIA.ttf");
+    font-weight: normal;
+    font-style: normal;
 }
-
-body {
-    font-family: "GAMERIA", sans-serif;
+@font-face {
+    font-family: "BANGOPRO";
+    src: url("../../public/assets/fonts/BangoPro.ttf");
+    font-weight: normal;
+    font-style: normal;
 }
-
-.nunito-fonts {
-    font-family: "Nunito", sans-serif;
-    font-optical-sizing: auto;
+@font-face {
+    font-family: "NUNITO";
+    src: url("../../public/assets/fonts/Nunito-Variable.ttf");
+    font-weight: normal;
     font-style: normal;
 }
 
+body {
+    font-family: "NUNITO", "BANGOPRO", sans-serif;
+}
+
+.f-nunito {
+    font-family: "NUNITO", sans-serif;
+    font-weight: 800;
+}
+.f-bangopro {
+    font-family: "BANGOPRO", sans-serif;
+}
+
 button {
-    font-family: "GAMERIA", sans-serif;
+    font-family: "NUNITO", sans-serif;
     outline: 0px;
     margin: 0px;
+    background: #ffa53a !important;
+    background-color: #ffa53a;
     cursor: pointer;
     user-select: none;
     vertical-align: middle;
     appearance: none;
     text-decoration: none;
     color: inherit;
-    text-transform: uppercase;
+    // text-transform: uppercase;
     min-width: 64px;
     width: 100%;
     box-sizing: border-box;
@@ -33,16 +51,13 @@ button {
     white-space: nowrap;
     transition: all 0.25s ease-in 0s;
     height: 16px;
-    font-family: GAMERIA, sans-serif;
     font-style: normal;
-    font-weight: 400;
+    font-weight: 800;
     font-size: 16px;
     line-height: 24px;
-    letter-spacing: 1px;
-    -webkit-text-fill-color: unset;
-    -webkit-text-stroke: 1px rgb(139, 129, 116);
-    background: #ffa53a;
-    // border: 1px solid rgb(163, 112, 41);
+    letter-spacing: 0px;
+    // -webkit-text-fill-color: unset;
+    // -webkit-text-stroke: 1px rgb(139, 129, 116);
     border: none;
     position: relative;
     display: flex;
@@ -57,8 +72,8 @@ button:hover {
     background: rgb(255, 184, 77);
     border-color: rgb(226, 154, 54);
     box-shadow: rgb(163, 112, 41) 0px 6px 0px;
-    -webkit-text-fill-color: unset;
-    -webkit-text-stroke: 1px rgb(163, 112, 41);
+    // -webkit-text-fill-color: unset;
+    // -webkit-text-stroke: 1px rgb(163, 112, 41);
 }
 
 button span {
@@ -86,4 +101,13 @@ button span {
 
 .icon-svg {
     width: 16px !important;
+}
+
+* {
+    scrollbar-width: none; /* For Firefox */
+    -ms-overflow-style: none; /* For Internet Explorer and Edge */
+}
+
+*::-webkit-scrollbar {
+    display: none; /* For Chrome, Safari, and Opera */
 }

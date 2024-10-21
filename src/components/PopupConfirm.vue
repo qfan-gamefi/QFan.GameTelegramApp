@@ -1,13 +1,15 @@
 <template>
-    <div class="popup-container" v-if="visible">
-        <div class="popup-content">
-            <p>{{ text }} <i class="fa-solid fa-question"></i></p>
-            <div class="popup-buttons">
-                <button @click="yes">Yes</button>
-                <button @click="no">No</button>
+    <transition name="popup">
+        <div class="popup-container" v-if="visible">
+            <div class="popup-content">
+                <p class="f-bangopro">{{ text }}</p>
+                <div class="popup-buttons">
+                    <button @click="yes()">Yes</button>
+                    <button @click="no()">No</button>
+                </div>
             </div>
         </div>
-    </div>
+    </transition>
 </template>
 
 <script>
@@ -20,6 +22,7 @@ export default {
         visible: {
             type: Boolean,
             required: true,
+            default: false,
         },
     },
     methods: {
@@ -34,6 +37,9 @@ export default {
 </script>
 
 <style scoped>
+@import "@/styles/global.scss";
+@import "@/styles/animation/popup.scss";
+
 .popup-container {
     position: fixed;
     top: 0;
@@ -48,6 +54,7 @@ export default {
 }
 
 .popup-content {
+    font-size: 12px;
     background: white;
     padding: 20px;
     border-radius: 5px;
@@ -64,5 +71,6 @@ export default {
 .popup-buttons button {
     margin: 0 10px;
     padding: 10px 20px;
+    font-size: 12px;
 }
 </style>

@@ -3,7 +3,10 @@ import { createRouter, createWebHistory } from "vue-router";
 import HomePage from "@/views/Home/HomePage.vue";
 import WalletCreate from "@/views/Wallet/WalletCreate.vue";
 import WalletForm from "@/views/Wallet/WalletForm.vue";
+import FlipPage from "@/views/Flip/FlipPage.vue";
 import Wallet from "@/views/Wallet/Wallet.vue";
+import InventoryPage from "@/views/Inventory/InventoryPage.vue";
+import ShopPage from "@/views/Shop/ShopPage.vue";
 
 const routes = [
     {
@@ -22,9 +25,24 @@ const routes = [
         component: WalletCreate,
     },
     {
+        path: "/flip",
+        name: "FlipPage",
+        component: FlipPage,
+    },
+    {
         path: "/wallet/detail",
         name: "WalletDetail",
         component: Wallet,
+    },
+    {
+        path: "/inventory",
+        name: "InventoryPage",
+        component: InventoryPage,
+    },
+    {
+        path: "/market",
+        name: "ShopPage",
+        component: ShopPage,
     },
 ];
 

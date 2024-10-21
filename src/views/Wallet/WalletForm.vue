@@ -34,7 +34,7 @@
 </template>
 
 <script lang="ts">
-import { VAULT_KEY } from "@/crypto/storage";
+import HDKeyring from "@/crypto_utils/HDKeyring";
 import { storage } from "@/storage/storage";
 import { defineComponent } from "vue";
 
@@ -49,8 +49,9 @@ export default defineComponent({
         },
     },
     async mounted() {
-        const vault = await storage.get(VAULT_KEY);
-        if (vault) {
+        const hdKeyring = new HDKeyring();
+        await hdKeyring.loadKeyrings();
+        if (hdKeyring.isSigning) {
             this.$router.push("/wallet/detail");
         }
     },
@@ -70,7 +71,6 @@ export default defineComponent({
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
-    font-family: monospace;
 }
 
 @keyframes fadeInWallet {
@@ -92,6 +92,7 @@ export default defineComponent({
     top: 40%;
     left: 50%;
     width: 100%;
+    align-items: center;
 }
 
 .box-btn {
@@ -100,6 +101,7 @@ export default defineComponent({
     left: 50%;
     transform: translate(-50%, 0);
     width: 100%;
+
     button {
         margin: 0 30px;
         width: calc(100% - 60px);
@@ -111,10 +113,8 @@ export default defineComponent({
 }
 
 .logo-wallet {
-    text-align: center;
-
     img {
-        width: 150px;
+        width: 200px;
     }
 }
 
@@ -139,9 +139,8 @@ export default defineComponent({
 }
 
 .btn-title {
-    // position: absolute;
-    // right: 15%;
-    color: #0054d2;
+    color: #fff;
+    font-weight: 800;
 }
 
 .text-qfan {

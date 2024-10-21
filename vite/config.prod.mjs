@@ -25,19 +25,15 @@ export default defineConfig({
     plugins: [vue(), phasermsg()],
     resolve: {
         alias: {
-            "@": fileURLToPath(new URL("../src", import.meta.url)),
+            "@": url("../src"),
             "@public": url("./../public"),
-            // "@components": fileURLToPath(
-            //     new URL("src/components", import.meta.url)
-            // ),
-
-            "@components/*": url("./src/components"),
-            "@views/*": ["src/views/*"],
-            "@router/*": ["src/router/*"],
-            "@utils/*": ["src/utils/*"],
-            "@services/*": ["src/services/*"],
-            "@styles/*": ["src/styles/*"],
-            "@interface/*": ["src/interface/*"],
+            "@components": url("./src/components"),
+            "@views": url("./src/views"),
+            "@router": url("./src/router"),
+            "@utils": url("./src/utils"),
+            "@services": url("./src/services"),
+            "@styles": url("./src/styles"),
+            "@interface": url("./src/interface"),
             // "readable-stream": "vite-compatible-readable-stream",
         },
     },
@@ -50,7 +46,7 @@ export default defineConfig({
                     phaser: ["phaser"],
                 },
             },
-            external: ["crypto"],
+            // external: ["crypto-js"],
         },
         minify: "terser",
         terserOptions: {
@@ -64,7 +60,7 @@ export default defineConfig({
         },
     },
     optimizeDeps: {
-        include: ["@quais/contracts"],
+        // include: ["@quais/contracts"],
         exclude: ["__vite-browser-external"],
     },
 });

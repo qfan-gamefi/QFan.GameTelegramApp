@@ -24,11 +24,35 @@ import userService from "@/services/userService";
 import EventList from "@/views/Event/EventList.vue";
 import CheckinForm from "@/views/Checkin/CheckinForm.vue";
 import { secureStorage, storage } from "@/storage/storage";
-import KeyringService from "@/crypto/KDKeyringService";
-import { transferToken } from "@/crypto/networks";
-import type { Wallet } from "quais";
+import { quais, type Wallet } from "quais";
+import NotificationToast from "@/components/NotificationToast.vue";
+// import { title } from "process";
+// import { title } from "process";
+import type { ILevel } from "@/interface";
+import InfoUser from "@/views/InfoUser/InfoUser.vue";
+import LoadingScreen from "@/views/LoadingScreen/LoadingScreen.vue";
+import { formattedBalance } from "@/utils";
+import { mapState, useStore } from "vuex";
+import { preloadImages } from "@/utils/preloadImages";
+import HDKeyring from "@/crypto_utils/HDKeyring";
+import type { PrivateKey } from "@/crypto_utils/type";
+import type {
+    QuaiTransactionRequest,
+    QuaiTransactionResponse,
+} from "quais/lib/esm/providers";
+import {
+    QFPContractAddress,
+    QFPOwerWalletAddress,
+} from "@/crypto_utils/constants";
+import { DEFAULT_QUAI_TESNTET } from "@/services/network/chains";
+import { getAddress, parseEther, toBigInt } from "ethers";
+import BoxAction from "./BoxAction.vue";
+import PopupPassword from "@/components/popup/PopupPassword.vue";
+import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
 
 const REF_MESS_PREFIX: string = "start r_";
+const REF_TOKEN_PREFIX: string = "TOKEN_";
+const MINING_INTERVAL = 1000 * 60 * 1 + 5000;
 export default {
     components: {
         InviteFrens,
@@ -36,32 +60,41 @@ export default {
         EventList,
         BoosterForm,
         CheckinForm,
+        NotificationToast,
+        InfoUser,
+        LoadingScreen,
+        BoxAction,
+        PopupPassword,
+        PopupComingSoon,
     },
+
     data() {
         const telegram_bot_link =
             "Invite Link: https://t.me/QFanClubBot?start=r_";
 
-        let first_name = "";
-        let last_name = "";
+        const dataUserTele = window.Telegram?.WebApp?.initDataUnsafe;
 
-        if (window?.Telegram?.WebApp?.initDataUnsafe) {
-            const user = window.Telegram.WebApp.initDataUnsafe.user;
-            if (user) {
-                first_name = user.first_name || "";
-                last_name = user.last_name || "";
-            }
+        let first_name = dataUserTele?.user?.first_name || "";
+        let last_name = dataUserTele?.user?.last_name || "";
+
+        if (
+            dataUserTele?.start_param &&
+            dataUserTele?.start_param?.startsWith("TOKEN_")
+        ) {
+            secureStorage.set(
+                "SECURITY_TOKEN",
+                dataUserTele.start_param?.replace("TOKEN_", "")
+            );
         }
 
         return {
+            isLoadingCreen: true,
+            storePermission: false,
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            idUser: window.Telegram.WebApp.initDataUnsafe.user?.id?.toString() ?? '1927324767',
-            telegram_bot_link:
-                telegram_bot_link +
-                window.Telegram.WebApp.initDataUnsafe.user?.id || "",
-            // idUser: "1927324767",
-            // telegram_bot_link: telegram_bot_link + 212380022 || "",
+            idUser: dataUserTele?.user?.id?.toString() ?? "",
+            telegram_bot_link: telegram_bot_link + dataUserTele?.user?.id || "",
 
             showCoomingSoon: false,
             isSuccess: false,
@@ -72,9 +105,6 @@ export default {
                 lastTakeRewardTime: "",
                 nextTakeRewardTime: "",
                 rewardAmount: "",
-                createdAt: "",
-                updatedAt: "",
-                publishedAt: "",
                 rewardScheduleHour: 0,
             },
             increasePerSecond: 0,
@@ -92,17 +122,71 @@ export default {
             activeButton: "",
             activeWallet: null as Wallet | null,
             isCheckin: false,
-            isExecCheckin: false
+            isExecCheckin: false,
+            titleCheckin: "Checkin",
+            titleAutoInteract: "Auto Mining",
+            isExecAutoInteract: false,
+            autoInteractInterval: null as NodeJS.Timeout | null,
+            notification: {
+                show: false,
+                message: "",
+                type: "",
+            },
+            widthWining: 0,
+
+            urlAvt: null,
+            dataLevel: {} as ILevel,
+            expLevelNext: {} as ILevel,
+            percentageLevel: 0,
+            isMaxLv: false,
+            isAnimated: false,
+            // autoMiningStore: this.$store.state.autoMining
         };
     },
     computed: {
+        ...mapState([
+            "hasLoaded",
+            "autoMiningStore",
+            "autoMessStore",
+            "autoMessTextStore",
+        ]),
         beforeStyle() {
             return {
                 "--pseudo-width": `${this.apiDataWidth}%`,
             };
         },
+        styleWining() {
+            return {
+                "--pseudo-width": `${this.widthWining}%`,
+            };
+        },
+    },
+    watch: {
+        autoMiningStore() {
+            if (this.autoMiningStore) {
+                this.calcWidthMining();
+                this.isExecAutoInteract = true;
+            }
+        },
+        autoMessStore(newVal, oldVal) {
+            this.widthWining = 0;
+
+            if (this.autoMessStore) {
+                this.renderSuccess(`Mining success +${30} QFP`);
+                this.calcWidthMining();
+                this.getInfoUser();
+            } else {
+                this.renderErr(`${this.autoMessTextStore}`);
+            }
+        },
     },
     methods: {
+        triggerAnimation() {
+            this.isAnimated = true;
+            setTimeout(() => {
+                this.isAnimated = false;
+            }, 1000);
+        },
         showPopupCoomingSoon() {
             this.showCoomingSoon = true;
         },
@@ -112,7 +196,22 @@ export default {
         hidePopupCode() {
             this.isPopupCode = false;
         },
-
+        async renderNotification(message, type) {
+            this.notification = {
+                show: true,
+                message: message,
+                type: type,
+            };
+        },
+        async renderSuccess(mess) {
+            this.renderNotification(mess, "success");
+        },
+        async renderErr(mess) {
+            this.renderNotification(mess, "error");
+        },
+        async renderWarning(mess) {
+            this.renderNotification(mess, "warning");
+        },
         async register() {
             if (!window.Telegram.WebApp.initDataUnsafe.user) {
                 return;
@@ -150,6 +249,11 @@ export default {
         },
 
         async getInfoUser() {
+            this.$store.commit("setUserId", this.idUser);
+            this.$store.commit(
+                "setFullName",
+                `${this.first_name} ${this.last_name}`
+            );
             try {
                 var data = await userService.getInfo(this.idUser!);
 
@@ -169,15 +273,17 @@ export default {
                     }
                 } else {
                     const resData = data?.data?.[0];
+
+                    // secureStorage.set("data_login", resData);
+                    this.$store.commit("setRewardInfo", resData);
                     this.dataLogin = resData;
                     this.dataQPoint =
                         resData.attributes?.qpoint?.data?.attributes;
+
                     this.animatedBalance = Number(
                         resData.attributes?.qpoint?.data?.attributes?.balance
                     );
-                    // if (!this.isClaim) {
-                    //     await this.countdownFunc();
-                    // }
+                    this.triggerAnimation();
                 }
             } catch (error) {
                 console.error("Error fetching API data:", error);
@@ -259,10 +365,10 @@ export default {
         async updateSence() {
             const phaserRef: any = this.$refs.phaserRef as
                 | {
-                    scene?: {
-                        changeScene: () => void;
-                    };
-                }
+                      scene?: {
+                          changeScene: () => void;
+                      };
+                  }
                 | undefined;
             const scene = toRaw(phaserRef?.scene);
             const givenDateTimeString = this.dataQPoint.nextTakeRewardTime;
@@ -388,8 +494,17 @@ export default {
         },
         async handleWallet() {
             this.handleBackButton();
-            const isSigned = (await storage.get<boolean>("signed_in")) || false;
-            if (isSigned) {
+
+            const walletType = localStorage.getItem("walletType");
+            if (walletType !== "GOLDEN_AGE_WALLET_V3") {
+                localStorage.removeItem("tallyVaults");
+                localStorage.removeItem("address");
+                this.$router.push({ name: "WalletCreate" });
+            }
+
+            const keyringService = new HDKeyring();
+            const isUnlock = await keyringService.unlock();
+            if (isUnlock && keyringService.isSigning) {
                 this.$router.push({ name: "WalletDetail" });
             } else {
                 this.$router.push({ name: "WalletForm" });
@@ -397,44 +512,177 @@ export default {
         },
         async onCheckIn() {
             try {
+                this.titleCheckin = "Processing";
                 this.isExecCheckin = true;
-                const keyringService = new KeyringService();
-                const isUnlock = await keyringService.unlock(secureStorage.getPassword() as string, false)
+                const keyringService = new HDKeyring();
+                const isUnlock = await keyringService.unlock();
                 if (isUnlock) {
-                    const activeWallet = await keyringService.getPrivateKeys().at(0) as Wallet;
-                    const claimCheckin = await userService.claimCheckin(this.idUser, activeWallet?.address as string);
+                    const activeWallet = keyringService.getActiveWallet();
+                    const address = await activeWallet?.address;
+
+                    if (!address) {
+                        this.$router.push({ name: "WalletCreate" });
+                        return;
+                    }
+
+                    const request: QuaiTransactionRequest = {
+                        from: address,
+                        to: QFPOwerWalletAddress,
+                    };
+
+                    const tx = (await keyringService.sendTokenTransaction(
+                        request
+                    )) as QuaiTransactionResponse;
+
+                    const claimCheckin = await userService.claimCheckin(
+                        this.idUser,
+                        activeWallet?.address as string,
+                        tx.hash as string
+                    );
+
                     console.log("claimCheckin", claimCheckin);
+
+                    await this.getInfoUser();
                     if (claimCheckin.error) {
-                        alert(claimCheckin?.error?.message)
+                        // alert(claimCheckin?.error?.message);
+                        this.renderErr(claimCheckin?.message);
+                    } else {
+                        this.renderSuccess("Checkin success!");
+                        // alert(claimCheckin?.message);
                     }
-                    else {
-                        alert(claimCheckin?.message)
-                    }
-                }
-                else {
-                    alert("Please import wallet to checkin");
+                } else {
+                    // alert("Please import wallet to checkin");
                     this.$router.push({ name: "WalletCreate" });
                 }
                 this.isExecCheckin = false;
-
             } catch (error) {
-                console.error("Error claimCheckin:", error);
-                alert(error?.message);
+                // console.error("Error claimCheckin:", error);
+                // alert(error?.message);
+                this.renderErr(error?.message);
                 this.isExecCheckin = false;
-            }
-            finally {
+            } finally {
                 this.isExecCheckin = false;
+                this.titleCheckin = "Checkin";
             }
+        },
+        async onAutoInteract() {
+            this.$store.commit("setAutoMining", true);
+
+            // const keyringService = new HDKeyring();
+            // await keyringService.unlock();
+
+            // const activeWallet = keyringService
+            //     .getWallets()
+            //     ?.at(0) as PrivateKey;
+
+            // const address = await activeWallet?.addresses?.at(0);
+
+            // if (!address) {
+            //     this.$router.push({ name: "WalletCreate" });
+            //     return;
+            // }
+
+            // this.calcWidthMining();
+            // this.isExecAutoInteract = true;
+            // await this.autoInteract(keyringService);
+
+            // this.autoInteractInterval = setInterval(async () => {
+            //     await this.calcWidthMining();
+            //     await this.autoInteract(keyringService);
+            // }, MINING_INTERVAL);
+        },
+        // async autoInteract(keyringService: HDKeyring) {
+        //     try {
+        //         if (keyringService.getWallets().length > 0) {
+        //             this.isExecAutoInteract = true;
+        //             const activeWallet = keyringService.getActiveWallet();
+        //             if (!activeWallet) {
+        //                 this.$router.push({ name: "WalletCreate" });
+        //                 return;
+        //             }
+
+        //             const address = await activeWallet?.address;
+
+        //             const request: QuaiTransactionRequest = {
+        //                 from: address,
+        //                 to: QFPOwerWalletAddress,
+        //             };
+
+        //             const tx = (await keyringService.sendTokenTransaction(
+        //                 request
+        //             )) as QuaiTransactionResponse;
+
+        //             const autoInteract = await userService.autoInteract(
+        //                 this.idUser,
+        //                 activeWallet?.address as string,
+        //                 tx.hash as string
+        //             );
+        //             await this.getInfoUser();
+        //             if (autoInteract.error) {
+        //                 this.renderErr(autoInteract?.message);
+        //                 this.widthWining = 0;
+        //             } else {
+        //                 this.widthWining = 0;
+        //                 this.renderSuccess(`Mining success +${30} QFP`);
+        //                 this.calcWidthMining();
+        //             }
+        //         } else {
+        //             this.$router.push({ name: "WalletCreate" });
+        //         }
+        //     } catch (error) {
+        //         this.renderErr(error?.message);
+        //         await this.getInfoUser();
+        //     }
+        // },
+        calcWidthMining() {
+            const totalTime = MINING_INTERVAL;
+            const updateInterval = 1000;
+            const increment = (100 * updateInterval) / totalTime / 2;
+
+            this.intervalId = setInterval(() => {
+                if (this.widthWining < 100) {
+                    this.widthWining += increment;
+                    if (this.widthWining >= 100) {
+                        this.widthWining = 100;
+                        clearInterval(this.intervalId);
+                    }
+                } else {
+                    clearInterval(this.intervalId);
+                }
+            }, updateInterval);
+        },
+        async initializeApp() {
+            setTimeout(() => {
+                this.$store.commit("setHasLoaded", true);
+            }, 2000);
+        },
+        async cancelPopupPassword() {
+            this.storePermission = false;
+            await this.getInfoUser();
         },
     },
     async mounted() {
         Telegram.WebApp.ready();
         Telegram.WebApp.setHeaderColor("#ffffff");
+        // this.storePermission =
+        //     localStorage.getItem("storePermission") === "true";
         await this.getInfoUser();
+
+        if (!this.hasLoaded) {
+            this.initializeApp();
+        }
+        if (this.autoMiningStore) {
+            this.calcWidthMining();
+            this.isExecAutoInteract = true;
+        }
     },
     async updated() {
         this.updateSence();
-    }
+    },
+    unmounted() {
+        this.autoInteractInterval && clearInterval(this.autoInteractInterval);
+        this.intervalId && clearInterval(this.intervalId);
+    },
 };
 </script>
 
@@ -444,25 +692,11 @@ export default {
 </style>
 
 <template>
-    <div class="container">
-        <button class="absolute-training-btn button-decoration">
-            START TRAINING
-        </button>
+    <LoadingScreen />
 
+    <div class="container" v-if="hasLoaded">
         <div class="container-game">
-            <div class="container-info" v-show="isTelegramLogin">
-                <div class="wrap-username">
-                    {{ first_name }} {{ last_name }}
-                </div>
-            </div>
-
-            <div class="wrap-score">
-                <div class="content">
-                    <!-- <img src="./../public/assets/logo.svg" /> -->
-                    <img src="@public/assets/logo.svg" />
-                    <div class="balance">Balance: {{ animatedBalance }}</div>
-                </div>
-            </div>
+            <InfoUser v-if="dataLogin" :dataLogin="dataLogin" />
 
             <div class="link-checkin">
                 <div>
@@ -471,76 +705,148 @@ export default {
                         Wallet
                     </button>
                 </div>
-                <!-- <a
-                    v-bind:href="`https://qfan-dapp.qcloud.asia/?playerId=${idUser}`"
-                    target="'_blank"
-                > -->
                 <button @click="onCheckIn()" v-bind:disabled="isExecCheckin">
-                    <i class="fa-solid fa-calendar-days"></i> Checkin
-                    <span v-if="isExecCheckin"><i class="fa fa-spinner"></i></span>
+                    <i class="fa-solid fa-calendar-days"></i> {{ titleCheckin }}
+                    <span v-if="isExecCheckin"
+                        ><i class="fa fa-spinner"></i
+                    ></span>
                 </button>
-                <!-- </a> -->
             </div>
 
-            <div class="wrap-commit_reward" :style="beforeStyle">
-                <div class="box-info">
-                    <div v-if="isClaim" class="box-left-train">
-                        Click "Claim" to take +{{
-                            Number(dataQPoint?.rewardAmount) *
-                            dataQPoint?.rewardScheduleHour
+            <div class="contaner-balance">
+                <div class="wr-balance">
+                    Balance:
+                    <div
+                        class="text-balance"
+                        :class="{ 'animate-text': isAnimated }"
+                    >
+                        {{
+                            formattedBalance(
+                                dataLogin?.attributes?.qpoint?.data?.attributes
+                                    ?.balance
+                            )
                         }}
-                        <img src="@public/assets/logo.svg" />
                     </div>
 
-                    <div v-else class="box-left">
-                        <div class="content">
-                            Remain {{ countdown }} to claim
+                    <img src="@public/assets/logo.svg" />
+                </div>
+                <div class="wrap-commit_reward" :style="beforeStyle">
+                    <div class="box-info">
+                        <div v-if="isClaim" class="box-left-train">
+                            Click "Claim" to take +{{
+                                Number(dataQPoint?.rewardAmount) *
+                                dataQPoint?.rewardScheduleHour
+                            }}
+                            <img src="@public/assets/logo.svg" />
+                        </div>
+
+                        <div v-else class="box-left">
+                            <div class="content">
+                                Remain time: {{ countdown }}
+                            </div>
+                        </div>
+
+                        <div class="box-right">
+                            <button
+                                class="btn-commit_reward"
+                                @click="handleReward"
+                                :disabled="isCountingDown"
+                            >
+                                {{ isClaim ? "Claim" : "Training..." }}
+                            </button>
                         </div>
                     </div>
 
-                    <div class="box-right">
-                        <button class="btn-commit_reward" @click="handleReward" :disabled="isCountingDown">
-                            {{ isClaim ? "Claim" : "Training..." }}
-                        </button>
-                    </div>
+                    <!-- <div class="box-info" :style="styleWining">
+                        <div class="auto-left">
+                            <div class="woodwork-loader">
+                                <div
+                                    class="runner rotateMining"
+                                    :style="styleWining"
+                                ></div>
+                            </div>
+
+                            <div class="box-woodwork">
+                                <img src="@public/assets/mining/woodwork.png" />
+                            </div>
+                        </div>
+                        <div class="box-right">
+                            <div
+                                class="btn-mining"
+                                @click="onAutoInteract()"
+                                :class="{ active: isExecAutoInteract }"
+                            >
+                                <img
+                                    src="@public/assets/mining/icon-auto.png"
+                                    :class="{
+                                        rotateMining: isExecAutoInteract,
+                                    }"
+                                />
+                                Mining
+                            </div>
+                        </div>
+                    </div> -->
                 </div>
             </div>
 
+            <BoxAction @back-clicked="handleBackButton" />
             <MainGame ref="phaserRef" />
         </div>
 
         <div class="box-button">
-            <div class="btn-item" @click="handleButtonTab('mission')" :class="{ active: activeButton === 'mission' }">
+            <div
+                class="btn-item"
+                @click="handleButtonTab('mission')"
+                :class="{ active: activeButton === 'mission' }"
+            >
                 <div class="item-img">
                     <img src="@public/assets/button-icons/mission.svg" />
                 </div>
                 <div class="item-title">Mission</div>
             </div>
-            <div class="btn-item" @click="handleButtonTab('event')" :class="{ active: activeButton === 'event' }">
+            <div
+                class="btn-item"
+                @click="handleButtonTab('event')"
+                :class="{ active: activeButton === 'event' }"
+            >
                 <div class="item-img">
                     <img src="@public/assets/button-icons/event.svg" />
                 </div>
                 <div class="item-title">Event</div>
             </div>
-            <div class="btn-item" @click="handleButtonTab('booster')" :class="{ active: activeButton === 'booster' }">
+            <div
+                class="btn-item"
+                @click="handleButtonTab('booster')"
+                :class="{ active: activeButton === 'booster' }"
+            >
                 <div class="item-img">
                     <img src="@public/assets/button-icons/booster.svg" />
                 </div>
-                <div class="item-title" :class="{ active: activeButton === 'booster' }">
+                <div
+                    class="item-title"
+                    :class="{ active: activeButton === 'booster' }"
+                >
                     Booster
                 </div>
             </div>
-            <div class="btn-item" @click="handleButtonTab('invite')" :class="{ active: activeButton === 'invite' }">
+            <div
+                class="btn-item"
+                @click="handleButtonTab('invite')"
+                :class="{ active: activeButton === 'invite' }"
+            >
                 <div class="item-img">
                     <img src="@public/assets/button-icons/invite-friend.svg" />
                 </div>
                 <div class="item-title">Invite Friend</div>
             </div>
+
             <div class="btn-item" @click="showPopupCoomingSoon">
+                <!-- <router-link to=""> -->
                 <div class="item-img">
                     <img src="@public/assets/button-icons/shop.svg" />
                 </div>
                 <div class="item-title">Shop</div>
+                <!-- </router-link> -->
             </div>
         </div>
 
@@ -549,8 +855,15 @@ export default {
             <div class="popup-referer-code">
                 <div class="referer-code">Referer code</div>
                 <form @submit.prevent="submitCode">
-                    <input class="code-input" :class="{ 'input-error': errorMessage }" type="text" v-model="code"
-                        id="code" @input="clearError" placeholder="Enter code" />
+                    <input
+                        class="code-input"
+                        :class="{ 'input-error': errorMessage }"
+                        type="text"
+                        v-model="code"
+                        id="code"
+                        @input="clearError"
+                        placeholder="Enter code"
+                    />
                     <div v-if="errorMessage" class="text-err-code">
                         {{ errorMessage }}
                     </div>
@@ -562,27 +875,47 @@ export default {
         </div>
 
         <MissionList :visible="showMission" :idUser="idUser" />
-        <EventList :visible="showEvent" :idUser="idUser" :dataQPoint="dataQPoint"
-            @openCoomSoon="showPopupCoomingSoon" />
+        <EventList
+            :visible="showEvent"
+            :idUser="idUser"
+            :dataQPoint="dataQPoint"
+            @openCoomSoon="showPopupCoomingSoon"
+        />
 
-        <InviteFrens :visible="showInvite" :idUser="idUser" :rewardAmount="dataQPoint.rewardAmount"
-            :telegram_bot_link="telegram_bot_link" />
-        <BoosterForm :visible="showBooster" :rewardScheduleHour="dataQPoint.rewardScheduleHour" :idUser="idUser" />
+        <InviteFrens
+            :visible="showInvite"
+            :idUser="idUser"
+            :rewardAmount="dataQPoint.rewardAmount"
+            :telegram_bot_link="telegram_bot_link"
+        />
+        <BoosterForm
+            :visible="showBooster"
+            :rewardScheduleHour="dataQPoint.rewardScheduleHour"
+            :idUser="idUser"
+        />
 
         <CheckinForm :isCheckin="isCheckin" @closeCheckin="closeCheckin" />
 
-        <div :class="[
-            'popup-cooming-soon',
-            { 'closing-popup': !showCoomingSoon },
-        ]" v-if="showCoomingSoon">
-            <p>Coming soon</p>
-            <button @click="hidePopupCoomingSoon" class="btn-close-coming-soon">
-                Close
-            </button>
-        </div>
+        <PopupComingSoon
+            :visible="showCoomingSoon"
+            message="Coming soon!"
+            @close="showCoomingSoon = false"
+        />
 
         <div class="enter-code-success" v-if="isSuccess">
             <span>Success!</span>
         </div>
+
+        <NotificationToast
+            v-if="notification.show"
+            :message="notification.message"
+            :type="notification.type"
+            @close="notification.show = false"
+        />
+
+        <PopupPassword
+            :visible="storePermission"
+            @cancel="cancelPopupPassword"
+        />
     </div>
 </template>

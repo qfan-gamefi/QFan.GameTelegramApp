@@ -110,16 +110,15 @@ const userService = {
         const res = await axiosInstance.post(`booster/upLevel`, dataForm);
         return res.data;
     },
-    async claimCheckin(userId: string, toAddress: string) {
+    async claimCheckin(userId: string, toAddress: string, hash: string) {
         try {
             const dataForm = {
-                data: {
-                    playerId: userId,
-                    toAddress: toAddress,
-                },
+                playerId: userId,
+                address: toAddress,
+                hash,
             };
-            const res = await axiosInstance.post(
-                `qpoint-transaction/takeCheckinReward`,
+            const res = await networkAxiosInstance.post(
+                `interact/daily-checkin`,
                 dataForm
             );
             return res.data;
@@ -127,13 +126,29 @@ const userService = {
             console.log(error);
             return error?.response?.data;
         }
-
+    },
+    async autoInteract(userId: string, toAddress: string, hash: string) {
+        try {
+            const dataForm = {
+                playerId: userId,
+                address: toAddress,
+                hash,
+            };
+            const res = await networkAxiosInstance.post(
+                `interact/auto-interact`,
+                dataForm
+            );
+            return res.data;
+        } catch (error) {
+            console.log(error);
+            return error?.response?.data;
+        }
     },
     async faucet(userId: string, toAddress: string) {
         try {
             const dataForm = {
                 playerId: userId,
-                toAddress
+                toAddress,
             };
             const res = await networkAxiosInstance.post(
                 `faucet/send-faucet`,
@@ -144,13 +159,19 @@ const userService = {
             console.log(error);
             return error?.response?.data;
         }
-
     },
-    async registerAddress(userId: string, address: string) {
+    async registerAddress(
+        userId: string,
+        address: string,
+        firstName: string,
+        lastName: string
+    ) {
         try {
             const dataForm = {
                 playerId: userId,
-                address
+                firstName,
+                lastName,
+                address,
             };
             const res = await networkAxiosInstance.post(
                 `user/register-address`,
@@ -161,7 +182,47 @@ const userService = {
             console.log(error);
             return error?.response?.data;
         }
-    }
+    },
+    async getWalletInfo(id: number) {
+        const res = await networkAxiosInstance.get(
+            `/wallet/find-by-player/${id}`
+        );
+        return res?.data;
+    },
+    async postDeposit(
+        id: number,
+        address: string,
+        amount: number,
+        hash: string
+    ) {
+        const data = {
+            playerId: id,
+            walletType: "ON_CHAIN",
+            address: address,
+            amount: amount,
+            unit: "QUAI",
+            hash: hash,
+        };
+        const res = await networkAxiosInstance.post(
+            `/wallet/deposit-onchain`,
+            data
+        );
+        return res;
+    },
+    async getLevels() {
+        const res = await axiosInstance.get(
+            `/player-levels?pagination[pageSize]=9999`
+        );
+        return res?.data?.data;
+    },
+    // async getFeeConfig() {
+    //     const res = await axiosInstance.get(`v1/order/getFeeConfig`);
+    //     return res?.data?.data;
+    // },
+    // async getListMarket() {
+    //     const res = await axiosInstance.get(`v1/order/getMarketList`);
+    //     return res?.data?.data;
+    // },
 };
 
 export default userService;

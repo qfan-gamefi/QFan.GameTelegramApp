@@ -13,6 +13,12 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
     (config) => {
         // Add any custom request configuration here, like auth tokens
+        const passVerify = localStorage.getItem("passVerify");
+
+        // if (passVerify) {
+        //     config.headers["Authorization"] = `Bearer ${passVerify}`;
+        // }
+
         return config;
     },
     (error) => {
@@ -23,7 +29,9 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
     (response) => response,
     (error) => {
-        // Handle any errors
+        if (error.response && error.response.status === 401) {
+            localStorage.setItem("storePermission", "true");
+        }
         return Promise.reject(error);
     }
 );

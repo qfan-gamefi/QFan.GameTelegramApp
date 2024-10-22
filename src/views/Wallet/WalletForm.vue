@@ -139,7 +139,7 @@ export default defineComponent({
 }
 
 .btn-title {
-    color: #0054d2;
+    color: #fff;
     font-weight: 800;
 }
 

@@ -1,6 +1,6 @@
 <template>
     <router-view>
-        <div class="wr-create-wallet">
+        <div class="wr-create-wallet" :style="{ height: dynamicHeight }">
             <div class="btn-close" @click="navigateToHome">
                 <i class="fa-solid fa-rectangle-xmark"></i>
             </div>
@@ -16,39 +16,42 @@
                 <div class="wl-addr">
                     <div class="title-addr">Password</div>
                     <input
-                        class="code-input"
-                        :class="{ 'input-error': errorMessage }"
                         type="password"
                         v-model="walletPassword"
                         id="code"
                         @input="clearError"
                         placeholder="Enter password"
+                        @focus="onFocus"
+                        @blur="onBlur"
                     />
                     <div class="title-addr">Confirm password</div>
                     <input
-                        class="code-input"
-                        :class="{ 'input-error': errorMessage }"
                         type="password"
                         v-model="confirmPassword"
                         id="code"
                         @input="clearError"
                         placeholder="Enter password"
+                        @focus="onFocus"
+                        @blur="onBlur"
                     />
                 </div>
                 <div class="title-pass">Private Key</div>
                 <div class="wr-phrase">
                     <textarea
-                        class="code-input"
-                        :class="{ 'input-error': errorMessage }"
                         type="text"
                         v-model="mnemonic"
                         id="code"
                         @input="clearError"
                         placeholder="Enter private key export from Pelagus Wallet"
+                        @focus="onFocus"
+                        @blur="onBlur"
                     ></textarea>
                 </div>
 
-                <div v-if="errorMessage" class="text-err-code">
+                <div
+                    v-if="errorMessage"
+                    class="bg-[#e49f9f] text-white p-2.5 rounded-md"
+                >
                     {{ errorMessage }}
                 </div>
 
@@ -85,6 +88,9 @@ export default defineComponent({
             confirmPassword: "",
             mnemonic: "",
             errorMessage: "",
+
+            initialHeight: window.innerHeight,
+            dynamicHeight: "100vh",
         };
     },
     methods: {
@@ -158,6 +164,13 @@ export default defineComponent({
         copySeedPhrase() {
             navigator.clipboard.writeText(this.mnemonic);
         },
+        onFocus() {
+            // const heightDifference = this.initialHeight - window.innerHeight;
+            this.dynamicHeight = `calc(100vh + ${200}px)`;
+        },
+        onBlur() {
+            this.dynamicHeight = "100vh";
+        },
     },
     async mounted() {
         // this.mnemonic = await generateRandomMnemonic();
@@ -175,7 +188,7 @@ export default defineComponent({
 .wr-create-wallet {
     height: 100vh;
     width: 100%;
-    overflow-y: auto;
+    overflow-y: scroll;
     z-index: 999;
     animation: fadeIn 0.3s ease forwards;
     color: #fff;
@@ -195,36 +208,18 @@ export default defineComponent({
     }
 }
 
-.text-err-code {
-    background-color: #e49f9f;
-    color: #fff;
-    padding: 10px;
-    border-radius: 5px;
-    animation: fade 1s infinite;
-}
-
-.code-input:focus {
-    border-color: #66afe9;
-    outline: none;
-}
-
-.input-error {
-    border-color: #8c0000;
-    animation: pulse 1s infinite;
-}
-
 .wr-content-wallet {
     display: flex;
     flex-direction: column;
-    padding: 20px;
+    padding: 0 20px;
     gap: 10px;
-    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
-        1px 1px 0 #000;
+    // text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
+    //     1px 1px 0 #000;
 
     .title {
         font-size: 30px;
         font-weight: bold;
-        margin-bottom: 30px;
+        margin-bottom: 20px;
     }
 }
 
@@ -239,7 +234,6 @@ export default defineComponent({
 
     .title-addr {
         color: #000000;
-        margin-bottom: 5px;
     }
 
     .ct-addr {
@@ -256,6 +250,10 @@ export default defineComponent({
         padding: 10px;
         color: #333;
         margin-bottom: 10px;
+    }
+    input:focus {
+        border-color: #66afe9;
+        outline: none;
     }
 }
 
@@ -290,19 +288,18 @@ export default defineComponent({
         border-radius: 5px;
         padding: 10px;
         color: #333;
-        margin-bottom: 10px;
         height: 100px;
     }
 }
 
 .wr-btn {
-    padding: 20px;
+    margin-top: 20px;
     font-weight: 800;
 
     button {
         padding: 25px;
         border-radius: 10px;
-        background: #fff;
+        background: #fff !important;
         -webkit-text-stroke: 0px;
     }
 }
@@ -312,5 +309,9 @@ export default defineComponent({
     padding: 10px;
     color: #fff;
     font-size: 20px;
+}
+.title-pass {
+    font-size: 22px;
+    font-weight: bold;
 }
 </style>

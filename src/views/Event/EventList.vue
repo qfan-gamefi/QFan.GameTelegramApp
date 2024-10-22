@@ -139,7 +139,7 @@ export default {
         },
         handleJoin(itemDetail: IEvent) {
             const { actionType, status, route } = itemDetail?.attributes || {};
-           
+
             if (actionType === "POST") {
                 return this.$router.push(route);
             } else if (actionType === "REDIRECT_EXTERNAL") {
@@ -227,6 +227,9 @@ export default {
     background-position: center;
     border-radius: 15px;
     /* height: 17vh; */
+    height: auto;
+    aspect-ratio: 16 / 6.5;
+    background-size: 100% 100%;
 }
 
 .box-content-event {

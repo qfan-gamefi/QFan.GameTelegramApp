@@ -1,7 +1,7 @@
 <template>
     <transition name="popup-fade">
         <div
-            class="fixed inset-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-[1000]"
+            class="fixed inset-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-[9999]"
             v-if="visible"
         >
             <div

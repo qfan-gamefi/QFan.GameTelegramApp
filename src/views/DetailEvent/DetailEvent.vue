@@ -722,11 +722,13 @@ export default {
 } */
 .banner-event {
     width: 100%;
-    /* height: 17vh; */
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
     position: relative;
+    height: auto;
+    aspect-ratio: 16 / 6.5;
+    background-size: 100% 100%;
 }
 
 .btn-banner {

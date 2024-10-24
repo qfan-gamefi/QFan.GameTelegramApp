@@ -6,7 +6,9 @@ const userService = {
         return axiosInstance.get(`/player/getReferalList?playerId=${userId}`);
     },
     async getListMission() {
-        const res = await axiosInstance.get(`/missions`);
+        const res = await axiosInstance.get(
+            `/missions?populate[QA][populate]=*&populate[category][populate]=*`
+        );
 
         return res.data;
     },
@@ -223,6 +225,45 @@ const userService = {
     //     const res = await axiosInstance.get(`v1/order/getMarketList`);
     //     return res?.data?.data;
     // },
+    async postMissionQA(
+        userId: string,
+        missionId: number,
+        answerId: number,
+        answerCode: string
+    ) {
+        const dataForm = {
+            data: {
+                playerId: userId,
+                missionId: missionId,
+                answer: [
+                    {
+                        id: answerId,
+                        answer: answerCode,
+                    },
+                ],
+            },
+        };
+        const res = await axiosInstance.post(
+            `qpoint-transaction/claimMissionReward`,
+            dataForm
+        );
+        return res;
+    },
+    async giftCode(idUser: string, code: string) {
+        const data = {
+            playerId: idUser,
+            code: code,
+        };
+        try {
+            const res = await axiosInstance.post(
+                `/gift-code/check-available`,
+                data
+            );
+            return res;
+        } catch (error) {
+            return error;
+        }
+    },
 };
 
 export default userService;

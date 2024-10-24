@@ -4,11 +4,23 @@
             <LoadingForm :loading="loading" />
 
             <div class="box-mission" v-if="!loading">
-                <div class="h-full">
+                <div class="flex gap-3 pb-[15px] border-b border-solid">
+                    <div
+                        v-for="(btn, index) in btnMission"
+                        :key="index"
+                        class="btn-mission"
+                        :class="{ active: activeButton === btn?.name }"
+                        @click="setActiveButton(btn?.name)"
+                    >
+                        {{ btn?.label }}
+                    </div>
+                </div>
+
+                <div class="h-full mt-[15px]">
                     <div class="box-desc-mission" v-dragscroll v-if="!loading">
                         <div
-                            class="fade-in flex justify-between items-center p-[15px] text-xs rounded-lg bg-[#00256c]"
-                            v-for="item in missionData"
+                            class="fade-in flex justify-between items-center gap-2 p-[10px] text-xs rounded-lg bg-[#00256c]"
+                            v-for="item in missionTab"
                             :key="item?.id"
                             :class="{ 'blur-background': item.isStatus }"
                         >
@@ -21,12 +33,14 @@
                                     />
                                 </div>
 
-                                <div>
-                                    <div class="text-xs mb-1 f-bangopro">
+                                <div class="text-[10px]">
+                                    <div class="mb-1 f-bangopro">
                                         {{ item?.attributes?.title }}
                                     </div>
+
                                     <div
-                                        class="flex text-[10px] t-primary-color f-nunito"
+                                        class="flex t-primary-color f-nunito"
+                                        v-if="!item?.attributes?.QA"
                                     >
                                         +{{ item?.attributes?.rewardAmount }}
                                         <img
@@ -35,32 +49,81 @@
                                             loading="lazy"
                                         />
                                     </div>
+                                    <div v-else class="grid grid-cols-2 gap-2">
+                                        <div
+                                            v-for="el in item?.attributes?.QA
+                                                ?.answer_selection"
+                                            :key="el?.id"
+                                            class="btn-qa"
+                                            :class="{
+                                                active: renderActiveAnswer(
+                                                    item,
+                                                    el
+                                                ),
+                                            }"
+                                        >
+                                            <div @click="handleQA(el, item)">
+                                                {{ el?.title }}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="item-right" v-if="!item.isStatus">
-                                <a
-                                    v-if="buttonText[item?.id] === 'Go'"
-                                    v-bind:href="item?.attributes?.link"
-                                    target="'_blank"
-                                >
-                                    <button
-                                        class="mission-btn"
-                                        @click="autoClaim(item?.id, item?.id)"
+                            <div
+                                class="item-right"
+                                v-if="!item?.attributes?.QA"
+                            >
+                                <div v-if="!item.isStatus">
+                                    <a
+                                        v-if="buttonText[item?.id] === 'Go'"
+                                        v-bind:href="item?.attributes?.link"
+                                        target="'_blank"
                                     >
-                                        {{ buttonText[item?.id] }}
-                                    </button>
-                                </a>
+                                        <button
+                                            class="mission-btn"
+                                            @click="
+                                                autoClaim(item?.id, item?.id)
+                                            "
+                                        >
+                                            {{ buttonText[item?.id] }}
+                                        </button>
+                                    </a>
 
-                                <a v-if="buttonText[item?.id] !== 'Go'">
-                                    <button class="verifying-btn">
-                                        <i class="fa fa-spinner fa-pulse"></i>
-                                        {{ buttonText[item?.id] }}
-                                    </button>
-                                </a>
-                            </div>
-                            <div class="item-right" v-else>
+                                    <a v-if="buttonText[item?.id] !== 'Go'">
+                                        <button class="verifying-btn">
+                                            <i
+                                                class="fa fa-spinner fa-pulse"
+                                            ></i>
+                                            {{ buttonText[item?.id] }}
+                                        </button>
+                                    </a>
+                                </div>
                                 <img
+                                    v-else
+                                    src="@public/assets/tick.svg"
+                                    loading="lazy"
+                                />
+                            </div>
+
+                            <div v-else>
+                                <button
+                                    class="submit-btn"
+                                    @click="submitQA()"
+                                    v-if="!item.isStatus"
+                                    :class="{
+                                        active: activeSubmit[item?.id],
+                                    }"
+                                >
+                                    <div v-if="buttonText[item?.id] === 'Go'">
+                                        Submit
+                                    </div>
+                                    <div v-else>
+                                        <i class="fa fa-spinner fa-pulse"></i>
+                                    </div>
+                                </button>
+                                <img
+                                    v-else
                                     src="@public/assets/tick.svg"
                                     loading="lazy"
                                 />
@@ -117,6 +180,7 @@ export default defineComponent({
         return {
             loading: true,
             missionData: null,
+            missionTab: null,
             buttonText: [],
             missionRewardData: [],
             loadingBtn: [],
@@ -130,6 +194,18 @@ export default defineComponent({
                 type: "",
                 message: "",
             },
+
+            activeAnswer: "",
+            detailAnswer: null,
+            idMission: null,
+            idAnswer: null,
+            btnMission: [
+                { name: "qfan", label: "Qfan" },
+                { name: "quai_discovery", label: "Quai Discovery" },
+                { name: "partnership", label: "Partnership" },
+            ],
+            activeButton: "qfan",
+            activeSubmit: {},
         };
     },
     watch: {
@@ -155,8 +231,6 @@ export default defineComponent({
             };
 
             setTimeout(() => {
-                // this.fetchMissionData();
-                // this.fetchListMissionReward();
                 if (type == "success") {
                     this.missionData.forEach((mission) => {
                         if (mission?.id == idMiss) {
@@ -170,6 +244,16 @@ export default defineComponent({
                     visible: false,
                 };
             }, 2000);
+        },
+        renderActiveAnswer(detailItem, itemAnswer) {
+            if (detailItem?.isStatus) {
+                const isTrue =
+                    detailItem?.attributes?.QA?.right_answer_code ===
+                    itemAnswer?.code;
+                return isTrue;
+            } else {
+                return this.activeAnswer === itemAnswer?.title;
+            }
         },
         async autoClaim(idMission, id) {
             this.buttonText[id] = `Verifying`;
@@ -188,18 +272,37 @@ export default defineComponent({
                     this.renderNotification("error", "Error!", idMission);
                 });
         },
+        setActiveButton(buttonName) {
+            const newActiveSubmit = Object.keys(this.activeSubmit).reduce(
+                (acc, key) => {
+                    acc[key] = false;
+                    return acc;
+                },
+                {}
+            );
+            this.activeSubmit = newActiveSubmit;
 
+            this.activeAnswer = "";
+            this.activeButton = buttonName;
+            this.filterCategory(buttonName);
+        },
+        filterCategory(categoryName) {
+            this.missionTab = this.missionData?.filter(
+                (item) =>
+                    item?.attributes?.category?.data?.attributes?.code?.toLowerCase() ===
+                    categoryName
+            );
+        },
         async fetchMissionData() {
             try {
                 this.loading = true;
                 const res = await userService.getListMission();
-
                 if (res?.data) {
-                    this.missionData = res?.data;
-
                     res?.data.forEach((item) => {
                         this.buttonText[item?.id] = "Go";
                     });
+
+                    this.missionData = res?.data;
                 }
             } catch (error) {
                 this.missionData = [];
@@ -215,7 +318,6 @@ export default defineComponent({
 
                 if (res) {
                     const rawMissions = toRaw(this.missionData);
-                    console.log(rawMissions);
 
                     rawMissions.forEach((mission) => {
                         const matchingReward = res.data.find(
@@ -243,15 +345,150 @@ export default defineComponent({
                             mission.isStatus = false;
                         }
                     });
-
                     const sortedMissions = sortMissions(rawMissions);
-                    this.missionData = [...sortedMissions];
+                    const test = [
+                        //     {
+                        //     id: 8,
+                        //     attributes: {
+                        //         title: "Visit Quai’s Golden Age Testnet Document",
+                        //         description: null,
+                        //         link: "https://t.co/Zi5smC58Hf",
+                        //         rewardAmount: "20",
+                        //         autoReceiveRewardSecond: 30,
+                        //         type: "QA",
+                        //         QA: [
+                        //             {
+                        //                 id: 2,
+                        //                 question:
+                        //                     "Visit Quai’s Golden Age Testnet Document",
+                        //                 right_answer_code: "A",
+                        //                 answer_selection: [
+                        //                     {
+                        //                         id: 5,
+                        //                         code: "A",
+                        //                         title: "Test",
+                        //                     },
+                        //                     {
+                        //                         id: 6,
+                        //                         code: "B",
+                        //                         title: "Test 2",
+                        //                     },
+                        //                 ],
+                        //             },
+                        //         ],
+                        //         category: {
+                        //             data: {
+                        //                 attributes: {
+                        //                     code: "Quai_Discovery",
+                        //                     name: "Quai Discovery",
+                        //                 },
+                        //             },
+                        //         },
+                        //     },
+                        //     isStatus: false,
+                        // },
+                        {
+                            id: 9,
+                            attributes: {
+                                title: "Visit Quai’s Golden Age Testnet Document 1",
+                                description: null,
+                                link: "https://t.co/Zi5smC58Hf",
+                                rewardAmount: "20",
+                                autoReceiveRewardSecond: 30,
+                                type: "QA",
+                                QA: [
+                                    {
+                                        id: 22,
+                                        question:
+                                            "Visit Quai’s Golden Age Testnet Document 1",
+                                        right_answer_code: "A",
+                                        answer_selection: [
+                                            {
+                                                id: 55,
+                                                code: "A",
+                                                title: "Test 1",
+                                            },
+                                            {
+                                                id: 66,
+                                                code: "B",
+                                                title: "Test 22",
+                                            },
+                                        ],
+                                    },
+                                ],
+                                category: {
+                                    data: {
+                                        attributes: {
+                                            code: "Quai_Discovery",
+                                            name: "Quai Discovery",
+                                        },
+                                    },
+                                },
+                            },
+                            isStatus: false,
+                        },
+                    ];
+                    // this.buttonText[8] = "Go";
+                    // this.buttonText[9] = "Go";
+                    // const ab = sortedMissions?.concat(test);
+                    const newData = ab?.map((item) => {
+                        return {
+                            ...item,
+                            attributes: {
+                                ...item?.attributes,
+                                QA:
+                                    item?.attributes?.QA.length > 0
+                                        ? item?.attributes?.QA?.[0]
+                                        : null,
+                            },
+                        };
+                    });
+                    this.missionData = newData;
+                    this.filterCategory(this.activeButton);
                 }
             } catch (error) {
                 this.missionRewardData = [];
             } finally {
                 this.loading = false;
             }
+        },
+        async handleQA(detailAnswer, item) {
+            const idMission = item?.id;
+            const idAnswer = item?.attributes?.QA?.id;
+            const newActiveSubmit = Object.keys(this.activeSubmit).reduce(
+                (acc, key) => {
+                    acc[key] = false;
+                    return acc;
+                },
+                {}
+            );
+            newActiveSubmit[idMission] = true;
+            this.activeSubmit = newActiveSubmit;
+
+            this.activeAnswer = detailAnswer?.title;
+            this.detailAnswer = detailAnswer;
+
+            this.idMission = idMission;
+            this.idAnswer = idAnswer;
+        },
+        async submitQA() {
+            const { id, code } = this.detailAnswer;
+            this.buttonText[this.idMission] = `Verifying`;
+
+            userService
+                .postMissionQA(this.idUser, this.idMission, this.idAnswer, code)
+                .then(async () => {
+                    await this.renderNotification(
+                        "success",
+                        "Success!",
+                        this.idMission
+                    );
+                })
+                .catch((err) => {
+                    const mess = err?.message || "Error!";
+                    this.renderNotification("error", mess, this.idMission);
+                    this.buttonText[this.idMission] = `Go`;
+                });
         },
     },
     computed: {
@@ -281,7 +518,7 @@ export default defineComponent({
 
 .box-mission {
     padding: 20px;
-    height: calc(100% - 80px);
+    height: 100%;
 }
 
 .box-desc-mission {
@@ -290,6 +527,7 @@ export default defineComponent({
     display: flex;
     flex-direction: column;
     gap: 10px;
+    height: calc(100% - 125px);
 }
 
 .blur-background {
@@ -310,12 +548,10 @@ export default defineComponent({
 .item-right img {
     width: 20px;
 }
-.item-right button {
+button {
     font-size: 10px;
     padding: 10px 5px;
     border: none;
-}
-.mission-btn {
     border-radius: 10px;
 }
 
@@ -375,5 +611,38 @@ section.loaders .loader {
     border-bottom: 16px solid red;
     border-right: 16px solid green;
     border-left: 16px solid pink;
+}
+
+.btn-qa {
+    text-align: center;
+    border-radius: 10px;
+    background: #354d7b;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.btn-qa.active {
+    background: #ffa53a;
+}
+
+.btn-mission.active {
+    background: #ffa53a;
+    color: white;
+}
+
+.btn-mission {
+    padding: 0 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 800;
+    font-size: 12px;
+}
+
+.submit-btn {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.submit-btn.active {
+    opacity: 1;
+    cursor: pointer;
 }
 </style>

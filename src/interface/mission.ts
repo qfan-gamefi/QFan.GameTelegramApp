@@ -3,6 +3,11 @@ export interface IMission {
     name: string;
     status: string;
     isStatus: boolean;
+    attributes: {
+        type: string
+        QA: any
+    }
+    
 }
 
 export interface IMissionReward {

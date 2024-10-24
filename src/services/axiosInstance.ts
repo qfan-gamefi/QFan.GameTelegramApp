@@ -27,12 +27,19 @@ axiosInstance.interceptors.request.use(
 );
 
 axiosInstance.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        return response;
+    },
     (error) => {
         if (error.response && error.response.status === 401) {
             localStorage.setItem("storePermission", "true");
         }
-        return Promise.reject(error);
+        const customError = {
+            ...error,
+            message: error?.response?.data?.error?.message,
+        };
+
+        return Promise.reject(customError);
     }
 );
 

@@ -9,7 +9,7 @@
                         v-for="(btn, index) in btnMission"
                         :key="index"
                         class="btn-mission"
-                        :class="{ active: activeButton === btn?.name }"
+                        :class="{ active: activeButton === btn?.name, isPending: checkPending(btn?.name) }"
                         @click="setActiveButton(btn?.name)"
                     >
                         {{ btn?.label }}
@@ -245,6 +245,15 @@ export default defineComponent({
                 };
             }, 2000);
         },
+        checkPending(nameBtn){
+           const findTab = this.missionData?.filter(
+                (item) =>
+                    item?.attributes?.category?.data?.attributes?.code?.toLowerCase() ===
+                    nameBtn
+            );
+           const hasCompletedTask = findTab?.some(task => task?.isStatus === false);
+           return hasCompletedTask
+        },
         renderActiveAnswer(detailItem, itemAnswer) {
             if (detailItem?.isStatus) {
                 const isTrue =
@@ -292,6 +301,7 @@ export default defineComponent({
                     item?.attributes?.category?.data?.attributes?.code?.toLowerCase() ===
                     categoryName
             );
+            console.log( this.missionTab)
         },
         async fetchMissionData() {
             try {
@@ -431,7 +441,7 @@ export default defineComponent({
                     // this.buttonText[8] = "Go";
                     // this.buttonText[9] = "Go";
                     // const ab = sortedMissions?.concat(test);
-                    const newData = ab?.map((item) => {
+                    const newData = sortedMissions?.map((item) => {
                         return {
                             ...item,
                             attributes: {
@@ -555,11 +565,6 @@ button {
     border-radius: 10px;
 }
 
-.btn-mission-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
 /*  */
 .verifying-btn {
     border-radius: 10px;
@@ -598,7 +603,7 @@ section.loaders .loader {
     }
 }
 
-.colors2 {
+/* .colors2 {
     border-bottom: 16px solid blue;
 }
 
@@ -611,6 +616,51 @@ section.loaders .loader {
     border-bottom: 16px solid red;
     border-right: 16px solid green;
     border-left: 16px solid pink;
+} */
+
+.btn-qa {
+    text-align: center;
+    border-radius: 10px;
+    background: #354d7b;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.btn-qa.active {
+    background: #ffa53a;
+}
+
+.btn-mission.active {
+    background: #ffa53a;
+    color: white;
+}
+
+.btn-mission {
+    padding: 0 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 800;
+    font-size: 12px;
+    background: #5b5b5bab;
+    position: relative;
+}
+.isPending::after {
+    background: #f80000;
+    content: '';
+    width: 6px;
+    height: 6px;
+    position: absolute;
+    border-radius: 6px;
+    right: 3%;
+    top: 3%;
+}
+
+.submit-btn {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.submit-btn.active {
+    opacity: 1;
+    cursor: pointer;
 }
 
 .btn-qa {

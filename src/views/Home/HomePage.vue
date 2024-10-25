@@ -665,13 +665,12 @@ export default {
         },
         async handleYesGiftCode() {
             const res = await userService.giftCode(this.idUser, this.giftCode);
-            if (res?.status === 400) {
-                this.renderErr(res?.message);
-            }
             if (res.status === 200) {
                 this.renderSuccess("Gift code applied successfully!");
                 this.handleNoGiftCode();
                 this.getInfoUser();
+            } else {
+                this.renderErr(res?.message);
             }
         },
         handleNoGiftCode() {

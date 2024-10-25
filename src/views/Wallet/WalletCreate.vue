@@ -148,7 +148,7 @@ export default defineComponent({
                     this.last_name
                 );
                 await storage.set("address", address);
-                localStorage.setItem("walletType", "GOLDEN_AGE_WALLET_V3");
+                localStorage.setItem("walletType", "GOLDEN_AGE_WALLET_V4");
                 this.$router.push("/wallet/detail");
             } else {
                 localStorage.clear();
@@ -175,7 +175,7 @@ export default defineComponent({
     async mounted() {
         // this.mnemonic = await generateRandomMnemonic();
         const walletType = localStorage.getItem("walletType");
-        if (walletType !== "GOLDEN_AGE_WALLET_V3") {
+        if (walletType !== "GOLDEN_AGE_WALLET_V4") {
             localStorage.removeItem("tallyVaults");
             localStorage.removeItem("address");
             this.$router.push({ name: "WalletCreate" });

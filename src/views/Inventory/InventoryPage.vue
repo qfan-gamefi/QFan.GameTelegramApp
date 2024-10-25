@@ -76,7 +76,6 @@
                                             class="item-btn"
                                             v-if="item?.Tradable"
                                         >
-                                           
                                             <button
                                                 @click="handleSell(item)"
                                                 :disabled="loadingBtn"
@@ -124,7 +123,7 @@
                             class="slideIn-fusion flex justify-between p-1.5 border-2 border-[#56d6ff] rounded-md"
                         >
                             <div
-                                class="flex items-center gap-2.5 max-w-[220px] overflow-auto"
+                                class="flex items-center gap-2.5 w-[220px] overflow-auto"
                             >
                                 <div
                                     class="flex flex-col gap-[5px] min-w-[55px]"
@@ -421,7 +420,6 @@ export default defineComponent({
             }
         },
         async getDataInventor() {
-            
             try {
                 const res = await userServiceInventory.getListInventory(
                     Number(this.userId)

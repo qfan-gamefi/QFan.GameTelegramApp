@@ -669,7 +669,7 @@ export default {
                 this.renderSuccess("Gift code applied successfully!");
                 this.handleNoGiftCode();
                 this.getInfoUser();
-            }else{
+            } else {
                 this.renderErr(res?.message);
             }
         },

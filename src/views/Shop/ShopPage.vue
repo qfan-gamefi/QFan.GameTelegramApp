@@ -11,7 +11,7 @@
                 <div class="text-[24px] f-bangopro">Trading</div>
                 <div class="flex gap-4 text-[12px] f-bangopro">
                     <div class="flex gap-1">
-                        {{ infoWallet?.balance }}
+                        {{ infoWallet?.balance || 0 }}
                         <img
                             src="@public/assets/logo-quai.svg"
                             loading="lazy"
@@ -249,7 +249,8 @@ export default defineComponent({
             this.dataDetailCart = item;
         },
         handleDeposit() {
-            this.isDeposit = true;
+            this.showCoomingSoon = true
+            // this.isDeposit = true;
         },
         handleCloseDeposit() {
             this.isDeposit = false;

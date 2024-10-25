@@ -1,8 +1,12 @@
 <template>
     <transition name="popup-fade">
         <div class="popup-container" v-if="visible">
+
             <div class="popup-content">
-                <p class="f-bangopro">{{ text }}</p>
+                <div class="title f-bangopro">{{title}}</div>
+
+                <slot name="content"></slot>
+
                 <div class="popup-buttons">
                     <button @click="yes()">Yes</button>
                     <button @click="no()">No</button>
@@ -14,8 +18,9 @@
 
 <script>
 export default {
+    name: "PopupComponent",
     props: {
-        text: {
+        title: {
             type: String,
             required: true,
         },
@@ -50,27 +55,32 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 9999;
+    color: #000000;
+}
+
+.title {
+    margin-bottom: 15px;
 }
 
 .popup-content {
     font-size: 12px;
-    background: white;
+    background: #fff;
     padding: 20px;
     border-radius: 5px;
     text-align: center;
     position: relative;
-    color: black;
 }
 
 .popup-buttons {
     display: flex;
-    margin-top: 20px;
+    gap: 10px
 }
 
 .popup-buttons button {
-    margin: 0 10px;
     padding: 10px 20px;
     font-size: 12px;
+    color: #fff;
+    border-radius: 5px;
 }
 </style>

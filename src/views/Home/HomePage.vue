@@ -49,6 +49,8 @@ import { getAddress, parseEther, toBigInt } from "ethers";
 import BoxAction from "./BoxAction.vue";
 import PopupPassword from "@/components/popup/PopupPassword.vue";
 import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
+import PopupComponent from "@/components/popup/PopupComponent.vue";
+import InputField from "@/components/Input/InputField.vue";
 
 const REF_MESS_PREFIX: string = "start r_";
 const REF_TOKEN_PREFIX: string = "TOKEN_";
@@ -141,6 +143,9 @@ export default {
             isMaxLv: false,
             isAnimated: false,
             // autoMiningStore: this.$store.state.autoMining
+
+            openGiftCode: false,
+            giftCode: "",
         };
     },
     computed: {
@@ -544,20 +549,15 @@ export default {
 
                     await this.getInfoUser();
                     if (claimCheckin.error) {
-                        // alert(claimCheckin?.error?.message);
                         this.renderErr(claimCheckin?.message);
                     } else {
                         this.renderSuccess("Checkin success!");
-                        // alert(claimCheckin?.message);
                     }
                 } else {
-                    // alert("Please import wallet to checkin");
                     this.$router.push({ name: "WalletCreate" });
                 }
                 this.isExecCheckin = false;
             } catch (error) {
-                // console.error("Error claimCheckin:", error);
-                // alert(error?.message);
                 this.renderErr(error?.message);
                 this.isExecCheckin = false;
             } finally {
@@ -660,12 +660,28 @@ export default {
             this.storePermission = false;
             await this.getInfoUser();
         },
+        handleGiftCode() {
+            this.openGiftCode = true;
+        },
+        async handleYesGiftCode() {
+            const res = await userService.giftCode(this.idUser, this.giftCode);
+                        
+            if (res.status === 200) {
+                this.renderSuccess(`+ ${res?.data?.amount} ${res?.data?.unit}`);
+                this.handleNoGiftCode();
+                this.getInfoUser();
+            } else {
+                this.renderErr(res?.message);
+            }
+        },
+        handleNoGiftCode() {
+            this.openGiftCode = false;
+            this.giftCode = "";
+        },
     },
     async mounted() {
         Telegram.WebApp.ready();
         Telegram.WebApp.setHeaderColor("#ffffff");
-        // this.storePermission =
-        //     localStorage.getItem("storePermission") === "true";
         await this.getInfoUser();
 
         if (!this.hasLoaded) {
@@ -711,6 +727,12 @@ export default {
                         ><i class="fa fa-spinner"></i
                     ></span>
                 </button>
+                <div>
+                    <button @click="handleGiftCode()">
+                        <i class="fa-solid fa-gift"></i>
+                        Gift code
+                    </button>
+                </div>
             </div>
 
             <div class="contaner-balance">
@@ -917,5 +939,20 @@ export default {
             :visible="storePermission"
             @cancel="cancelPopupPassword"
         />
+
+        <PopupComponent
+            :visible="openGiftCode"
+            title="Gift Code"
+            @yes="handleYesGiftCode()"
+            @no="handleNoGiftCode()"
+        >
+            <template #content>
+                <InputField
+                    v-model="giftCode"
+                    label=""
+                    placeholder="Enter Code"
+                />
+            </template>
+        </PopupComponent>
     </div>
 </template>

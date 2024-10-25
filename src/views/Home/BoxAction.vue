@@ -1,14 +1,16 @@
 <template>
     <div class="box-action">
         <div class="market">
-            <img
-                loading="lazy"
-                class="img-market"
-                src="./../../../public/assets/shop/marketplace.png"
-                @click="showCoomingSoon = true"
-            />
-            <div class="shine shine-1"></div>
-            <div class="shine shine-4"></div>
+            <router-link to="/market">
+                <img
+                    loading="lazy"
+                    class="img-market"
+                    src="./../../../public/assets/shop/marketplace.png"
+                    @click="handleBackButton"
+                />
+                <div class="shine shine-1"></div>
+                <div class="shine shine-4"></div>
+            </router-link>
         </div>
         <router-link to="/inventory">
             <img
@@ -76,6 +78,7 @@ img {
     width: 50px;
     object-fit: cover;
 }
+
 .box-action .img-inventory {
     border-radius: 3px;
     width: 50px;
@@ -85,13 +88,16 @@ img {
     -o-animation: glowing 1500ms infinite;
     animation: glowing 1500ms infinite;
 }
+
 @-webkit-keyframes glowing {
     0% {
         -webkit-box-shadow: 0 0 3px #271439;
     }
+
     50% {
         -webkit-box-shadow: 0 0 10px #30154b;
     }
+
     100% {
         -webkit-box-shadow: 0 0 3px #4d1e79;
     }
@@ -101,9 +107,11 @@ img {
     0% {
         -moz-box-shadow: 0 0 3px #271439;
     }
+
     50% {
         -moz-box-shadow: 0 0 10px #30154b;
     }
+
     100% {
         -moz-box-shadow: 0 0 3px #4d1e79;
     }
@@ -113,9 +121,11 @@ img {
     0% {
         box-shadow: 0 0 3px #271439;
     }
+
     50% {
         box-shadow: 0 0 10px #30154b;
     }
+
     100% {
         box-shadow: 0 0 3px #4d1e79;
     }
@@ -125,9 +135,11 @@ img {
     0% {
         box-shadow: 0 0 3px #271439;
     }
+
     50% {
         box-shadow: 0 0 10px #30154b;
     }
+
     100% {
         box-shadow: 0 0 3px #4d1e79;
     }
@@ -138,6 +150,7 @@ img {
         transform: scale(0.9);
         opacity: 1;
     }
+
     100% {
         transform: scale(1);
         opacity: 1;
@@ -164,12 +177,14 @@ img {
     transform: rotate(15deg);
     animation: shine 3s infinite;
 }
+
 .shine:before,
 .shine:after {
     content: "";
     display: block;
     position: absolute;
 }
+
 .shine:after {
     /* top: 6px;
     left: -2px;
@@ -179,30 +194,36 @@ img {
     transform: rotate(45deg);
     box-shadow: 0 0 8px 5px rgba(255, 255, 255, 0.75);
 }
+
 @keyframes shine {
     0% {
         opacity: 0;
     }
+
     34% {
         opacity: 0;
         transform: rotate(15deg);
     }
+
     40% {
         opacity: 0.6;
         transform: rotate(620deg);
     }
+
     48%,
     100% {
         opacity: 0;
         transform: rotate(635deg);
     }
 }
+
 .shine-1 {
     top: 55%;
     left: 15%;
     width: 1px;
     height: 18px;
 }
+
 .shine-1:after {
     top: 6px;
     left: -2px;
@@ -217,6 +238,7 @@ img {
     height: 18px;
     animation-delay: 0.5s;
 }
+
 .shine-2:after {
     top: 6px;
     left: -2px;
@@ -231,12 +253,14 @@ img {
     height: 16px;
     animation-delay: 1s;
 }
+
 .shine-3:after {
     top: 6px;
     left: -2px;
     width: 5px;
     height: 5px;
 }
+
 .shine-4 {
     top: 5%;
     left: 75%;
@@ -244,6 +268,7 @@ img {
     height: 16px;
     animation-delay: 1s;
 }
+
 .shine-4:after {
     top: 6px;
     left: -2px;

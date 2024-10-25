@@ -76,9 +76,9 @@
                                             class="item-btn"
                                             v-if="item?.Tradable"
                                         >
-                                            <!-- @click="handleSell(item)" -->
+                                           
                                             <button
-                                                @click="showCoomingSoon = true"
+                                                @click="handleSell(item)"
                                                 :disabled="loadingBtn"
                                             >
                                                 <div v-if="loadingBtn">

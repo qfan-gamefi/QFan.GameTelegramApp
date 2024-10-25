@@ -665,7 +665,6 @@ export default {
         },
         async handleYesGiftCode() {
             const res = await userService.giftCode(this.idUser, this.giftCode);
-
             if (res.status === 200) {
                 this.renderSuccess("Gift code applied successfully!");
                 this.handleNoGiftCode();

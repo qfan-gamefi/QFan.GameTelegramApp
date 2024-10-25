@@ -4,7 +4,6 @@
             <LoadingForm :loading="loading" />
 
             <div class="box-mission" v-if="!loading">
-
                 <div class="flex gap-3 pb-[15px] border-b border-solid">
                     <div
                         v-for="(btn, index) in btnMission"
@@ -653,6 +652,39 @@ section.loaders .loader {
     border-radius: 6px;
     right: 3%;
     top: 3%;
+}
+
+.submit-btn {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.submit-btn.active {
+    opacity: 1;
+    cursor: pointer;
+}
+
+.btn-qa {
+    text-align: center;
+    border-radius: 10px;
+    background: #354d7b;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.btn-qa.active {
+    background: #ffa53a;
+}
+
+.btn-mission.active {
+    background: #ffa53a;
+    color: white;
+}
+
+.btn-mission {
+    padding: 0 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 800;
+    font-size: 12px;
 }
 
 .submit-btn {

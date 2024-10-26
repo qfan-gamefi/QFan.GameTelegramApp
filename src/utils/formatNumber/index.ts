@@ -1,5 +1,9 @@
 export const formattedBalance = (value: string | number) => {
     const result = Number(value) || 0;
+    if (!isFinite(result)) {
+        return "0"; 
+    }
+
     return (
         new Intl.NumberFormat("en-US", {
             minimumFractionDigits: 0,

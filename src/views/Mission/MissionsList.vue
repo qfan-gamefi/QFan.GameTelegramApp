@@ -361,7 +361,6 @@ export default defineComponent({
                         }
                     });
                     const sortedMissions = sortMissions(rawMissions);
-
                     const newData = sortedMissions?.map((item) => {
                         return {
                             ...item,

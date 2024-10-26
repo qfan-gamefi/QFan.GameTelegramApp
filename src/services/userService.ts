@@ -129,7 +129,7 @@ const userService = {
             return error?.response?.data;
         }
     },
-    async autoInteract(userId: string, toAddress: string, hash: string) {
+    async autoInteract(userId: string, toAddress: string, hash: any) {
         try {
             const dataForm = {
                 playerId: userId,

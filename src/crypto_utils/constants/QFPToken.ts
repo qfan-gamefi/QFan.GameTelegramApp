@@ -429,5 +429,5 @@ export const QFPTokenABI = [
     }
 ]
 
-export const QFPContractAddress = "0x00325562fD099939c02780e50F20c411cB449dE5";
-export const QFPOwerWalletAddress = "0x005F1bf66F3aD789e7392E09687C34f335f9c4eC";
+export const QFPContractAddress = "0x0044D31d2eD2aAF113ed2E39a39A34b61360c7A0";
+export const QFPOwerWalletAddress = "0x0008D5A08d2Db2211bF1cF05A9347f300c3CcD60";

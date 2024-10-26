@@ -13,24 +13,14 @@
 
             <div class="wp-deposit">
                 <div class="desc">
-                    <InputField
-                        v-model="amount"
-                        label="Amount"
-                        placeholder="Enter Amount"
-                        type="number"
-                    />
+                    <InputField v-model="amount" label="Amount" placeholder="Enter Amount" type="number" />
                     <span v-if="amountError" class="error-message">{{
                         messAmountError
-                    }}</span>
-                    <InputField
-                        v-model="password"
-                        label="Password"
-                        placeholder="Enter Password"
-                        type="password"
-                    />
+                        }}</span>
+                    <InputField v-model="password" label="Password" placeholder="Enter Password" type="password" />
                     <span v-if="passwordError" class="error-message">{{
                         messPassError
-                    }}</span>
+                        }}</span>
                 </div>
             </div>
 
@@ -47,12 +37,9 @@ import { QFPOwerWalletAddress } from "@/crypto_utils/constants";
 import HDKeyring from "@/crypto_utils/HDKeyring";
 import userService from "@/services/userService";
 import { secureStorage } from "@/storage/storage";
-import { IInfoWallet } from "@/views/Shop/defination";
-import {
-    QuaiTransactionRequest,
-    QuaiTransactionResponse,
-} from "quais/lib/esm/providers";
-import { defineComponent, PropType } from "vue";
+import type { IInfoWallet } from "@/views/Shop/defination";
+import type { QuaiTransactionRequest, QuaiTransactionResponse } from "quais/providers";
+import { defineComponent, type PropType } from "vue";
 
 export default defineComponent({
     name: "DepositInShop",
@@ -69,7 +56,7 @@ export default defineComponent({
             required: true,
         },
     },
-    mounted() {},
+    mounted() { },
     watch: {
         isDeposit(newVal) {
             if (!newVal) {
@@ -79,7 +66,7 @@ export default defineComponent({
     },
     data() {
         return {
-            amount: null,
+            amount: 0,
             password: "",
 
             amountError: false,
@@ -148,9 +135,9 @@ export default defineComponent({
                     )) as QuaiTransactionResponse;
 
                     const res = await userService.postDeposit(
-                        id,
+                        Number.parseInt(id),
                         address,
-                        amount,
+                        Number(amount),
                         tx.hash
                     );
                     console.log(res);
@@ -180,6 +167,7 @@ $t-white-color: rgb(255, 255, 255);
     text-align: right;
     font-weight: 800;
 }
+
 .overlay-template {
     position: fixed;
     top: 0;
@@ -197,6 +185,7 @@ $t-white-color: rgb(255, 255, 255);
     bottom: 0%;
     z-index: 999;
 }
+
 .popup-enter-active {
     animation: slideUp 0.1s ease forwards;
 }
@@ -239,6 +228,7 @@ $t-white-color: rgb(255, 255, 255);
     background-repeat: no-repeat;
     border-top-right-radius: 20px;
     border-top-left-radius: 20px;
+
     .title {
         margin: 0 auto;
     }
@@ -250,6 +240,7 @@ $t-white-color: rgb(255, 255, 255);
     flex-direction: column;
     gap: 5px;
     background: #00165a;
+
     .desc {
         background: #0b3393;
         padding: 10px;

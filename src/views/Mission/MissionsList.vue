@@ -4,12 +4,15 @@
             <LoadingForm :loading="loading" />
 
             <div class="box-mission" v-if="!loading">
-                <div class="flex gap-3 pb-[15px] border-b border-solid">
+                <div class="flex justify-between gap-3 p-[20px] bg-[#00256c]">
                     <div
                         v-for="(btn, index) in btnMission"
                         :key="index"
                         class="btn-mission"
-                        :class="{ active: activeButton === btn?.name, isPending: checkPending(btn?.name) }"
+                        :class="{
+                            active: activeButton === btn?.name,
+                            isPending: checkPending(btn?.name),
+                        }"
                         @click="setActiveButton(btn?.name)"
                     >
                         {{ btn?.label }}
@@ -27,8 +30,8 @@
                             <div class="flex items-center gap-2">
                                 <div>
                                     <img
-                                        class="w-[35px] rounded-lg"
-                                        src="@public/assets/logo.jpg"
+                                        class="w-[25px]"
+                                        :src="`${apiBaseUrl}${item?.attributes?.image?.data?.attributes?.url}`"
                                         loading="lazy"
                                     />
                                 </div>
@@ -178,6 +181,7 @@ export default defineComponent({
     },
     data() {
         return {
+            apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
             loading: true,
             missionData: null,
             missionTab: null,
@@ -245,14 +249,16 @@ export default defineComponent({
                 };
             }, 2000);
         },
-        checkPending(nameBtn){
-           const findTab = this.missionData?.filter(
+        checkPending(nameBtn) {
+            const findTab = this.missionData?.filter(
                 (item) =>
                     item?.attributes?.category?.data?.attributes?.code?.toLowerCase() ===
                     nameBtn
             );
-           const hasCompletedTask = findTab?.some(task => task?.isStatus === false);
-           return hasCompletedTask
+            const hasCompletedTask = findTab?.some(
+                (task) => task?.isStatus === false
+            );
+            return hasCompletedTask;
         },
         renderActiveAnswer(detailItem, itemAnswer) {
             if (detailItem?.isStatus) {
@@ -301,7 +307,6 @@ export default defineComponent({
                     item?.attributes?.category?.data?.attributes?.code?.toLowerCase() ===
                     categoryName
             );
-            console.log( this.missionTab)
         },
         async fetchMissionData() {
             try {
@@ -356,91 +361,6 @@ export default defineComponent({
                         }
                     });
                     const sortedMissions = sortMissions(rawMissions);
-                    const test = [
-                        //     {
-                        //     id: 8,
-                        //     attributes: {
-                        //         title: "Visit Quai’s Golden Age Testnet Document",
-                        //         description: null,
-                        //         link: "https://t.co/Zi5smC58Hf",
-                        //         rewardAmount: "20",
-                        //         autoReceiveRewardSecond: 30,
-                        //         type: "QA",
-                        //         QA: [
-                        //             {
-                        //                 id: 2,
-                        //                 question:
-                        //                     "Visit Quai’s Golden Age Testnet Document",
-                        //                 right_answer_code: "A",
-                        //                 answer_selection: [
-                        //                     {
-                        //                         id: 5,
-                        //                         code: "A",
-                        //                         title: "Test",
-                        //                     },
-                        //                     {
-                        //                         id: 6,
-                        //                         code: "B",
-                        //                         title: "Test 2",
-                        //                     },
-                        //                 ],
-                        //             },
-                        //         ],
-                        //         category: {
-                        //             data: {
-                        //                 attributes: {
-                        //                     code: "Quai_Discovery",
-                        //                     name: "Quai Discovery",
-                        //                 },
-                        //             },
-                        //         },
-                        //     },
-                        //     isStatus: false,
-                        // },
-                        {
-                            id: 9,
-                            attributes: {
-                                title: "Visit Quai’s Golden Age Testnet Document 1",
-                                description: null,
-                                link: "https://t.co/Zi5smC58Hf",
-                                rewardAmount: "20",
-                                autoReceiveRewardSecond: 30,
-                                type: "QA",
-                                QA: [
-                                    {
-                                        id: 22,
-                                        question:
-                                            "Visit Quai’s Golden Age Testnet Document 1",
-                                        right_answer_code: "A",
-                                        answer_selection: [
-                                            {
-                                                id: 55,
-                                                code: "A",
-                                                title: "Test 1",
-                                            },
-                                            {
-                                                id: 66,
-                                                code: "B",
-                                                title: "Test 22",
-                                            },
-                                        ],
-                                    },
-                                ],
-                                category: {
-                                    data: {
-                                        attributes: {
-                                            code: "Quai_Discovery",
-                                            name: "Quai Discovery",
-                                        },
-                                    },
-                                },
-                            },
-                            isStatus: false,
-                        },
-                    ];
-                    // this.buttonText[8] = "Go";
-                    // this.buttonText[9] = "Go";
-                    // const ab = sortedMissions?.concat(test);
                     const newData = sortedMissions?.map((item) => {
                         return {
                             ...item,
@@ -527,7 +447,6 @@ export default defineComponent({
 }
 
 .box-mission {
-    padding: 20px;
     height: 100%;
 }
 
@@ -537,7 +456,8 @@ export default defineComponent({
     display: flex;
     flex-direction: column;
     gap: 10px;
-    height: calc(100% - 125px);
+    height: calc(100% - 160px);
+    padding: 0 15px;
 }
 
 .blur-background {
@@ -635,17 +555,19 @@ section.loaders .loader {
 }
 
 .btn-mission {
-    padding: 0 10px;
     border-radius: 5px;
     cursor: pointer;
     font-weight: 800;
     font-size: 12px;
     background: #5b5b5bab;
     position: relative;
+    width: 100%;
+    text-align: center;
+    padding: 5px;
 }
 .isPending::after {
     background: #f80000;
-    content: '';
+    content: "";
     width: 6px;
     height: 6px;
     position: absolute;
@@ -672,19 +594,6 @@ section.loaders .loader {
 
 .btn-qa.active {
     background: #ffa53a;
-}
-
-.btn-mission.active {
-    background: #ffa53a;
-    color: white;
-}
-
-.btn-mission {
-    padding: 0 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: 800;
-    font-size: 12px;
 }
 
 .submit-btn {

@@ -96,7 +96,7 @@ export default {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            idUser: dataUserTele?.user?.id?.toString() ?? "1927324767",
+            idUser: dataUserTele?.user?.id?.toString() ?? "2123800227",
             telegram_bot_link: telegram_bot_link + dataUserTele?.user?.id || "",
 
             showCoomingSoon: false,
@@ -541,7 +541,7 @@ export default {
                     )) as QuaiTransactionResponse;
 
                     console.log("tx", tx);
-                    
+
 
                     const claimCheckin = await userService.claimCheckin(
                         this.idUser,
@@ -604,7 +604,6 @@ export default {
         },
         async handleYesGiftCode() {
             const res = await userService.giftCode(this.idUser, this.giftCode);
-
             if (res.status === 200) {
                 this.renderSuccess(`+ ${res?.data?.amount} ${res?.data?.unit}`);
                 this.handleNoGiftCode();

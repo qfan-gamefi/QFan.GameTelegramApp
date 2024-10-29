@@ -26,6 +26,9 @@ axiosPredictInstance.interceptors.response.use(
     (response) => response,
     (error) => {
         // Handle any errors
+        if (error.response && error.response.status === 401) {
+            localStorage.setItem("storePermission", "true");
+        }
         return Promise.reject(error);
     }
 );

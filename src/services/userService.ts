@@ -7,7 +7,7 @@ const userService = {
     },
     async getListMission() {
         const res = await axiosInstance.get(
-            `/missions?populate[QA][populate]=*&populate[category][populate]=*`
+            `/missions?populate[QA][populate]=*&populate[image][populate]=*&populate[category][populate]=*`
         );
 
         return res.data;

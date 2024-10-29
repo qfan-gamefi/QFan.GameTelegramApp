@@ -9,6 +9,8 @@ interface State {
     autoMiningStore: boolean;
     autoMessStore: boolean;
     autoMessTextStore: string;
+    autoFlipStore: boolean;
+    countFlip: number;
 }
 
 const store = createStore<State>({
@@ -20,7 +22,9 @@ const store = createStore<State>({
             rewardInfo: {} as IPlayer,
             autoMiningStore: false,
             autoMessStore: false,
-            autoMessTextStore: '',
+            autoMessTextStore: "",
+            autoFlipStore: false,
+            countFlip: 0,
         };
     },
     mutations: {
@@ -35,6 +39,12 @@ const store = createStore<State>({
         },
         setRewardInfo(state: State, rewardInfo: IPlayer) {
             state.rewardInfo = rewardInfo;
+        },
+        setCountFlip(state: State, payload: number) {
+            state.countFlip = payload;
+        },
+        setAutoFlip(state: State, payload: boolean) {
+            state.autoFlipStore = payload;
         },
         setAutoMining(state: State, payload: boolean) {
             state.autoMiningStore = payload;

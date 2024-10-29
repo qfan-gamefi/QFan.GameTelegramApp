@@ -3,13 +3,13 @@
         <div class="popup-container" v-if="visible">
 
             <div class="popup-content">
-                <div class="title f-bangopro">{{title}}</div>
+                <div class="title">{{title}}</div>
 
                 <slot name="content"></slot>
 
                 <div class="popup-buttons">
-                    <button @click="yes()">Yes</button>
-                    <button @click="no()">No</button>
+                    <button @click="yes()">Ok</button>
+                    <button @click="no()">Cancel</button>
                 </div>
             </div>
         </div>
@@ -60,21 +60,28 @@ export default {
 }
 
 .title {
-    margin-bottom: 15px;
+    border-bottom: 1px solid #89A2EF;
+    padding: 10px 0;
+    margin: 0 10px;
+    font-size: 16px;
+    font-weight: 800;
 }
 
 .popup-content {
     font-size: 12px;
-    background: #fff;
-    padding: 20px;
     border-radius: 5px;
     text-align: center;
     position: relative;
+    background: #00175F;
+    color: #fff;
+    border: 1px solid #89A2EF;
 }
 
 .popup-buttons {
     display: flex;
-    gap: 10px
+    gap: 10px;
+    padding: 15px 10px;
+    border-top: 1px solid #89A2EF;
 }
 
 .popup-buttons button {

@@ -27,9 +27,9 @@ axiosInventory.interceptors.request.use(
 axiosInventory.interceptors.response.use(
     (response) => response,
     (error) => {
-        // if (error.response && error.response.status === 401) {
-        //     localStorage.setItem("storePermission", "true");
-        // }
+        if (error.response && error.response.status === 401) {
+            localStorage.setItem("storePermission", "true");
+        }
         return Promise.reject(error);
     }
 );

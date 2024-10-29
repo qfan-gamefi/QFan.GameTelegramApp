@@ -2,21 +2,12 @@
     <div class="wr-inventory-page">
         <!-- <div class="banner-inventory"></div> -->
 
-        <img
-            class="w-full object-cover"
-            src="./../../../public/assets/inventory/banner-inventory.png"
-            alt="banner_inventory"
-            ref="bannerInventory"
-        />
+        <img class="w-full object-cover" src="./../../../public/assets/inventory/banner-inventory.png"
+            alt="banner_inventory" ref="bannerInventory" />
 
         <div class="btn-inventory">
-            <div
-                v-for="(button, index) in buttonInventory"
-                :key="index"
-                class="btn-item-inventory"
-                :class="{ active: activeButton === button?.name }"
-                @click="setActiveButton(button?.name)"
-            >
+            <div v-for="(button, index) in buttonInventory" :key="index" class="btn-item-inventory"
+                :class="{ active: activeButton === button?.name }" @click="setActiveButton(button?.name)">
                 {{ button.label }}
             </div>
         </div>
@@ -24,66 +15,33 @@
         <div class="wr-box" :style="{ height: calcHeightInventory }">
             <div class="inventory-detail p-2">
                 <div v-if="activeButton === 'Inventory'">
-                    <div
-                        v-for="(itemTitle, key) in itemsInventory"
-                        :key="key"
-                        class="border-b border-[#2F9AD6] p-1 rounded-md animation-inventory"
-                    >
+                    <div v-for="(itemTitle, key) in itemsInventory" :key="key"
+                        class="border-b border-[#2F9AD6] p-1 rounded-md animation-inventory">
                         <div class="text-[14px] mb-1 font-extrabold">
                             {{ renderTitleKey(key) }}
                         </div>
 
                         <div class="box-item">
-                            <div
-                                class="item"
-                                v-for="(item, index) in itemTitle"
-                                :key="index"
-                            >
-                                <div
-                                    class="item-img"
-                                    @click="toggleButtons(item?.id)"
-                                >
-                                    <img
-                                        :src="item?.ItemDef?.ImageUrl"
-                                        :alt="item?.Description"
-                                        loading="lazy"
-                                    />
+                            <div class="item" v-for="(item, index) in itemTitle" :key="index">
+                                <div class="item-img" @click="toggleButtons(item?.id)">
+                                    <img :src="item?.ItemDef?.ImageUrl" :alt="item?.Description" loading="lazy" />
 
-                                    <div
-                                        v-if="activeIndex === item?.id"
-                                        class="button-overlay"
-                                    >
-                                        <div
-                                            class="item-btn"
-                                            v-if="item?.ItemDef?.Consumable"
-                                        >
-                                            <button
-                                                @click="
-                                                    handleUseInventory(item)
-                                                "
-                                                :disabled="loadingBtn"
-                                            >
+                                    <div v-if="activeIndex === item?.id" class="button-overlay">
+                                        <div class="item-btn" v-if="item?.ItemDef?.Consumable">
+                                            <button @click="
+                                                handleUseInventory(item)
+                                                " :disabled="loadingBtn">
                                                 <div v-if="loadingBtn">
-                                                    <i
-                                                        class="fa fa-spinner fa-spin"
-                                                    ></i>
+                                                    <i class="fa fa-spinner fa-spin"></i>
                                                 </div>
                                                 Use
                                             </button>
                                         </div>
 
-                                        <div
-                                            class="item-btn"
-                                            v-if="item?.Tradable"
-                                        >
-                                            <button
-                                                @click="handleSell(item)"
-                                                :disabled="loadingBtn"
-                                            >
+                                        <div class="item-btn" v-if="item?.Tradable">
+                                            <button @click="handleSell(item)" :disabled="loadingBtn">
                                                 <div v-if="loadingBtn">
-                                                    <i
-                                                        class="fa fa-spinner fa-spin"
-                                                    ></i>
+                                                    <i class="fa fa-spinner fa-spin"></i>
                                                 </div>
                                                 Sell
                                             </button>
@@ -98,11 +56,7 @@
                     </div>
                 </div>
                 <div class="box-item" v-if="activeButton === 'Badges'">
-                    <div
-                        class="item-badge"
-                        v-for="(item, index) in itemsBadge"
-                        :key="index"
-                    >
+                    <div class="item-badge" v-for="(item, index) in itemsBadge" :key="index">
                         <img class="img-badge" :src="item?.ItemDef?.ImageUrl" />
                         <div class="item-btn">
                             <button @click="showCoomingSoon = true">Use</button>
@@ -110,71 +64,41 @@
                     </div>
                 </div>
 
-                <div
-                    class="flex flex-col gap-[5px]"
-                    v-if="activeButton === 'Fusion'"
-                >
-                    <div
-                        class="text-[10px]"
-                        v-for="(item, index) in listFusion"
-                        :key="index"
-                    >
-                        <div
-                            class="slideIn-fusion flex justify-between p-1.5 border-2 border-[#56d6ff] rounded-md"
-                        >
-                            <div
-                                class="flex items-center gap-2.5 w-[220px] overflow-auto"
-                            >
-                                <div
-                                    class="flex flex-col gap-[5px] min-w-[55px]"
-                                    v-for="(
+                <div class="flex flex-col gap-[5px]" v-if="activeButton === 'Fusion'">
+                    <div class="text-[10px]" v-for="(item, index) in listFusion" :key="index">
+                        <div class="slideIn-fusion flex justify-between p-1.5 border-2 border-[#56d6ff] rounded-md">
+                            <div class="flex items-center gap-2.5 w-[220px] overflow-auto">
+                                <div class="flex flex-col gap-[5px] min-w-[55px]" v-for="(
                                         el, idx
-                                    ) in item?.ResourcesItemDefIds"
-                                    :key="idx"
-                                >
-                                    <div
-                                        class="text-center p-1 rounded-md"
-                                        :class="renderItemFusion(el, 'bg')"
-                                    >
+                                    ) in item?.ResourcesItemDefIds" :key="idx">
+                                    <div class="text-center p-1 rounded-md" :class="renderItemFusion(el, 'bg')">
                                         {{ renderItemFusion(el, "count") }}
                                     </div>
-                                    <img
-                                        class="w-[55px]"
-                                        :src="el?.ImageUrl"
-                                        loading="lazy"
-                                    />
+                                    <img class="w-[55px]" :src="el?.ImageUrl" loading="lazy" />
                                 </div>
                             </div>
 
                             <div class="flex gap-[15px]">
                                 <div class="flex items-center">
-                                    <img
-                                        class="w-2.5"
-                                        src="@public/assets/inventory/triangle.png"
-                                    />
+                                    <img class="w-2.5" src="@public/assets/inventory/triangle.png" />
                                 </div>
                                 <div class="flex flex-col gap-2 items-center">
                                     <div class="font-extrabold">
                                         {{ item.Name }}
                                     </div>
                                     <div class="relative">
-                                        <img
-                                            class="w-[60px] rounded-md"
-                                            :src="item?.Treasure?.ImageUrl"
-                                        />
+                                        <img class="w-[60px] rounded-md" :src="item?.Treasure?.ImageUrl" />
                                         <div class="slot-item">
                                             {{ item?.TreasureCount }}
                                         </div>
                                     </div>
-                                    <div
-                                        :class="[
-                                            'btn-fusion',
-                                            {
-                                                disable:
-                                                    checkDisableFusion(item),
-                                            },
-                                        ]"
-                                    >
+                                    <div :class="[
+                                        'btn-fusion',
+                                        {
+                                            disable:
+                                                checkDisableFusion(item),
+                                        },
+                                    ]">
                                         <button @click="handleFausion(item)">
                                             Claim
                                         </button>
@@ -187,34 +111,16 @@
             </div>
         </div>
 
-        <PopupComingSoon
-            :visible="showCoomingSoon"
-            message="Coming soon!"
-            @close="showCoomingSoon = false"
-        />
+        <PopupComingSoon :visible="showCoomingSoon" message="Coming soon!" @close="showCoomingSoon = false" />
 
-        <NotificationToast
-            v-if="showNotification"
-            :message="notificationMessage"
-            :type="notificationType"
-            @close="showNotification = false"
-        />
+        <NotificationToast v-if="showNotification" :message="notificationMessage" :type="notificationType"
+            @close="showNotification = false" />
 
-        <PopupConfirm
-            v-if="showClaim"
-            :text="`Do you want Claim!`"
-            :visible="showClaim"
-            @yes="handleYesClaim"
-            @no="handleNoClaim"
-        />
+        <PopupConfirm v-if="showClaim" :text="`Do you want Claim!`" :visible="showClaim" @yes="handleYesClaim"
+            @no="handleNoClaim" />
 
-        <ViewCart
-            :isViewCart="isViewCart"
-            @close="closeViewCart"
-            :detailCart="dataDetailCart"
-            currentPage="inventory"
-            @closeCallApi="closeViewCart()"
-        />
+        <ViewCart :isViewCart="isViewCart" @close="closeViewCart" :detailCart="dataDetailCart" currentPage="inventory"
+            @closeCallApi="closeViewCart()" />
 
         <PopupPassword :visible="isPass" @cancel="isPass = false" />
     </div>
@@ -587,6 +493,7 @@ export default defineComponent({
 
 <style scoped lang="scss">
 @import "@/styles/global.scss";
+
 .wr-inventory-page {
     height: 100%;
     position: absolute;
@@ -601,6 +508,7 @@ export default defineComponent({
     background-repeat: no-repeat;
     background-size: cover;
 }
+
 @keyframes fadeInDetailEvent {
     0% {
         opacity: 0;
@@ -631,6 +539,7 @@ export default defineComponent({
     font-size: 12px;
     font-weight: 800;
 }
+
 .btn-item-inventory.active {
     background: #ffa53a;
     color: white;
@@ -645,6 +554,7 @@ export default defineComponent({
 .wr-box {
     height: 100%;
     padding: 15px;
+
     // height: calc(100% - 140px);
     .inventory-detail {
         height: 100%;
@@ -656,35 +566,42 @@ export default defineComponent({
         overflow-y: auto;
         scrollbar-width: none;
     }
+
     .box-item {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
         gap: 20px 10px;
         animation: slideIn 0.5s forwards;
+
         button {
             padding: 12px;
             font-size: 12px;
             border-radius: 8px;
             min-width: fit-content;
         }
+
         .item {
             position: relative;
             display: flex;
         }
+
         .item-badge {
             position: relative;
             display: flex;
             flex-direction: column;
             gap: 5px;
+
             .img-badge {
                 width: 100%;
                 object-fit: cover;
             }
         }
+
         .item-img {
             width: 100%;
             position: relative;
             cursor: pointer;
+
             img {
                 width: 100%;
                 height: 100%;
@@ -701,11 +618,13 @@ export default defineComponent({
             border-radius: 8px;
         }
     }
+
     .disable {
         pointer-events: none;
         opacity: 0.5;
     }
 }
+
 .slot-item {
     font-size: 10px;
     font-weight: 800;
@@ -723,6 +642,7 @@ export default defineComponent({
 .animation-inventory {
     animation: slideIn 0.5s forwards;
 }
+
 .slideIn-fusion {
     animation: slideIn 0.5s forwards;
 }
@@ -731,6 +651,7 @@ export default defineComponent({
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
@@ -740,6 +661,7 @@ export default defineComponent({
     from {
         opacity: 1;
     }
+
     to {
         opacity: 0;
     }

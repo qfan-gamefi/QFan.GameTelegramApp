@@ -1,9 +1,11 @@
 <script>
 import AutoMining from "./views/Home/AutoMining.vue";
+import AutoFlip from "./views/Flip/AutoFlip.vue";
 
 export default {
     components: {
         AutoMining,
+        AutoFlip
     },
 };
 </script>
@@ -15,5 +17,6 @@ export default {
 
 <template>
     <AutoMining />
+    <AutoFlip />
     <router-view></router-view>
 </template>

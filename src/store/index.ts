@@ -59,11 +59,11 @@ const store = createStore<State>({
             state.autoMessTextStore = payload;
         },
     },
-    // actions: {
-    //     triggerAutoMining({ commit }) {
-    //         commit("setAutoMining", true);
-    //     },
-    // },
+    actions: {
+        triggerAutoMining({ commit }) {
+            commit("setAutoMining", true);
+        },
+    },
     getters: {
         isAutoMiningTriggered: (state) => state.autoMiningStore,
     },

@@ -71,6 +71,7 @@ import HDKeyring from "@/crypto_utils/HDKeyring";
 import { SignerImportSource, SignerSourceTypes } from "@/crypto_utils/type";
 import { secureStorage, storage } from "@/storage/storage";
 import userService from "@/services/userService";
+import { CURRENT_WALLET_VERSION } from "@/crypto_utils/constants";
 
 export default defineComponent({
     name: "WalletCreate",
@@ -148,7 +149,7 @@ export default defineComponent({
                     this.last_name
                 );
                 await storage.set("address", address);
-                localStorage.setItem("walletType", "GOLDEN_AGE_WALLET_V4");
+                localStorage.setItem("walletType", CURRENT_WALLET_VERSION);
                 this.$router.push("/wallet/detail");
             } else {
                 localStorage.clear();
@@ -175,7 +176,7 @@ export default defineComponent({
     async mounted() {
         // this.mnemonic = await generateRandomMnemonic();
         const walletType = localStorage.getItem("walletType");
-        if (walletType !== "GOLDEN_AGE_WALLET_V4") {
+        if (walletType !== CURRENT_WALLET_VERSION) {
             localStorage.removeItem("tallyVaults");
             localStorage.removeItem("address");
             this.$router.push({ name: "WalletCreate" });

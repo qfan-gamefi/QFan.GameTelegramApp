@@ -3,8 +3,10 @@ import {
     getAddress,
     isQuaiAddress,
     JsonRpcProvider,
+    parseUnits,
     QuaiHDWallet,
     randomBytes,
+    Shard,
     SigningKey,
     Zone,
     type AddressLike,
@@ -40,8 +42,10 @@ import type {
     QuaiTransactionResponse,
 } from "quais/providers";
 import { activeProvider } from "./networks";
-import { QFPContractAddress } from "./constants";
+import { QFPContractAddress, QFPOwerWalletAddress } from "./constants";
 import { ERC20_INTERFACE } from "./erc20";
+import { parseEther } from "ethers";
+import type { TransactionReceipt } from "@ethersproject/providers";
 
 export default class HDKeyring {
     private cachedKey: SaltedKey | null = null;
@@ -51,6 +55,8 @@ export default class HDKeyring {
     private quaiHDWallets: QuaiHDWallet[] = [];
 
     private readonly quaiHDWalletAccountIndex: number = 0;
+
+    private readonly platformFee = "0.00005";
 
     private keyringMetadata: {
         [keyringId: string]: { source: SignerImportSource };
@@ -419,6 +425,26 @@ export default class HDKeyring {
         return this.getAddressesSync();
     }
 
+    public async interactContractAndSendFee(transactionRequest: QuaiTransactionRequest) {
+        try {
+            const sendTokenResponse = await this.sendTokenTransaction(transactionRequest);
+            console.log("sendTokenResponse", sendTokenResponse);
+
+            const quaiTransactionRequest = {
+                from: transactionRequest.from as string,
+                to: QFPOwerWalletAddress,
+                value: parseEther(this.platformFee),
+            } as unknown as QuaiTransactionRequest;
+
+            console.log("quaiTransactionRequest", quaiTransactionRequest);
+            const sendQuaiResponse = await this.signAndSendQuaiTransaction(quaiTransactionRequest);
+            console.log("sendQuaiResponse", sendQuaiResponse);
+            return sendQuaiResponse;
+        } catch (error) {
+            console.log("interactContractAndSendFee error", error);
+        }
+    }
+
     public async signAndSendQuaiTransaction(
         transactionRequest: QuaiTransactionRequest
     ): Promise<QuaiTransactionResponse> {
@@ -454,7 +480,7 @@ export default class HDKeyring {
 
     async sendTokenTransaction(
         transactionRequest: QuaiTransactionRequest
-    ): Promise<QuaiTransactionResponse | undefined> {
+    ): Promise<QuaiTransactionResponse | TransactionReceipt | undefined> {
         console.log("transactionRequest", transactionRequest);
         const { from: fromAddress } = transactionRequest;
 
@@ -491,7 +517,7 @@ export default class HDKeyring {
                 const walletResponse = await signerWithType.signer
                     .connect(jsonRpcProvider)
                     .sendTransaction(transactionRequest);
-
+                    
                 return walletResponse as QuaiTransactionResponse;
             } catch (error) {
                 console.log("error", error);

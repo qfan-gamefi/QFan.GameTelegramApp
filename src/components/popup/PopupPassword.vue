@@ -1,23 +1,41 @@
 <template>
     <transition name="popup-fade">
-        <div class="fixed inset-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-[9999]"
-            v-if="visible">
+        <div
+            class="fixed inset-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-[9999]"
+            v-if="visible"
+        >
             <div
-                class="bg-white p-5 rounded-lg text-center relative text-black text-[12px] flex flex-col gap-2 w-[250px]">
+                class="bg-white p-5 rounded-lg text-center relative text-black text-[12px] flex flex-col gap-2 w-[250px]"
+            >
                 <div class="text-[16px] font-extrabold">
                     {{
                         isCreatePass ? "Create password" : "Enter your password"
                     }}
                 </div>
                 <div>
-                    <input type="password" v-model="password" placeholder="Enter password"
-                        class="border border-gray-400 p-1 rounded-md f-bangopro w-full" v-if="!isCreatePass" />
+                    <input
+                        type="password"
+                        v-model="password"
+                        placeholder="Enter password"
+                        class="border border-gray-400 p-1 rounded-md f-bangopro w-full"
+                        v-if="!isCreatePass"
+                    />
 
                     <div class="flex flex-col gap-3">
-                        <input type="password" v-model="newPassword" placeholder="New password"
-                            class="border border-gray-400 p-1 rounded-md f-bangopro w-full" v-if="isCreatePass" />
-                        <input type="password" v-model="confirmPassword" placeholder="Confirm password"
-                            class="border border-gray-400 p-1 rounded-md f-bangopro w-full" v-if="isCreatePass" />
+                        <input
+                            type="password"
+                            v-model="newPassword"
+                            placeholder="New password"
+                            class="border border-gray-400 p-1 rounded-md f-bangopro w-full"
+                            v-if="isCreatePass"
+                        />
+                        <input
+                            type="password"
+                            v-model="confirmPassword"
+                            placeholder="Confirm password"
+                            class="border border-gray-400 p-1 rounded-md f-bangopro w-full"
+                            v-if="isCreatePass"
+                        />
                     </div>
                     <!-- <div
                         v-if="
@@ -30,13 +48,22 @@
                         Passwords do not match!
                     </div> -->
 
-                    <div v-if="showMess" @click="isSuccess && derectBot()" class="font-extrabold"
-                        :class="[isSuccess ? 'text-green-500' : 'text-red-500']">
+                    <div
+                        v-if="showMess"
+                        @click="isSuccess && derectBot()"
+                        class="font-extrabold"
+                        :class="[isSuccess ? 'text-green-500' : 'text-red-500']"
+                    >
                         {{ message }}
                     </div>
 
-                    <div class="text-[10px] text-[#ffa53a] font-extrabold flex justify-end">
-                        <div class="w-fit cursor-pointer pt-1" @click="handleCreatePass()">
+                    <div
+                        class="text-[10px] text-[#ffa53a] font-extrabold flex justify-end"
+                    >
+                        <div
+                            class="w-fit cursor-pointer pt-1"
+                            @click="handleCreatePass()"
+                        >
                             {{
                                 !isCreatePass
                                     ? "Create password"

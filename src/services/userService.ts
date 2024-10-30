@@ -264,6 +264,13 @@ const userService = {
             return error;
         }
     },
+    async walletTrasnsaction(idUser: string) {
+        const res = await networkAxiosInstance.get(
+            `/wallet/find-transaction-by-player/${idUser}`
+        );
+        console.log(res)
+        return res;
+    }
 };
 
 export default userService;

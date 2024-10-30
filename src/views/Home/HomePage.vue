@@ -946,11 +946,13 @@ export default {
             @no="handleNoGiftCode()"
         >
             <template #content>
-                <InputField
-                    v-model="giftCode"
-                    label=""
-                    placeholder="Enter Code"
-                />
+                <div class="p-3">
+                    <InputField
+                        v-model="giftCode"
+                        label=""
+                        placeholder="Enter the code"
+                    />
+                </div>
             </template>
         </PopupComponent>
     </div>

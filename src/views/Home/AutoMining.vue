@@ -15,6 +15,7 @@ import type {
 } from "quais/lib/esm/providers";
 import { QFPOwerWalletAddress } from "@/crypto_utils/constants";
 import userService from "@/services/userService";
+import { TransactionReceipt } from "quais";
 
 export default defineComponent({
     name: "AutoMining",
@@ -70,10 +71,11 @@ export default defineComponent({
                     request
                 )) as QuaiTransactionResponse;
 
+
                 const autoInteract = await userService.autoInteract(
                     idUser,
                     activeWallet?.address as string,
-                    tx.hash as string
+                    tx.hash
                 );
                 if (autoInteract.error) {
                     store.commit("setAutoMessStore", false);

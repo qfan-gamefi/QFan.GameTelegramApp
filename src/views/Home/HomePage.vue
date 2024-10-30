@@ -41,6 +41,7 @@ import type {
     QuaiTransactionResponse,
 } from "quais/lib/esm/providers";
 import {
+    CURRENT_WALLET_VERSION,
     QFPContractAddress,
     QFPOwerWalletAddress,
 } from "@/crypto_utils/constants";
@@ -95,7 +96,7 @@ export default {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            idUser: dataUserTele?.user?.id?.toString() ?? "",
+            idUser: dataUserTele?.user?.id?.toString() ?? "2123800227",
             telegram_bot_link: telegram_bot_link + dataUserTele?.user?.id || "",
 
             showCoomingSoon: false,
@@ -501,7 +502,7 @@ export default {
             this.handleBackButton();
 
             const walletType = localStorage.getItem("walletType");
-            if (walletType !== "GOLDEN_AGE_WALLET_V4") {
+            if (walletType !== CURRENT_WALLET_VERSION) {
                 localStorage.removeItem("tallyVaults");
                 localStorage.removeItem("address");
                 this.$router.push({ name: "WalletCreate" });
@@ -539,6 +540,8 @@ export default {
                         request
                     )) as QuaiTransactionResponse;
 
+                    console.log("tx", tx);
+
                     const claimCheckin = await userService.claimCheckin(
                         this.idUser,
                         activeWallet?.address as string,
@@ -558,7 +561,10 @@ export default {
                 }
                 this.isExecCheckin = false;
             } catch (error) {
-                this.renderErr(error?.message);
+                console.log("error", error);
+                this.renderErr(
+                    "Checkin failed! Chain is not ready to interact."
+                );
                 this.isExecCheckin = false;
             } finally {
                 this.isExecCheckin = false;
@@ -567,73 +573,7 @@ export default {
         },
         async onAutoInteract() {
             this.$store.commit("setAutoMining", true);
-
-            // const keyringService = new HDKeyring();
-            // await keyringService.unlock();
-
-            // const activeWallet = keyringService
-            //     .getWallets()
-            //     ?.at(0) as PrivateKey;
-
-            // const address = await activeWallet?.addresses?.at(0);
-
-            // if (!address) {
-            //     this.$router.push({ name: "WalletCreate" });
-            //     return;
-            // }
-
-            // this.calcWidthMining();
-            // this.isExecAutoInteract = true;
-            // await this.autoInteract(keyringService);
-
-            // this.autoInteractInterval = setInterval(async () => {
-            //     await this.calcWidthMining();
-            //     await this.autoInteract(keyringService);
-            // }, MINING_INTERVAL);
         },
-        // async autoInteract(keyringService: HDKeyring) {
-        //     try {
-        //         if (keyringService.getWallets().length > 0) {
-        //             this.isExecAutoInteract = true;
-        //             const activeWallet = keyringService.getActiveWallet();
-        //             if (!activeWallet) {
-        //                 this.$router.push({ name: "WalletCreate" });
-        //                 return;
-        //             }
-
-        //             const address = await activeWallet?.address;
-
-        //             const request: QuaiTransactionRequest = {
-        //                 from: address,
-        //                 to: QFPOwerWalletAddress,
-        //             };
-
-        //             const tx = (await keyringService.sendTokenTransaction(
-        //                 request
-        //             )) as QuaiTransactionResponse;
-
-        //             const autoInteract = await userService.autoInteract(
-        //                 this.idUser,
-        //                 activeWallet?.address as string,
-        //                 tx.hash as string
-        //             );
-        //             await this.getInfoUser();
-        //             if (autoInteract.error) {
-        //                 this.renderErr(autoInteract?.message);
-        //                 this.widthWining = 0;
-        //             } else {
-        //                 this.widthWining = 0;
-        //                 this.renderSuccess(`Mining success +${30} QFP`);
-        //                 this.calcWidthMining();
-        //             }
-        //         } else {
-        //             this.$router.push({ name: "WalletCreate" });
-        //         }
-        //     } catch (error) {
-        //         this.renderErr(error?.message);
-        //         await this.getInfoUser();
-        //     }
-        // },
         calcWidthMining() {
             const totalTime = MINING_INTERVAL;
             const updateInterval = 1000;
@@ -778,7 +718,7 @@ export default {
                         </div>
                     </div>
 
-                    <!-- <div class="box-info" :style="styleWining">
+                    <div class="box-info" :style="styleWining">
                         <div class="auto-left">
                             <div class="woodwork-loader">
                                 <div
@@ -806,7 +746,7 @@ export default {
                                 Mining
                             </div>
                         </div>
-                    </div> -->
+                    </div>
                 </div>
             </div>
 

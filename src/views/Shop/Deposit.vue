@@ -1,53 +1,57 @@
 <template>
     <div v-bind:class="{ 'overlay-template': isDeposit }"></div>
 
-        <div class="popup-template fade-in" v-if="isDeposit">
-            <div class="header">
-                <div @click="handleBack()" class="back-step" v-if="isConfirm">
-                    <i class="fa-solid fa-chevron-left"></i>
-                </div>
-
-                <div class="title">{{labelType}} QUAI</div>
-
-                <div @click="handleCloseDeposit()" class="close-view-cart">
-                    <i class="fa-solid fa-rectangle-xmark"></i>
-                </div>
+    <div class="popup-template fade-in" v-if="isDeposit">
+        <div class="header">
+            <div @click="handleBack()" class="back-step" v-if="isConfirm">
+                <i class="fa-solid fa-chevron-left"></i>
             </div>
 
-            <div class="wp-deposit">
-                <div class="desc" v-if="!isConfirm">
-                    <InputField
-                        v-model="amount"
-                        label="Amount"
-                        placeholder="Enter Amount"
-                        type="number"
-                    />
-                    <span v-if="amountError" class="error-message">{{
-                        messAmountError
-                    }}</span>
-                    <InputField
-                        v-model="password"
-                        label="Password"
-                        placeholder="Enter Password"
-                        type="password"
-                    />
-                    <span v-if="passwordError" class="error-message">{{
-                        messPassError
-                    }}</span>
-                </div>
-                <div class="desc" v-else>
-                    <div class="text-center">
-                        Are you sure {{labelType}} {{amount}} Quai to address
-                        {{addressWallet}}
-                    </div>
-                    
-                </div>
-            </div>
+            <div class="title">{{ labelType }} QUAI</div>
 
-            <div class="btn-deposit">
-                <div class="text-center" @click="isConfirm ? submitDeposit() : handleConfirm()">{{labelType}}</div>
+            <div @click="handleCloseDeposit()" class="close-view-cart">
+                <i class="fa-solid fa-rectangle-xmark"></i>
             </div>
         </div>
+
+        <div class="wp-deposit">
+            <div class="desc" v-if="!isConfirm">
+                <InputField
+                    v-model="amount"
+                    label="Amount"
+                    placeholder="Enter Amount"
+                    type="number"
+                />
+                <span v-if="amountError" class="error-message">{{
+                    messAmountError
+                }}</span>
+                <InputField
+                    v-model="password"
+                    label="Password"
+                    placeholder="Enter Password"
+                    type="password"
+                />
+                <span v-if="passwordError" class="error-message">{{
+                    messPassError
+                }}</span>
+            </div>
+            <div class="desc" v-else>
+                <div class="text-center">
+                    Are you sure {{ labelType }} {{ amount }} Quai to address
+                    {{ addressWallet }}
+                </div>
+            </div>
+        </div>
+
+        <div class="btn-deposit">
+            <div
+                class="text-center"
+                @click="isConfirm ? submitDeposit() : handleConfirm()"
+            >
+                {{ labelType }}
+            </div>
+        </div>
+    </div>
 </template>
 
 <script lang="ts">
@@ -56,12 +60,12 @@ import { QFPOwerWalletAddress } from "@/crypto_utils/constants";
 import HDKeyring from "@/crypto_utils/HDKeyring";
 import userService from "@/services/userService";
 import { secureStorage } from "@/storage/storage";
-import { IInfoWallet } from "@/views/Shop/defination";
-import {
+import type { IInfoWallet } from "@/views/Shop/defination";
+import type {
     QuaiTransactionRequest,
     QuaiTransactionResponse,
-} from "quais/lib/esm/providers";
-import { defineComponent, PropType } from "vue";
+} from "quais/providers";
+import { defineComponent, type PropType } from "vue";
 
 export default defineComponent({
     name: "DepositInShop",
@@ -80,7 +84,7 @@ export default defineComponent({
         labelType: {
             type: String,
             required: true,
-            validator: (value) => ['DEPOSIT', 'WITHDRAW'].includes(value)
+            validator: (value) => ["DEPOSIT", "WITHDRAW"].includes(value),
         },
     },
     mounted() {},
@@ -93,7 +97,7 @@ export default defineComponent({
     },
     data() {
         return {
-            amount: null,
+            amount: 0,
             password: "",
 
             amountError: false,
@@ -135,10 +139,13 @@ export default defineComponent({
                 this.passwordError = false;
                 this.messPassError = "";
                 this.isConfirm = true;
-                this.addressWallet = `${this.infoWallet?.address?.slice(0, 8)}.......${this.infoWallet?.address?.slice(-8)}`;
+                this.addressWallet = `${this.infoWallet?.address?.slice(
+                    0,
+                    8
+                )}.......${this.infoWallet?.address?.slice(-8)}`;
             }
         },
-        handleConfirm(){
+        handleConfirm() {
             this.validateAmount();
             this.validatePassword();
         },
@@ -167,9 +174,9 @@ export default defineComponent({
                     )) as QuaiTransactionResponse;
 
                     const res = await userService.postDeposit(
-                        id,
+                        Number.parseInt(id),
                         address,
-                        amount,
+                        Number(amount),
                         tx.hash
                     );
                     console.log(res);
@@ -186,9 +193,9 @@ export default defineComponent({
             this.isConfirm = false;
             this.$emit("close");
         },
-        handleBack(){
+        handleBack() {
             this.isConfirm = false;
-        }
+        },
     },
 });
 </script>
@@ -203,6 +210,7 @@ $t-white-color: rgb(255, 255, 255);
     text-align: right;
     font-weight: 800;
 }
+
 .overlay-template {
     position: fixed;
     top: 0;
@@ -276,6 +284,7 @@ $t-white-color: rgb(255, 255, 255);
     flex-direction: column;
     gap: 5px;
     background: #00165a;
+
     .desc {
         background: #0b3393;
         padding: 10px;
@@ -303,5 +312,6 @@ $t-white-color: rgb(255, 255, 255);
     }
 }
 
-.address-text {}
+.address-text {
+}
 </style>

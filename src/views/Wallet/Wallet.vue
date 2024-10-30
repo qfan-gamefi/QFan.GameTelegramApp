@@ -338,6 +338,7 @@ import HDKeyring from "@/crypto_utils/HDKeyring";
 import { type WalletInfo } from "@/crypto_utils/type";
 import type { QuaiTransactionRequest } from "quais/lib/esm/providers";
 import { formatEther, parseEther, toBigInt } from "ethers";
+import { CURRENT_WALLET_VERSION } from "@/crypto_utils/constants";
 
 export default defineComponent({
     name: "WalletDetail",
@@ -488,13 +489,14 @@ export default defineComponent({
                     value: parseEther(this.sendValue.toString()),
                 } as unknown as QuaiTransactionRequest;
 
-                // const signedData = await this.keyringService.signTransaction(this.toAddress, transaction);
+                console.log("transaction", transaction);
+                
 
                 const result = await hdKeyring.signAndSendQuaiTransaction(
                     transaction
                 );
 
-                // console.log("result", result);
+                console.log("result", result);
                 this.openSend = false;
                 setTimeout(() => {
                     this.setActiveTab(new Event(""), "activities");
@@ -553,7 +555,7 @@ export default defineComponent({
         // }
 
         const walletType = localStorage.getItem("walletType");
-        if (walletType !== "GOLDEN_AGE_WALLET_V4") {
+        if (walletType !== CURRENT_WALLET_VERSION) {
             localStorage.removeItem("tallyVaults");
             localStorage.removeItem("address");
             this.$router.push({ name: "WalletCreate" });

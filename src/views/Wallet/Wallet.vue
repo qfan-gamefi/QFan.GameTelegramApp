@@ -34,7 +34,7 @@
                     <div class="flex gap-[10px]">
                         Total balance
 
-                        <div @click="toggleVisibility">
+                        <div @click="toggleVisibility()">
                             <div v-if="!isVisible">
                                 <i class="fa-solid fa-eye"></i>
                             </div>
@@ -110,7 +110,8 @@
                                         src="@public/assets/logo-quai.svg"
                                         class="w-5"
                                     />
-                                    <h2>{{ balance }} QUAI</h2>
+                                    <h2 v-if="isVisible">{{ balance }} QUAI</h2>
+                                    <h2 v-else>*********</h2>
                                 </div>
                             </div>
                         </div>

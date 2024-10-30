@@ -1,15 +1,24 @@
 <template>
     <transition name="popup-fade">
         <div class="popup-container" v-if="visible">
-
-            <div class="popup-content">
-                <div class="title">{{title}}</div>
+            <div
+                class="popup-content"
+                :style="{ backgroundColor: backgroundColor, border: border }"
+            >
+                <div @click="no()" class="close-popup">
+                    <i
+                        class="fa-solid fa-rectangle-xmark"
+                        style="color: #ff0000"
+                    ></i>
+                </div>
+                <div class="title" :style="{ borderBottom: border }">
+                    {{ title }}
+                </div>
 
                 <slot name="content"></slot>
 
-                <div class="popup-buttons">
+                <div class="popup-buttons" :style="{ borderTop: border }">
                     <button @click="yes()">Ok</button>
-                    <button @click="no()">Cancel</button>
                 </div>
             </div>
         </div>
@@ -23,6 +32,14 @@ export default {
         title: {
             type: String,
             required: true,
+        },
+        backgroundColor: {
+            type: String,
+            default: "#00175F",
+        },
+        border: {
+            type: String,
+            default: "1px solid #89A2EF",
         },
         visible: {
             type: Boolean,
@@ -45,6 +62,15 @@ export default {
 @import "@/styles/global.scss";
 @import "@/styles/animation/popup.scss";
 
+.close-popup {
+    position: absolute;
+    top: 3%;
+    right: 3%;
+}
+.close-popup svg {
+    font-size: 18px;
+}
+
 .popup-container {
     position: fixed;
     top: 0;
@@ -60,7 +86,7 @@ export default {
 }
 
 .title {
-    border-bottom: 1px solid #89A2EF;
+    border-bottom: 1px solid #89a2ef;
     padding: 10px 0;
     margin: 0 10px;
     font-size: 16px;
@@ -72,16 +98,15 @@ export default {
     border-radius: 5px;
     text-align: center;
     position: relative;
-    background: #00175F;
     color: #fff;
-    border: 1px solid #89A2EF;
+    border: 1px solid #89a2ef;
 }
 
 .popup-buttons {
     display: flex;
     gap: 10px;
     padding: 15px 10px;
-    border-top: 1px solid #89A2EF;
+    border-top: 1px solid #89a2ef;
 }
 
 .popup-buttons button {

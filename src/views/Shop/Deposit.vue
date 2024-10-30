@@ -1,34 +1,57 @@
 <template>
     <div v-bind:class="{ 'overlay-template': isDeposit }"></div>
 
-    <transition name="popup">
-        <div class="popup-template close-popup" v-if="isDeposit">
-            <div class="header">
-                <div class="title">DEPOSIT QUAI</div>
-
-                <div @click="handleCloseDeposit" class="close-view-cart">
-                    <i class="fa-solid fa-rectangle-xmark"></i>
-                </div>
+    <div class="popup-template fade-in" v-if="isDeposit">
+        <div class="header">
+            <div @click="handleBack()" class="back-step" v-if="isConfirm">
+                <i class="fa-solid fa-chevron-left"></i>
             </div>
 
-            <div class="wp-deposit">
-                <div class="desc">
-                    <InputField v-model="amount" label="Amount" placeholder="Enter Amount" type="number" />
-                    <span v-if="amountError" class="error-message">{{
-                        messAmountError
-                        }}</span>
-                    <InputField v-model="password" label="Password" placeholder="Enter Password" type="password" />
-                    <span v-if="passwordError" class="error-message">{{
-                        messPassError
-                        }}</span>
-                </div>
-            </div>
+            <div class="title">{{ labelType }} QUAI</div>
 
-            <div class="btn-deposit">
-                <div class="text-center" @click="submitDeposit()">Deposit</div>
+            <div @click="handleCloseDeposit()" class="close-view-cart">
+                <i class="fa-solid fa-rectangle-xmark"></i>
             </div>
         </div>
-    </transition>
+
+        <div class="wp-deposit">
+            <div class="desc" v-if="!isConfirm">
+                <InputField
+                    v-model="amount"
+                    label="Amount"
+                    placeholder="Enter Amount"
+                    type="number"
+                />
+                <span v-if="amountError" class="error-message">{{
+                    messAmountError
+                }}</span>
+                <InputField
+                    v-model="password"
+                    label="Password"
+                    placeholder="Enter Password"
+                    type="password"
+                />
+                <span v-if="passwordError" class="error-message">{{
+                    messPassError
+                }}</span>
+            </div>
+            <div class="desc" v-else>
+                <div class="text-center">
+                    Are you sure {{ labelType }} {{ amount }} Quai to address
+                    {{ addressWallet }}
+                </div>
+            </div>
+        </div>
+
+        <div class="btn-deposit">
+            <div
+                class="text-center"
+                @click="isConfirm ? submitDeposit() : handleConfirm()"
+            >
+                {{ labelType }}
+            </div>
+        </div>
+    </div>
 </template>
 
 <script lang="ts">
@@ -38,7 +61,10 @@ import HDKeyring from "@/crypto_utils/HDKeyring";
 import userService from "@/services/userService";
 import { secureStorage } from "@/storage/storage";
 import type { IInfoWallet } from "@/views/Shop/defination";
-import type { QuaiTransactionRequest, QuaiTransactionResponse } from "quais/providers";
+import type {
+    QuaiTransactionRequest,
+    QuaiTransactionResponse,
+} from "quais/providers";
 import { defineComponent, type PropType } from "vue";
 
 export default defineComponent({
@@ -55,8 +81,13 @@ export default defineComponent({
             type: Object as PropType<IInfoWallet>,
             required: true,
         },
+        labelType: {
+            type: String,
+            required: true,
+            validator: (value) => ["DEPOSIT", "WITHDRAW"].includes(value),
+        },
     },
-    mounted() { },
+    mounted() {},
     watch: {
         isDeposit(newVal) {
             if (!newVal) {
@@ -73,6 +104,8 @@ export default defineComponent({
             messAmountError: "",
             passwordError: false,
             messPassError: "",
+            isConfirm: false,
+            addressWallet: "",
         };
     },
     methods: {
@@ -105,12 +138,18 @@ export default defineComponent({
             } else {
                 this.passwordError = false;
                 this.messPassError = "";
+                this.isConfirm = true;
+                this.addressWallet = `${this.infoWallet?.address?.slice(
+                    0,
+                    8
+                )}.......${this.infoWallet?.address?.slice(-8)}`;
             }
         },
-        async submitDeposit() {
+        handleConfirm() {
             this.validateAmount();
             this.validatePassword();
-
+        },
+        async submitDeposit() {
             const id = this.infoWallet?.playerId;
             const address = this.infoWallet?.address;
             const amount = this.amount;
@@ -151,7 +190,11 @@ export default defineComponent({
             }
         },
         handleCloseDeposit() {
+            this.isConfirm = false;
             this.$emit("close");
+        },
+        handleBack() {
+            this.isConfirm = false;
         },
     },
 });
@@ -182,41 +225,42 @@ $t-white-color: rgb(255, 255, 255);
     height: auto;
     position: absolute;
     width: 100%;
-    bottom: 0%;
+    top: 50%;
+    transform: translate(0, -50%);
     z-index: 999;
+    padding: 0 20px;
 }
+// .popup-enter-active {
+//     animation: slideUp 0.1s ease forwards;
+// }
 
-.popup-enter-active {
-    animation: slideUp 0.1s ease forwards;
-}
+// .popup-leave-active {
+//     animation: slideDown 0.1s ease forwards;
+// }
 
-.popup-leave-active {
-    animation: slideDown 0.1s ease forwards;
-}
+// @keyframes slideUp {
+//     0% {
+//         opacity: 0;
+//         transform: translateY(100%) scale(0.5);
+//     }
 
-@keyframes slideUp {
-    0% {
-        opacity: 0;
-        transform: translateY(100%) scale(0.5);
-    }
+//     100% {
+//         opacity: 1;
+//         transform: translateY(0) scale(1);
+//     }
+// }
 
-    100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
+// @keyframes slideDown {
+//     0% {
+//         opacity: 1;
+//         transform: translateY(0) scale(1);
+//     }
 
-@keyframes slideDown {
-    0% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-
-    100% {
-        opacity: 0;
-        transform: translateY(100%) scale(0.5);
-    }
-}
+//     100% {
+//         opacity: 0;
+//         transform: translateY(100%) scale(0.5);
+//     }
+// }
 
 .header {
     display: flex;
@@ -226,11 +270,11 @@ $t-white-color: rgb(255, 255, 255);
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
-    border-top-right-radius: 20px;
-    border-top-left-radius: 20px;
-
+    border-top-right-radius: 10px;
+    border-top-left-radius: 10px;
     .title {
         margin: 0 auto;
+        font-weight: 800;
     }
 }
 
@@ -245,6 +289,9 @@ $t-white-color: rgb(255, 255, 255);
         background: #0b3393;
         padding: 10px;
         border-radius: 5px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
     }
 }
 
@@ -255,11 +302,16 @@ $t-white-color: rgb(255, 255, 255);
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
 
     button {
         color: #000000;
         -webkit-text-stroke: 0.5px rgb(0 0 0);
         border-radius: 5px;
     }
+}
+
+.address-text {
 }
 </style>

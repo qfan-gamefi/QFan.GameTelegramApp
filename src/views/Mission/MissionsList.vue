@@ -204,7 +204,7 @@ export default defineComponent({
             idMission: null,
             idAnswer: null,
             btnMission: [
-                { name: "qfan", label: "Qfan" },
+                { name: "qfan", label: "QFan" },
                 { name: "quai_discovery", label: "Quai Discovery" },
                 { name: "partnership", label: "Partnership" },
             ],

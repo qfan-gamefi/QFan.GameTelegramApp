@@ -1,23 +1,40 @@
 <template>
     <div class="wr-flip-page fade-in">
-        <img src="./../../../public/assets/event/banner-flip.png" loading="lazy" ref="bannerImage" alt="banner-flip"
-            class="w-full" />
+        <img
+            src="./../../../public/assets/event/banner-flip.png"
+            loading="lazy"
+            ref="bannerImage"
+            alt="banner-flip"
+            class="w-full"
+        />
 
         <div class="m-[15px] h-full">
             <div class="wr-cooldown">
-                <div class="flex justify-between pt-[15px] px-[10px] gap-[10px]">
+                <div
+                    class="flex justify-between pt-[15px] px-[10px] gap-[10px]"
+                >
                     <div class="flex gap-[10px]">
-                        <img class="avt" :src="urlImg" loading="lazy" alt="avt" />
+                        <img
+                            class="avt"
+                            :src="urlImg"
+                            loading="lazy"
+                            alt="avt"
+                        />
                         <div class="flex flex-col gap-[5px] text-[10px]">
                             <div>{{ fullName }}</div>
                             <div class="text-rate">
                                 Win Rate 50 Flips:
-                                <span class="text-[#ffcf56]" v-bind:class="{ 'loader-rate': loading }">{{ winRate
-                                    }}%</span>
+                                <span
+                                    class="text-[#ffcf56]"
+                                    v-bind:class="{ 'loader-rate': loading }"
+                                    >{{ winRate }}%</span
+                                >
                             </div>
                             <div>
                                 Total W/L:
-                                <span class="text-[#ffcf56]">{{ winFlip }}/{{ lostFlip }}</span>
+                                <span class="text-[#ffcf56]"
+                                    >{{ winFlip }}/{{ lostFlip }}</span
+                                >
                             </div>
                         </div>
                     </div>
@@ -26,7 +43,10 @@
                         <div class="text-center text-[16px] text-[#e6b2ff]">
                             Cooldown
                         </div>
-                        <div class="time" :class="{ 'counter-animation': isAnimating }">
+                        <div
+                            class="time"
+                            :class="{ 'counter-animation': isAnimating }"
+                        >
                             {{ timeCountdown }}
                         </div>
                     </div>
@@ -40,15 +60,34 @@
 
                 <div id="coin" :class="flipClass">
                     <div class="side-a"></div>
-                    <div class="side-b" :style="{
-                        backgroundImage: `url(${urlImg})`,
-                    }"></div>
+                    <div
+                        class="side-b"
+                        :style="{
+                            backgroundImage: `url(${urlImg})`,
+                        }"
+                    ></div>
                 </div>
 
-                <div class="box-submit">
-                    <button class="btn-submit" @click="flipCoin()" :disabled="loadingSubmit">
+                <div class="flex justify-center gap-3">
+                    <button
+                        class="btn-submit"
+                        @click="flipCoin()"
+                        :disabled="loadingSubmit"
+                        :class="{ isOn: autoFlipValue }"
+                    >
                         Flip the coin - 200
                         <img src="@public/assets/logo.svg" />
+                    </button>
+
+                    <button
+                        class="btn-auto-flip"
+                        @click="handleAutoFlip()"
+                        :class="{ isOn: autoFlipValue }"
+                        :disabled="loadingSubmit"
+                    >
+                        Auto Flip
+                        <div class="btn-on" v-if="autoFlipValue">ON</div>
+                        <div class="btn-off" v-else>OFF</div>
                     </button>
                 </div>
 
@@ -58,11 +97,7 @@
                         {{ formattedBalance(balance) }}
                         <img src="@public/assets/logo.svg" />
                     </div>
-                    <div>
-                        <button class="btn-submit" @click="handleAutoFlip()">
-                            Auto Flip
-                        </button>
-                    </div>
+
                     <div class="re-load" @click="history">
                         <i class="fa-solid fa-rotate"></i>
                     </div>
@@ -79,10 +114,15 @@
 
                 <LoadingForm :loading="loading" />
                 <div class="wr-content" v-if="!loading">
-                    <div v-for="(item, index) in dataHistory" :key="index"
-                        class="flex text-center p-[5px] text-[10px] items-center">
+                    <div
+                        v-for="(item, index) in dataHistory"
+                        :key="index"
+                        class="flex text-center p-[5px] text-[10px] items-center"
+                    >
                         <div class="stt">
-                            <div class="w-[80px] whitespace-nowrap overflow-hidden text-ellipsis">
+                            <div
+                                class="w-[80px] whitespace-nowrap overflow-hidden text-ellipsis"
+                            >
                                 {{ parseReward(item?.Reward).userName || "-" }}
                             </div>
                         </div>
@@ -91,13 +131,21 @@
                             {{ formatDateTimeUS(item?.createdAt) }}
                         </div>
                         <div class="status">
-                            <div class="win" v-if="item?.Status?.toLowerCase() === 'win'">
+                            <div
+                                class="win"
+                                v-if="item?.Status?.toLowerCase() === 'win'"
+                            >
                                 <i class="fa-solid fa-crown"></i>
                             </div>
-                            <div class="lose" v-if="item?.Status?.toLowerCase() === 'lose'">
+                            <div
+                                class="lose"
+                                v-if="item?.Status?.toLowerCase() === 'lose'"
+                            >
                                 <i class="fa-solid fa-flag"></i>
                             </div>
-                            <div v-if="item?.Status?.toLowerCase() === 'placed'">
+                            <div
+                                v-if="item?.Status?.toLowerCase() === 'placed'"
+                            >
                                 Placed
                             </div>
                         </div>
@@ -108,7 +156,7 @@
                                 {{ item?.ValueType }}:
                                 {{
                                     parseReward(item?.Reward)?.[
-                                    item?.ValueType?.toLowerCase()
+                                        item?.ValueType?.toLowerCase()
                                     ]
                                 }}
                             </div>
@@ -118,8 +166,12 @@
             </div>
         </div>
 
-        <NotificationToast v-if="showNotification" :message="notificationMessage" :type="notificationType"
-            @close="showNotification = false" />
+        <NotificationToast
+            v-if="showNotification"
+            :message="notificationMessage"
+            :type="notificationType"
+            @close="showNotification = false"
+        />
 
         <div v-bind:class="{ 'overlay-popup': isPopup }"></div>
         <div :class="['popup', { 'closing-popup': !isPopup }]" v-if="isPopup">
@@ -127,9 +179,12 @@
                 <div>Winner</div>
             </div>
             <div class="box-img">
-                <div class="img" :style="{
-                    backgroundImage: `url(${getImageUrl()})`,
-                }" />
+                <div
+                    class="img"
+                    :style="{
+                        backgroundImage: `url(${getImageUrl()})`,
+                    }"
+                />
             </div>
 
             <div class="text">{{ text }}</div>
@@ -138,30 +193,54 @@
         </div>
     </div>
 
-    <PopupConfirm v-if="isToken" :text="`Click yes to invoke your security token?`" :visible="isToken"
-        @yes="handleYesToken" @no="handleNoToken" />
+    <PopupConfirm
+        v-if="isToken"
+        :text="`Click yes to invoke your security token?`"
+        :visible="isToken"
+        @yes="handleYesToken"
+        @no="handleNoToken"
+    />
 
     <PopupPassword :visible="isPass" @cancel="isPass = false" />
 
-    <PopupComponent :visible="openAuto" title="AUTO FLIP" @yes="yesAutoFlip()" @no="noAutoFlip()">
+    <PopupComponent
+        :visible="openAuto"
+        title="AUTO FLIP"
+        @yes="yesAutoFlip()"
+        @no="noAutoFlip()"
+        background-color="#500d79"
+        border="1px solid #d631ff"
+    >
         <template #content>
             <div class="p-[10px] flex flex-col gap-3">
                 <div>
                     <div class="text-[14px] mb-1">
                         Auto by number of times or unlimited
                     </div>
-                    <div class="flex gap-2 justify-evenly">
-                        <div class="btn-count" :class="{ active: isCount }" @click="btnCount()">
+                    <div class="flex justify-center">
+                        <div
+                            class="btn-count"
+                            :class="{ active: isCount }"
+                            @click="btnCount()"
+                        >
                             Number
                         </div>
-                        <div class="btn-count" :class="{ active: !isCount }" @click="btnUnlimited()">
+                        <div
+                            class="btn-count"
+                            :class="{ active: !isCount }"
+                            @click="btnUnlimited()"
+                        >
                             Unlimited
                         </div>
                     </div>
                 </div>
 
                 <div class="box-input" :class="{ active: !isCount }">
-                    <InputNumber v-model="countAuto" label="" placeholder="Enter number" />
+                    <InputNumber
+                        v-model="countAuto"
+                        label=""
+                        placeholder="Enter number"
+                    />
                 </div>
             </div>
         </template>
@@ -181,7 +260,8 @@ import { TFlipClass, TStatusFlip } from "@/interface";
 import PopupPassword from "@/components/popup/PopupPassword.vue";
 import PopupComponent from "@/components/popup/PopupComponent.vue";
 import InputNumber from "@/components/Input/InputNumber.vue";
-import { useStore } from "vuex";
+import { computed, ref, watch } from "vue";
+import { mapState, useStore } from "vuex";
 
 export default defineComponent({
     name: "FlipPage",
@@ -194,15 +274,32 @@ export default defineComponent({
         InputNumber,
     },
     props: {},
+    computed: {
+        ...mapState(["autoFlipStore"]),
+    },
     async created() {
-        this.getInfo();
-        this.getAvt();
-        this.history();
-        this.getRate();
+        await Promise.all([
+            this.getInfo(),
+            this.getAvt(),
+            this.history(),
+            this.getRate(),
+        ]);
+        this.autoFlipValue = this.autoFlipStore;
+    },
+    watch: {
+        autoFlipStore(newValue) {
+            this.autoFlipValue = newValue;
+            if (!newValue) {
+                this.getInfo();
+                this.history();
+                this.getRate();
+            }
+        },
     },
     mounted() {
         this.updateHeight();
     },
+
     data() {
         const userInfo = window.Telegram.WebApp.initDataUnsafe;
 
@@ -213,7 +310,7 @@ export default defineComponent({
             loading: false,
             userId: userInfo?.user?.id || "",
             fullName: `${userInfo?.user?.first_name} ${userInfo?.user?.last_name}`,
-            // fullName: `${userInfo?.user?.first_name} ${userInfo?.user?.last_name}` || "su fly 007 🍅",
+            // fullName: "su fly 007 🍅",
             isPopup: false,
             flipClass: "" as TFlipClass,
             urlImg: null,
@@ -243,6 +340,7 @@ export default defineComponent({
             isCount: true,
             openAuto: false,
             countAuto: 1,
+            autoFlipValue: null,
         };
     },
     methods: {
@@ -647,22 +745,49 @@ export default defineComponent({
     }
 }
 
-.btn-submit {
+.btn-submit,
+.btn-auto-flip {
     padding: 10px;
     border-radius: 5px;
     width: fit-content;
-    margin: 0 auto;
     cursor: pointer;
     font-size: 12px;
-
     img {
         width: 15px;
     }
 }
 
-.btn-submit:disabled {
+.btn-submit:disabled,
+.btn-auto-flip:disabled,
+.box-input.active,
+.isOn {
     opacity: 0.6;
     cursor: not-allowed;
+    pointer-events: none;
+}
+
+.btn-auto-flip {
+    padding: 10px 0 10px 10px;
+}
+// .isOn {
+//     opacity: 0.6;
+//     cursor: not-allowed;
+//     pointer-events: none;
+// }
+.btn-on,
+.btn-off {
+    display: flex;
+    align-items: center;
+    height: 16px;
+    padding: 10px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+.btn-on {
+    background: #42ff00;
+}
+.btn-off {
+    background: #ff0000;
 }
 
 .wr-history {
@@ -818,21 +943,21 @@ export default defineComponent({
 }
 
 .btn-count {
-    border-radius: 5px;
     width: fit-content;
     cursor: pointer;
     font-size: 12px;
-    padding: 0 10px;
-    background: #ffa53a69;
+    padding: 5px 10px;
+    background: #412e17;
+    font-weight: 800;
 }
 
 .btn-count.active {
     background: #ffa53a;
 }
 
-.box-input.active {
-    opacity: 0.6;
-    cursor: not-allowed;
-    pointer-events: none;
-}
+// .box-input.active {
+//     opacity: 0.6;
+//     cursor: not-allowed;
+//     pointer-events: none;
+// }
 </style>

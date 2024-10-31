@@ -27,8 +27,8 @@
                         />
                     </div>
                 </div>
-            </div>
-            <div class="flex gap-2 justify-end">
+            </div> 
+            <!-- <div class="flex gap-2 justify-end">
                 <button
                     class="btn-transaction"
                     @click="handleDeposit('deposit')"
@@ -41,7 +41,7 @@
                 >
                     Withdraw
                 </button>
-            </div>
+            </div> -->
         </div>
 
         <div

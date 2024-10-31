@@ -146,6 +146,10 @@ export default defineComponent({
             if (!this.amountError && !this.passwordError) {
                 try {
                     const activeWallet = keyringService.getActiveWallet();
+                    if (!activeWallet || !activeWallet.address) {
+                        this.$router.push({ name: "WalletCreate" });
+                        return;
+                    }
                     const request: QuaiTransactionRequest = {
                         from: activeWallet.address,
                         to: MARKET_WALLET_ADDRESS,
@@ -162,7 +166,7 @@ export default defineComponent({
                         Number(amount),
                         tx.hash
                     );
-                    console.log(res);
+                    console.log("Deposit Result: ", res);
 
                     if (res?.status === 201 || res?.status === 200) {
                         this.$emit("close");

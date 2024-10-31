@@ -27,12 +27,21 @@
                         />
                     </div>
                 </div>
-                <div>
-                    <button class="deposit-btn" @click="handleDeposit()">
-                        Deposit
-                    </button>
-                </div>
-            </div>
+            </div> 
+            <!-- <div class="flex gap-2 justify-end">
+                <button
+                    class="btn-transaction"
+                    @click="handleDeposit('deposit')"
+                >
+                    Deposit
+                </button>
+                <button
+                    class="btn-transaction"
+                    @click="handleDeposit('withdraw')"
+                >
+                    Withdraw
+                </button>
+            </div> -->
         </div>
 
         <div
@@ -98,6 +107,10 @@
             <MyOrderPage />
         </div>
 
+        <div v-if="activeButton === EButtonName.Transactions">
+            <TransactionPage />
+        </div>
+
         <ViewCart
             :isViewCart="isViewCart"
             @close="handleCloseCart()"
@@ -109,6 +122,7 @@
             :isDeposit="isDeposit"
             @close="handleCloseDeposit()"
             :infoWallet="infoWallet"
+            :labelType="labelTransaction"
         />
 
         <PopupComingSoon
@@ -131,6 +145,7 @@ import {
 } from "@/views/Shop/defination";
 import ViewCart from "./ViewCart.vue";
 import MyOrderPage from "./MyOrder.vue";
+import TransactionPage from "./TransactionPage.vue";
 import DepositInShop from "./Deposit.vue";
 import { mapState } from "vuex";
 import { formattedBalance } from "@/utils";
@@ -145,6 +160,7 @@ export default defineComponent({
         DepositInShop,
         MyOrderPage,
         PopupComingSoon,
+        TransactionPage,
     },
     computed: {
         ...mapState(["rewardInfo"]),
@@ -177,6 +193,7 @@ export default defineComponent({
 
             isDeposit: false,
             infoWallet: {} as IInfoWallet,
+            labelTransaction: "DEPOSIT",
         };
     },
     methods: {
@@ -202,6 +219,7 @@ export default defineComponent({
             );
         },
         setActiveButton(button: EButtonName) {
+            // this.activeButton = button;
             if (button === EButtonName.Transactions) {
                 this.showCoomingSoon = true;
             } else {
@@ -248,9 +266,14 @@ export default defineComponent({
             this.isViewCart = true;
             this.dataDetailCart = item;
         },
-        handleDeposit() {
-            this.showCoomingSoon = true
-            // this.isDeposit = true;
+        handleDeposit(labelType: "withdraw" | "deposit") {
+            // this.showCoomingSoon = true
+            this.isDeposit = true;
+            if (labelType === "deposit") {
+                this.labelTransaction = "DEPOSIT";
+            } else {
+                this.labelTransaction = "WITHDRAW";
+            }
         },
         handleCloseDeposit() {
             this.isDeposit = false;
@@ -258,9 +281,11 @@ export default defineComponent({
         async callWalletInfo() {
             try {
                 const res = await userService.getWalletInfo(this.userId);
-
+                console.log("callWalletInfo", res);
                 this.infoWallet = res?.[0];
-            } catch (error) {}
+            } catch (error) {
+                console.log("Error", error);
+            }
         },
     },
 });
@@ -341,5 +366,8 @@ button {
 
 .animation-item-market {
     animation: fadeInZoom 0.1s ease forwards;
+}
+.btn-transaction {
+    width: fit-content;
 }
 </style>

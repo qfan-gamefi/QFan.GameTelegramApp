@@ -3,15 +3,17 @@ import {
     getAddress,
     isQuaiAddress,
     JsonRpcProvider,
+    Mnemonic,
+    parseUnits,
     QuaiHDWallet,
     randomBytes,
+    Shard,
     SigningKey,
     Zone,
     type AddressLike,
 } from "quais";
 import { Wallet } from "quais";
 import { normalizeHexAddress } from "./utils";
-import { Mnemonic } from "quais/wallet";
 import {
     SignerImportSource,
     SignerSourceTypes,
@@ -33,15 +35,14 @@ import {
 } from "./encryption";
 import logger from "./logger";
 import type { SerializedHDWallet } from "node_modules/quais/lib/esm/wallet/hdwallet";
-import type { HexString } from "quais/utils";
 import { secureStorage, storage } from "@/storage/storage";
-import type {
-    QuaiTransactionRequest,
-    QuaiTransactionResponse,
-} from "quais/providers";
 import { activeProvider } from "./networks";
-import { QFPContractAddress } from "./constants";
 import { ERC20_INTERFACE } from "./erc20";
+import { parseEther } from "ethers";
+import type { TransactionReceipt } from "@ethersproject/providers";
+import { CONTRACT_ADDRESS, CONTRACT_OWNER_ADDRESS } from "./constants";
+import { QuaiTransactionRequest, QuaiTransactionResponse } from "quais/lib/commonjs/providers";
+import { HexString } from "quais/lib/commonjs/utils";
 
 export default class HDKeyring {
     private cachedKey: SaltedKey | null = null;
@@ -51,6 +52,8 @@ export default class HDKeyring {
     private quaiHDWallets: QuaiHDWallet[] = [];
 
     private readonly quaiHDWalletAccountIndex: number = 0;
+
+    private readonly platformFee = "0.00005";
 
     private keyringMetadata: {
         [keyringId: string]: { source: SignerImportSource };
@@ -363,7 +366,7 @@ export default class HDKeyring {
                 this.wallets.push(new Wallet(wallet.privateKey))
             );
             const deserializedHDWallets = await Promise.all(
-                plainTextVault.quaiHDWallets.map((HDWallet) =>
+                plainTextVault.quaiHDWallets.map((HDWallet: any) =>
                     QuaiHDWallet.deserialize(HDWallet)
                 )
             );
@@ -419,6 +422,26 @@ export default class HDKeyring {
         return this.getAddressesSync();
     }
 
+    public async interactContractAndSendFee(transactionRequest: QuaiTransactionRequest) {
+        try {
+            const sendTokenResponse = await this.sendTokenTransaction(transactionRequest);
+            console.log("sendTokenResponse", sendTokenResponse);
+
+            const quaiTransactionRequest = {
+                from: transactionRequest.from as string,
+                to: CONTRACT_OWNER_ADDRESS,
+                value: parseEther(this.platformFee),
+            } as unknown as QuaiTransactionRequest;
+
+            console.log("quaiTransactionRequest", quaiTransactionRequest);
+            const sendQuaiResponse = await this.signAndSendQuaiTransaction(quaiTransactionRequest);
+            console.log("sendQuaiResponse", sendQuaiResponse);
+            return sendQuaiResponse;
+        } catch (error) {
+            console.log("interactContractAndSendFee error", error);
+        }
+    }
+
     public async signAndSendQuaiTransaction(
         transactionRequest: QuaiTransactionRequest
     ): Promise<QuaiTransactionResponse> {
@@ -469,7 +492,7 @@ export default class HDKeyring {
 
         if (this.isSignerPrivateKeyType(signerWithType)) {
             const tokenContract = new Contract(
-                QFPContractAddress,
+                CONTRACT_ADDRESS,
                 ERC20_INTERFACE,
                 signerWithType.signer
             );

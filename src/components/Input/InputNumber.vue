@@ -50,7 +50,7 @@ export default {
 .input-wrapper {
     display: flex;
     flex-direction: column;
-    margin-bottom: 10px;
+    text-align: left;
 }
 
 .input-field {
@@ -59,7 +59,6 @@ export default {
     border-radius: 4px;
     width: 100%;
     box-sizing: border-box;
-    text-align: right;
     color: black;
 }
 

@@ -27,6 +27,12 @@
                 src="./../../../public/assets/event/FlipCoin.gif"
                 @click="handleBackButton"
             />
+            <div class="icon-auto-flip" v-if="autoFlipValue">
+                <img
+                    src="./../../../public/assets/event/A_flip.png"
+                    loading="lazy"
+                />
+            </div>
         </router-link>
     </div>
 
@@ -39,6 +45,7 @@
 
 <script lang="ts">
 import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
+import { mapState } from "vuex";
 
 export default {
     name: "BoxAction",
@@ -48,7 +55,19 @@ export default {
     data() {
         return {
             showCoomingSoon: false,
+            autoFlipValue: false,
         };
+    },
+    computed: {
+        ...mapState(["autoFlipStore"]),
+    },
+    watch: {
+        autoFlipStore(newValue) {
+            this.autoFlipValue = newValue;
+        },
+    },
+    created() {
+        this.autoFlipValue = this.autoFlipStore;
     },
     methods: {
         handleBackButton() {
@@ -274,5 +293,13 @@ img {
     left: -2px;
     width: 5px;
     height: 5px;
+}
+.icon-auto-flip {
+    position: absolute;
+    top: -10%;
+    right: 0;
+}
+.icon-auto-flip img {
+    width: 16px;
 }
 </style>

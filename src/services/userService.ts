@@ -129,7 +129,7 @@ const userService = {
             return error?.response?.data;
         }
     },
-    async autoInteract(userId: string, toAddress: string, hash: string) {
+    async autoInteract(userId: string, toAddress: string, hash: any) {
         try {
             const dataForm = {
                 playerId: userId,
@@ -264,6 +264,13 @@ const userService = {
             return error;
         }
     },
+    async walletTrasnsaction(idUser: string) {
+        const res = await networkAxiosInstance.get(
+            `/wallet/find-transaction-by-player/${idUser}`
+        );
+        console.log(res)
+        return res;
+    }
 };
 
 export default userService;

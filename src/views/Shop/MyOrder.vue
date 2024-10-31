@@ -19,7 +19,7 @@
             </div>
         </div>
     </div>
-    <div class="box-item h-[calc(100vh-198px)] p-[10px_15px] overflow-auto">
+    <div class="box-item h-[calc(100vh-220px)] p-[10px_15px] overflow-auto">
         <div class="order-item" v-for="(item, index) in listOrder" :key="index">
             <div class="flex gap-[10px]">
                 <div class="w-[60px]">

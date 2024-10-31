@@ -5,48 +5,67 @@
             v-if="visible"
         >
             <div
-                class="bg-white p-5 rounded-lg text-center relative text-black text-[12px] flex flex-col gap-2 w-[250px]"
+                class="bg-[#00175F] rounded-lg text-center relative text-white text-[12px] flex flex-col w-[250px] border border-[#89a2ef]"
             >
-                <div class="text-[16px] font-extrabold">
-                    {{
-                        isCreatePass ? "Create password" : "Enter your password"
-                    }}
+                <div class="title">
+                    <div class="text-[16px] font-extrabold">
+                        {{
+                            isCreatePass ? "Create password" : "Enter your password"
+                        }}
+                    </div>
+                    <div @click="no()" class="close-popup">
+                        <i
+                            class="fa-solid fa-rectangle-xmark"
+                            style="color: #ff0000"
+                        ></i>
+                    </div>
                 </div>
-                <div>
-                    <input
+                
+
+                <div class="p-[10px]">
+                    <!-- <input
                         type="password"
                         v-model="password"
                         placeholder="Enter password"
-                        class="border border-gray-400 p-1 rounded-md f-bangopro w-full"
+                        class="border border-gray-100 p-1 rounded-md f-bangopro w-full"
+                        v-if="!isCreatePass"
+                    /> -->
+                    <InputField
+                        v-model="password"
+                        type="password"
+                        placeholder="Enter password"
+                        label=""
                         v-if="!isCreatePass"
                     />
 
-                    <div class="flex flex-col gap-3">
-                        <input
+                    <div class="flex flex-col gap-3" v-if="isCreatePass">
+                        <InputField
+                            v-model="newPassword"
+                            type="password"
+                            placeholder="New password"
+                            label=""
+                        />
+                        <InputField
+                            v-model="confirmPassword"
+                            type="password"
+                            placeholder="Confirm password"
+                            label=""
+                        />
+                        <!-- <input
                             type="password"
                             v-model="newPassword"
                             placeholder="New password"
-                            class="border border-gray-400 p-1 rounded-md f-bangopro w-full"
+                            class="border border-gray-100 p-1 rounded-md f-bangopro w-full"
                             v-if="isCreatePass"
                         />
                         <input
                             type="password"
                             v-model="confirmPassword"
                             placeholder="Confirm password"
-                            class="border border-gray-400 p-1 rounded-md f-bangopro w-full"
+                            class="border border-gray-100 p-1 rounded-md f-bangopro w-full"
                             v-if="isCreatePass"
-                        />
+                        /> -->
                     </div>
-                    <!-- <div
-                        v-if="
-                            isCreatePass &&
-                            newPassword !== confirmPassword &&
-                            confirmPassword !== ''
-                        "
-                        class="text-red-500 text-[10px] font-extrabold"
-                    >
-                        Passwords do not match!
-                    </div> -->
 
                     <div
                         v-if="showMess"
@@ -56,28 +75,19 @@
                     >
                         {{ message }}
                     </div>
-
-                    <div
-                        class="text-[10px] text-[#ffa53a] font-extrabold flex justify-end"
-                    >
-                        <div
-                            class="w-fit cursor-pointer pt-1"
-                            @click="handleCreatePass()"
-                        >
-                            {{
-                                !isCreatePass
-                                    ? "Create password"
-                                    : "Enter password"
-                            }}
-                        </div>
-                    </div>
                 </div>
 
-                <div class="flex gap-2">
+                <div class="flex flex-col gap-2 p-[10px]">
                     <button @click="yes()">
-                        {{ !isCreatePass ? "Ok" : "Create" }}
+                        {{ !isCreatePass ? "OK" : "Create" }}
                     </button>
-                    <button @click="no()">Cancel</button>
+                    <button @click="handleCreatePass()">
+                        {{
+                            !isCreatePass
+                                ? "Create password"
+                                : "Enter password"
+                        }}
+                    </button>
                 </div>
             </div>
         </div>
@@ -86,10 +96,13 @@
 
 <script lang="ts">
 import userServiceInventory from "@/services/inventoryService";
-import axios from "axios";
+import InputField from "@/components/Input/InputField.vue";
 
 export default {
     name: "PopupPassword",
+    components: {
+        InputField,
+    },
     props: {
         visible: {
             type: Boolean,
@@ -128,6 +141,9 @@ export default {
         };
     },
     methods: {
+        logPassword() {
+        console.log(this.password);
+    },
         validateForm() {
             this.showMess = true;
             this.isSuccess = false;
@@ -159,6 +175,7 @@ export default {
                                 dataCreate
                             );
 
+                        console.log(response)
                         if (response?.success) {
                             this.message = response?.data?.message;
                             this.isCreatePass = false;
@@ -167,7 +184,7 @@ export default {
                         } else {
                             this.showMess = true;
                             this.isSuccess = false;
-                            this.message = response?.data?.message;
+                            this.message = response?.data?.message || response?.data;
                         }
                     } else {
                         const dataVerify = {
@@ -231,5 +248,24 @@ export default {
 button {
     padding: 10px 20px;
     font-size: 12px;
+    border-radius: 5px;
+    color: #fff;
+}
+
+.close-popup {
+    position: absolute;
+    top: 3%;
+    right: 3%;
+}
+.close-popup svg {
+    font-size: 18px;
+}
+
+.title {
+    /* border-bottom: 1px solid #89a2ef; */
+    padding: 10px 0;
+    margin: 0 10px;
+    font-size: 16px;
+    font-weight: 800;
 }
 </style>

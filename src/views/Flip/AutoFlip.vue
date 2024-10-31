@@ -1,6 +1,5 @@
 <template>
-    <div>
-    </div>
+    <div></div>
 </template>
 
 <script lang="ts">
@@ -38,7 +37,10 @@ export default defineComponent({
             }
 
             const res = await predictService.makeFlip(data);
-            if (res.success === false && res?.data?.Reason.includes("Pending")) {
+            if (
+                res.success === false &&
+                res?.data?.Reason.includes("Pending")
+            ) {
                 setTimeout(() => {
                     flipCount(count === -1 ? -1 : count);
                 }, 10000);
@@ -48,20 +50,21 @@ export default defineComponent({
                     flipCount(count === -1 ? -1 : count - 1);
                 }, 10000);
             }
-        }
+        };
 
         const onAutoFlip = async () => {
-            const total = countFlip.value
+            const total = countFlip.value;
             if (total > 0) {
-                flipCount(countFlip.value)
+                flipCount(countFlip.value);
             }
             if (total === 0) {
-                flipCount(-1)
+                flipCount(-1);
             }
         };
 
         onMounted(() => {
-            watch(() => store.state.autoFlipStore,
+            watch(
+                () => store.state.autoFlipStore,
                 (newValue) => {
                     if (newValue) {
                         onAutoFlip();
@@ -70,16 +73,12 @@ export default defineComponent({
             );
         });
 
-        onUnmounted(() => { });
+        onUnmounted(() => {});
 
         return {};
     },
-    methods: {
-
-    },
-    data() {
-
-    }
+    methods: {},
+    data() {},
 });
 </script>
 

@@ -11,14 +11,14 @@
                         style="color: #ff0000"
                     ></i>
                 </div>
-                <div class="title" :style="{ borderBottom: border }">
+                <div class="title">
                     {{ title }}
                 </div>
 
                 <slot name="content"></slot>
 
-                <div class="popup-buttons" :style="{ borderTop: border }">
-                    <button @click="yes()">Ok</button>
+                <div class="popup-buttons">
+                    <button @click="yes()">OK</button>
                 </div>
             </div>
         </div>
@@ -86,7 +86,6 @@ export default {
 }
 
 .title {
-    border-bottom: 1px solid #89a2ef;
     padding: 10px 0;
     margin: 0 10px;
     font-size: 16px;
@@ -105,8 +104,7 @@ export default {
 .popup-buttons {
     display: flex;
     gap: 10px;
-    padding: 15px 10px;
-    border-top: 1px solid #89a2ef;
+    padding: 10px;
 }
 
 .popup-buttons button {

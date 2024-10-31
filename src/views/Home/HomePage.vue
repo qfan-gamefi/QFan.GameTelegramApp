@@ -96,7 +96,7 @@ export default {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            idUser: dataUserTele?.user?.id?.toString() ?? "2123800227",
+            idUser: dataUserTele?.user?.id?.toString() ?? "",
             telegram_bot_link: telegram_bot_link + dataUserTele?.user?.id || "",
 
             showCoomingSoon: false,
@@ -654,23 +654,33 @@ export default {
             <InfoUser v-if="dataLogin" :dataLogin="dataLogin" />
 
             <div class="link-checkin">
-                <div>
-                    <button @click="handleWallet">
-                        <i class="fa-solid fa-wallet"></i>
-                        Wallet
-                    </button>
-                </div>
-                <button @click="onCheckIn()" v-bind:disabled="isExecCheckin">
-                    <i class="fa-solid fa-calendar-days"></i> {{ titleCheckin }}
-                    <span v-if="isExecCheckin"
-                        ><i class="fa fa-spinner"></i
-                    ></span>
-                </button>
-                <div>
-                    <button @click="handleGiftCode()">
-                        <i class="fa-solid fa-gift"></i>
-                        Gift code
-                    </button>
+
+                <div class="gr-btn">
+                <input type="checkbox" id="toggle" checked />
+                <label class="button" for="toggle">
+                    <nav class="nav">
+                        <ul>
+                            <div>
+                                <button @click="handleWallet">
+                                    <i class="fa-solid fa-wallet"></i>
+                                    Wallet
+                                </button>
+                            </div>
+                            <button @click="onCheckIn()" v-bind:disabled="isExecCheckin">
+                                <i class="fa-solid fa-calendar-days"></i> {{ titleCheckin }}
+                                <span v-if="isExecCheckin"
+                                    ><i class="fa fa-spinner"></i
+                                ></span>
+                            </button>
+                            <div>
+                                <button @click="handleGiftCode()">
+                                    <i class="fa-solid fa-gift"></i>
+                                    Gift code
+                                </button>
+                            </div>
+                        </ul>
+                    </nav>
+                </label>
                 </div>
             </div>
 
@@ -886,7 +896,7 @@ export default {
             @no="handleNoGiftCode()"
         >
             <template #content>
-                <div class="p-3">
+                <div class="px-[10px]">
                     <InputField
                         v-model="giftCode"
                         label=""

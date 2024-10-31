@@ -477,7 +477,7 @@ export default class HDKeyring {
 
     async sendTokenTransaction(
         transactionRequest: QuaiTransactionRequest
-    ): Promise<QuaiTransactionResponse | TransactionReceipt | undefined> {
+    ): Promise<QuaiTransactionResponse | undefined> {
         console.log("transactionRequest", transactionRequest);
         const { from: fromAddress } = transactionRequest;
 

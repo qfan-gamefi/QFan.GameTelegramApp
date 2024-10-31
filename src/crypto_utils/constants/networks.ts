@@ -8,7 +8,7 @@ import { QUAI, QUAI_LOCAL } from "./base-assets"
 import type SerialFallbackProvider from "../serial-fallback-provider"
 import { makeSerialFallbackProvider } from "../serial-fallback-provider"
 
-export const CURRENT_WALLET_VERSION = "WALLET_GOLDEN_AGE_V5";
+export const CURRENT_WALLET_VERSION = "WALLET_GOLDEN_AGE_V6";
 
 export const VALID_SHARDS: Array<string> = [
   "cyprus-1",

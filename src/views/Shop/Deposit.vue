@@ -16,24 +16,14 @@
 
         <div class="wp-deposit">
             <div class="desc" v-if="!isConfirm">
-                <InputField
-                    v-model="amount"
-                    label="Amount"
-                    placeholder="Enter Amount"
-                    type="number"
-                />
+                <InputField v-model="amount" label="Amount" placeholder="Enter Amount" type="number" />
                 <span v-if="amountError" class="error-message">{{
                     messAmountError
-                }}</span>
-                <InputField
-                    v-model="password"
-                    label="Password"
-                    placeholder="Enter Password"
-                    type="password"
-                />
+                    }}</span>
+                <InputField v-model="password" label="Password" placeholder="Enter Password" type="password" />
                 <span v-if="passwordError" class="error-message">{{
                     messPassError
-                }}</span>
+                    }}</span>
             </div>
             <div class="desc" v-else>
                 <div class="text-center">
@@ -44,10 +34,7 @@
         </div>
 
         <div class="btn-deposit">
-            <div
-                class="text-center"
-                @click="isConfirm ? submitDeposit() : handleConfirm()"
-            >
+            <div class="text-center" @click="isConfirm ? submitDeposit() : handleConfirm()">
                 {{ labelType }}
             </div>
         </div>
@@ -149,21 +136,18 @@ export default defineComponent({
             this.validatePassword();
         },
         async submitDeposit() {
+            console.log("infoWallet", this.infoWallet);
+
             const id = this.infoWallet?.playerId;
             const address = this.infoWallet?.address;
             const amount = this.amount;
-            const hash = "";
-
             const keyringService = new HDKeyring();
             await keyringService.unlock();
             if (!this.amountError && !this.passwordError) {
                 try {
-                    // const activeWallet = keyringService.getActiveWallet();
-                    // const address1 = await activeWallet?.address;
-                    // console.log("address1", address1);
-
+                    const activeWallet = keyringService.getActiveWallet();
                     const request: QuaiTransactionRequest = {
-                        from: address,
+                        from: activeWallet.address,
                         to: MARKET_WALLET_ADDRESS,
                         value: Number(amount),
                     };
@@ -229,6 +213,7 @@ $t-white-color: rgb(255, 255, 255);
     z-index: 999;
     padding: 0 20px;
 }
+
 // .popup-enter-active {
 //     animation: slideUp 0.1s ease forwards;
 // }
@@ -271,6 +256,7 @@ $t-white-color: rgb(255, 255, 255);
     background-repeat: no-repeat;
     border-top-right-radius: 10px;
     border-top-left-radius: 10px;
+
     .title {
         margin: 0 auto;
         font-weight: 800;
@@ -311,6 +297,5 @@ $t-white-color: rgb(255, 255, 255);
     }
 }
 
-.address-text {
-}
+.address-text {}
 </style>

@@ -281,9 +281,11 @@ export default defineComponent({
         async callWalletInfo() {
             try {
                 const res = await userService.getWalletInfo(this.userId);
-
+                console.log("callWalletInfo", res);
                 this.infoWallet = res?.[0];
-            } catch (error) {}
+            } catch (error) {
+                console.log("Error", error);
+            }
         },
     },
 });

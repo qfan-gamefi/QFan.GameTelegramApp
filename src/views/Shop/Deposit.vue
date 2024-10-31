@@ -56,15 +56,12 @@
 
 <script lang="ts">
 import InputField from "@/components/Input/InputField.vue";
-import { QFPOwerWalletAddress } from "@/crypto_utils/constants";
+import { MARKET_WALLET_ADDRESS } from "@/crypto_utils/constants";
 import HDKeyring from "@/crypto_utils/HDKeyring";
 import userService from "@/services/userService";
 import { secureStorage } from "@/storage/storage";
 import type { IInfoWallet } from "@/views/Shop/defination";
-import type {
-    QuaiTransactionRequest,
-    QuaiTransactionResponse,
-} from "quais/providers";
+import { QuaiTransactionRequest, QuaiTransactionResponse } from "quais/lib/commonjs/providers";
 import { defineComponent, type PropType } from "vue";
 
 export default defineComponent({
@@ -87,7 +84,9 @@ export default defineComponent({
             validator: (value) => ["DEPOSIT", "WITHDRAW"].includes(value),
         },
     },
-    mounted() {},
+    mounted() {
+
+    },
     watch: {
         isDeposit(newVal) {
             if (!newVal) {
@@ -165,7 +164,7 @@ export default defineComponent({
 
                     const request: QuaiTransactionRequest = {
                         from: address,
-                        to: QFPOwerWalletAddress,
+                        to: MARKET_WALLET_ADDRESS,
                         value: Number(amount),
                     };
 

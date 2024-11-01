@@ -11,23 +11,31 @@
                 </div>
             </div>
 
-            <div class="box-btn">
+            <div class="box-btn flex flex-col gap-2">
+                <div class="flex text-[12px] justify-center">
+                    <div>If you don’t have a &nbsp;</div>
+                    <div class="cursor-pointe">
+                        <a
+                            href="https://pelaguswallet.io/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="underline"
+                        >
+                            Pelagus Wallet,
+                        </a>
+                        <a
+                            href="https://chromewebstore.google.com/detail/pelagus/nhccebmfjcbhghphpclcfdkkekheegop"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="underline"
+                        >
+                            create one here.
+                        </a>
+                    </div>
+                </div>
                 <button @click="navigateToCreateWallet">
-                    <!-- <div class="btn-img">
-                            <img src="@public/assets/logo.svg" />
-                            <div class="text-qfan">QFAN</div>
-                        </div> -->
-
                     <div class="btn-title">Import Wallet</div>
                 </button>
-
-                <!-- <button>
-                        <div class="btn-img">
-                            <img src="@public/assets/logo.svg" />
-                            <div class="text-qfan">QFAN</div>
-                        </div>
-                        <div class="btn-title">Import Wallet</div>
-                    </button> -->
             </div>
         </div>
     </router-view>
@@ -106,7 +114,7 @@ export default defineComponent({
         margin: 0 30px;
         width: calc(100% - 60px);
         border-radius: 10px;
-        background: #fff;
+        background: #fff !important;
         padding: 25px 80px;
         -webkit-text-stroke: 0px;
     }
@@ -139,12 +147,11 @@ export default defineComponent({
 }
 
 .btn-title {
-    color: #fff;
+    color: #000;
     font-weight: 800;
 }
-
-.text-qfan {
-    -webkit-text-stroke: 0px;
-    color: #841c2e;
+.text-link {
+    text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff,
+        1px 1px 0 #fff;
 }
 </style>

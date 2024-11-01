@@ -27,8 +27,8 @@
                         />
                     </div>
                 </div>
-            </div>
-            <div class="flex gap-2 justify-end">
+            </div> 
+            <!-- <div class="flex gap-2 justify-end">
                 <button
                     class="btn-transaction"
                     @click="handleDeposit('deposit')"
@@ -41,7 +41,7 @@
                 >
                     Withdraw
                 </button>
-            </div>
+            </div> -->
         </div>
 
         <div
@@ -281,9 +281,11 @@ export default defineComponent({
         async callWalletInfo() {
             try {
                 const res = await userService.getWalletInfo(this.userId);
-
+                console.log("callWalletInfo", res);
                 this.infoWallet = res?.[0];
-            } catch (error) {}
+            } catch (error) {
+                console.log("Error", error);
+            }
         },
     },
 });

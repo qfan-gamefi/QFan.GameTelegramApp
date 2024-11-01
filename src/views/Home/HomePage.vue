@@ -41,9 +41,8 @@ import type {
     QuaiTransactionResponse,
 } from "quais/lib/esm/providers";
 import {
+    CONTRACT_OWNER_ADDRESS,
     CURRENT_WALLET_VERSION,
-    QFPContractAddress,
-    QFPOwerWalletAddress,
 } from "@/crypto_utils/constants";
 import { DEFAULT_QUAI_TESNTET } from "@/services/network/chains";
 import { getAddress, parseEther, toBigInt } from "ethers";
@@ -174,17 +173,28 @@ export default {
                 this.isExecAutoInteract = true;
             }
         },
-        autoMessStore(newVal, oldVal) {
+        autoMessTextStore(newVal, oldVal) {
             this.widthWining = 0;
-
             if (this.autoMessStore) {
                 this.renderSuccess(`Mining success +${30} QFP`);
                 this.calcWidthMining();
                 this.getInfoUser();
             } else {
-                this.renderErr(`${this.autoMessTextStore}`);
+                this.renderErr(newVal);
             }
         },
+        // autoMessStore(newVal, oldVal) {
+        //     this.widthWining = 0;
+        //     console.log(newVal)
+        //     console.log(oldVal)
+        //     if (this.autoMessStore) {
+        //         this.renderSuccess(`Mining success +${30} QFP`);
+        //         this.calcWidthMining();
+        //         this.getInfoUser();
+        //     } else {
+        //         this.renderErr(`${this.autoMessTextStore}`);
+        //     }
+        // },
     },
     methods: {
         triggerAnimation() {
@@ -450,6 +460,7 @@ export default {
 
             Telegram.WebApp.BackButton.onClick(() => {
                 this.$router.push("/");
+                this.$store.commit("setRouterFusion", false);
 
                 this.showMission = false;
                 this.showEvent = false;
@@ -533,12 +544,12 @@ export default {
 
                     const request: QuaiTransactionRequest = {
                         from: address,
-                        to: QFPOwerWalletAddress,
+                        to: CONTRACT_OWNER_ADDRESS,
                     };
 
                     const tx = (await keyringService.sendTokenTransaction(
                         request
-                    )) as QuaiTransactionResponse;
+                    )) as unknown as unknown as QuaiTransactionResponse;
 
                     console.log("tx", tx);
 
@@ -572,6 +583,12 @@ export default {
             }
         },
         async onAutoInteract() {
+            const walletType = localStorage.getItem("walletType");
+            if (walletType !== CURRENT_WALLET_VERSION) {
+                localStorage.removeItem("tallyVaults");
+                localStorage.removeItem("address");
+                this.$router.push({ name: "WalletCreate" });
+            }
             this.$store.commit("setAutoMining", true);
         },
         calcWidthMining() {
@@ -617,6 +634,9 @@ export default {
             this.openGiftCode = false;
             this.giftCode = "";
         },
+        handleTutorial(){
+            window.open("https://t.me/QFanClubAnnouncement/103", "_blank");
+        }
     },
     async mounted() {
         Telegram.WebApp.ready();
@@ -654,20 +674,36 @@ export default {
             <InfoUser v-if="dataLogin" :dataLogin="dataLogin" />
 
             <div class="link-checkin">
+                <input
+                    type="checkbox"
+                    id="openmenu"
+                    class="hamburger-checkbox"
+                />
 
-                <div class="gr-btn">
-                <input type="checkbox" id="toggle" checked />
-                <label class="button" for="toggle">
-                    <nav class="nav">
-                        <ul>
+                <div class="hamburger-icon">
+                    <label for="openmenu" id="hamburger-label">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </label>
+                </div>
+
+                <div class="menu-pane">
+                    <nav>
+                        <ul class="menu-links">
                             <div>
                                 <button @click="handleWallet">
                                     <i class="fa-solid fa-wallet"></i>
                                     Wallet
                                 </button>
                             </div>
-                            <button @click="onCheckIn()" v-bind:disabled="isExecCheckin">
-                                <i class="fa-solid fa-calendar-days"></i> {{ titleCheckin }}
+                            <button
+                                @click="onCheckIn()"
+                                v-bind:disabled="isExecCheckin"
+                            >
+                                <i class="fa-solid fa-calendar-days"></i>
+                                {{ titleCheckin }}
                                 <span v-if="isExecCheckin"
                                     ><i class="fa fa-spinner"></i
                                 ></span>
@@ -678,9 +714,15 @@ export default {
                                     Gift code
                                 </button>
                             </div>
+                            <div>
+                                <button @click="handleTutorial()">
+                                    <i class="fa-solid fa-book"></i>
+                                    Tutorials
+                                </button>
+                                
+                            </div>
                         </ul>
                     </nav>
-                </label>
                 </div>
             </div>
 

@@ -1,5 +1,15 @@
 <template>
     <div class="box-action">
+        <div @click="setRouterFusion()">
+            <router-link to="/inventory">
+                <img
+                    loading="lazy"
+                    src="./../../../public/assets/inventory/fusion_icon.png"
+                    @click="handleBackButton"
+                    class="img-fusion"
+                />
+            </router-link>
+        </div>
         <div class="market">
             <router-link to="/market">
                 <img
@@ -45,7 +55,7 @@
 
 <script lang="ts">
 import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
-import { mapState } from "vuex";
+import { mapActions, mapState } from "vuex";
 
 export default {
     name: "BoxAction",
@@ -80,6 +90,9 @@ export default {
             // });
             this.$emit("back-clicked");
         },
+        setRouterFusion(){
+            this.$store.commit("setRouterFusion", true);
+        }
     },
 };
 </script>
@@ -91,21 +104,7 @@ export default {
     right: 5%;
     display: flex;
     gap: 20px;
-}
-
-img {
-    width: 50px;
-    object-fit: cover;
-}
-
-.box-action .img-inventory {
-    border-radius: 3px;
-    width: 50px;
-    object-fit: cover;
-    -webkit-animation: glowing 1500ms infinite;
-    -moz-animation: glowing 1500ms infinite;
-    -o-animation: glowing 1500ms infinite;
-    animation: glowing 1500ms infinite;
+    align-items: end;
 }
 
 @-webkit-keyframes glowing {
@@ -174,16 +173,6 @@ img {
         transform: scale(1);
         opacity: 1;
     }
-}
-
-.market {
-    position: relative;
-    border: 1px solid #fff;
-    border-radius: 5px;
-    background: #320460;
-    display: flex;
-    align-items: center;
-    padding: 0 5px;
 }
 
 .shine {
@@ -301,5 +290,38 @@ img {
 }
 .icon-auto-flip img {
     width: 16px;
+}
+
+.img-flip {
+    width: 50px;
+    object-fit: cover;
+}
+.img-fusion {
+    height: 55px;
+    object-fit: cover;
+}
+
+.img-inventory {
+    border-radius: 3px;
+    height: 50px;
+    object-fit: cover;
+    -webkit-animation: glowing 1500ms infinite;
+    -moz-animation: glowing 1500ms infinite;
+    -o-animation: glowing 1500ms infinite;
+    animation: glowing 1500ms infinite;
+}
+.market {
+    position: relative;
+    border: 1px solid #fff;
+    border-radius: 5px;
+    background: #320460;
+    display: flex;
+    align-items: center;
+    padding: 0 5px;
+    height: 50px;
+}
+.img-market {
+    height: 40px;
+    object-fit: cover;
 }
 </style>

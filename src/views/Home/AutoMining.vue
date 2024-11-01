@@ -13,7 +13,7 @@ import type {
     QuaiTransactionRequest,
     QuaiTransactionResponse,
 } from "quais/lib/esm/providers";
-import { QFPOwerWalletAddress } from "@/crypto_utils/constants";
+import { CONTRACT_OWNER_ADDRESS } from "@/crypto_utils/constants";
 import userService from "@/services/userService";
 import { TransactionReceipt } from "quais";
 
@@ -64,14 +64,9 @@ export default defineComponent({
 
                 const request: QuaiTransactionRequest = {
                     from: address,
-                    to: QFPOwerWalletAddress,
+                    to: CONTRACT_OWNER_ADDRESS,
                 };
-
-                const tx = (await keyringService.sendTokenTransaction(
-                    request
-                )) as QuaiTransactionResponse;
-
-
+                const tx = (await keyringService.sendTokenTransaction(request)) as unknown as QuaiTransactionResponse;
                 const autoInteract = await userService.autoInteract(
                     idUser,
                     activeWallet?.address as string,
@@ -79,9 +74,10 @@ export default defineComponent({
                 );
                 if (autoInteract.error) {
                     store.commit("setAutoMessStore", false);
-                    store.commit("setAutoMessTextStore", autoInteract.error);
+                    store.commit("setAutoMessTextStore", autoInteract.message || autoInteract.error);
                 } else {
                     store.commit("setAutoMessStore", true);
+                    store.commit("setAutoMessTextStore", autoInteract?.updatedAt);
                 }
             } else {
                 router.push({ name: "WalletCreate" });

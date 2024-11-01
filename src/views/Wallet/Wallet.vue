@@ -68,6 +68,8 @@
                             v-bind:disabled="executing"
                         >
                             <i class="fa-solid fa-faucet"></i> Faucet
+                            <div v-if="isFaucet"><i class="fa fa-spinner loading"></i></div>
+                            
                         </button>
                     </div>
 
@@ -374,6 +376,7 @@ export default defineComponent({
             filterStatus: "",
             transactionUrl: "",
             openReceive: false,
+            isFaucet: false,
         };
     },
     methods: {
@@ -413,6 +416,7 @@ export default defineComponent({
         },
         async faucet() {
             try {
+                this.isFaucet = true;
                 this.executing = true;
                 this.errorMessage = "";
                 this.transactionUrl = "";
@@ -420,13 +424,13 @@ export default defineComponent({
                     this.playerId,
                     this.activeWallet?.address as string
                 );
-                // console.log("faucetResult", faucetResult);
                 if (
                     faucetResult.statusCode &&
                     faucetResult.statusCode !== 200
                 ) {
                     this.errorMessage = "Faucet error: " + faucetResult.message;
                     this.executing = false;
+                    this.isFaucet = false;
                     return;
                 }
                 if (faucetResult?.hash) {
@@ -434,11 +438,13 @@ export default defineComponent({
                         faucetResult?.hash
                     );
                 }
+                this.isFaucet = false;
                 this.executing = false;
             } catch (error) {
-                console.log("error", error);
+                // console.log("error", error);
                 this.errorMessage = "Faucet error: " + error?.message;
                 this.executing = false;
+                this.isFaucet = false;
             }
         },
         async linkToExplore(e: Event) {

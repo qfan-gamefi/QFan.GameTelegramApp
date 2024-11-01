@@ -55,7 +55,29 @@
                     {{ errorMessage }}
                 </div>
 
-                <div class="wr-btn">
+                <div class="wr-btn flex flex-col gap-2">
+                    <div class="flex text-[12px] justify-center">
+                    <div>If you don’t have a &nbsp;</div>
+                    <div class="cursor-pointe">
+                        <a
+                        href="https://pelaguswallet.io/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="underline"
+                    >
+                         Pelagus Wallet,
+                    </a>
+                    <a
+                        href="https://chromewebstore.google.com/detail/pelagus/nhccebmfjcbhghphpclcfdkkekheegop"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="underline"
+                    >
+                        create one here.
+                    </a>
+                    </div>
+                    
+                </div>
                     <button @click="createWallet()" style="color: #000">
                         Import
                     </button>

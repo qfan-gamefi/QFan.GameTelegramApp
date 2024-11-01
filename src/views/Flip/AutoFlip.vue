@@ -20,6 +20,7 @@ export default defineComponent({
         // const fullName = `su fly 007 🍅`;
         const countFlip = computed(() => store.state.countFlip);
         const autoFlipStore = computed(() => store.state.autoFlipStore);
+        let isFlippingActive = false;
 
         const flipCount = async (count?: number) => {
             const data = {
@@ -33,27 +34,33 @@ export default defineComponent({
 
             if (count === 0) {
                 store.commit("setAutoFlip", false);
+                isFlippingActive = false;
                 return;
             }
 
             const res = await predictService.makeFlip(data);
             if (
                 res.success === false &&
-                res?.data?.Reason.includes("Pending")
+                res?.data?.Reason?.includes("Pending")
             ) {
-                setTimeout(() => {
-                    flipCount(count === -1 ? -1 : count);
-                }, 10000);
+                if (isFlippingActive) {
+                    setTimeout(() => {
+                        flipCount(count === -1 ? -1 : count);
+                    }, 10000);
+                }
             }
             if (res.success === true && res?.data?.Status) {
-                setTimeout(() => {
-                    flipCount(count === -1 ? -1 : count - 1);
-                }, 10000);
+                if (isFlippingActive) {
+                    setTimeout(() => {
+                        flipCount(count === -1 ? -1 : count - 1);
+                    }, 10000);
+                }
             }
         };
 
         const onAutoFlip = async () => {
             const total = countFlip.value;
+            isFlippingActive = true;
             if (total > 0) {
                 flipCount(countFlip.value);
             }
@@ -68,6 +75,8 @@ export default defineComponent({
                 (newValue) => {
                     if (newValue) {
                         onAutoFlip();
+                    } else {
+                        isFlippingActive = false;
                     }
                 }
             );

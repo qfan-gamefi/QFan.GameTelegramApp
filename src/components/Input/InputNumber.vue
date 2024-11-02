@@ -54,7 +54,7 @@ export default {
 }
 
 .input-field {
-    padding: 8px;
+    padding: 4px;
     border: 1px solid #ccc;
     border-radius: 4px;
     width: 100%;

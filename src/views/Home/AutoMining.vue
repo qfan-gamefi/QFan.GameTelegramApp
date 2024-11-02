@@ -74,9 +74,10 @@ export default defineComponent({
                 );
                 if (autoInteract.error) {
                     store.commit("setAutoMessStore", false);
-                    store.commit("setAutoMessTextStore", autoInteract.error);
+                    store.commit("setAutoMessTextStore", autoInteract.message || autoInteract.error);
                 } else {
                     store.commit("setAutoMessStore", true);
+                    store.commit("setAutoMessTextStore", autoInteract?.updatedAt);
                 }
             } else {
                 router.push({ name: "WalletCreate" });

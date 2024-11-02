@@ -82,7 +82,6 @@
                     <button
                         class="btn-auto-flip"
                         @click="handleAutoFlip()"
-                        :class="{ isOn: autoFlipValue }"
                         :disabled="loadingSubmit"
                     >
                         Auto Flip
@@ -214,16 +213,18 @@
         <template #content>
             <div class="p-[10px] flex flex-col gap-3">
                 <div>
-                    <div class="text-[14px] mb-1">
-                        Auto by number of times or unlimited
-                    </div>
-                    <div class="flex justify-center">
+                    <div class="text-[14px] mb-1">Number of Auto-Flips</div>
+                    <div class="flex gap-2">
                         <div
-                            class="btn-count"
+                            class="box-input w-[75px]"
                             :class="{ active: isCount }"
-                            @click="btnCount()"
+                            @click="(isCount = true), (countAuto = 1)"
                         >
-                            Number
+                            <InputNumber
+                                v-model="countAuto"
+                                label=""
+                                placeholder="Enter number"
+                            />
                         </div>
                         <div
                             class="btn-count"
@@ -233,14 +234,6 @@
                             Unlimited
                         </div>
                     </div>
-                </div>
-
-                <div class="box-input" :class="{ active: !isCount }">
-                    <InputNumber
-                        v-model="countAuto"
-                        label=""
-                        placeholder="Enter number"
-                    />
                 </div>
             </div>
         </template>
@@ -556,13 +549,18 @@ export default defineComponent({
                 console.log(error);
             }
         },
-        handleAutoFlip() {
-            const passVerify = localStorage.getItem("passVerify");
-            if (!passVerify) {
-                this.isPass = true;
-            } else {
-                this.openAuto = true;
+        handleAutoFlip() {            
+            if(this.autoFlipValue === true){
+                this.$store.commit("setAutoFlip", false);                
+            }else{
+                const passVerify = localStorage.getItem("passVerify");
+                if (!passVerify) {
+                    this.isPass = true;
+                } else {
+                    this.openAuto = true;
+                }
             }
+            
         },
         async yesAutoFlip() {
             //set disable btn
@@ -580,10 +578,6 @@ export default defineComponent({
             this.openAuto = false;
             this.countAuto = 1;
             this.isCount = true;
-        },
-        btnCount() {
-            this.isCount = true;
-            this.countAuto = 1;
         },
         btnUnlimited() {
             this.isCount = false;
@@ -759,7 +753,7 @@ export default defineComponent({
 
 .btn-submit:disabled,
 .btn-auto-flip:disabled,
-.box-input.active,
+// .box-input.active,
 .isOn {
     opacity: 0.6;
     cursor: not-allowed;
@@ -769,11 +763,7 @@ export default defineComponent({
 .btn-auto-flip {
     padding: 10px 0 10px 10px;
 }
-// .isOn {
-//     opacity: 0.6;
-//     cursor: not-allowed;
-//     pointer-events: none;
-// }
+
 .btn-on,
 .btn-off {
     display: flex;
@@ -949,15 +939,18 @@ export default defineComponent({
     padding: 5px 10px;
     background: #412e17;
     font-weight: 800;
+    opacity: 0.6;
+    border-radius: 5px;
 }
 
+.box-input {
+    opacity: 0.6;
+}
+.box-input.active {
+    opacity: 1;
+}
 .btn-count.active {
     background: #ffa53a;
+    opacity: 1;
 }
-
-// .box-input.active {
-//     opacity: 0.6;
-//     cursor: not-allowed;
-//     pointer-events: none;
-// }
 </style>

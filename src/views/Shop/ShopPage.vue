@@ -42,7 +42,7 @@
                     Withdraw
                 </div>
 
-                <a @click="callWalletInfo()"><i class="fa-solid fa-rotate"></i></a>
+                <div @click="callWalletInfo()"><i class="fa-solid fa-rotate"></i></div>
             </div>
         </div>
 
@@ -178,7 +178,7 @@ export default defineComponent({
             loadingBtn: false,
             showCoomingSoon: false,
             apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
-            userId: userInfo?.user?.id || "1927324767",
+            userId: userInfo?.user?.id || "",
 
             showNotification: false,
             notificationMessage: "",
@@ -222,11 +222,6 @@ export default defineComponent({
         },
         setActiveButton(button: EButtonName) {
             this.activeButton = button;
-            // if (button === EButtonName.Transactions) {
-            //     this.showCoomingSoon = true;
-            // } else {
-            //     this.activeButton = button;
-            // }
         },
         getBtnClass(item) {
             if (item?.Side === "S") {
@@ -372,5 +367,8 @@ button {
     width: fit-content;
     padding: 0 10px;
     border-radius: 5px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
 }
 </style>

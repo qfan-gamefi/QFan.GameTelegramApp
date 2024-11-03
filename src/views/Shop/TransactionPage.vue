@@ -8,7 +8,8 @@
             :key="index"
         >
             <div class="text-[12px]">
-                <div class="flex justify-end">
+                <div class="flex justify-between">
+                    <span>{{ item?.tranType }}</span>
                     <span class="font-extrabold">
                         <i v-if="item?.opr === '+'"
                         class="fa-solid fa-plus fa-lg"
@@ -17,10 +18,6 @@
                         class="fa-solid fa-minus fa-lg "
                         style="color: #db0000;"></i>
                     </span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="">Tran type:</span>
-                    <span>{{ item?.tranType }}</span>
                 </div>
                 
                 <div class="flex justify-between">
@@ -37,6 +34,10 @@
                     <span class="">Fee:</span>
                     <span>{{ item?.fee }}</span>
                 </div>
+                <div class="flex justify-between">
+                    <span class="">Received Amount:</span>
+                    <span>{{ item?.netAmount }}</span>
+                </div>
                 <div class="flex justify-between" v-if="item?.hash?.length > 5">
                     <span class="">Hash:</span>
                     <span class="underline" @click="linkHash(item?.hash)">{{ renderHash(item?.hash) }}</span>
@@ -48,7 +49,7 @@
                     <span>{{ formatDateTimeUS(item?.createdAt) }}</span>
                 </div>
                 <div v-if="item?.message" class="flex justify-between">
-                    <span class="font-semibold text-[#2f9ad6]">Message:</span>
+                    <span>Message:</span>
                     <span>{{ item?.message }}</span>
                 </div>
             </div>
@@ -85,7 +86,7 @@ export default defineComponent({
         const userInfo = window.Telegram.WebApp.initDataUnsafe;
 
         return {
-            userId: userInfo?.user?.id || "1927324767",
+            userId: userInfo?.user?.id || "",
             showNotification: false,
             notificationMessage: "success",
             notificationType: "success",

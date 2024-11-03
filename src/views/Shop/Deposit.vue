@@ -19,11 +19,11 @@
                 <InputField v-model="amount" label="Amount" placeholder="Enter Amount" type="number" />
                 <span v-if="amountError" class="error-message">{{
                     messAmountError
-                }}</span>
+                    }}</span>
                 <InputField v-model="password" label="Password" placeholder="Enter Password" type="password" />
                 <span v-if="passwordError" class="error-message">{{
                     messPassError
-                }}</span>
+                    }}</span>
             </div>
             <div class="desc" v-else>
                 <div class="text-center">
@@ -34,9 +34,10 @@
         </div>
 
         <div class="btn-deposit">
-            <div class="text-center" @click="isConfirm ? submit() : handleConfirm()">
+            <a class="text-center" v-bind:class="labelType.toLowerCase()" v-bind:disabled="isLoading"
+                @click="isConfirm ? submit() : handleConfirm()">
                 {{ labelType }} <span v-if="isLoading"><i class="fa fa-spinner"></i></span>
-            </div>
+            </a>
         </div>
     </div>
 
@@ -89,7 +90,7 @@ export default defineComponent({
     },
     data() {
         return {
-            amount: 0,
+            amount: null,
             password: "",
             amountError: false,
             messAmountError: "",
@@ -116,7 +117,7 @@ export default defineComponent({
             this.renderNotification(text, "error");
         },
         resetFields() {
-            this.amount = 0;
+            this.amount = null;
             this.password = "";
             this.amountError = false;
             this.messAmountError = "";
@@ -194,21 +195,26 @@ export default defineComponent({
                         request
                     )) as QuaiTransactionResponse;
 
-                    const res = await userService.postDeposit(
-                        Number.parseInt(id),
-                        address,
-                        Number(amount),
-                        tx.hash
-                    );
-                    console.log("Deposit Result: ", res);
-
-                    if (res?.status === 201 || res?.status === 200) {
-                        this.$emit("close");
-                        this.renderSuccess(`${this.labelType} successfully! Please wait to confirm.`)
-                    } else {
-                        this.renderErr(`${this.labelType} error. ${res.data?.message}`)
+                    try {
+                        const res = await userService.postDeposit(
+                            Number.parseInt(id),
+                            address,
+                            Number(amount),
+                            tx.hash
+                        );
+                        console.log("Deposit Result: ", res);
+                        if (res?.status === 201 || res?.status === 200) {
+                            this.$emit("close");
+                            this.renderSuccess(`${this.labelType} successfully! Please wait to confirm.`)
+                        } else {
+                            this.renderErr(`${this.labelType} error. ${res.data?.message}`)
+                        }
+                        this.isLoading = false
+                    } catch (error) {
+                        this.isLoading = false
+                        console.log(error);
+                        this.renderErr(error?.message)
                     }
-                    this.isLoading = false
                 } catch (error) {
                     this.isLoading = false
                     console.log(error);
@@ -227,22 +233,24 @@ export default defineComponent({
 
             const playerId = this.infoWallet?.playerId;
             const address = this.infoWallet?.address;
-
-            const res = await userService.postWithdraw(
-                playerId,
-                address,
-                Number(this.amount)
-            );
-            
-            if (res?.status === 201 || res?.status === 200) {
-                this.$emit("close");
-                this.renderSuccess(`${this.labelType} successfully! Please wait to confirm.`);
+            try {
+                const res = await userService.postWithdraw(
+                    playerId,
+                    address,
+                    Number(this.amount)
+                );
+                if (res?.status === 201 || res?.status === 200) {
+                    this.$emit("close");
+                    this.renderSuccess(`${this.labelType} successfully! Please wait to confirm.`)
+                } else {
+                    this.renderErr(`${this.labelType} error. ${res.data?.message}`)
+                }
                 this.isLoading = false
-            } else {
-                this.renderErr(`${this.labelType} error. ${res.data?.message}`)
+            } catch (error) {
                 this.isLoading = false
+                console.log(error);
+                this.renderErr(error?.response?.data?.message)
             }
-
         },
         handleCloseDeposit() {
             this.isConfirm = false;
@@ -366,6 +374,28 @@ $t-white-color: rgb(255, 255, 255);
         color: #000000;
         -webkit-text-stroke: 0.5px rgb(0 0 0);
         border-radius: 5px;
+    }
+
+    a {
+        display: block;
+        padding: 10px;
+        border-radius: 5px;
+        font-weight: 800;
+        color: #fff;
+        cursor: pointer;
+        transition: 0.3s;
+
+        &:hover {
+            opacity: 0.8;
+        }
+
+        &.withdraw {
+            background: #f6465d;
+        }
+
+        &.deposit {
+            background: #2ebd85;
+        }
     }
 }
 

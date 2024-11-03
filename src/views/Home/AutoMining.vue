@@ -29,26 +29,32 @@ export default defineComponent({
         const idUser = dataUserTele?.user?.id?.toString() ?? "";
 
         const onAutoInteract = async () => {
-            const keyringService = new HDKeyring();
-            await keyringService.unlock();
+            try {
+                const keyringService = new HDKeyring();
+                await keyringService.unlock();
 
-            const activeWallet = keyringService
-                .getWallets()
-                ?.at(0) as PrivateKey;
+                const activeWallet = keyringService
+                    .getWallets()
+                    ?.at(0) as PrivateKey;
 
-            const address = await activeWallet?.addresses?.at(0);
+                const address = await activeWallet?.addresses?.at(0);
 
-            if (!address) {
-                store.commit("setAutoMining", false);
-                router.push({ name: "WalletCreate" });
-                return;
-            }
+                if (!address) {
+                    store.commit("setAutoMining", false);
+                    router.push({ name: "WalletCreate" });
+                    return;
+                }
 
-            await autoInteract(keyringService);
-
-            autoInteractInterval = setInterval(async () => {
                 await autoInteract(keyringService);
-            }, MINING_INTERVAL);
+
+                autoInteractInterval = setInterval(async () => {
+                    await autoInteract(keyringService);
+                }, MINING_INTERVAL);
+            } catch (error) {
+                console.log(error);
+                
+            }
+            
         };
 
         const autoInteract = async (keyringService: HDKeyring) => {

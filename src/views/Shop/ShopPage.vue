@@ -28,7 +28,7 @@
                     </div>
                 </div>
             </div> 
-            <!-- <div class="flex gap-3 justify-end">
+            <div class="flex gap-3 justify-end">
                 <div
                     class="btn-transaction bg-[#28a745]"
                     @click="handleDeposit('deposit')"
@@ -43,7 +43,7 @@
                 </div>
 
                 <div @click="callWalletInfo()"><i class="fa-solid fa-rotate"></i></div>
-            </div> -->
+            </div>
         </div>
 
         <div
@@ -222,11 +222,6 @@ export default defineComponent({
         },
         setActiveButton(button: EButtonName) {
             this.activeButton = button;
-            // if (button === EButtonName.Transactions) {
-            //     this.showCoomingSoon = true;
-            // } else {
-            //     this.activeButton = button;
-            // }
         },
         getBtnClass(item) {
             if (item?.Side === "S") {
@@ -372,5 +367,8 @@ button {
     width: fit-content;
     padding: 0 10px;
     border-radius: 5px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
 }
 </style>

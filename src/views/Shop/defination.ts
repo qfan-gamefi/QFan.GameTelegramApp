@@ -174,6 +174,7 @@ export interface IMarketTransactions {
     fee: number;
     message: string | null;
     id: number;
+    netAmount: number;
     createdAt: Date;
     updatedAt: Date;
   }

@@ -10,17 +10,32 @@
             <div class="title">{{ labelType }} QUAI</div>
 
             <div @click="handleCloseDeposit()" class="close-view-cart">
-                <i class="fa-solid fa-rectangle-xmark" style="color: #ff0000"></i>
+                <i
+                    class="fa-solid fa-rectangle-xmark"
+                    style="color: #ff0000"
+                ></i>
             </div>
         </div>
 
         <div class="wp-deposit">
             <div class="desc" v-if="!isConfirm">
-                <InputField v-model="amount" label="Amount" placeholder="Enter Amount" type="number" />
+                <InputField
+                    v-model="amount"
+                    label="Amount"
+                    placeholder="Enter Amount"
+                    type="number"
+                    :positiveIntegerOnly="labelType === 'WITHDRAW'"
+                />
+                
                 <span v-if="amountError" class="error-message">{{
                     messAmountError
                 }}</span>
-                <InputField v-model="password" label="Password" placeholder="Enter Password" type="password" />
+                <InputField
+                    v-model="password"
+                    label="Password"
+                    placeholder="Enter Password"
+                    type="password"
+                />
                 <span v-if="passwordError" class="error-message">{{
                     messPassError
                 }}</span>
@@ -34,14 +49,22 @@
         </div>
 
         <div class="btn-deposit">
-            <div class="text-center" @click="isConfirm ? submit() : handleConfirm()">
-                {{ labelType }} <span v-if="isLoading"><i class="fa fa-spinner"></i></span>
+            <div
+                class="text-center"
+                @click="isConfirm ? submit() : handleConfirm()"
+            >
+                {{ labelType }}
+                <span v-if="isLoading"><i class="fa fa-spinner"></i></span>
             </div>
         </div>
     </div>
 
-    <NotificationToast v-if="showNotification" :message="notificationMessage" :type="notificationType"
-        @close="showNotification = false" />
+    <NotificationToast
+        v-if="showNotification"
+        :message="notificationMessage"
+        :type="notificationType"
+        @close="showNotification = false"
+    />
 </template>
 
 <script lang="ts">
@@ -51,7 +74,10 @@ import HDKeyring from "@/crypto_utils/HDKeyring";
 import userService from "@/services/userService";
 import { secureStorage } from "@/storage/storage";
 import type { IInfoWallet } from "@/views/Shop/defination";
-import { QuaiTransactionRequest, QuaiTransactionResponse } from "quais/lib/commonjs/providers";
+import {
+    QuaiTransactionRequest,
+    QuaiTransactionResponse,
+} from "quais/lib/commonjs/providers";
 import { defineComponent, type PropType } from "vue";
 import NotificationToast from "@/components/NotificationToast.vue";
 import { parseEther } from "ethers";
@@ -77,9 +103,7 @@ export default defineComponent({
             validator: (value) => ["DEPOSIT", "WITHDRAW"].includes(value),
         },
     },
-    mounted() {
-
-    },
+    mounted() {},
     watch: {
         isDeposit(newVal) {
             if (!newVal) {
@@ -89,7 +113,7 @@ export default defineComponent({
     },
     data() {
         return {
-            amount: 0,
+            amount: "",
             password: "",
             amountError: false,
             messAmountError: "",
@@ -116,7 +140,7 @@ export default defineComponent({
             this.renderNotification(text, "error");
         },
         resetFields() {
-            this.amount = 0;
+            this.amount = "";
             this.password = "";
             this.amountError = false;
             this.messAmountError = "";
@@ -169,7 +193,7 @@ export default defineComponent({
             const keyringService = new HDKeyring();
             await keyringService.unlock();
             if (!this.amountError && !this.passwordError) {
-                this.isLoading = true
+                this.isLoading = true;
                 try {
                     const activeWallet = keyringService.getActiveWallet();
                     if (!activeWallet || !activeWallet.address) {
@@ -179,9 +203,9 @@ export default defineComponent({
 
                     const balance = await keyringService.getBalance(address);
                     if (balance < Number(amount)) {
-                        this.renderErr("Insufficient balance")
-                        this.isLoading = false
-                        return
+                        this.renderErr("Insufficient balance");
+                        this.isLoading = false;
+                        return;
                     }
 
                     const request: QuaiTransactionRequest = {
@@ -204,41 +228,53 @@ export default defineComponent({
 
                     if (res?.status === 201 || res?.status === 200) {
                         this.$emit("close");
-                        this.renderSuccess(`${this.labelType} successfully! Please wait to confirm.`)
+                        this.renderSuccess(
+                            `${this.labelType} successfully! Please wait to confirm.`
+                        );
                     } else {
-                        this.renderErr(`${this.labelType} error. ${res.data?.message}`)
+                        this.renderErr(
+                            `${this.labelType} error. ${res.data?.message}`
+                        );
                     }
-                    this.isLoading = false
+                    this.isLoading = false;
                 } catch (error) {
-                    this.isLoading = false
+                    this.isLoading = false;
                     console.log(error);
-                    this.renderErr(error?.message)
+                    this.renderErr(error?.message);
                 }
             }
         },
         async submitWithdraw() {
-            //check balance of wallet
-            const balance = this.infoWallet?.balance;
-            if (balance < this.amount) {
-                this.renderErr("Insufficient balance")
-                return
+            try {
+                this.isLoading = true;
+                const balance = this.infoWallet?.balance;
+                if (balance < this.amount) {
+                    this.renderErr("Insufficient balance");
+                    return;
+                }
+
+                const playerId = this.infoWallet?.playerId;
+                const address = this.infoWallet?.address;
+
+                const res = await userService.postWithdraw(
+                    playerId,
+                    address,
+                    Number(this.amount)
+                );
+                if (res?.status === 201 || res?.status === 200) {
+                    this.isLoading = false;
+                    this.$emit("close");
+                    this.renderSuccess(
+                        `${this.labelType} successfully! Please wait to confirm.`
+                    );
+                } else {
+                    this.isLoading = false;
+                    this.renderErr(`${this.labelType} error. ${res.data?.message}`);
+                }
+            } catch (error) {
+                this.isLoading = false;
             }
-
-            const playerId = this.infoWallet?.playerId;
-            const address = this.infoWallet?.address;
-
-            const res = await userService.postWithdraw(
-                playerId,
-                address,
-                Number(this.amount)
-            );
-            if (res?.status === 201 || res?.status === 200) {
-                this.$emit("close");
-                this.renderSuccess(`${this.labelType} successfully! Please wait to confirm.`)
-            } else {
-                this.renderErr(`${this.labelType} error. ${res.data?.message}`)
-            }
-
+            
         },
         handleCloseDeposit() {
             this.isConfirm = false;
@@ -365,5 +401,6 @@ $t-white-color: rgb(255, 255, 255);
     }
 }
 
-.address-text {}
+.address-text {
+}
 </style>

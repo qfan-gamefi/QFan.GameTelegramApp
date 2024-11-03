@@ -4,9 +4,12 @@
         <input
             :type="type"
             :value="modelValue"
-            @input="$emit('update:modelValue', $event.target.value)"
             class="input-field f-bangopro"
             :placeholder="placeholder"
+            :inputmode="type === 'number' ? 'numeric' : null"
+            @input="onInput"
+            :min="positiveIntegerOnly && type === 'number' ? 1 : null"
+            @keypress="onKeyPress"
         />
     </div>
 </template>
@@ -31,7 +34,27 @@ export default {
             type: String,
             default: "",
         },
+        positiveIntegerOnly: {
+            type: Boolean,
+            default: false
+        }
     },
+    methods: {
+        onInput(event) {
+            let value = event.target.value;
+            if(this.type === 'number' && this.positiveIntegerOnly){
+                value = value.replace(/[^0-9]/g, '')
+                if (value < 1) value = 1
+            }
+            
+            this.$emit('update:modelValue', value);
+        },
+        onKeyPress(event) {
+            if (event.key === '.' && this.positiveIntegerOnly) {
+                event.preventDefault();
+            }
+        }
+    }
 };
 </script>
 

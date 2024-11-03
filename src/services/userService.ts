@@ -285,7 +285,6 @@ const userService = {
         const res = await networkAxiosInstance.get(
             `/wallet/find-transaction-by-player/${idUser}`
         );
-        console.log(res)
         return res;
     }
 };

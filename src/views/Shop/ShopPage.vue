@@ -28,7 +28,7 @@
                     </div>
                 </div>
             </div> 
-            <!-- <div class="flex gap-2 justify-end">
+            <div class="flex gap-2 justify-end">
                 <button
                     class="btn-transaction"
                     @click="handleDeposit('deposit')"
@@ -41,7 +41,7 @@
                 >
                     Withdraw
                 </button>
-            </div> -->
+            </div>
         </div>
 
         <div
@@ -176,7 +176,7 @@ export default defineComponent({
             loadingBtn: false,
             showCoomingSoon: false,
             apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
-            userId: userInfo?.user?.id || "",
+            userId: userInfo?.user?.id || "1927324767",
 
             showNotification: false,
             notificationMessage: "",

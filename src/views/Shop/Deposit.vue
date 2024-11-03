@@ -19,11 +19,11 @@
                 <InputField v-model="amount" label="Amount" placeholder="Enter Amount" type="number" />
                 <span v-if="amountError" class="error-message">{{
                     messAmountError
-                    }}</span>
+                }}</span>
                 <InputField v-model="password" label="Password" placeholder="Enter Password" type="password" />
                 <span v-if="passwordError" class="error-message">{{
                     messPassError
-                    }}</span>
+                }}</span>
             </div>
             <div class="desc" v-else>
                 <div class="text-center">
@@ -34,18 +34,14 @@
         </div>
 
         <div class="btn-deposit">
-            <div class="text-center" @click="isConfirm ? submitDeposit() : handleConfirm()">
+            <div class="text-center" @click="isConfirm ? submit() : handleConfirm()">
                 {{ labelType }} <span v-if="isLoading"><i class="fa fa-spinner"></i></span>
             </div>
         </div>
     </div>
 
-    <NotificationToast
-            v-if="showNotification"
-            :message="notificationMessage"
-            :type="notificationType"
-            @close="showNotification = false"
-        />
+    <NotificationToast v-if="showNotification" :message="notificationMessage" :type="notificationType"
+        @close="showNotification = false" />
 </template>
 
 <script lang="ts">
@@ -95,7 +91,6 @@ export default defineComponent({
         return {
             amount: 0,
             password: "",
-
             amountError: false,
             messAmountError: "",
             passwordError: false,
@@ -160,9 +155,15 @@ export default defineComponent({
             this.validateAmount();
             this.validatePassword();
         },
+        async submit() {
+            if (this.labelType === "DEPOSIT") {
+                await this.submitDeposit();
+            } else {
+                await this.submitWithdraw();
+            }
+        },
         async submitDeposit() {
-
-            const id = "" // this.infoWallet?.playerId;
+            const id = this.infoWallet?.playerId;
             const address = this.infoWallet?.address;
             const amount = this.amount;
             const keyringService = new HDKeyring();
@@ -175,6 +176,14 @@ export default defineComponent({
                         this.$router.push({ name: "WalletCreate" });
                         return;
                     }
+
+                    const balance = await keyringService.getBalance(address);
+                    if (balance < Number(amount)) {
+                        this.renderErr("Insufficient balance")
+                        this.isLoading = false
+                        return
+                    }
+
                     const request: QuaiTransactionRequest = {
                         from: activeWallet.address,
                         to: MARKET_WALLET_ADDRESS,
@@ -195,9 +204,9 @@ export default defineComponent({
 
                     if (res?.status === 201 || res?.status === 200) {
                         this.$emit("close");
-                        this.renderSuccess(`${this.labelType} successfully! Please wait for confirm`)
-                    }else{
-                        this.renderErr(`${this.labelType} error`)
+                        this.renderSuccess(`${this.labelType} successfully! Please wait to confirm.`)
+                    } else {
+                        this.renderErr(`${this.labelType} error. ${res.data?.message}`)
                     }
                     this.isLoading = false
                 } catch (error) {
@@ -206,6 +215,30 @@ export default defineComponent({
                     this.renderErr(error?.message)
                 }
             }
+        },
+        async submitWithdraw() {
+            //check balance of wallet
+            const balance = this.infoWallet?.balance;
+            if (balance < this.amount) {
+                this.renderErr("Insufficient balance")
+                return
+            }
+
+            const playerId = this.infoWallet?.playerId;
+            const address = this.infoWallet?.address;
+
+            const res = await userService.postWithdraw(
+                playerId,
+                address,
+                Number(this.amount)
+            );
+            if (res?.status === 201 || res?.status === 200) {
+                this.$emit("close");
+                this.renderSuccess(`${this.labelType} successfully! Please wait to confirm.`)
+            } else {
+                this.renderErr(`${this.labelType} error. ${res.data?.message}`)
+            }
+
         },
         handleCloseDeposit() {
             this.isConfirm = false;

@@ -217,6 +217,7 @@ export default defineComponent({
             }
         },
         async submitWithdraw() {
+            this.isLoading = true;
             //check balance of wallet
             const balance = this.infoWallet?.balance;
             if (balance < this.amount) {
@@ -232,11 +233,14 @@ export default defineComponent({
                 address,
                 Number(this.amount)
             );
+            
             if (res?.status === 201 || res?.status === 200) {
                 this.$emit("close");
-                this.renderSuccess(`${this.labelType} successfully! Please wait to confirm.`)
+                this.renderSuccess(`${this.labelType} successfully! Please wait to confirm.`);
+                this.isLoading = false
             } else {
                 this.renderErr(`${this.labelType} error. ${res.data?.message}`)
+                this.isLoading = false
             }
 
         },

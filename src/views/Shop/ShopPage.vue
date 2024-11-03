@@ -28,20 +28,22 @@
                     </div>
                 </div>
             </div> 
-            <div class="flex gap-2 justify-end">
-                <button
-                    class="btn-transaction"
+            <!-- <div class="flex gap-3 justify-end">
+                <div
+                    class="btn-transaction bg-[#28a745]"
                     @click="handleDeposit('deposit')"
                 >
                     Deposit
-                </button>
-                <button
-                    class="btn-transaction"
+                </div>
+                <div
+                    class="btn-transaction bg-[#dc3545]"
                     @click="handleDeposit('withdraw')"
                 >
                     Withdraw
-                </button>
-            </div>
+                </div>
+
+                <div @click="callWalletInfo()"><i class="fa-solid fa-rotate"></i></div>
+            </div> -->
         </div>
 
         <div
@@ -176,7 +178,7 @@ export default defineComponent({
             loadingBtn: false,
             showCoomingSoon: false,
             apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
-            userId: userInfo?.user?.id || "1927324767",
+            userId: userInfo?.user?.id || "",
 
             showNotification: false,
             notificationMessage: "",
@@ -219,12 +221,12 @@ export default defineComponent({
             );
         },
         setActiveButton(button: EButtonName) {
-            // this.activeButton = button;
-            if (button === EButtonName.Transactions) {
-                this.showCoomingSoon = true;
-            } else {
-                this.activeButton = button;
-            }
+            this.activeButton = button;
+            // if (button === EButtonName.Transactions) {
+            //     this.showCoomingSoon = true;
+            // } else {
+            //     this.activeButton = button;
+            // }
         },
         getBtnClass(item) {
             if (item?.Side === "S") {
@@ -281,7 +283,6 @@ export default defineComponent({
         async callWalletInfo() {
             try {
                 const res = await userService.getWalletInfo(this.userId);
-                console.log("callWalletInfo", res);
                 this.infoWallet = res?.[0];
             } catch (error) {
                 console.log("Error", error);
@@ -369,5 +370,7 @@ button {
 }
 .btn-transaction {
     width: fit-content;
+    padding: 0 10px;
+    border-radius: 5px;
 }
 </style>

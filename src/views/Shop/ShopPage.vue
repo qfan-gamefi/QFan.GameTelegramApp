@@ -28,7 +28,7 @@
                     </div>
                 </div>
             </div> 
-            <!-- <div class="flex gap-3 justify-end">
+            <div class="flex gap-3 justify-end">
                 <div
                     class="btn-transaction bg-[#28a745]"
                     @click="handleDeposit('deposit')"
@@ -43,7 +43,7 @@
                 </div>
 
                 <div @click="callWalletInfo()"><i class="fa-solid fa-rotate"></i></div>
-            </div> -->
+            </div>
         </div>
 
         <div

@@ -49,7 +49,7 @@
                     <span>{{ formatDateTimeUS(item?.createdAt) }}</span>
                 </div>
                 <div v-if="item?.message" class="flex justify-between">
-                    <span class="font-semibold text-[#2f9ad6]">Message:</span>
+                    <span>Message:</span>
                     <span>{{ item?.message }}</span>
                 </div>
             </div>

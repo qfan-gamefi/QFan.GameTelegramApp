@@ -15,7 +15,6 @@ import type {
 } from "quais/lib/esm/providers";
 import { CONTRACT_OWNER_ADDRESS } from "@/crypto_utils/constants";
 import userService from "@/services/userService";
-import { TransactionReceipt } from "quais";
 
 export default defineComponent({
     name: "AutoMining",

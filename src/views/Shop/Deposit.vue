@@ -38,7 +38,7 @@
                 />
                 <span v-if="passwordError" class="error-message">{{
                     messPassError
-                }}</span>
+                    }}</span>
             </div>
             <div class="desc" v-else>
                 <div class="text-center">
@@ -49,13 +49,10 @@
         </div>
 
         <div class="btn-deposit">
-            <div
-                class="text-center"
-                @click="isConfirm ? submit() : handleConfirm()"
-            >
-                {{ labelType }}
-                <span v-if="isLoading"><i class="fa fa-spinner"></i></span>
-            </div>
+            <a class="text-center" v-bind:class="labelType.toLowerCase()" v-bind:disabled="isLoading"
+                @click="isConfirm ? submit() : handleConfirm()">
+                {{ labelType }} <span v-if="isLoading"><i class="fa fa-spinner"></i></span>
+            </a>
         </div>
     </div>
 
@@ -113,7 +110,7 @@ export default defineComponent({
     },
     data() {
         return {
-            amount: "",
+            amount: null,
             password: "",
             amountError: false,
             messAmountError: "",
@@ -140,7 +137,7 @@ export default defineComponent({
             this.renderNotification(text, "error");
         },
         resetFields() {
-            this.amount = "";
+            this.amount = null;
             this.password = "";
             this.amountError = false;
             this.messAmountError = "";
@@ -218,25 +215,26 @@ export default defineComponent({
                         request
                     )) as QuaiTransactionResponse;
 
-                    const res = await userService.postDeposit(
-                        Number.parseInt(id),
-                        address,
-                        Number(amount),
-                        tx.hash
-                    );
-                    console.log("Deposit Result: ", res);
-
-                    if (res?.status === 201 || res?.status === 200) {
-                        this.$emit("close");
-                        this.renderSuccess(
-                            `${this.labelType} successfully! Please wait to confirm.`
+                    try {
+                        const res = await userService.postDeposit(
+                            Number.parseInt(id),
+                            address,
+                            Number(amount),
+                            tx.hash
                         );
-                    } else {
-                        this.renderErr(
-                            `${this.labelType} error. ${res.data?.message}`
-                        );
+                        console.log("Deposit Result: ", res);
+                        if (res?.status === 201 || res?.status === 200) {
+                            this.$emit("close");
+                            this.renderSuccess(`${this.labelType} successfully! Please wait to confirm.`)
+                        } else {
+                            this.renderErr(`${this.labelType} error. ${res.data?.message}`)
+                        }
+                        this.isLoading = false
+                    } catch (error) {
+                        this.isLoading = false
+                        console.log(error);
+                        this.renderErr(error?.message)
                     }
-                    this.isLoading = false;
                 } catch (error) {
                     this.isLoading = false;
                     console.log(error);
@@ -245,36 +243,34 @@ export default defineComponent({
             }
         },
         async submitWithdraw() {
+            this.isLoading = true;
+            //check balance of wallet
+            const balance = this.infoWallet?.balance;
+            if (balance < this.amount) {
+                this.renderErr("Insufficient balance")
+                return
+            }
+
+            const playerId = this.infoWallet?.playerId;
+            const address = this.infoWallet?.address;
             try {
-                this.isLoading = true;
-                const balance = this.infoWallet?.balance;
-                if (balance < this.amount) {
-                    this.renderErr("Insufficient balance");
-                    return;
-                }
-
-                const playerId = this.infoWallet?.playerId;
-                const address = this.infoWallet?.address;
-
                 const res = await userService.postWithdraw(
                     playerId,
                     address,
                     Number(this.amount)
                 );
                 if (res?.status === 201 || res?.status === 200) {
-                    this.isLoading = false;
                     this.$emit("close");
-                    this.renderSuccess(
-                        `${this.labelType} successfully! Please wait to confirm.`
-                    );
+                    this.renderSuccess(`${this.labelType} successfully! Please wait to confirm.`)
                 } else {
-                    this.isLoading = false;
-                    this.renderErr(`${this.labelType} error. ${res.data?.message}`);
+                    this.renderErr(`${this.labelType} error. ${res.data?.message}`)
                 }
+                this.isLoading = false
             } catch (error) {
-                this.isLoading = false;
+                this.isLoading = false
+                console.log(error);
+                this.renderErr(error?.response?.data?.message)
             }
-            
         },
         handleCloseDeposit() {
             this.isConfirm = false;
@@ -398,6 +394,28 @@ $t-white-color: rgb(255, 255, 255);
         color: #000000;
         -webkit-text-stroke: 0.5px rgb(0 0 0);
         border-radius: 5px;
+    }
+
+    a {
+        display: block;
+        padding: 10px;
+        border-radius: 5px;
+        font-weight: 800;
+        color: #fff;
+        cursor: pointer;
+        transition: 0.3s;
+
+        &:hover {
+            opacity: 0.8;
+        }
+
+        &.withdraw {
+            background: #f6465d;
+        }
+
+        &.deposit {
+            background: #2ebd85;
+        }
     }
 }
 

@@ -176,25 +176,15 @@ export default {
         autoMessTextStore(newVal, oldVal) {
             this.widthWining = 0;
             if (this.autoMessStore) {
-                this.renderSuccess(`Mining success +${30} QFP`);
+                this.renderSuccess(
+                    `Mining send success. Please wait to confirm to take 30 QFP.`
+                );
                 this.calcWidthMining();
                 this.getInfoUser();
             } else {
                 this.renderErr(newVal);
             }
         },
-        // autoMessStore(newVal, oldVal) {
-        //     this.widthWining = 0;
-        //     console.log(newVal)
-        //     console.log(oldVal)
-        //     if (this.autoMessStore) {
-        //         this.renderSuccess(`Mining success +${30} QFP`);
-        //         this.calcWidthMining();
-        //         this.getInfoUser();
-        //     } else {
-        //         this.renderErr(`${this.autoMessTextStore}`);
-        //     }
-        // },
     },
     methods: {
         triggerAnimation() {
@@ -634,13 +624,13 @@ export default {
             this.openGiftCode = false;
             this.giftCode = "";
         },
-        handleTutorial(){
+        handleTutorial() {
             window.open("https://t.me/QFanClubAnnouncement/103", "_blank");
-        }
+        },
     },
     async mounted() {
         Telegram.WebApp.ready();
-        Telegram.WebApp.setHeaderColor("#ffffff");
+        // Telegram.WebApp.setHeaderColor("#ffffff");
         await this.getInfoUser();
 
         if (!this.hasLoaded) {
@@ -687,6 +677,7 @@ export default {
                         <span></span>
                         <span></span>
                     </label>
+                    <div class="title-menu">MENU</div>
                 </div>
 
                 <div class="menu-pane">
@@ -719,7 +710,6 @@ export default {
                                     <i class="fa-solid fa-book"></i>
                                     Tutorials
                                 </button>
-                                
                             </div>
                         </ul>
                     </nav>

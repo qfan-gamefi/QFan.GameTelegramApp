@@ -9,7 +9,7 @@
 
             <div class="title">{{ labelType }} QUAI</div>
 
-            <div @click="handleCloseDeposit()" class="close-view-cart">
+            <div @click="handleClose()" class="absolute top-2 right-2">
                 <i
                     class="fa-solid fa-rectangle-xmark"
                     style="color: #ff0000"
@@ -26,7 +26,7 @@
                     type="number"
                     :positiveIntegerOnly="labelType === 'WITHDRAW'"
                 />
-                
+
                 <span v-if="amountError" class="error-message">{{
                     messAmountError
                 }}</span>
@@ -38,7 +38,7 @@
                 />
                 <span v-if="passwordError" class="error-message">{{
                     messPassError
-                    }}</span>
+                }}</span>
             </div>
             <div class="desc" v-else>
                 <div class="text-center">
@@ -49,9 +49,14 @@
         </div>
 
         <div class="btn-deposit">
-            <a class="text-center" v-bind:class="labelType.toLowerCase()" v-bind:disabled="isLoading"
-                @click="isConfirm ? submit() : handleConfirm()">
-                {{ labelType }} <span v-if="isLoading"><i class="fa fa-spinner"></i></span>
+            <a
+                class="text-center"
+                v-bind:class="labelType.toLowerCase()"
+                v-bind:disabled="isLoading"
+                @click="isConfirm ? submit() : handleConfirm()"
+            >
+                {{ labelType }}
+                <span v-if="isLoading"><i class="fa fa-spinner"></i></span>
             </a>
         </div>
     </div>
@@ -189,57 +194,55 @@ export default defineComponent({
             const amount = this.amount;
             const keyringService = new HDKeyring();
             await keyringService.unlock();
-            if (!this.amountError && !this.passwordError) {
-                this.isLoading = true;
-                try {
-                    const activeWallet = keyringService.getActiveWallet();
-                    if (!activeWallet || !activeWallet.address) {
-                        this.$router.push({ name: "WalletCreate" });
-                        return;
-                    }
+            this.isLoading = true;
 
-                    const balance = await keyringService.getBalance(address);
-                    if (balance < Number(amount)) {
-                        this.renderErr("Insufficient balance");
-                        this.isLoading = false;
-                        return;
-                    }
-
-                    const request: QuaiTransactionRequest = {
-                        from: activeWallet.address,
-                        to: MARKET_WALLET_ADDRESS,
-                        value: parseEther(amount),
-                    };
-
-                    const tx = (await keyringService.signAndSendQuaiTransaction(
-                        request
-                    )) as QuaiTransactionResponse;
-
-                    try {
-                        const res = await userService.postDeposit(
-                            Number.parseInt(id),
-                            address,
-                            Number(amount),
-                            tx.hash
-                        );
-                        console.log("Deposit Result: ", res);
-                        if (res?.status === 201 || res?.status === 200) {
-                            this.$emit("close");
-                            this.renderSuccess(`${this.labelType} successfully! Please wait to confirm.`)
-                        } else {
-                            this.renderErr(`${this.labelType} error. ${res.data?.message}`)
-                        }
-                        this.isLoading = false
-                    } catch (error) {
-                        this.isLoading = false
-                        console.log(error);
-                        this.renderErr(error?.message)
-                    }
-                } catch (error) {
-                    this.isLoading = false;
-                    console.log(error);
-                    this.renderErr(error?.message);
+            try {
+                const activeWallet = keyringService.getActiveWallet();
+                if (!activeWallet || !activeWallet.address) {
+                    this.$router.push({ name: "WalletCreate" });
+                    return;
                 }
+
+                const balance = await keyringService.getBalance(address);
+
+                if (balance < Number(amount)) {
+                    this.renderErr("Insufficient balance");
+                    this.isLoading = false;
+                    return;
+                }
+
+                const request: QuaiTransactionRequest = {
+                    from: activeWallet.address,
+                    to: MARKET_WALLET_ADDRESS,
+                    value: parseEther(amount),
+                };
+
+                const tx = (await keyringService.signAndSendQuaiTransaction(
+                    request
+                )) as QuaiTransactionResponse;
+
+                const res = await userService.postDeposit(
+                    Number.parseInt(id),
+                    address,
+                    Number(amount),
+                    tx.hash
+                );
+
+                if (res?.status === 201 || res?.status === 200) {
+                    this.handleClose();
+                    this.renderSuccess(
+                        `${this.labelType} successfully! Please wait to confirm.`
+                    );
+                } else {
+                    this.renderErr(
+                        `${this.labelType} error. ${res.data?.message}`
+                    );
+                }
+            } catch (error) {
+                console.log(error);
+                this.renderErr(error?.message);
+            } finally {
+                this.isLoading = false;
             }
         },
         async submitWithdraw() {
@@ -247,8 +250,9 @@ export default defineComponent({
             //check balance of wallet
             const balance = this.infoWallet?.balance;
             if (balance < this.amount) {
-                this.renderErr("Insufficient balance")
-                return
+                this.isLoading = false;
+                this.renderErr("Insufficient balance");
+                return;
             }
 
             const playerId = this.infoWallet?.playerId;
@@ -260,19 +264,23 @@ export default defineComponent({
                     Number(this.amount)
                 );
                 if (res?.status === 201 || res?.status === 200) {
-                    this.$emit("close");
-                    this.renderSuccess(`${this.labelType} successfully! Please wait to confirm.`)
+                    this.handleClose();
+                    this.renderSuccess(
+                        `${this.labelType} successfully! Please wait to confirm.`
+                    );
                 } else {
-                    this.renderErr(`${this.labelType} error. ${res.data?.message}`)
+                    this.renderErr(
+                        `${this.labelType} error. ${res.data?.message}`
+                    );
                 }
-                this.isLoading = false
             } catch (error) {
-                this.isLoading = false
                 console.log(error);
-                this.renderErr(error?.response?.data?.message)
+                this.renderErr(error?.response?.data?.message);
+            } finally {
+                this.isLoading = false;
             }
         },
-        handleCloseDeposit() {
+        handleClose() {
             this.isConfirm = false;
             this.$emit("close");
         },
@@ -314,38 +322,6 @@ $t-white-color: rgb(255, 255, 255);
     padding: 0 20px;
 }
 
-// .popup-enter-active {
-//     animation: slideUp 0.1s ease forwards;
-// }
-
-// .popup-leave-active {
-//     animation: slideDown 0.1s ease forwards;
-// }
-
-// @keyframes slideUp {
-//     0% {
-//         opacity: 0;
-//         transform: translateY(100%) scale(0.5);
-//     }
-
-//     100% {
-//         opacity: 1;
-//         transform: translateY(0) scale(1);
-//     }
-// }
-
-// @keyframes slideDown {
-//     0% {
-//         opacity: 1;
-//         transform: translateY(0) scale(1);
-//     }
-
-//     100% {
-//         opacity: 0;
-//         transform: translateY(100%) scale(0.5);
-//     }
-// }
-
 .header {
     display: flex;
     justify-content: space-between;
@@ -356,7 +332,7 @@ $t-white-color: rgb(255, 255, 255);
     background-repeat: no-repeat;
     border-top-right-radius: 10px;
     border-top-left-radius: 10px;
-
+    position: relative;
     .title {
         margin: 0 auto;
         font-weight: 800;
@@ -417,8 +393,5 @@ $t-white-color: rgb(255, 255, 255);
             background: #2ebd85;
         }
     }
-}
-
-.address-text {
 }
 </style>

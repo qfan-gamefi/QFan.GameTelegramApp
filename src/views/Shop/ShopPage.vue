@@ -9,7 +9,7 @@
 
             <div class="flex justify-between items-center w-full">
                 <div class="text-[24px] f-bangopro">Trading</div>
-                <div class="flex gap-4 text-[12px] f-bangopro">
+                <div class="flex gap-4 text-[12px] f-bangopro" v-if="!loadingPage">
                     <div class="flex gap-1">
                         {{ infoWallet?.balance || 0 }}
                         <img
@@ -27,22 +27,26 @@
                         />
                     </div>
                 </div>
+                <div v-else><i class="fa-solid fa-rotate"></i></div>
             </div> 
             <div class="flex gap-3 justify-end">
                 <div
-                    class="btn-transaction bg-[#28a745]"
+                    class="btn-transaction bg-[#2ebd85]"
                     @click="handleDeposit('deposit')"
                 >
                     Deposit
                 </div>
                 <div
-                    class="btn-transaction bg-[#dc3545]"
+                    class="btn-transaction bg-[#f6465d]"
                     @click="handleDeposit('withdraw')"
                 >
                     Withdraw
                 </div>
 
-                <div @click="callWalletInfo()"><i class="fa-solid fa-rotate"></i></div>
+                <div @click="callWalletInfo()">
+                    <div v-if="!loadingPage"><i class="fa-solid fa-rotate"></i></div>
+                    <div v-else><i class="fa-solid fa-spinner fa-spin"></i></div>
+                </div>
             </div>
         </div>
 
@@ -175,7 +179,7 @@ export default defineComponent({
         const userInfo = window.Telegram.WebApp.initDataUnsafe;
 
         return {
-            loadingBtn: false,
+            loadingPage: false,
             showCoomingSoon: false,
             apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
             userId: userInfo?.user?.id || "",
@@ -276,11 +280,14 @@ export default defineComponent({
             this.isDeposit = false;
         },
         async callWalletInfo() {
+            this.loadingPage = true;
             try {
                 const res = await userService.getWalletInfo(this.userId);
                 this.infoWallet = res?.[0];
             } catch (error) {
                 console.log("Error", error);
+            }finally{
+                this.loadingPage = false;
             }
         },
     },

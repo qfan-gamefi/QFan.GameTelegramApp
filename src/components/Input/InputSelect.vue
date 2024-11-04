@@ -93,7 +93,7 @@ export default {
 }
 
 .input-field {
-    padding: 8px 50px 8px 8px;
+    padding: 4px 50px 4px 4px;
     border: 1px solid #ccc;
     border-radius: 4px;
     width: 100%;
@@ -106,7 +106,7 @@ export default {
     top: 0;
     right: 0;
     border: none;
-    padding: 9px;
+    padding: 5px 9px;
     background: #f0f0f0;
     border-left: 1px solid #ccc;
     border-top-right-radius: 4px;

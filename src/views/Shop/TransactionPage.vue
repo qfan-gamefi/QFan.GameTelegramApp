@@ -28,7 +28,7 @@
                 </div>
                 <div class="flex justify-between">
                     <span class="">Amount:</span>
-                    <span>{{ item?.amount }}</span>
+                    <span>{{ item?.netAmount }}</span>
                 </div>
                 <div class="flex justify-between">
                     <span class="">Fee:</span>
@@ -36,7 +36,7 @@
                 </div>
                 <div class="flex justify-between">
                     <span class="">Received Amount:</span>
-                    <span>{{ item?.netAmount }}</span>
+                    <span>{{ item?.amount }}</span>
                 </div>
                 <div class="flex justify-between" v-if="item?.hash?.length > 5">
                     <span class="">Hash:</span>
@@ -109,9 +109,7 @@ export default defineComponent({
 
         async callTransaction() {
             try {
-                const res = await userService.walletTrasnsaction(this.userId);
-                console.log(res.data);
-                
+                const res = await userService.walletTrasnsaction(this.userId);                
                 this.listTransaction = res?.data;
             } catch (error) {
                 console.log(error);

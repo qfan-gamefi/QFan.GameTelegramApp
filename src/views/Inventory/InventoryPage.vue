@@ -213,6 +213,7 @@
             :detailCart="dataDetailCart"
             currentPage="inventory"
             @closeCallApi="closeViewCart()"
+            :dataInventory="arrInventory"
         />
 
         <PopupPassword :visible="isPass" @cancel="isPass = false" />
@@ -331,9 +332,6 @@ export default defineComponent({
             this.notificationMessage = message;
             this.notificationType = type;
             this.showNotification = true;
-            // setTimeout(() => {
-            //     this.showNotification = false;
-            // }, 2000);
         },
         async renderSuccess(text: string) {
             this.renderNotification(text, "success");

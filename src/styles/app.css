@@ -247,9 +247,15 @@
     font-size: 12px;
 }
 
-.link-checkin {
+.container-wl {
     position: absolute;
     top: 3%;
+    right: 2%;
+}
+
+.link-checkin {
+    position: absolute;
+    top: 7%;
     right: 2%;
 }
 
@@ -257,7 +263,7 @@
     color: #fff;
     text-decoration: none;
 }
-
+.container-wl button,
 .link-checkin button {
     border: none;
     border-radius: 8px;
@@ -602,9 +608,9 @@
     border-radius: 10px;
 }
 
-#openmenu:checked ~ .body-text {
+/* #openmenu:checked ~ .body-text {
     display: none;
-}
+} */
 
 #openmenu:checked ~ .hamburger-icon span:nth-of-type(2) {
     transform: translate(0%, 175%) rotate(-45deg);

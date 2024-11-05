@@ -663,6 +663,12 @@ export default {
         <div class="container-game">
             <InfoUser v-if="dataLogin" :dataLogin="dataLogin" />
 
+            <div class="container-wl">
+                <button @click="handleWallet">
+                    <i class="fa-solid fa-wallet"></i>
+                    Wallet
+                </button>
+            </div>
             <div class="link-checkin">
                 <input
                     type="checkbox"
@@ -670,7 +676,7 @@ export default {
                     class="hamburger-checkbox"
                 />
 
-                <div class="hamburger-icon">
+                <label class="hamburger-icon cursor-pointer" for="openmenu">
                     <label for="openmenu" id="hamburger-label">
                         <span></span>
                         <span></span>
@@ -678,17 +684,11 @@ export default {
                         <span></span>
                     </label>
                     <div class="title-menu">MENU</div>
-                </div>
+                </label>
 
                 <div class="menu-pane">
                     <nav>
                         <ul class="menu-links">
-                            <div>
-                                <button @click="handleWallet">
-                                    <i class="fa-solid fa-wallet"></i>
-                                    Wallet
-                                </button>
-                            </div>
                             <button
                                 @click="onCheckIn()"
                                 v-bind:disabled="isExecCheckin"

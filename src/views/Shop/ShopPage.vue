@@ -31,19 +31,19 @@
             </div> 
             <div class="flex gap-3 justify-end">
                 <div
-                    class="btn-transaction bg-[#2ebd85]"
+                    class="btn-transaction bg-[#2ebd85] cursor-pointer"
                     @click="handleDeposit('deposit')"
                 >
                     Deposit
                 </div>
                 <div
-                    class="btn-transaction bg-[#f6465d]"
+                    class="btn-transaction bg-[#f6465d] cursor-pointer"
                     @click="handleDeposit('withdraw')"
                 >
                     Withdraw
                 </div>
 
-                <div @click="callWalletInfo()">
+                <div @click="callWalletInfo()" class="cursor-pointer">
                     <div v-if="!loadingPage"><i class="fa-solid fa-rotate"></i></div>
                     <div v-else><i class="fa-solid fa-spinner fa-spin"></i></div>
                 </div>

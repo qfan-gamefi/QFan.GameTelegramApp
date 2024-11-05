@@ -90,8 +90,8 @@ export default defineComponent({
     data() {
         const dataUserTele = window?.Telegram?.WebApp?.initDataUnsafe;
 
-        let first_name = dataUserTele?.user?.first_name || "";
-        let last_name = dataUserTele?.user?.last_name || "";
+        let first_name = dataUserTele?.user?.first_name || "1";
+        let last_name = dataUserTele?.user?.last_name || "2";
 
         return {
             isTelegramLogin: !!first_name || !!last_name,

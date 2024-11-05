@@ -664,11 +664,11 @@ export default {
             <InfoUser v-if="dataLogin" :dataLogin="dataLogin" />
 
             <div class="container-wl">
-                                <button @click="handleWallet">
-                                    <i class="fa-solid fa-wallet"></i>
-                                    Wallet
-                                </button>
-                            </div>
+                <button @click="handleWallet">
+                    <i class="fa-solid fa-wallet"></i>
+                    Wallet
+                </button>
+            </div>
             <div class="link-checkin">
                 <input
                     type="checkbox"

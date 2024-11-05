@@ -263,8 +263,8 @@
     color: #fff;
     text-decoration: none;
 }
-
-.link-checkin, .container-wl button {
+.container-wl button,
+.link-checkin button {
     border: none;
     border-radius: 8px;
     font-size: 10px;

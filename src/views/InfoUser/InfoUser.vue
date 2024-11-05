@@ -90,8 +90,8 @@ export default defineComponent({
     data() {
         const dataUserTele = window?.Telegram?.WebApp?.initDataUnsafe;
 
-        let first_name = dataUserTele?.user?.first_name || "1";
-        let last_name = dataUserTele?.user?.last_name || "2";
+        let first_name = dataUserTele?.user?.first_name || "";
+        let last_name = dataUserTele?.user?.last_name || "";
 
         return {
             isTelegramLogin: !!first_name || !!last_name,
@@ -128,14 +128,16 @@ export default defineComponent({
             this.urlAvt = res;
             this.$store.commit("setAvtStore", res);
         },
-        async getLevels() {
+        async getLevels() {                        
             const dataLv: ILevel[] =
                 this.dataLvStore?.length > 0
                     ? this.dataLvStore
                     : await userService.getLevels();
-            if (this.dataLvStore?.length === 0) {
+                    
+            if (this.dataLvStore?.length === 0) {                
                 this.$store.commit("setDataLvStore", dataLv);
             }
+            // const dataLv: ILevel[] = await userService.getLevels();
 
             const dataExpCurrent = this.dataLogin?.attributes?.exp;
 
@@ -153,7 +155,7 @@ export default defineComponent({
                 currentLv
             );
 
-            const maxLV = dataLv?.pop();
+            const maxLV = dataLv?.[dataLv?.length - 1];
 
             if (maxLV?.attributes?.level == currentLv?.attributes?.level) {
                 this.percentageLevel = 100;

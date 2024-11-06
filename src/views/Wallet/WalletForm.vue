@@ -43,11 +43,12 @@
 
 <script lang="ts">
 import HDKeyring from "@/crypto_utils/HDKeyring";
-import { storage } from "@/storage/storage";
+import BackButtonTelegram from "@/mixins/BackButtonTelegram";
 import { defineComponent } from "vue";
 
 export default defineComponent({
     name: "WalletForm",
+    mixins: [BackButtonTelegram],
     data() {
         return {};
     },

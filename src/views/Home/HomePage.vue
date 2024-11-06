@@ -20,14 +20,11 @@ import InviteFrens from "@/components/InviteFrens.vue";
 import MissionList from "@/views/Mission/MissionsList.vue";
 import BoosterForm from "@/components/BoosterForm.vue";
 import userService from "@/services/userService";
-// import EventBus from "@/utils/eventBus";
 import EventList from "@/views/Event/EventList.vue";
 import CheckinForm from "@/views/Checkin/CheckinForm.vue";
 import { secureStorage, storage } from "@/storage/storage";
 import { quais, type Wallet } from "quais";
 import NotificationToast from "@/components/NotificationToast.vue";
-// import { title } from "process";
-// import { title } from "process";
 import type { ILevel } from "@/interface";
 import InfoUser from "@/views/InfoUser/InfoUser.vue";
 import LoadingScreen from "@/views/LoadingScreen/LoadingScreen.vue";
@@ -79,15 +76,15 @@ export default {
         let first_name = dataUserTele?.user?.first_name || "";
         let last_name = dataUserTele?.user?.last_name || "";
 
-        if (
-            dataUserTele?.start_param &&
-            dataUserTele?.start_param?.startsWith("TOKEN_")
-        ) {
-            secureStorage.set(
-                "SECURITY_TOKEN",
-                dataUserTele.start_param?.replace("TOKEN_", "")
-            );
-        }
+        // if (
+        //     dataUserTele?.start_param &&
+        //     dataUserTele?.start_param?.startsWith("TOKEN_")
+        // ) {
+        //     secureStorage.set(
+        //         "SECURITY_TOKEN",
+        //         dataUserTele.start_param?.replace("TOKEN_", "")
+        //     );
+        // }
 
         return {
             isLoadingCreen: true,
@@ -280,7 +277,6 @@ export default {
                 } else {
                     const resData = data?.data?.[0];
 
-                    // secureStorage.set("data_login", resData);
                     this.$store.commit("setRewardInfo", resData);
                     this.dataLogin = resData;
                     this.dataQPoint =
@@ -448,19 +444,20 @@ export default {
         handleBackButton() {
             Telegram.WebApp.BackButton.show();
 
-            Telegram.WebApp.BackButton.onClick(() => {
+            const handleClick = () => {
                 this.$router.push("/");
-                this.$store.commit("setRouterFusion", false);
-
                 this.showMission = false;
                 this.showEvent = false;
                 this.showBooster = false;
                 this.showInvite = false;
-
-                this.getInfoUser();
                 this.activeButton = "";
+                this.getInfoUser();
+
                 Telegram.WebApp.BackButton.hide();
-            });
+                Telegram.WebApp.BackButton.offClick(handleClick); 
+            };
+
+            Telegram.WebApp.BackButton.onClick(handleClick);
         },
         handleButtonTab(tab) {
             this.isCheckin = false;
@@ -500,8 +497,6 @@ export default {
             Object.assign(this, tabMappings[tab]);
         },
         async handleWallet() {
-            this.handleBackButton();
-
             const walletType = localStorage.getItem("walletType");
             if (walletType !== CURRENT_WALLET_VERSION) {
                 localStorage.removeItem("tallyVaults");
@@ -541,15 +536,11 @@ export default {
                         request
                     )) as unknown as unknown as QuaiTransactionResponse;
 
-                    console.log("tx", tx);
-
                     const claimCheckin = await userService.claimCheckin(
                         this.idUser,
                         activeWallet?.address as string,
                         tx.hash as string
                     );
-
-                    console.log("claimCheckin", claimCheckin);
 
                     await this.getInfoUser();
                     if (claimCheckin.error) {
@@ -630,7 +621,8 @@ export default {
     },
     async mounted() {
         Telegram.WebApp.ready();
-        // Telegram.WebApp.setHeaderColor("#ffffff");
+        Telegram.WebApp.BackButton.hide();
+        this.$store.commit("setRouterFusion", false);
         await this.getInfoUser();
 
         if (!this.hasLoaded) {
@@ -792,7 +784,7 @@ export default {
                 </div>
             </div>
 
-            <BoxAction @back-clicked="handleBackButton" />
+            <BoxAction />
             <MainGame ref="phaserRef" />
         </div>
 

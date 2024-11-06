@@ -341,9 +341,11 @@ import { type WalletInfo } from "@/crypto_utils/type";
 import type { QuaiTransactionRequest } from "quais/lib/esm/providers";
 import { formatEther, parseEther, toBigInt } from "ethers";
 import { CURRENT_WALLET_VERSION } from "@/crypto_utils/constants";
+import BackButtonTelegram from "@/mixins/BackButtonTelegram";
 
 export default defineComponent({
     name: "WalletDetail",
+    mixins: [BackButtonTelegram],
     components: {
         NotificationToast,
         LoadingForm,
@@ -410,7 +412,6 @@ export default defineComponent({
             this.activities = (await fetchActivity(
                 this.activeWallet?.address as string
             )) as never[];
-            console.log("activites", this.activities);
 
             this.executing = false;
         },

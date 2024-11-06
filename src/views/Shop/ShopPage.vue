@@ -158,9 +158,11 @@ import { formattedBalance } from "@/utils";
 import userService from "@/services/userService";
 import userServiceInventory from "@/services/inventoryService";
 import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
+import BackButtonTelegram from "@/mixins/BackButtonTelegram";
 
 export default defineComponent({
     name: "ShopPage",
+    mixins: [BackButtonTelegram],
     components: {
         ViewCart,
         DepositInShop,

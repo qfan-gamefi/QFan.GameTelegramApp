@@ -9,7 +9,7 @@
 
             <div class="flex justify-between items-center w-full">
                 <div class="text-[24px] f-bangopro">Trading</div>
-                <div class="flex gap-4 text-[12px] f-bangopro">
+                <div class="flex gap-4 text-[12px] f-bangopro" v-if="!loadingPage">
                     <div class="flex gap-1">
                         {{ infoWallet?.balance || 0 }}
                         <img
@@ -27,21 +27,27 @@
                         />
                     </div>
                 </div>
+                <div v-else><i class="fa-solid fa-rotate"></i></div>
             </div> 
-            <!-- <div class="flex gap-2 justify-end">
-                <button
-                    class="btn-transaction"
+            <div class="flex gap-3 justify-end">
+                <div
+                    class="btn-transaction bg-[#2ebd85] cursor-pointer"
                     @click="handleDeposit('deposit')"
                 >
                     Deposit
-                </button>
-                <button
-                    class="btn-transaction"
+                </div>
+                <div
+                    class="btn-transaction bg-[#f6465d] cursor-pointer"
                     @click="handleDeposit('withdraw')"
                 >
                     Withdraw
-                </button>
-            </div> -->
+                </div>
+
+                <div @click="callWalletInfo()" class="cursor-pointer">
+                    <div v-if="!loadingPage"><i class="fa-solid fa-rotate"></i></div>
+                    <div v-else><i class="fa-solid fa-spinner fa-spin"></i></div>
+                </div>
+            </div>
         </div>
 
         <div
@@ -152,9 +158,11 @@ import { formattedBalance } from "@/utils";
 import userService from "@/services/userService";
 import userServiceInventory from "@/services/inventoryService";
 import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
+import BackButtonTelegram from "@/mixins/BackButtonTelegram";
 
 export default defineComponent({
     name: "ShopPage",
+    mixins: [BackButtonTelegram],
     components: {
         ViewCart,
         DepositInShop,
@@ -173,7 +181,7 @@ export default defineComponent({
         const userInfo = window.Telegram.WebApp.initDataUnsafe;
 
         return {
-            loadingBtn: false,
+            loadingPage: false,
             showCoomingSoon: false,
             apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
             userId: userInfo?.user?.id || "",
@@ -219,12 +227,7 @@ export default defineComponent({
             );
         },
         setActiveButton(button: EButtonName) {
-            // this.activeButton = button;
-            if (button === EButtonName.Transactions) {
-                this.showCoomingSoon = true;
-            } else {
-                this.activeButton = button;
-            }
+            this.activeButton = button;
         },
         getBtnClass(item) {
             if (item?.Side === "S") {
@@ -279,12 +282,14 @@ export default defineComponent({
             this.isDeposit = false;
         },
         async callWalletInfo() {
+            this.loadingPage = true;
             try {
                 const res = await userService.getWalletInfo(this.userId);
-                console.log("callWalletInfo", res);
                 this.infoWallet = res?.[0];
             } catch (error) {
                 console.log("Error", error);
+            }finally{
+                this.loadingPage = false;
             }
         },
     },
@@ -369,5 +374,10 @@ button {
 }
 .btn-transaction {
     width: fit-content;
+    padding: 0 10px;
+    border-radius: 5px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
 }
 </style>

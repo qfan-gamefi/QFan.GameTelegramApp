@@ -20,14 +20,11 @@ import InviteFrens from "@/components/InviteFrens.vue";
 import MissionList from "@/views/Mission/MissionsList.vue";
 import BoosterForm from "@/components/BoosterForm.vue";
 import userService from "@/services/userService";
-// import EventBus from "@/utils/eventBus";
 import EventList from "@/views/Event/EventList.vue";
 import CheckinForm from "@/views/Checkin/CheckinForm.vue";
 import { secureStorage, storage } from "@/storage/storage";
 import { quais, type Wallet } from "quais";
 import NotificationToast from "@/components/NotificationToast.vue";
-// import { title } from "process";
-// import { title } from "process";
 import type { ILevel } from "@/interface";
 import InfoUser from "@/views/InfoUser/InfoUser.vue";
 import LoadingScreen from "@/views/LoadingScreen/LoadingScreen.vue";
@@ -42,7 +39,7 @@ import type {
 } from "quais/lib/esm/providers";
 import {
     CONTRACT_OWNER_ADDRESS,
-    CURRENT_WALLET_VERSION
+    CURRENT_WALLET_VERSION,
 } from "@/crypto_utils/constants";
 import { DEFAULT_QUAI_TESNTET } from "@/services/network/chains";
 import { getAddress, parseEther, toBigInt } from "ethers";
@@ -79,15 +76,15 @@ export default {
         let first_name = dataUserTele?.user?.first_name || "";
         let last_name = dataUserTele?.user?.last_name || "";
 
-        if (
-            dataUserTele?.start_param &&
-            dataUserTele?.start_param?.startsWith("TOKEN_")
-        ) {
-            secureStorage.set(
-                "SECURITY_TOKEN",
-                dataUserTele.start_param?.replace("TOKEN_", "")
-            );
-        }
+        // if (
+        //     dataUserTele?.start_param &&
+        //     dataUserTele?.start_param?.startsWith("TOKEN_")
+        // ) {
+        //     secureStorage.set(
+        //         "SECURITY_TOKEN",
+        //         dataUserTele.start_param?.replace("TOKEN_", "")
+        //     );
+        // }
 
         return {
             isLoadingCreen: true,
@@ -95,7 +92,7 @@ export default {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            idUser: dataUserTele?.user?.id?.toString() ?? "2123800227",
+            idUser: dataUserTele?.user?.id?.toString() ?? "",
             telegram_bot_link: telegram_bot_link + dataUserTele?.user?.id || "",
 
             showCoomingSoon: false,
@@ -173,15 +170,16 @@ export default {
                 this.isExecAutoInteract = true;
             }
         },
-        autoMessStore(newVal, oldVal) {
+        autoMessTextStore(newVal, oldVal) {
             this.widthWining = 0;
-
             if (this.autoMessStore) {
-                this.renderSuccess(`Mining success +${30} QFP`);
+                this.renderSuccess(
+                    `Mining send success. Please wait to confirm to take 30 QFP.`
+                );
                 this.calcWidthMining();
                 this.getInfoUser();
             } else {
-                this.renderErr(`${this.autoMessTextStore}`);
+                this.renderErr(newVal);
             }
         },
     },
@@ -279,7 +277,6 @@ export default {
                 } else {
                     const resData = data?.data?.[0];
 
-                    // secureStorage.set("data_login", resData);
                     this.$store.commit("setRewardInfo", resData);
                     this.dataLogin = resData;
                     this.dataQPoint =
@@ -370,10 +367,10 @@ export default {
         async updateSence() {
             const phaserRef: any = this.$refs.phaserRef as
                 | {
-                    scene?: {
-                        changeScene: () => void;
-                    };
-                }
+                      scene?: {
+                          changeScene: () => void;
+                      };
+                  }
                 | undefined;
             const scene = toRaw(phaserRef?.scene);
             const givenDateTimeString = this.dataQPoint.nextTakeRewardTime;
@@ -447,18 +444,20 @@ export default {
         handleBackButton() {
             Telegram.WebApp.BackButton.show();
 
-            Telegram.WebApp.BackButton.onClick(() => {
+            const handleClick = () => {
                 this.$router.push("/");
-
                 this.showMission = false;
                 this.showEvent = false;
                 this.showBooster = false;
                 this.showInvite = false;
-
-                this.getInfoUser();
                 this.activeButton = "";
+                this.getInfoUser();
+
                 Telegram.WebApp.BackButton.hide();
-            });
+                Telegram.WebApp.BackButton.offClick(handleClick); 
+            };
+
+            Telegram.WebApp.BackButton.onClick(handleClick);
         },
         handleButtonTab(tab) {
             this.isCheckin = false;
@@ -498,8 +497,6 @@ export default {
             Object.assign(this, tabMappings[tab]);
         },
         async handleWallet() {
-            this.handleBackButton();
-
             const walletType = localStorage.getItem("walletType");
             if (walletType !== CURRENT_WALLET_VERSION) {
                 localStorage.removeItem("tallyVaults");
@@ -539,15 +536,11 @@ export default {
                         request
                     )) as unknown as unknown as QuaiTransactionResponse;
 
-                    console.log("tx", tx);
-
                     const claimCheckin = await userService.claimCheckin(
                         this.idUser,
                         activeWallet?.address as string,
                         tx.hash as string
                     );
-
-                    console.log("claimCheckin", claimCheckin);
 
                     await this.getInfoUser();
                     if (claimCheckin.error) {
@@ -622,10 +615,14 @@ export default {
             this.openGiftCode = false;
             this.giftCode = "";
         },
+        handleTutorial() {
+            window.open("https://t.me/QFanClubAnnouncement/103", "_blank");
+        },
     },
     async mounted() {
         Telegram.WebApp.ready();
-        Telegram.WebApp.setHeaderColor("#ffffff");
+        Telegram.WebApp.BackButton.hide();
+        this.$store.commit("setRouterFusion", false);
         await this.getInfoUser();
 
         if (!this.hasLoaded) {
@@ -658,29 +655,66 @@ export default {
         <div class="container-game">
             <InfoUser v-if="dataLogin" :dataLogin="dataLogin" />
 
-            <div class="link-checkin">
-                <div>
-                    <button @click="handleWallet">
-                        <i class="fa-solid fa-wallet"></i>
-                        Wallet
-                    </button>
-                </div>
-                <button @click="onCheckIn()" v-bind:disabled="isExecCheckin">
-                    <i class="fa-solid fa-calendar-days"></i> {{ titleCheckin }}
-                    <span v-if="isExecCheckin"><i class="fa fa-spinner"></i></span>
+            <div class="container-wl">
+                <button @click="handleWallet">
+                    <i class="fa-solid fa-wallet"></i>
+                    Wallet
                 </button>
-                <div>
-                    <button @click="handleGiftCode()">
-                        <i class="fa-solid fa-gift"></i>
-                        Gift code
-                    </button>
+            </div>
+            <div class="link-checkin">
+                <input
+                    type="checkbox"
+                    id="openmenu"
+                    class="hamburger-checkbox"
+                />
+
+                <label class="hamburger-icon cursor-pointer" for="openmenu">
+                    <label for="openmenu" id="hamburger-label">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </label>
+                    <div class="title-menu">MENU</div>
+                </label>
+
+                <div class="menu-pane">
+                    <nav>
+                        <ul class="menu-links">
+                            <button
+                                @click="onCheckIn()"
+                                v-bind:disabled="isExecCheckin"
+                            >
+                                <i class="fa-solid fa-calendar-days"></i>
+                                {{ titleCheckin }}
+                                <span v-if="isExecCheckin"
+                                    ><i class="fa fa-spinner"></i
+                                ></span>
+                            </button>
+                            <div>
+                                <button @click="handleGiftCode()">
+                                    <i class="fa-solid fa-gift"></i>
+                                    Gift code
+                                </button>
+                            </div>
+                            <div>
+                                <button @click="handleTutorial()">
+                                    <i class="fa-solid fa-book"></i>
+                                    Tutorials
+                                </button>
+                            </div>
+                        </ul>
+                    </nav>
                 </div>
             </div>
 
             <div class="contaner-balance">
                 <div class="wr-balance">
                     Balance:
-                    <div class="text-balance" :class="{ 'animate-text': isAnimated }">
+                    <div
+                        class="text-balance"
+                        :class="{ 'animate-text': isAnimated }"
+                    >
                         {{
                             formattedBalance(
                                 dataLogin?.attributes?.qpoint?.data?.attributes
@@ -708,7 +742,11 @@ export default {
                         </div>
 
                         <div class="box-right">
-                            <button class="btn-commit_reward" @click="handleReward" :disabled="isCountingDown">
+                            <button
+                                class="btn-commit_reward"
+                                @click="handleReward"
+                                :disabled="isCountingDown"
+                            >
                                 {{ isClaim ? "Claim" : "Training..." }}
                             </button>
                         </div>
@@ -717,7 +755,10 @@ export default {
                     <div class="box-info" :style="styleWining">
                         <div class="auto-left">
                             <div class="woodwork-loader">
-                                <div class="runner rotateMining" :style="styleWining"></div>
+                                <div
+                                    class="runner rotateMining"
+                                    :style="styleWining"
+                                ></div>
                             </div>
 
                             <div class="box-woodwork">
@@ -725,10 +766,17 @@ export default {
                             </div>
                         </div>
                         <div class="box-right">
-                            <div class="btn-mining" @click="onAutoInteract()" :class="{ active: isExecAutoInteract }">
-                                <img src="@public/assets/mining/icon-auto.png" :class="{
-                                    rotateMining: isExecAutoInteract,
-                                }" />
+                            <div
+                                class="btn-mining"
+                                @click="onAutoInteract()"
+                                :class="{ active: isExecAutoInteract }"
+                            >
+                                <img
+                                    src="@public/assets/mining/icon-auto.png"
+                                    :class="{
+                                        rotateMining: isExecAutoInteract,
+                                    }"
+                                />
                                 Mining
                             </div>
                         </div>
@@ -736,32 +784,51 @@ export default {
                 </div>
             </div>
 
-            <BoxAction @back-clicked="handleBackButton" />
+            <BoxAction />
             <MainGame ref="phaserRef" />
         </div>
 
         <div class="box-button">
-            <div class="btn-item" @click="handleButtonTab('mission')" :class="{ active: activeButton === 'mission' }">
+            <div
+                class="btn-item"
+                @click="handleButtonTab('mission')"
+                :class="{ active: activeButton === 'mission' }"
+            >
                 <div class="item-img">
                     <img src="@public/assets/button-icons/mission.svg" />
                 </div>
                 <div class="item-title">Mission</div>
             </div>
-            <div class="btn-item" @click="handleButtonTab('event')" :class="{ active: activeButton === 'event' }">
+            <div
+                class="btn-item"
+                @click="handleButtonTab('event')"
+                :class="{ active: activeButton === 'event' }"
+            >
                 <div class="item-img">
                     <img src="@public/assets/button-icons/event.svg" />
                 </div>
                 <div class="item-title">Event</div>
             </div>
-            <div class="btn-item" @click="handleButtonTab('booster')" :class="{ active: activeButton === 'booster' }">
+            <div
+                class="btn-item"
+                @click="handleButtonTab('booster')"
+                :class="{ active: activeButton === 'booster' }"
+            >
                 <div class="item-img">
                     <img src="@public/assets/button-icons/booster.svg" />
                 </div>
-                <div class="item-title" :class="{ active: activeButton === 'booster' }">
+                <div
+                    class="item-title"
+                    :class="{ active: activeButton === 'booster' }"
+                >
                     Booster
                 </div>
             </div>
-            <div class="btn-item" @click="handleButtonTab('invite')" :class="{ active: activeButton === 'invite' }">
+            <div
+                class="btn-item"
+                @click="handleButtonTab('invite')"
+                :class="{ active: activeButton === 'invite' }"
+            >
                 <div class="item-img">
                     <img src="@public/assets/button-icons/invite-friend.svg" />
                 </div>
@@ -783,8 +850,15 @@ export default {
             <div class="popup-referer-code">
                 <div class="referer-code">Referer code</div>
                 <form @submit.prevent="submitCode">
-                    <input class="code-input" :class="{ 'input-error': errorMessage }" type="text" v-model="code"
-                        id="code" @input="clearError" placeholder="Enter code" />
+                    <input
+                        class="code-input"
+                        :class="{ 'input-error': errorMessage }"
+                        type="text"
+                        v-model="code"
+                        id="code"
+                        @input="clearError"
+                        placeholder="Enter code"
+                    />
                     <div v-if="errorMessage" class="text-err-code">
                         {{ errorMessage }}
                     </div>
@@ -796,30 +870,62 @@ export default {
         </div>
 
         <MissionList :visible="showMission" :idUser="idUser" />
-        <EventList :visible="showEvent" :idUser="idUser" :dataQPoint="dataQPoint"
-            @openCoomSoon="showPopupCoomingSoon" />
+        <EventList
+            :visible="showEvent"
+            :idUser="idUser"
+            :dataQPoint="dataQPoint"
+            @openCoomSoon="showPopupCoomingSoon"
+        />
 
-        <InviteFrens :visible="showInvite" :idUser="idUser" :rewardAmount="dataQPoint.rewardAmount"
-            :telegram_bot_link="telegram_bot_link" />
-        <BoosterForm :visible="showBooster" :rewardScheduleHour="dataQPoint.rewardScheduleHour" :idUser="idUser" />
+        <InviteFrens
+            :visible="showInvite"
+            :idUser="idUser"
+            :rewardAmount="dataQPoint.rewardAmount"
+            :telegram_bot_link="telegram_bot_link"
+        />
+        <BoosterForm
+            :visible="showBooster"
+            :rewardScheduleHour="dataQPoint.rewardScheduleHour"
+            :idUser="idUser"
+        />
 
         <CheckinForm :isCheckin="isCheckin" @closeCheckin="closeCheckin" />
 
-        <PopupComingSoon :visible="showCoomingSoon" message="Coming soon!" @close="showCoomingSoon = false" />
+        <PopupComingSoon
+            :visible="showCoomingSoon"
+            message="Coming soon!"
+            @close="showCoomingSoon = false"
+        />
 
         <div class="enter-code-success" v-if="isSuccess">
             <span>Success!</span>
         </div>
 
-        <NotificationToast v-if="notification.show" :message="notification.message" :type="notification.type"
-            @close="notification.show = false" />
+        <NotificationToast
+            v-if="notification.show"
+            :message="notification.message"
+            :type="notification.type"
+            @close="notification.show = false"
+        />
 
-        <PopupPassword :visible="storePermission" @cancel="cancelPopupPassword" />
+        <PopupPassword
+            :visible="storePermission"
+            @cancel="cancelPopupPassword"
+        />
 
-        <PopupComponent :visible="openGiftCode" title="Gift Code" @yes="handleYesGiftCode()" @no="handleNoGiftCode()">
+        <PopupComponent
+            :visible="openGiftCode"
+            title="Gift Code"
+            @yes="handleYesGiftCode()"
+            @no="handleNoGiftCode()"
+        >
             <template #content>
-                <div class="p-3">
-                    <InputField v-model="giftCode" label="" placeholder="Enter the code" />
+                <div class="px-[10px]">
+                    <InputField
+                        v-model="giftCode"
+                        label=""
+                        placeholder="Enter the code"
+                    />
                 </div>
             </template>
         </PopupComponent>

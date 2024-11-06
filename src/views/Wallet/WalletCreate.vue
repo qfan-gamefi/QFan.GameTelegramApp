@@ -55,7 +55,29 @@
                     {{ errorMessage }}
                 </div>
 
-                <div class="wr-btn">
+                <div class="wr-btn flex flex-col gap-2">
+                    <div class="flex text-[12px] justify-center">
+                    <div>If you don’t have a &nbsp;</div>
+                    <div class="cursor-pointe">
+                        <a
+                        href="https://pelaguswallet.io/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="underline"
+                    >
+                         Pelagus Wallet,
+                    </a>
+                    <a
+                        href="https://chromewebstore.google.com/detail/pelagus/nhccebmfjcbhghphpclcfdkkekheegop"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="underline"
+                    >
+                        create one here.
+                    </a>
+                    </div>
+                    
+                </div>
                     <button @click="createWallet()" style="color: #000">
                         Import
                     </button>
@@ -72,9 +94,11 @@ import { SignerImportSource, SignerSourceTypes } from "@/crypto_utils/type";
 import { secureStorage, storage } from "@/storage/storage";
 import userService from "@/services/userService";
 import { CURRENT_WALLET_VERSION } from "@/crypto_utils/constants";
+import BackButtonTelegram from "@/mixins/BackButtonTelegram";
 
 export default defineComponent({
     name: "WalletCreate",
+    mixins: [BackButtonTelegram],
     data() {
         const userInfo = window.Telegram.WebApp.initDataUnsafe;
         let first_name = userInfo?.user?.first_name || "";
@@ -294,7 +318,7 @@ export default defineComponent({
 }
 
 .wr-btn {
-    margin-top: 20px;
+    margin: 20px 0;
     font-weight: 800;
 
     button {

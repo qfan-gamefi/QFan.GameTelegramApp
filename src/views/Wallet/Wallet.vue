@@ -68,6 +68,8 @@
                             v-bind:disabled="executing"
                         >
                             <i class="fa-solid fa-faucet"></i> Faucet
+                            <div v-if="isFaucet"><i class="fa fa-spinner loading"></i></div>
+                            
                         </button>
                     </div>
 
@@ -339,9 +341,11 @@ import { type WalletInfo } from "@/crypto_utils/type";
 import type { QuaiTransactionRequest } from "quais/lib/esm/providers";
 import { formatEther, parseEther, toBigInt } from "ethers";
 import { CURRENT_WALLET_VERSION } from "@/crypto_utils/constants";
+import BackButtonTelegram from "@/mixins/BackButtonTelegram";
 
 export default defineComponent({
     name: "WalletDetail",
+    mixins: [BackButtonTelegram],
     components: {
         NotificationToast,
         LoadingForm,
@@ -374,6 +378,7 @@ export default defineComponent({
             filterStatus: "",
             transactionUrl: "",
             openReceive: false,
+            isFaucet: false,
         };
     },
     methods: {
@@ -407,12 +412,12 @@ export default defineComponent({
             this.activities = (await fetchActivity(
                 this.activeWallet?.address as string
             )) as never[];
-            console.log("activites", this.activities);
 
             this.executing = false;
         },
         async faucet() {
             try {
+                this.isFaucet = true;
                 this.executing = true;
                 this.errorMessage = "";
                 this.transactionUrl = "";
@@ -420,13 +425,13 @@ export default defineComponent({
                     this.playerId,
                     this.activeWallet?.address as string
                 );
-                // console.log("faucetResult", faucetResult);
                 if (
                     faucetResult.statusCode &&
                     faucetResult.statusCode !== 200
                 ) {
                     this.errorMessage = "Faucet error: " + faucetResult.message;
                     this.executing = false;
+                    this.isFaucet = false;
                     return;
                 }
                 if (faucetResult?.hash) {
@@ -434,11 +439,13 @@ export default defineComponent({
                         faucetResult?.hash
                     );
                 }
+                this.isFaucet = false;
                 this.executing = false;
             } catch (error) {
-                console.log("error", error);
+                // console.log("error", error);
                 this.errorMessage = "Faucet error: " + error?.message;
                 this.executing = false;
+                this.isFaucet = false;
             }
         },
         async linkToExplore(e: Event) {

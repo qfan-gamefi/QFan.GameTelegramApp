@@ -211,6 +211,23 @@ const userService = {
         );
         return res;
     },
+    async postWithdraw(
+        playerId: string,
+        address: string,
+        amount: number
+    ) {
+        const data = {
+            playerId,
+            address: address,
+            amount: amount,
+            unit: "QUAI"
+        };
+        const res = await networkAxiosInstance.post(
+            `/wallet/withdraw-onchain`,
+            data
+        );
+        return res;
+    },
     async getLevels() {
         const res = await axiosInstance.get(
             `/player-levels?pagination[pageSize]=9999`
@@ -268,7 +285,6 @@ const userService = {
         const res = await networkAxiosInstance.get(
             `/wallet/find-transaction-by-player/${idUser}`
         );
-        console.log(res)
         return res;
     }
 };

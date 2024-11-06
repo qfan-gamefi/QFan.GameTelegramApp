@@ -9,21 +9,36 @@
 
             <div class="title">{{ labelType }} QUAI</div>
 
-            <div @click="handleCloseDeposit()" class="close-view-cart">
-                <i class="fa-solid fa-rectangle-xmark"></i>
+            <div @click="handleClose()" class="absolute top-2 right-2">
+                <i
+                    class="fa-solid fa-rectangle-xmark"
+                    style="color: #ff0000"
+                ></i>
             </div>
         </div>
 
         <div class="wp-deposit">
             <div class="desc" v-if="!isConfirm">
-                <InputField v-model="amount" label="Amount" placeholder="Enter Amount" type="number" />
+                <InputField
+                    v-model="amount"
+                    label="Amount"
+                    placeholder="Enter Amount"
+                    type="number"
+                    :positiveIntegerOnly="labelType === 'WITHDRAW'"
+                />
+
                 <span v-if="amountError" class="error-message">{{
                     messAmountError
-                    }}</span>
-                <InputField v-model="password" label="Password" placeholder="Enter Password" type="password" />
+                }}</span>
+                <InputField
+                    v-model="password"
+                    label="Password"
+                    placeholder="Enter Password"
+                    type="password"
+                />
                 <span v-if="passwordError" class="error-message">{{
                     messPassError
-                    }}</span>
+                }}</span>
             </div>
             <div class="desc" v-else>
                 <div class="text-center">
@@ -34,11 +49,24 @@
         </div>
 
         <div class="btn-deposit">
-            <div class="text-center" @click="isConfirm ? submitDeposit() : handleConfirm()">
+            <a
+                class="text-center"
+                v-bind:class="labelType.toLowerCase()"
+                v-bind:disabled="isLoading"
+                @click="isConfirm ? submit() : handleConfirm()"
+            >
                 {{ labelType }}
-            </div>
+                <span v-if="isLoading"><i class="fa fa-spinner"></i></span>
+            </a>
         </div>
     </div>
+
+    <NotificationToast
+        v-if="showNotification"
+        :message="notificationMessage"
+        :type="notificationType"
+        @close="showNotification = false"
+    />
 </template>
 
 <script lang="ts">
@@ -48,13 +76,19 @@ import HDKeyring from "@/crypto_utils/HDKeyring";
 import userService from "@/services/userService";
 import { secureStorage } from "@/storage/storage";
 import type { IInfoWallet } from "@/views/Shop/defination";
-import { QuaiTransactionRequest, QuaiTransactionResponse } from "quais/lib/commonjs/providers";
+import {
+    QuaiTransactionRequest,
+    QuaiTransactionResponse,
+} from "quais/lib/commonjs/providers";
 import { defineComponent, type PropType } from "vue";
+import NotificationToast from "@/components/NotificationToast.vue";
+import { parseEther } from "ethers";
 
 export default defineComponent({
     name: "DepositInShop",
     components: {
         InputField,
+        NotificationToast,
     },
     props: {
         isDeposit: {
@@ -71,9 +105,7 @@ export default defineComponent({
             validator: (value) => ["DEPOSIT", "WITHDRAW"].includes(value),
         },
     },
-    mounted() {
-
-    },
+    mounted() {},
     watch: {
         isDeposit(newVal) {
             if (!newVal) {
@@ -83,20 +115,34 @@ export default defineComponent({
     },
     data() {
         return {
-            amount: 0,
+            amount: null,
             password: "",
-
             amountError: false,
             messAmountError: "",
             passwordError: false,
             messPassError: "",
             isConfirm: false,
             addressWallet: "",
+            isLoading: false,
+            showNotification: false,
+            notificationMessage: "",
+            notificationType: "",
         };
     },
     methods: {
+        async renderNotification(message, type) {
+            this.notificationMessage = message;
+            this.notificationType = type;
+            this.showNotification = true;
+        },
+        async renderSuccess(text) {
+            this.renderNotification(text, "success");
+        },
+        async renderErr(text) {
+            this.renderNotification(text, "error");
+        },
         resetFields() {
-            this.amount = 0;
+            this.amount = null;
             this.password = "";
             this.amountError = false;
             this.messAmountError = "";
@@ -127,56 +173,114 @@ export default defineComponent({
                 this.isConfirm = true;
                 this.addressWallet = `${this.infoWallet?.address?.slice(
                     0,
-                    8
-                )}.......${this.infoWallet?.address?.slice(-8)}`;
+                    6
+                )}.......${this.infoWallet?.address?.slice(-6)}`;
             }
         },
         handleConfirm() {
             this.validateAmount();
             this.validatePassword();
         },
+        async submit() {
+            if (this.labelType === "DEPOSIT") {
+                await this.submitDeposit();
+            } else {
+                await this.submitWithdraw();
+            }
+        },
         async submitDeposit() {
-            console.log("infoWallet", this.infoWallet);
-
             const id = this.infoWallet?.playerId;
             const address = this.infoWallet?.address;
             const amount = this.amount;
             const keyringService = new HDKeyring();
             await keyringService.unlock();
-            if (!this.amountError && !this.passwordError) {
-                try {
-                    const activeWallet = keyringService.getActiveWallet();
-                    if (!activeWallet || !activeWallet.address) {
-                        this.$router.push({ name: "WalletCreate" });
-                        return;
-                    }
-                    const request: QuaiTransactionRequest = {
-                        from: activeWallet.address,
-                        to: MARKET_WALLET_ADDRESS,
-                        value: Number(amount),
-                    };
+            this.isLoading = true;
 
-                    const tx = (await keyringService.sendTokenTransaction(
-                        request
-                    )) as QuaiTransactionResponse;
-
-                    const res = await userService.postDeposit(
-                        Number.parseInt(id),
-                        address,
-                        Number(amount),
-                        tx.hash
-                    );
-                    console.log("Deposit Result: ", res);
-
-                    if (res?.status === 201 || res?.status === 200) {
-                        this.$emit("close");
-                    }
-                } catch (error) {
-                    console.log(error);
+            try {
+                const activeWallet = keyringService.getActiveWallet();
+                if (!activeWallet || !activeWallet.address) {
+                    this.$router.push({ name: "WalletCreate" });
+                    return;
                 }
+
+                const balance = await keyringService.getBalance(address);
+
+                if (balance < Number(amount)) {
+                    this.renderErr("Insufficient balance");
+                    this.isLoading = false;
+                    return;
+                }
+
+                const request: QuaiTransactionRequest = {
+                    from: activeWallet.address,
+                    to: MARKET_WALLET_ADDRESS,
+                    value: parseEther(amount),
+                };
+
+                const tx = (await keyringService.signAndSendQuaiTransaction(
+                    request
+                )) as QuaiTransactionResponse;
+
+                const res = await userService.postDeposit(
+                    Number.parseInt(id),
+                    address,
+                    Number(amount),
+                    tx.hash
+                );
+
+                if (res?.status === 201 || res?.status === 200) {
+                    this.handleClose();
+                    this.renderSuccess(
+                        `${this.labelType} successfully! Please wait to confirm.`
+                    );
+                } else {
+                    this.renderErr(
+                        `${this.labelType} error. ${res.data?.message}`
+                    );
+                }
+            } catch (error) {
+                console.log(error);
+                this.renderErr(error?.message);
+            } finally {
+                this.isLoading = false;
             }
         },
-        handleCloseDeposit() {
+        async submitWithdraw() {
+            this.isLoading = true;
+            //check balance of wallet
+            const balance = this.infoWallet?.balance;
+            if (balance < this.amount) {
+                this.isLoading = false;
+                this.renderErr("Insufficient balance");
+                return;
+            }
+
+            const playerId = this.infoWallet?.playerId;
+            const address = this.infoWallet?.address;
+            try {
+                const res = await userService.postWithdraw(
+                    playerId,
+                    address,
+                    Number(this.amount)
+                );
+                if (res?.status === 201 || res?.status === 200) {
+                    this.handleClose();
+                    this.renderSuccess(
+                        `${this.labelType} successfully! Please wait to confirm.`
+                    );
+                } else {
+                    this.renderErr(
+                        `${this.labelType} error. ${res.data?.message}`
+                    );
+                }
+            } catch (error) {
+                console.log(error);
+                this.renderErr(error?.response?.data?.message);
+            } finally {
+                this.isLoading = false;
+            }
+        },
+        handleClose() {
             this.isConfirm = false;
             this.$emit("close");
         },
@@ -218,38 +322,6 @@ $t-white-color: rgb(255, 255, 255);
     padding: 0 20px;
 }
 
-// .popup-enter-active {
-//     animation: slideUp 0.1s ease forwards;
-// }
-
-// .popup-leave-active {
-//     animation: slideDown 0.1s ease forwards;
-// }
-
-// @keyframes slideUp {
-//     0% {
-//         opacity: 0;
-//         transform: translateY(100%) scale(0.5);
-//     }
-
-//     100% {
-//         opacity: 1;
-//         transform: translateY(0) scale(1);
-//     }
-// }
-
-// @keyframes slideDown {
-//     0% {
-//         opacity: 1;
-//         transform: translateY(0) scale(1);
-//     }
-
-//     100% {
-//         opacity: 0;
-//         transform: translateY(100%) scale(0.5);
-//     }
-// }
-
 .header {
     display: flex;
     justify-content: space-between;
@@ -260,7 +332,7 @@ $t-white-color: rgb(255, 255, 255);
     background-repeat: no-repeat;
     border-top-right-radius: 10px;
     border-top-left-radius: 10px;
-
+    position: relative;
     .title {
         margin: 0 auto;
         font-weight: 800;
@@ -299,7 +371,27 @@ $t-white-color: rgb(255, 255, 255);
         -webkit-text-stroke: 0.5px rgb(0 0 0);
         border-radius: 5px;
     }
-}
 
-.address-text {}
+    a {
+        display: block;
+        padding: 10px;
+        border-radius: 5px;
+        font-weight: 800;
+        color: #fff;
+        cursor: pointer;
+        transition: 0.3s;
+
+        &:hover {
+            opacity: 0.8;
+        }
+
+        &.withdraw {
+            background: #f6465d;
+        }
+
+        &.deposit {
+            background: #2ebd85;
+        }
+    }
+}
 </style>

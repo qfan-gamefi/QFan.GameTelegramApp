@@ -82,7 +82,6 @@
                     <button
                         class="btn-auto-flip"
                         @click="handleAutoFlip()"
-                        :class="{ isOn: autoFlipValue }"
                         :disabled="loadingSubmit"
                     >
                         Auto Flip
@@ -98,7 +97,7 @@
                         <img src="@public/assets/logo.svg" />
                     </div>
 
-                    <div class="re-load" @click="history">
+                    <div class="re-load" @click="handleHistory()">
                         <i class="fa-solid fa-rotate"></i>
                     </div>
                 </div>
@@ -193,13 +192,13 @@
         </div>
     </div>
 
-    <PopupConfirm
+    <!-- <PopupConfirm
         v-if="isToken"
         :text="`Click yes to invoke your security token?`"
         :visible="isToken"
         @yes="handleYesToken"
         @no="handleNoToken"
-    />
+    /> -->
 
     <PopupPassword :visible="isPass" @cancel="isPass = false" />
 
@@ -214,16 +213,18 @@
         <template #content>
             <div class="p-[10px] flex flex-col gap-3">
                 <div>
-                    <div class="text-[14px] mb-1">
-                        Auto by number of times or unlimited
-                    </div>
-                    <div class="flex justify-center">
+                    <div class="text-[14px] mb-1">Number of Auto-Flips</div>
+                    <div class="flex gap-2">
                         <div
-                            class="btn-count"
+                            class="box-input w-[75px]"
                             :class="{ active: isCount }"
-                            @click="btnCount()"
+                            @click="(isCount = true), (countAuto = 1)"
                         >
-                            Number
+                            <InputNumber
+                                v-model="countAuto"
+                                label=""
+                                placeholder="Enter number"
+                            />
                         </div>
                         <div
                             class="btn-count"
@@ -233,14 +234,6 @@
                             Unlimited
                         </div>
                     </div>
-                </div>
-
-                <div class="box-input" :class="{ active: !isCount }">
-                    <InputNumber
-                        v-model="countAuto"
-                        label=""
-                        placeholder="Enter number"
-                    />
                 </div>
             </div>
         </template>
@@ -262,9 +255,11 @@ import PopupComponent from "@/components/popup/PopupComponent.vue";
 import InputNumber from "@/components/Input/InputNumber.vue";
 import { computed, ref, watch } from "vue";
 import { mapState, useStore } from "vuex";
+import BackButtonTelegram from "@/mixins/BackButtonTelegram";
 
 export default defineComponent({
     name: "FlipPage",
+    mixins: [BackButtonTelegram],
     components: {
         NotificationToast,
         LoadingForm,
@@ -275,19 +270,11 @@ export default defineComponent({
     },
     props: {},
     computed: {
-        ...mapState(["autoFlipStore"]),
+        ...mapState(["autoFlipStore", "avtStore", "rewardInfo"]),
     },
-    async created() {
-        await Promise.all([
-            this.getInfo(),
-            this.getAvt(),
-            this.history(),
-            this.getRate(),
-        ]);
-        this.autoFlipValue = this.autoFlipStore;
-    },
+    async created() {},
     watch: {
-        autoFlipStore(newValue) {
+        autoFlipStore(newValue) {            
             this.autoFlipValue = newValue;
             if (!newValue) {
                 this.getInfo();
@@ -296,8 +283,24 @@ export default defineComponent({
             }
         },
     },
-    mounted() {
+    async mounted() {
         this.updateHeight();
+
+        if (!this.avtStore) {
+            await this.getAvt();
+        } else {
+            this.urlImg = this.avtStore;
+        }
+
+        if (!this.rewardInfo) {
+            await this.getInfo();
+        } else {
+            this.balance = Number(
+                this?.rewardInfo?.attributes?.qpoint?.data?.attributes?.balance
+            );
+        }
+        await Promise.all([this.history(), this.getRate()]);
+        this.autoFlipValue = this.autoFlipStore;
     },
 
     data() {
@@ -328,7 +331,7 @@ export default defineComponent({
             text: "",
             descWinner: "",
 
-            isToken: false,
+            // isToken: false,
             winRate: 0,
             lights: [],
             balance: 0,
@@ -360,17 +363,17 @@ export default defineComponent({
                 return this.urlImgWinner || "./../../../public/assets/logo.jpg";
             }
         },
-        handleYesToken() {
-            this.isToken = false;
-            window.Telegram.WebApp.openTelegramLink(
-                "https://t.me/QFanClubBot?start=invoketoken"
-            );
-            window.Telegram.WebApp.close();
-        },
-        handleNoToken() {
-            this.loadingSubmit = false;
-            this.isToken = false;
-        },
+        // handleYesToken() {
+        //     this.isToken = false;
+        //     window.Telegram.WebApp.openTelegramLink(
+        //         "https://t.me/QFanClubBot?start=invoketoken"
+        //     );
+        //     window.Telegram.WebApp.close();
+        // },
+        // handleNoToken() {
+        //     this.loadingSubmit = false;
+        //     this.isToken = false;
+        // },
         showPopup() {
             this.isPopup = true;
         },
@@ -386,9 +389,6 @@ export default defineComponent({
             this.notificationMessage = message;
             this.notificationType = type;
             this.showNotification = true;
-            // setTimeout(() => {
-            //     this.showNotification = false;
-            // }, 2000);
         },
         async renderSuccess(text) {
             this.renderNotification(text, "success");
@@ -458,6 +458,7 @@ export default defineComponent({
             const response = await userServiceTelebot.getAvtTelegram(
                 this.userId
             );
+            this.$store.commit("setAvtStore", response);
             this.urlImg = response || "./../../../public/assets/no-img.jpg";
         },
         async getAvtOpponent(idOpponent: number) {
@@ -523,8 +524,6 @@ export default defineComponent({
 
         async history() {
             this.loading = true;
-            this.getRate();
-            this.getInfo();
             try {
                 const res = await predictService.getHistoryFlip(this.userId);
                 this.loading = false;
@@ -557,11 +556,15 @@ export default defineComponent({
             }
         },
         handleAutoFlip() {
-            const passVerify = localStorage.getItem("passVerify");
-            if (!passVerify) {
-                this.isPass = true;
+            if (this.autoFlipValue === true) {
+                this.$store.commit("setAutoFlip", false);
             } else {
-                this.openAuto = true;
+                const passVerify = localStorage.getItem("passVerify");
+                if (!passVerify) {
+                    this.isPass = true;
+                } else {
+                    this.openAuto = true;
+                }
             }
         },
         async yesAutoFlip() {
@@ -581,14 +584,15 @@ export default defineComponent({
             this.countAuto = 1;
             this.isCount = true;
         },
-        btnCount() {
-            this.isCount = true;
-            this.countAuto = 1;
-        },
         btnUnlimited() {
             this.isCount = false;
             this.countAuto = 0;
         },
+        async handleHistory() {
+            this.getInfo()
+            this.getRate()
+            this.history()
+        }
     },
 });
 </script>
@@ -759,7 +763,7 @@ export default defineComponent({
 
 .btn-submit:disabled,
 .btn-auto-flip:disabled,
-.box-input.active,
+// .box-input.active,
 .isOn {
     opacity: 0.6;
     cursor: not-allowed;
@@ -769,11 +773,7 @@ export default defineComponent({
 .btn-auto-flip {
     padding: 10px 0 10px 10px;
 }
-// .isOn {
-//     opacity: 0.6;
-//     cursor: not-allowed;
-//     pointer-events: none;
-// }
+
 .btn-on,
 .btn-off {
     display: flex;
@@ -949,15 +949,18 @@ export default defineComponent({
     padding: 5px 10px;
     background: #412e17;
     font-weight: 800;
+    opacity: 0.6;
+    border-radius: 5px;
 }
 
+.box-input {
+    opacity: 0.6;
+}
+.box-input.active {
+    opacity: 1;
+}
 .btn-count.active {
     background: #ffa53a;
+    opacity: 1;
 }
-
-// .box-input.active {
-//     opacity: 0.6;
-//     cursor: not-allowed;
-//     pointer-events: none;
-// }
 </style>

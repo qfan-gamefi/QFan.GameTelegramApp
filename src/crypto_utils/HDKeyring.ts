@@ -38,7 +38,7 @@ import type { SerializedHDWallet } from "node_modules/quais/lib/esm/wallet/hdwal
 import { secureStorage, storage } from "@/storage/storage";
 import { activeProvider } from "./networks";
 import { ERC20_INTERFACE } from "./erc20";
-import { parseEther } from "ethers";
+import { formatEther, parseEther } from "ethers";
 import type { TransactionReceipt } from "@ethersproject/providers";
 import { CONTRACT_ADDRESS, CONTRACT_OWNER_ADDRESS } from "./constants";
 import { QuaiTransactionRequest, QuaiTransactionResponse } from "quais/lib/commonjs/providers";
@@ -420,6 +420,14 @@ export default class HDKeyring {
 
     async getAddresses(): Promise<string[]> {
         return this.getAddressesSync();
+    }
+
+    async getBalance(address: string): Promise<number> {
+        const jsonRpcProvider = activeProvider();
+        const balance = await jsonRpcProvider.getBalance(address);
+        const formatedBalance = formatEther(balance);
+        const result = parseFloat(formatedBalance);
+        return result;
     }
 
     public async interactContractAndSendFee(transactionRequest: QuaiTransactionRequest) {

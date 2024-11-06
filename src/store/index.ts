@@ -1,3 +1,4 @@
+import { ILevel } from "@/interface";
 import type { IPlayer } from "@/interface/rewardInfo";
 import { createStore } from "vuex";
 
@@ -11,6 +12,9 @@ interface State {
     autoMessTextStore: string;
     autoFlipStore: boolean;
     countFlip: number;
+    routerFusion: boolean
+    avtStore: string | null
+    dataLvStore: ILevel[]
 }
 
 const store = createStore<State>({
@@ -25,6 +29,9 @@ const store = createStore<State>({
             autoMessTextStore: "",
             autoFlipStore: false,
             countFlip: 0,
+            routerFusion: false,
+            avtStore: null,
+            dataLvStore: []
         };
     },
     mutations: {
@@ -50,13 +57,25 @@ const store = createStore<State>({
             state.autoMiningStore = payload;
         },
         setAutoMessStore(state: State, payload: boolean) {
-            state.autoMessStore = false;
-            setTimeout(() => {
-                state.autoMessStore = payload;
-            }, 0);
+            // console.log('payload', payload)
+            // state.autoMessStore = !payload;
+            state.autoMessStore = payload;
+            // state.autoMessStore = false;
+            // setTimeout(() => {
+            //     state.autoMessStore = payload;
+            // }, 0);
         },
         setAutoMessTextStore(state: State, payload: string) {
             state.autoMessTextStore = payload;
+        },
+        setRouterFusion(state: State, payload: boolean) {
+            state.routerFusion = payload;
+        },
+        setAvtStore(state: State, payload: string) {
+            state.avtStore = payload;
+        },
+        setDataLvStore(state: State, payload: ILevel[]) {
+            state.dataLvStore = payload;
         },
     },
     actions: {

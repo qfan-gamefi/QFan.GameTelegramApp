@@ -260,6 +260,10 @@ export default defineComponent({
             type: String as () => "inventory" | "",
             required: false,
         },
+        dataInventory: {
+            type: Array as PropType<IItemInventory[]>,
+            required: false,
+        }
     },
     watch: {
         isViewCart(newValue) {
@@ -270,7 +274,11 @@ export default defineComponent({
         },
     },
     created() {
-        this.getInventory();
+        if(!this.currentPage){
+            this.getInventory();
+        }else{
+            this.itemsInventory = this.dataInventory;
+        }
         this.getFee();
     },
     mounted() {

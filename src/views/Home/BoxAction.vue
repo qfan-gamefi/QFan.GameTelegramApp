@@ -5,7 +5,6 @@
                 <img
                     loading="lazy"
                     src="./../../../public/assets/inventory/fusion_icon.png"
-                    @click="handleBackButton"
                     class="img-fusion"
                 />
             </router-link>
@@ -16,7 +15,6 @@
                     loading="lazy"
                     class="img-market"
                     src="./../../../public/assets/shop/marketplace.png"
-                    @click="handleBackButton"
                 />
                 <div class="shine shine-1"></div>
                 <div class="shine shine-4"></div>
@@ -27,7 +25,6 @@
                 loading="lazy"
                 class="img-inventory"
                 src="./../../../public/assets/inventory/inventory.png"
-                @click="handleBackButton"
             />
         </router-link>
         <router-link to="/flip">
@@ -35,7 +32,6 @@
                 loading="lazy"
                 class="img-flip"
                 src="./../../../public/assets/event/FlipCoin.gif"
-                @click="handleBackButton"
             />
             <div class="icon-auto-flip" v-if="autoFlipValue">
                 <img
@@ -80,16 +76,9 @@ export default {
         this.autoFlipValue = this.autoFlipStore;
     },
     methods: {
-        handleBackButton() {
-            // Telegram.WebApp.BackButton.show();
-
-            // Telegram.WebApp.BackButton.onClick(() => {
-            //     this.$router.push("/");
-            //     this.getInfoUser();
-            //     Telegram.WebApp.BackButton.hide();
-            // });
-            this.$emit("back-clicked");
-        },
+        // handleBackButton() {
+        //     this.$emit("back-clicked");
+        // },
         setRouterFusion(){
             this.$store.commit("setRouterFusion", true);
         }

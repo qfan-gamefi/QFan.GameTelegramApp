@@ -94,9 +94,11 @@ import { SignerImportSource, SignerSourceTypes } from "@/crypto_utils/type";
 import { secureStorage, storage } from "@/storage/storage";
 import userService from "@/services/userService";
 import { CURRENT_WALLET_VERSION } from "@/crypto_utils/constants";
+import BackButtonTelegram from "@/mixins/BackButtonTelegram";
 
 export default defineComponent({
     name: "WalletCreate",
+    mixins: [BackButtonTelegram],
     data() {
         const userInfo = window.Telegram.WebApp.initDataUnsafe;
         let first_name = userInfo?.user?.first_name || "";
@@ -316,7 +318,7 @@ export default defineComponent({
 }
 
 .wr-btn {
-    margin-top: 20px;
+    margin: 20px 0;
     font-weight: 800;
 
     button {

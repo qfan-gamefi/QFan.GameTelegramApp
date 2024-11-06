@@ -240,6 +240,7 @@ import PopupPassword from "@/components/popup/PopupPassword.vue";
 import { mapState } from "vuex";
 import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
 import userService from "@/services/userService";
+import BackButtonTelegram from "@/mixins/BackButtonTelegram";
 
 enum ButtonName {
     Inventory = "Inventory",
@@ -254,6 +255,7 @@ interface Button {
 
 export default defineComponent({
     name: "InventoryPage",
+    mixins: [BackButtonTelegram],
     components: {
         NotificationToast,
         PopupConfirm,

@@ -255,9 +255,11 @@ import PopupComponent from "@/components/popup/PopupComponent.vue";
 import InputNumber from "@/components/Input/InputNumber.vue";
 import { computed, ref, watch } from "vue";
 import { mapState, useStore } from "vuex";
+import BackButtonTelegram from "@/mixins/BackButtonTelegram";
 
 export default defineComponent({
     name: "FlipPage",
+    mixins: [BackButtonTelegram],
     components: {
         NotificationToast,
         LoadingForm,

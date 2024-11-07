@@ -40,6 +40,7 @@ import type {
 import {
     CONTRACT_OWNER_ADDRESS,
     CURRENT_WALLET_VERSION,
+    CURRENT_WALLET_VERSION,
 } from "@/crypto_utils/constants";
 import { DEFAULT_QUAI_TESNTET } from "@/services/network/chains";
 import { getAddress, parseEther, toBigInt } from "ethers";
@@ -85,6 +86,15 @@ export default {
         //         dataUserTele.start_param?.replace("TOKEN_", "")
         //     );
         // }
+        // if (
+        //     dataUserTele?.start_param &&
+        //     dataUserTele?.start_param?.startsWith("TOKEN_")
+        // ) {
+        //     secureStorage.set(
+        //         "SECURITY_TOKEN",
+        //         dataUserTele.start_param?.replace("TOKEN_", "")
+        //     );
+        // }
 
         return {
             isLoadingCreen: true,
@@ -92,6 +102,7 @@ export default {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
+            idUser: dataUserTele?.user?.id?.toString() ?? "",
             idUser: dataUserTele?.user?.id?.toString() ?? "",
             telegram_bot_link: telegram_bot_link + dataUserTele?.user?.id || "",
 
@@ -171,14 +182,16 @@ export default {
             }
         },
         autoMessTextStore(newVal, oldVal) {
+        autoMessTextStore(newVal, oldVal) {
             this.widthWining = 0;
             if (this.autoMessStore) {
                 this.renderSuccess(
-                    `Mining send success. Please wait to confirm to take 30 QFP.`
+                    `Mining success, block reward is being calculated.`
                 );
                 this.calcWidthMining();
                 this.getInfoUser();
             } else {
+                this.renderErr(newVal);
                 this.renderErr(newVal);
             }
         },
@@ -445,6 +458,7 @@ export default {
             Telegram.WebApp.BackButton.show();
 
             const handleClick = () => {
+            const handleClick = () => {
                 this.$router.push("/");
                 this.showMission = false;
                 this.showEvent = false;
@@ -453,8 +467,10 @@ export default {
                 this.activeButton = "";
                 this.getInfoUser();
 
+                this.getInfoUser();
+
                 Telegram.WebApp.BackButton.hide();
-                Telegram.WebApp.BackButton.offClick(handleClick); 
+                Telegram.WebApp.BackButton.offClick(handleClick);
             };
 
             Telegram.WebApp.BackButton.onClick(handleClick);
@@ -570,6 +586,12 @@ export default {
                 localStorage.removeItem("address");
                 this.$router.push({ name: "WalletCreate" });
             }
+            const walletType = localStorage.getItem("walletType");
+            if (walletType !== CURRENT_WALLET_VERSION) {
+                localStorage.removeItem("tallyVaults");
+                localStorage.removeItem("address");
+                this.$router.push({ name: "WalletCreate" });
+            }
             this.$store.commit("setAutoMining", true);
         },
         calcWidthMining() {
@@ -618,9 +640,14 @@ export default {
         handleTutorial() {
             window.open("https://t.me/QFanClubAnnouncement/103", "_blank");
         },
+        handleTutorial() {
+            window.open("https://t.me/QFanClubAnnouncement/103", "_blank");
+        },
     },
     async mounted() {
         Telegram.WebApp.ready();
+        Telegram.WebApp.BackButton.hide();
+        this.$store.commit("setRouterFusion", false);
         Telegram.WebApp.BackButton.hide();
         this.$store.commit("setRouterFusion", false);
         await this.getInfoUser();
@@ -655,57 +682,43 @@ export default {
         <div class="container-game">
             <InfoUser v-if="dataLogin" :dataLogin="dataLogin" />
 
-            <div class="container-wl">
-                <button @click="handleWallet">
-                    <i class="fa-solid fa-wallet"></i>
-                    Wallet
-                </button>
-            </div>
-            <div class="link-checkin">
-                <input
-                    type="checkbox"
-                    id="openmenu"
-                    class="hamburger-checkbox"
-                />
+            <div class="container-menu">
+                <input type="checkbox" id="openmenu" class="hamburger-checkbox" />
 
                 <label class="hamburger-icon cursor-pointer" for="openmenu">
-                    <label for="openmenu" id="hamburger-label">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </label>
-                    <div class="title-menu">MENU</div>
-                </label>
+                    <div class="btn-wl-icon">
+                        <button class="btn-menu wallet" @click="handleWallet">
+                            <i class="fa-solid fa-wallet"></i>
+                            Wallet
+                        </button>
+                    </div>
 
-                <div class="menu-pane">
-                    <nav>
-                        <ul class="menu-links">
-                            <button
-                                @click="onCheckIn()"
-                                v-bind:disabled="isExecCheckin"
-                            >
-                                <i class="fa-solid fa-calendar-days"></i>
-                                {{ titleCheckin }}
-                                <span v-if="isExecCheckin"
-                                    ><i class="fa fa-spinner"></i
-                                ></span>
-                            </button>
-                            <div>
-                                <button @click="handleGiftCode()">
-                                    <i class="fa-solid fa-gift"></i>
-                                    Gift code
-                                </button>
-                            </div>
-                            <div>
-                                <button @click="handleTutorial()">
-                                    <i class="fa-solid fa-book"></i>
-                                    Tutorials
-                                </button>
-                            </div>
-                        </ul>
-                    </nav>
-                </div>
+                    <div class="open-menu btn-menu" for="openmenu">
+                        <i class="fa-solid fa-bars"></i>
+                        Menu
+                    </div>
+
+                    <div class="close-menu" for="openmenu">
+                        <button class="btn-menu" @click="onCheckIn()" v-bind:disabled="isExecCheckin">
+                            <i class="fa-solid fa-calendar-days"></i>
+                            {{ titleCheckin }}
+                            <span v-if="isExecCheckin"><i class="fa fa-spinner"></i></span>
+                        </button>
+                        <button @click="handleGiftCode()" class="btn-menu">
+                            <i class="fa-solid fa-gift"></i>
+                            Gift code
+                        </button>
+                        <button @click="handleTutorial()" class="btn-menu">
+                            <i class="fa-solid fa-book"></i>
+                            Tutorials
+                        </button>
+
+                        <div class="close-menu-icon btn-menu">
+                            <i class="fa-solid fa-x"></i>
+                            Close
+                        </div>
+                    </div>
+                </label>
             </div>
 
             <div class="contaner-balance">
@@ -784,6 +797,7 @@ export default {
                 </div>
             </div>
 
+            <BoxAction />
             <BoxAction />
             <MainGame ref="phaserRef" />
         </div>
@@ -921,11 +935,7 @@ export default {
         >
             <template #content>
                 <div class="px-[10px]">
-                    <InputField
-                        v-model="giftCode"
-                        label=""
-                        placeholder="Enter the code"
-                    />
+                    <InputField v-model="giftCode" label="" placeholder="Enter the code" />
                 </div>
             </template>
         </PopupComponent>

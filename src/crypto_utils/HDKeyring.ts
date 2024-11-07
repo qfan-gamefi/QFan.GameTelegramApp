@@ -513,15 +513,15 @@ export default class HDKeyring {
                     transactionRequest.value
                 );
 
-            transactionRequest.to = transactionDetails.to;
-            transactionRequest.data = transactionDetails.data;
+            // transactionRequest.to = transactionDetails.to;
+            // transactionRequest.data = transactionDetails.data;
 
             // console.log("transactionRequest", transactionRequest);
 
             try {
                 const walletResponse = await signerWithType.signer
                     .connect(jsonRpcProvider)
-                    .sendTransaction(transactionRequest);
+                    .sendTransaction(transactionDetails);
 
                 return walletResponse as QuaiTransactionResponse;
             } catch (error) {

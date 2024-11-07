@@ -174,7 +174,7 @@ export default {
             this.widthWining = 0;
             if (this.autoMessStore) {
                 this.renderSuccess(
-                    `Mining send success. Please wait to confirm to take 30 QFP.`
+                    `Mining success, block reward is being calculated.`
                 );
                 this.calcWidthMining();
                 this.getInfoUser();
@@ -367,10 +367,10 @@ export default {
         async updateSence() {
             const phaserRef: any = this.$refs.phaserRef as
                 | {
-                      scene?: {
-                          changeScene: () => void;
-                      };
-                  }
+                    scene?: {
+                        changeScene: () => void;
+                    };
+                }
                 | undefined;
             const scene = toRaw(phaserRef?.scene);
             const givenDateTimeString = this.dataQPoint.nextTakeRewardTime;
@@ -656,11 +656,7 @@ export default {
             <InfoUser v-if="dataLogin" :dataLogin="dataLogin" />
 
             <div class="container-menu">
-                <input
-                    type="checkbox"
-                    id="openmenu"
-                    class="hamburger-checkbox"
-                />
+                <input type="checkbox" id="openmenu" class="hamburger-checkbox" />
 
                 <label class="hamburger-icon cursor-pointer" for="openmenu">
                     <div class="btn-wl-icon">
@@ -676,16 +672,10 @@ export default {
                     </div>
 
                     <div class="close-menu" for="openmenu">
-                        <button
-                            class="btn-menu"
-                            @click="onCheckIn()"
-                            v-bind:disabled="isExecCheckin"
-                        >
+                        <button class="btn-menu" @click="onCheckIn()" v-bind:disabled="isExecCheckin">
                             <i class="fa-solid fa-calendar-days"></i>
                             {{ titleCheckin }}
-                            <span v-if="isExecCheckin"
-                                ><i class="fa fa-spinner"></i
-                            ></span>
+                            <span v-if="isExecCheckin"><i class="fa fa-spinner"></i></span>
                         </button>
                         <button @click="handleGiftCode()" class="btn-menu">
                             <i class="fa-solid fa-gift"></i>
@@ -707,10 +697,7 @@ export default {
             <div class="contaner-balance">
                 <div class="wr-balance">
                     Balance:
-                    <div
-                        class="text-balance"
-                        :class="{ 'animate-text': isAnimated }"
-                    >
+                    <div class="text-balance" :class="{ 'animate-text': isAnimated }">
                         {{
                             formattedBalance(
                                 dataLogin?.attributes?.qpoint?.data?.attributes
@@ -738,11 +725,7 @@ export default {
                         </div>
 
                         <div class="box-right">
-                            <button
-                                class="btn-commit_reward"
-                                @click="handleReward"
-                                :disabled="isCountingDown"
-                            >
+                            <button class="btn-commit_reward" @click="handleReward" :disabled="isCountingDown">
                                 {{ isClaim ? "Claim" : "Training..." }}
                             </button>
                         </div>
@@ -751,10 +734,7 @@ export default {
                     <div class="box-info" :style="styleWining">
                         <div class="auto-left">
                             <div class="woodwork-loader">
-                                <div
-                                    class="runner rotateMining"
-                                    :style="styleWining"
-                                ></div>
+                                <div class="runner rotateMining" :style="styleWining"></div>
                             </div>
 
                             <div class="box-woodwork">
@@ -762,17 +742,10 @@ export default {
                             </div>
                         </div>
                         <div class="box-right">
-                            <div
-                                class="btn-mining"
-                                @click="onAutoInteract()"
-                                :class="{ active: isExecAutoInteract }"
-                            >
-                                <img
-                                    src="@public/assets/mining/icon-auto.png"
-                                    :class="{
-                                        rotateMining: isExecAutoInteract,
-                                    }"
-                                />
+                            <div class="btn-mining" @click="onAutoInteract()" :class="{ active: isExecAutoInteract }">
+                                <img src="@public/assets/mining/icon-auto.png" :class="{
+                                    rotateMining: isExecAutoInteract,
+                                }" />
                                 Mining
                             </div>
                         </div>
@@ -785,46 +758,27 @@ export default {
         </div>
 
         <div class="box-button">
-            <div
-                class="btn-item"
-                @click="handleButtonTab('mission')"
-                :class="{ active: activeButton === 'mission' }"
-            >
+            <div class="btn-item" @click="handleButtonTab('mission')" :class="{ active: activeButton === 'mission' }">
                 <div class="item-img">
                     <img src="@public/assets/button-icons/mission.svg" />
                 </div>
                 <div class="item-title">Mission</div>
             </div>
-            <div
-                class="btn-item"
-                @click="handleButtonTab('event')"
-                :class="{ active: activeButton === 'event' }"
-            >
+            <div class="btn-item" @click="handleButtonTab('event')" :class="{ active: activeButton === 'event' }">
                 <div class="item-img">
                     <img src="@public/assets/button-icons/event.svg" />
                 </div>
                 <div class="item-title">Event</div>
             </div>
-            <div
-                class="btn-item"
-                @click="handleButtonTab('booster')"
-                :class="{ active: activeButton === 'booster' }"
-            >
+            <div class="btn-item" @click="handleButtonTab('booster')" :class="{ active: activeButton === 'booster' }">
                 <div class="item-img">
                     <img src="@public/assets/button-icons/booster.svg" />
                 </div>
-                <div
-                    class="item-title"
-                    :class="{ active: activeButton === 'booster' }"
-                >
+                <div class="item-title" :class="{ active: activeButton === 'booster' }">
                     Booster
                 </div>
             </div>
-            <div
-                class="btn-item"
-                @click="handleButtonTab('invite')"
-                :class="{ active: activeButton === 'invite' }"
-            >
+            <div class="btn-item" @click="handleButtonTab('invite')" :class="{ active: activeButton === 'invite' }">
                 <div class="item-img">
                     <img src="@public/assets/button-icons/invite-friend.svg" />
                 </div>
@@ -846,15 +800,8 @@ export default {
             <div class="popup-referer-code">
                 <div class="referer-code">Referer code</div>
                 <form @submit.prevent="submitCode">
-                    <input
-                        class="code-input"
-                        :class="{ 'input-error': errorMessage }"
-                        type="text"
-                        v-model="code"
-                        id="code"
-                        @input="clearError"
-                        placeholder="Enter code"
-                    />
+                    <input class="code-input" :class="{ 'input-error': errorMessage }" type="text" v-model="code"
+                        id="code" @input="clearError" placeholder="Enter code" />
                     <div v-if="errorMessage" class="text-err-code">
                         {{ errorMessage }}
                     </div>
@@ -866,62 +813,30 @@ export default {
         </div>
 
         <MissionList :visible="showMission" :idUser="idUser" />
-        <EventList
-            :visible="showEvent"
-            :idUser="idUser"
-            :dataQPoint="dataQPoint"
-            @openCoomSoon="showPopupCoomingSoon"
-        />
+        <EventList :visible="showEvent" :idUser="idUser" :dataQPoint="dataQPoint"
+            @openCoomSoon="showPopupCoomingSoon" />
 
-        <InviteFrens
-            :visible="showInvite"
-            :idUser="idUser"
-            :rewardAmount="dataQPoint.rewardAmount"
-            :telegram_bot_link="telegram_bot_link"
-        />
-        <BoosterForm
-            :visible="showBooster"
-            :rewardScheduleHour="dataQPoint.rewardScheduleHour"
-            :idUser="idUser"
-        />
+        <InviteFrens :visible="showInvite" :idUser="idUser" :rewardAmount="dataQPoint.rewardAmount"
+            :telegram_bot_link="telegram_bot_link" />
+        <BoosterForm :visible="showBooster" :rewardScheduleHour="dataQPoint.rewardScheduleHour" :idUser="idUser" />
 
         <CheckinForm :isCheckin="isCheckin" @closeCheckin="closeCheckin" />
 
-        <PopupComingSoon
-            :visible="showCoomingSoon"
-            message="Coming soon!"
-            @close="showCoomingSoon = false"
-        />
+        <PopupComingSoon :visible="showCoomingSoon" message="Coming soon!" @close="showCoomingSoon = false" />
 
         <div class="enter-code-success" v-if="isSuccess">
             <span>Success!</span>
         </div>
 
-        <NotificationToast
-            v-if="notification.show"
-            :message="notification.message"
-            :type="notification.type"
-            @close="notification.show = false"
-        />
+        <NotificationToast v-if="notification.show" :message="notification.message" :type="notification.type"
+            @close="notification.show = false" />
 
-        <PopupPassword
-            :visible="storePermission"
-            @cancel="cancelPopupPassword"
-        />
+        <PopupPassword :visible="storePermission" @cancel="cancelPopupPassword" />
 
-        <PopupComponent
-            :visible="openGiftCode"
-            title="Gift Code"
-            @yes="handleYesGiftCode()"
-            @no="handleNoGiftCode()"
-        >
+        <PopupComponent :visible="openGiftCode" title="Gift Code" @yes="handleYesGiftCode()" @no="handleNoGiftCode()">
             <template #content>
                 <div class="px-[10px]">
-                    <InputField
-                        v-model="giftCode"
-                        label=""
-                        placeholder="Enter the code"
-                    />
+                    <InputField v-model="giftCode" label="" placeholder="Enter the code" />
                 </div>
             </template>
         </PopupComponent>

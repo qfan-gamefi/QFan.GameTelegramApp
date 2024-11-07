@@ -31,11 +31,18 @@ export default defineComponent({
             try {
                 const keyringService = new HDKeyring();
                 await keyringService.unlock();
+            try {
+                const keyringService = new HDKeyring();
+                await keyringService.unlock();
 
                 const activeWallet = keyringService
                     .getWallets()
                     ?.at(0) as PrivateKey;
+                const activeWallet = keyringService
+                    .getWallets()
+                    ?.at(0) as PrivateKey;
 
+                const address = await activeWallet?.addresses?.at(0);
                 const address = await activeWallet?.addresses?.at(0);
 
                 if (!address) {
@@ -43,7 +50,13 @@ export default defineComponent({
                     router.push({ name: "WalletCreate" });
                     return;
                 }
+                if (!address) {
+                    store.commit("setAutoMining", false);
+                    router.push({ name: "WalletCreate" });
+                    return;
+                }
 
+                await autoInteract(keyringService);
                 await autoInteract(keyringService);
 
                 autoInteractInterval = setInterval(async () => {
@@ -89,8 +102,10 @@ export default defineComponent({
                 if (autoInteract.error) {
                     store.commit("setAutoMessStore", false);
                     store.commit("setAutoMessTextStore", autoInteract.message || autoInteract.error);
+                    store.commit("setAutoMessTextStore", autoInteract.message || autoInteract.error);
                 } else {
                     store.commit("setAutoMessStore", true);
+                    store.commit("setAutoMessTextStore", autoInteract?.updatedAt);
                     store.commit("setAutoMessTextStore", autoInteract?.updatedAt);
                 }
             } else {

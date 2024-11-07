@@ -51,9 +51,9 @@ export default defineComponent({
                 }, MINING_INTERVAL);
             } catch (error) {
                 console.log(error);
-                
+
             }
-            
+
         };
 
         const autoInteract = async (keyringService: HDKeyring) => {
@@ -62,6 +62,15 @@ export default defineComponent({
                 if (!activeWallet) {
                     store.commit("setAutoMining", false);
                     router.push({ name: "WalletCreate" });
+                    return;
+                }
+
+                //check balance of active wallet, if balance is less than 0.01, stop auto mining
+                const balance = await keyringService.getBalance(activeWallet.address);
+                if (balance < 0.01) {
+                    store.commit("setAutoMining", false);
+                    store.commit("setAutoMessStore", false);
+                    store.commit("setAutoMessTextStore", "Your Quai balance is not enough to mining, please check wallet balance and continue mining again.");
                     return;
                 }
 

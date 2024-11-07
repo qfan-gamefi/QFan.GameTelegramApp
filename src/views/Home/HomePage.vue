@@ -454,7 +454,7 @@ export default {
                 this.getInfoUser();
 
                 Telegram.WebApp.BackButton.hide();
-                Telegram.WebApp.BackButton.offClick(handleClick); 
+                Telegram.WebApp.BackButton.offClick(handleClick);
             };
 
             Telegram.WebApp.BackButton.onClick(handleClick);
@@ -655,13 +655,7 @@ export default {
         <div class="container-game">
             <InfoUser v-if="dataLogin" :dataLogin="dataLogin" />
 
-            <div class="container-wl">
-                <button @click="handleWallet">
-                    <i class="fa-solid fa-wallet"></i>
-                    Wallet
-                </button>
-            </div>
-            <div class="link-checkin">
+            <div class="container-menu">
                 <input
                     type="checkbox"
                     id="openmenu"
@@ -669,43 +663,45 @@ export default {
                 />
 
                 <label class="hamburger-icon cursor-pointer" for="openmenu">
-                    <label for="openmenu" id="hamburger-label">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </label>
-                    <div class="title-menu">MENU</div>
-                </label>
+                    <div class="btn-wl-icon">
+                        <button class="btn-menu wallet" @click="handleWallet">
+                            <i class="fa-solid fa-wallet"></i>
+                            Wallet
+                        </button>
+                    </div>
 
-                <div class="menu-pane">
-                    <nav>
-                        <ul class="menu-links">
-                            <button
-                                @click="onCheckIn()"
-                                v-bind:disabled="isExecCheckin"
-                            >
-                                <i class="fa-solid fa-calendar-days"></i>
-                                {{ titleCheckin }}
-                                <span v-if="isExecCheckin"
-                                    ><i class="fa fa-spinner"></i
-                                ></span>
-                            </button>
-                            <div>
-                                <button @click="handleGiftCode()">
-                                    <i class="fa-solid fa-gift"></i>
-                                    Gift code
-                                </button>
-                            </div>
-                            <div>
-                                <button @click="handleTutorial()">
-                                    <i class="fa-solid fa-book"></i>
-                                    Tutorials
-                                </button>
-                            </div>
-                        </ul>
-                    </nav>
-                </div>
+                    <div class="open-menu btn-menu" for="openmenu">
+                        <i class="fa-solid fa-bars"></i>
+                        Menu
+                    </div>
+
+                    <div class="close-menu" for="openmenu">
+                        <button
+                            class="btn-menu"
+                            @click="onCheckIn()"
+                            v-bind:disabled="isExecCheckin"
+                        >
+                            <i class="fa-solid fa-calendar-days"></i>
+                            {{ titleCheckin }}
+                            <span v-if="isExecCheckin"
+                                ><i class="fa fa-spinner"></i
+                            ></span>
+                        </button>
+                        <button @click="handleGiftCode()" class="btn-menu">
+                            <i class="fa-solid fa-gift"></i>
+                            Gift code
+                        </button>
+                        <button @click="handleTutorial()" class="btn-menu">
+                            <i class="fa-solid fa-book"></i>
+                            Tutorials
+                        </button>
+
+                        <div class="close-menu-icon btn-menu">
+                            <i class="fa-solid fa-x"></i>
+                            Close
+                        </div>
+                    </div>
+                </label>
             </div>
 
             <div class="contaner-balance">

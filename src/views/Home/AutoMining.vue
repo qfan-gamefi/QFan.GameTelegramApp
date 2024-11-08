@@ -47,7 +47,6 @@ export default defineComponent({
                 }
 
                 await autoInteract(keyringService);
-                await autoInteract(keyringService);
 
                 autoInteractInterval = setInterval(async () => {
                     await autoInteract(keyringService);

@@ -31,6 +31,9 @@ export default defineComponent({
             try {
                 const keyringService = new HDKeyring();
                 await keyringService.unlock();
+            try {
+                const keyringService = new HDKeyring();
+                await keyringService.unlock();
 
                 const activeWallet = keyringService.getActiveWallet();
                 const address = await activeWallet?.address;
@@ -40,7 +43,13 @@ export default defineComponent({
                     router.push({ name: "WalletCreate" });
                     return;
                 }
+                if (!address) {
+                    store.commit("setAutoMining", false);
+                    router.push({ name: "WalletCreate" });
+                    return;
+                }
 
+                await autoInteract(keyringService);
                 await autoInteract(keyringService);
 
                 autoInteractInterval = setInterval(async () => {

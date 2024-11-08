@@ -181,6 +181,7 @@ export default {
             }
         },
         autoMessTextStore(newVal, oldVal) {
+        autoMessTextStore(newVal, oldVal) {
             this.widthWining = 0;
             if (this.autoMessStore) {
                 this.renderSuccess(
@@ -455,6 +456,7 @@ export default {
         handleBackButton() {
             Telegram.WebApp.BackButton.show();
             const handleClick = () => {
+            const handleClick = () => {
                 this.$router.push("/");
                 this.showMission = false;
                 this.showEvent = false;
@@ -576,6 +578,12 @@ export default {
             }
         },
         async onAutoInteract() {
+            const walletType = localStorage.getItem("walletType");
+            if (walletType !== CURRENT_WALLET_VERSION) {
+                localStorage.removeItem("tallyVaults");
+                localStorage.removeItem("address");
+                this.$router.push({ name: "WalletCreate" });
+            }
             const walletType = localStorage.getItem("walletType");
             if (walletType !== CURRENT_WALLET_VERSION) {
                 localStorage.removeItem("tallyVaults");

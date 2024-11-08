@@ -181,7 +181,6 @@ export default {
             }
         },
         autoMessTextStore(newVal, oldVal) {
-        autoMessTextStore(newVal, oldVal) {
             this.widthWining = 0;
             if (this.autoMessStore) {
                 this.renderSuccess(

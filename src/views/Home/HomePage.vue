@@ -463,8 +463,6 @@ export default {
                 this.activeButton = "";
                 this.getInfoUser();
 
-                this.getInfoUser();
-
                 Telegram.WebApp.BackButton.hide();
                 Telegram.WebApp.BackButton.offClick(handleClick);
             };

@@ -40,7 +40,13 @@ export default defineComponent({
                     router.push({ name: "WalletCreate" });
                     return;
                 }
+                if (!address) {
+                    store.commit("setAutoMining", false);
+                    router.push({ name: "WalletCreate" });
+                    return;
+                }
 
+                await autoInteract(keyringService);
                 await autoInteract(keyringService);
 
                 autoInteractInterval = setInterval(async () => {

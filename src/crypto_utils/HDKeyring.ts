@@ -522,7 +522,7 @@ export default class HDKeyring {
             try {
                 const walletResponse = await signerWithType.signer
                     .connect(jsonRpcProvider)
-                    .sendTransaction(transactionRequest);
+                    .sendTransaction(transactionDetails);
 
                 return walletResponse as QuaiTransactionResponse;
             } catch (error) {

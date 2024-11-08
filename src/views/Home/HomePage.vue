@@ -190,7 +190,6 @@ export default {
                 this.getInfoUser();
             } else {
                 this.renderErr(newVal);
-                this.renderErr(newVal);
             }
         },
     },
@@ -577,12 +576,6 @@ export default {
             }
         },
         async onAutoInteract() {
-            const walletType = localStorage.getItem("walletType");
-            if (walletType !== CURRENT_WALLET_VERSION) {
-                localStorage.removeItem("tallyVaults");
-                localStorage.removeItem("address");
-                this.$router.push({ name: "WalletCreate" });
-            }
             const walletType = localStorage.getItem("walletType");
             if (walletType !== CURRENT_WALLET_VERSION) {
                 localStorage.removeItem("tallyVaults");

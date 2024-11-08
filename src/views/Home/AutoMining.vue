@@ -35,15 +35,8 @@ export default defineComponent({
                 const keyringService = new HDKeyring();
                 await keyringService.unlock();
 
-                const activeWallet = keyringService
-                    .getWallets()
-                    ?.at(0) as PrivateKey;
-                const activeWallet = keyringService
-                    .getWallets()
-                    ?.at(0) as PrivateKey;
-
-                const address = await activeWallet?.addresses?.at(0);
-                const address = await activeWallet?.addresses?.at(0);
+                const activeWallet = keyringService.getActiveWallet();
+                const address = await activeWallet?.address;
 
                 if (!address) {
                     store.commit("setAutoMining", false);

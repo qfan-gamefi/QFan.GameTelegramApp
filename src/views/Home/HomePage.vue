@@ -39,8 +39,7 @@ import type {
 } from "quais/lib/esm/providers";
 import {
     CONTRACT_OWNER_ADDRESS,
-    CURRENT_WALLET_VERSION,
-    CURRENT_WALLET_VERSION,
+    CURRENT_WALLET_VERSION
 } from "@/crypto_utils/constants";
 import { DEFAULT_QUAI_TESNTET } from "@/services/network/chains";
 import { getAddress, parseEther, toBigInt } from "ethers";
@@ -456,7 +455,6 @@ export default {
         },
         handleBackButton() {
             Telegram.WebApp.BackButton.show();
-
             const handleClick = () => {
             const handleClick = () => {
                 this.$router.push("/");
@@ -639,10 +637,7 @@ export default {
         },
         handleTutorial() {
             window.open("https://t.me/QFanClubAnnouncement/103", "_blank");
-        },
-        handleTutorial() {
-            window.open("https://t.me/QFanClubAnnouncement/103", "_blank");
-        },
+        }
     },
     async mounted() {
         Telegram.WebApp.ready();

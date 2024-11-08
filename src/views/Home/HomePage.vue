@@ -190,7 +190,6 @@ export default {
                 this.getInfoUser();
             } else {
                 this.renderErr(newVal);
-                this.renderErr(newVal);
             }
         },
     },

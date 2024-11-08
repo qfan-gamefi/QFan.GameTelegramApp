@@ -181,7 +181,6 @@ export default {
             }
         },
         autoMessTextStore(newVal, oldVal) {
-        autoMessTextStore(newVal, oldVal) {
             this.widthWining = 0;
             if (this.autoMessStore) {
                 this.renderSuccess(
@@ -190,7 +189,6 @@ export default {
                 this.calcWidthMining();
                 this.getInfoUser();
             } else {
-                this.renderErr(newVal);
                 this.renderErr(newVal);
             }
         },
@@ -578,12 +576,6 @@ export default {
             }
         },
         async onAutoInteract() {
-            const walletType = localStorage.getItem("walletType");
-            if (walletType !== CURRENT_WALLET_VERSION) {
-                localStorage.removeItem("tallyVaults");
-                localStorage.removeItem("address");
-                this.$router.push({ name: "WalletCreate" });
-            }
             const walletType = localStorage.getItem("walletType");
             if (walletType !== CURRENT_WALLET_VERSION) {
                 localStorage.removeItem("tallyVaults");

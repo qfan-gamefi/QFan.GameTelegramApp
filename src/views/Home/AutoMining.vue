@@ -31,9 +31,6 @@ export default defineComponent({
             try {
                 const keyringService = new HDKeyring();
                 await keyringService.unlock();
-            try {
-                const keyringService = new HDKeyring();
-                await keyringService.unlock();
 
                 const activeWallet = keyringService.getActiveWallet();
                 const address = await activeWallet?.address;

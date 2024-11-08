@@ -454,15 +454,12 @@ export default {
         handleBackButton() {
             Telegram.WebApp.BackButton.show();
             const handleClick = () => {
-            const handleClick = () => {
                 this.$router.push("/");
                 this.showMission = false;
                 this.showEvent = false;
                 this.showBooster = false;
                 this.showInvite = false;
                 this.activeButton = "";
-                this.getInfoUser();
-
                 this.getInfoUser();
 
                 Telegram.WebApp.BackButton.hide();

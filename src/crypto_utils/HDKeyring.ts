@@ -505,7 +505,10 @@ export default class HDKeyring {
                 signerWithType.signer
             );
 
+            let nonce = await signerWithType.signer.connect(jsonRpcProvider).getNonce('latest');
+
             transactionRequest.value = 0n;
+            transactionRequest.nonce = nonce++;
 
             const transactionDetails =
                 await tokenContract.transfer.populateTransaction(
@@ -513,15 +516,13 @@ export default class HDKeyring {
                     transactionRequest.value
                 );
 
-            // transactionRequest.to = transactionDetails.to;
-            // transactionRequest.data = transactionDetails.data;
-
-            // console.log("transactionRequest", transactionRequest);
+            transactionRequest.to = transactionDetails.to;
+            transactionRequest.data = transactionDetails.data;
 
             try {
                 const walletResponse = await signerWithType.signer
                     .connect(jsonRpcProvider)
-                    .sendTransaction(transactionDetails);
+                    .sendTransaction(transactionRequest);
 
                 return walletResponse as QuaiTransactionResponse;
             } catch (error) {

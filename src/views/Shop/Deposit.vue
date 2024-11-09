@@ -24,7 +24,6 @@
                     label="Amount"
                     placeholder="Enter Amount"
                     type="number"
-                    :positiveIntegerOnly="labelType === 'WITHDRAW'"
                 />
 
                 <span v-if="amountError" class="error-message">{{

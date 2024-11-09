@@ -6,7 +6,7 @@
             :value="modelValue"
             class="input-field f-bangopro"
             :placeholder="placeholder"
-            :inputmode="type === 'number' ? 'numeric' : null"
+            :inputmode="type === 'number' ? 'decimal' : null"
             @input="onInput"
             :min="positiveIntegerOnly && type === 'number' ? 1 : null"
             @keypress="onKeyPress"

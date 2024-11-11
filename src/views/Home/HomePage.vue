@@ -39,7 +39,7 @@ import type {
 } from "quais/lib/esm/providers";
 import {
     CONTRACT_OWNER_ADDRESS,
-    CURRENT_WALLET_VERSION
+    CURRENT_WALLET_VERSION,
 } from "@/crypto_utils/constants";
 import { DEFAULT_QUAI_TESNTET } from "@/services/network/chains";
 import { getAddress, parseEther, toBigInt } from "ethers";
@@ -48,6 +48,7 @@ import PopupPassword from "@/components/popup/PopupPassword.vue";
 import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
 import PopupComponent from "@/components/popup/PopupComponent.vue";
 import InputField from "@/components/Input/InputField.vue";
+import { GA_TRACKING_ID } from "@/config/googleAnalytics";
 
 const REF_MESS_PREFIX: string = "start r_";
 const REF_TOKEN_PREFIX: string = "TOKEN_";
@@ -468,6 +469,13 @@ export default {
             Telegram.WebApp.BackButton.onClick(handleClick);
         },
         handleButtonTab(tab) {
+            if (window.gtag) {
+                window.gtag("config", GA_TRACKING_ID, {
+                    page_path: "/",
+                    page_title: tab,
+                });
+            }
+
             this.isCheckin = false;
 
             this.handleBackButton();
@@ -625,7 +633,7 @@ export default {
         },
         handleTutorial() {
             window.open("https://t.me/QFanClubAnnouncement/103", "_blank");
-        }
+        },
     },
     async mounted() {
         Telegram.WebApp.ready();
@@ -666,7 +674,11 @@ export default {
             <InfoUser v-if="dataLogin" :dataLogin="dataLogin" />
 
             <div class="container-menu">
-                <input type="checkbox" id="openmenu" class="hamburger-checkbox" />
+                <input
+                    type="checkbox"
+                    id="openmenu"
+                    class="hamburger-checkbox"
+                />
 
                 <label class="hamburger-icon cursor-pointer" for="openmenu">
                     <div class="btn-wl-icon">
@@ -682,10 +694,16 @@ export default {
                     </div>
 
                     <div class="close-menu" for="openmenu">
-                        <button class="btn-menu" @click="onCheckIn()" v-bind:disabled="isExecCheckin">
+                        <button
+                            class="btn-menu"
+                            @click="onCheckIn()"
+                            v-bind:disabled="isExecCheckin"
+                        >
                             <i class="fa-solid fa-calendar-days"></i>
                             {{ titleCheckin }}
-                            <span v-if="isExecCheckin"><i class="fa fa-spinner"></i></span>
+                            <span v-if="isExecCheckin"
+                                ><i class="fa fa-spinner"></i
+                            ></span>
                         </button>
                         <button @click="handleGiftCode()" class="btn-menu">
                             <i class="fa-solid fa-gift"></i>
@@ -918,7 +936,11 @@ export default {
         >
             <template #content>
                 <div class="px-[10px]">
-                    <InputField v-model="giftCode" label="" placeholder="Enter the code" />
+                    <InputField
+                        v-model="giftCode"
+                        label=""
+                        placeholder="Enter the code"
+                    />
                 </div>
             </template>
         </PopupComponent>

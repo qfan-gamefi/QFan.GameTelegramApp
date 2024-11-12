@@ -28,9 +28,9 @@
                             :class="{ 'blur-background': item.isStatus }"
                         >
                             <div class="flex items-center gap-2">
-                                <div>
+                                <div class="">
                                     <img
-                                        class="w-[25px]"
+                                        class="min-w-[35px] max-w-[35px] rounded object-cover"
                                         :src="`${apiBaseUrl}${item?.attributes?.image?.data?.attributes?.url}`"
                                         loading="lazy"
                                     />
@@ -153,7 +153,7 @@ import EmptyForm from "@/components/EmptyForm.vue";
 import NotificationToast from "@/components/NotificationToast.vue";
 import LoadingForm from "@/components/LoadingForm.vue";
 import userService from "@/services/userService";
-import { sortMissions } from "@/utils";
+import { sortMissions, trackEventBtn } from "@/utils";
 
 export default defineComponent({
     name: "MissionsList",
@@ -271,6 +271,10 @@ export default defineComponent({
             }
         },
         async autoClaim(idMission, id) {
+            trackEventBtn({
+                label: 'Go_Mission',
+            });
+
             this.buttonText[id] = `Verifying`;
             this.loadingBtn[id] = true;
 

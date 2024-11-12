@@ -342,6 +342,7 @@ import type { QuaiTransactionRequest } from "quais/lib/esm/providers";
 import { formatEther, parseEther, toBigInt } from "ethers";
 import { CURRENT_WALLET_VERSION } from "@/crypto_utils/constants";
 import BackButtonTelegram from "@/mixins/BackButtonTelegram";
+import { trackEventBtn } from "@/utils";
 
 export default defineComponent({
     name: "WalletDetail",
@@ -425,6 +426,9 @@ export default defineComponent({
                     this.playerId,
                     this.activeWallet?.address as string
                 );
+                trackEventBtn({
+                    label: 'Faucet',
+                });
                 if (
                     faucetResult.statusCode &&
                     faucetResult.statusCode !== 200
@@ -485,7 +489,9 @@ export default defineComponent({
                 this.errorMessage = "Password is incorrect";
                 return;
             }
-
+            trackEventBtn({
+                label: 'Send_wallet',
+            });
             try {
                 this.executing = true;
                 const hdKeyring = new HDKeyring();
@@ -494,10 +500,7 @@ export default defineComponent({
                     from: this.activeWallet?.address as string,
                     to: this.toAddress,
                     value: parseEther(this.sendValue.toString()),
-                } as unknown as QuaiTransactionRequest;
-
-                console.log("transaction", transaction);
-                
+                } as unknown as QuaiTransactionRequest;                
 
                 const result = await hdKeyring.signAndSendQuaiTransaction(
                     transaction

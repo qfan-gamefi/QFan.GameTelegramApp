@@ -82,6 +82,7 @@ import {
 import { defineComponent, type PropType } from "vue";
 import NotificationToast from "@/components/NotificationToast.vue";
 import { parseEther } from "ethers";
+import { trackEventBtn } from "@/utils";
 
 export default defineComponent({
     name: "DepositInShop",
@@ -181,6 +182,9 @@ export default defineComponent({
             this.validatePassword();
         },
         async submit() {
+            trackEventBtn({
+                label: this.labelType,
+            });
             if (this.labelType === "DEPOSIT") {
                 await this.submitDeposit();
             } else {

@@ -28,7 +28,7 @@ import NotificationToast from "@/components/NotificationToast.vue";
 import type { ILevel } from "@/interface";
 import InfoUser from "@/views/InfoUser/InfoUser.vue";
 import LoadingScreen from "@/views/LoadingScreen/LoadingScreen.vue";
-import { formattedBalance } from "@/utils";
+import { formattedBalance, trackEventBtn } from "@/utils";
 import { mapState, useStore } from "vuex";
 import { preloadImages } from "@/utils/preloadImages";
 import HDKeyring from "@/crypto_utils/HDKeyring";
@@ -364,6 +364,9 @@ export default {
         },
 
         async handleReward() {
+            trackEventBtn({
+                label: "Reward",
+            });
             try {
                 const res = await userService.takeReward(this.idUser!);
                 if (res) {
@@ -475,6 +478,9 @@ export default {
                     page_title: tab,
                 });
             }
+            trackEventBtn({
+                label: tab,
+            });
 
             this.isCheckin = false;
 
@@ -513,6 +519,9 @@ export default {
             Object.assign(this, tabMappings[tab]);
         },
         async handleWallet() {
+            trackEventBtn({
+                label: "Wallet",
+            });
             const walletType = localStorage.getItem("walletType");
             if (walletType !== CURRENT_WALLET_VERSION) {
                 localStorage.removeItem("tallyVaults");
@@ -529,6 +538,9 @@ export default {
             }
         },
         async onCheckIn() {
+            trackEventBtn({
+                label: "Wallet",
+            });
             try {
                 this.titleCheckin = "Processing";
                 this.isExecCheckin = true;
@@ -585,8 +597,12 @@ export default {
                 localStorage.removeItem("tallyVaults");
                 localStorage.removeItem("address");
                 this.$router.push({ name: "WalletCreate" });
+            } else {
+                this.$store.commit("setAutoMining", true);
+                trackEventBtn({
+                    label: "AutoMining",
+                });
             }
-            this.$store.commit("setAutoMining", true);
         },
         calcWidthMining() {
             const totalTime = MINING_INTERVAL;
@@ -615,6 +631,9 @@ export default {
             await this.getInfoUser();
         },
         handleGiftCode() {
+            trackEventBtn({
+                label: "GiftCode",
+            });
             this.openGiftCode = true;
         },
         async handleYesGiftCode() {
@@ -632,6 +651,9 @@ export default {
             this.giftCode = "";
         },
         handleTutorial() {
+            trackEventBtn({
+                label: "Tutorial",
+            });
             window.open("https://t.me/QFanClubAnnouncement/103", "_blank");
         },
     },

@@ -11,7 +11,7 @@
                 <div class="text-[24px] f-bangopro">Trading</div>
                 <div class="flex gap-4 text-[12px] f-bangopro" v-if="!loadingPage">
                     <div class="flex gap-1">
-                        {{ infoWallet?.balance || 0 }}
+                        {{ (infoWallet?.balance || 0)?.toFixed(4) }}
                         <img
                             src="@public/assets/logo-quai.svg"
                             loading="lazy"

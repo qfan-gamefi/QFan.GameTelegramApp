@@ -170,6 +170,10 @@ export default {
     methods: {
         formattedBalance,
         handleInvite() {
+            trackEventBtn({
+                label: 'Invite Friend',
+            });
+
             this.notification = {
                 isShow: true,
                 type: "success",
@@ -272,11 +276,11 @@ export default {
 
 .box-invite {
     padding: 20px;
-    height: calc(100% - 120px);
+    height: calc(100% - 125px);
 }
 
 .box-content {
-    height: calc(100% - 150px);
+    height: calc(100% - 140px);
 }
 
 .box-desc {

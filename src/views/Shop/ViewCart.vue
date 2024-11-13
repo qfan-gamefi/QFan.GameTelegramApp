@@ -225,7 +225,7 @@ import PopupPassword from "@/components/popup/PopupPassword.vue";
 import PopupConfirm from "@/components/PopupConfirm.vue";
 import { EItemDefType, IItemInventory } from "@/interface";
 import userServiceInventory from "@/services/inventoryService";
-import { formattedBalance } from "@/utils";
+import { formattedBalance, trackEventBtn } from "@/utils";
 import {
     IDetailCart,
     TabTypeBS,
@@ -526,6 +526,9 @@ export default defineComponent({
             };
 
             const handleResponse = async (response, successMsg) => {
+                trackEventBtn({
+                    label: this.activeTab,
+                });
                 if (response.success) {
                     await this.renderSuccess(successMsg);
                     this.$emit("closeCallApi");

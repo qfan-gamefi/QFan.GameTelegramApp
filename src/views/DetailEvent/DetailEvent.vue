@@ -338,7 +338,7 @@ import duration from "dayjs/plugin/duration";
 import EmptyForm from "../../components/EmptyForm.vue";
 import { IEvent, IGameExtraData } from "../../interface";
 import CountDown from "../../components/count-down/CountDown.vue";
-import { formatDateToDDMMMYY } from "../../utils";
+import { formatDateToDDMMMYY, trackEventBtn } from "../../utils";
 import PopupPassword from "@/components/popup/PopupPassword.vue";
 
 dayjs.extend(duration);
@@ -508,6 +508,9 @@ export default {
             }
         },
         async callPredict() {
+            trackEventBtn({
+                label: 'PredictEvent',
+            });
             const balance = Number(this.dataQPoint?.balance);
 
             if (balance < this.bidValue) {

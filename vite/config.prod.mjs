@@ -34,6 +34,7 @@ export default defineConfig({
             "@services": url("./src/services"),
             "@styles": url("./src/styles"),
             "@interface": url("./src/interface"),
+            "@config": ["./src/config"]
             // "readable-stream": "vite-compatible-readable-stream",
         },
     },

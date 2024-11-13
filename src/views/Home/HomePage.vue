@@ -28,7 +28,7 @@ import NotificationToast from "@/components/NotificationToast.vue";
 import type { ILevel } from "@/interface";
 import InfoUser from "@/views/InfoUser/InfoUser.vue";
 import LoadingScreen from "@/views/LoadingScreen/LoadingScreen.vue";
-import { formattedBalance } from "@/utils";
+import { formattedBalance, trackEventBtn } from "@/utils";
 import { mapState, useStore } from "vuex";
 import { preloadImages } from "@/utils/preloadImages";
 import HDKeyring from "@/crypto_utils/HDKeyring";
@@ -48,6 +48,7 @@ import PopupPassword from "@/components/popup/PopupPassword.vue";
 import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
 import PopupComponent from "@/components/popup/PopupComponent.vue";
 import InputField from "@/components/Input/InputField.vue";
+import { GA_TRACKING_ID } from "@/config/googleAnalytics";
 
 const REF_MESS_PREFIX: string = "start r_";
 const REF_TOKEN_PREFIX: string = "TOKEN_";
@@ -76,6 +77,15 @@ export default {
         let first_name = dataUserTele?.user?.first_name || "";
         let last_name = dataUserTele?.user?.last_name || "";
 
+        // if (
+        //     dataUserTele?.start_param &&
+        //     dataUserTele?.start_param?.startsWith("TOKEN_")
+        // ) {
+        //     secureStorage.set(
+        //         "SECURITY_TOKEN",
+        //         dataUserTele.start_param?.replace("TOKEN_", "")
+        //     );
+        // }
         // if (
         //     dataUserTele?.start_param &&
         //     dataUserTele?.start_param?.startsWith("TOKEN_")
@@ -174,7 +184,7 @@ export default {
             this.widthWining = 0;
             if (this.autoMessStore) {
                 this.renderSuccess(
-                    `Mining send success. Please wait to confirm to take 30 QFP.`
+                    `Mining success, block reward is being calculated.`
                 );
                 this.calcWidthMining();
                 this.getInfoUser();
@@ -354,6 +364,9 @@ export default {
         },
 
         async handleReward() {
+            trackEventBtn({
+                label: "Reward",
+            });
             try {
                 const res = await userService.takeReward(this.idUser!);
                 if (res) {
@@ -443,7 +456,6 @@ export default {
         },
         handleBackButton() {
             Telegram.WebApp.BackButton.show();
-
             const handleClick = () => {
                 this.$router.push("/");
                 this.showMission = false;
@@ -454,12 +466,22 @@ export default {
                 this.getInfoUser();
 
                 Telegram.WebApp.BackButton.hide();
-                Telegram.WebApp.BackButton.offClick(handleClick); 
+                Telegram.WebApp.BackButton.offClick(handleClick);
             };
 
             Telegram.WebApp.BackButton.onClick(handleClick);
         },
         handleButtonTab(tab) {
+            if (window.gtag) {
+                window.gtag("config", GA_TRACKING_ID, {
+                    page_path: "/",
+                    page_title: tab,
+                });
+            }
+            trackEventBtn({
+                label: tab,
+            });
+
             this.isCheckin = false;
 
             this.handleBackButton();
@@ -497,6 +519,9 @@ export default {
             Object.assign(this, tabMappings[tab]);
         },
         async handleWallet() {
+            trackEventBtn({
+                label: "Wallet",
+            });
             const walletType = localStorage.getItem("walletType");
             if (walletType !== CURRENT_WALLET_VERSION) {
                 localStorage.removeItem("tallyVaults");
@@ -513,6 +538,9 @@ export default {
             }
         },
         async onCheckIn() {
+            trackEventBtn({
+                label: "Wallet",
+            });
             try {
                 this.titleCheckin = "Processing";
                 this.isExecCheckin = true;
@@ -569,8 +597,12 @@ export default {
                 localStorage.removeItem("tallyVaults");
                 localStorage.removeItem("address");
                 this.$router.push({ name: "WalletCreate" });
+            } else {
+                this.$store.commit("setAutoMining", true);
+                trackEventBtn({
+                    label: "AutoMining",
+                });
             }
-            this.$store.commit("setAutoMining", true);
         },
         calcWidthMining() {
             const totalTime = MINING_INTERVAL;
@@ -599,6 +631,9 @@ export default {
             await this.getInfoUser();
         },
         handleGiftCode() {
+            trackEventBtn({
+                label: "GiftCode",
+            });
             this.openGiftCode = true;
         },
         async handleYesGiftCode() {
@@ -616,11 +651,16 @@ export default {
             this.giftCode = "";
         },
         handleTutorial() {
+            trackEventBtn({
+                label: "Tutorial",
+            });
             window.open("https://t.me/QFanClubAnnouncement/103", "_blank");
         },
     },
     async mounted() {
         Telegram.WebApp.ready();
+        Telegram.WebApp.BackButton.hide();
+        this.$store.commit("setRouterFusion", false);
         Telegram.WebApp.BackButton.hide();
         this.$store.commit("setRouterFusion", false);
         await this.getInfoUser();
@@ -655,13 +695,7 @@ export default {
         <div class="container-game">
             <InfoUser v-if="dataLogin" :dataLogin="dataLogin" />
 
-            <div class="container-wl">
-                <button @click="handleWallet">
-                    <i class="fa-solid fa-wallet"></i>
-                    Wallet
-                </button>
-            </div>
-            <div class="link-checkin">
+            <div class="container-menu">
                 <input
                     type="checkbox"
                     id="openmenu"
@@ -669,43 +703,45 @@ export default {
                 />
 
                 <label class="hamburger-icon cursor-pointer" for="openmenu">
-                    <label for="openmenu" id="hamburger-label">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </label>
-                    <div class="title-menu">MENU</div>
-                </label>
+                    <div class="btn-wl-icon">
+                        <button class="btn-menu wallet" @click="handleWallet">
+                            <i class="fa-solid fa-wallet"></i>
+                            Wallet
+                        </button>
+                    </div>
 
-                <div class="menu-pane">
-                    <nav>
-                        <ul class="menu-links">
-                            <button
-                                @click="onCheckIn()"
-                                v-bind:disabled="isExecCheckin"
-                            >
-                                <i class="fa-solid fa-calendar-days"></i>
-                                {{ titleCheckin }}
-                                <span v-if="isExecCheckin"
-                                    ><i class="fa fa-spinner"></i
-                                ></span>
-                            </button>
-                            <div>
-                                <button @click="handleGiftCode()">
-                                    <i class="fa-solid fa-gift"></i>
-                                    Gift code
-                                </button>
-                            </div>
-                            <div>
-                                <button @click="handleTutorial()">
-                                    <i class="fa-solid fa-book"></i>
-                                    Tutorials
-                                </button>
-                            </div>
-                        </ul>
-                    </nav>
-                </div>
+                    <div class="open-menu btn-menu" for="openmenu">
+                        <i class="fa-solid fa-bars"></i>
+                        Menu
+                    </div>
+
+                    <div class="close-menu" for="openmenu">
+                        <button
+                            class="btn-menu"
+                            @click="onCheckIn()"
+                            v-bind:disabled="isExecCheckin"
+                        >
+                            <i class="fa-solid fa-calendar-days"></i>
+                            {{ titleCheckin }}
+                            <span v-if="isExecCheckin"
+                                ><i class="fa fa-spinner"></i
+                            ></span>
+                        </button>
+                        <button @click="handleGiftCode()" class="btn-menu">
+                            <i class="fa-solid fa-gift"></i>
+                            Gift code
+                        </button>
+                        <button @click="handleTutorial()" class="btn-menu">
+                            <i class="fa-solid fa-book"></i>
+                            Tutorials
+                        </button>
+
+                        <div class="close-menu-icon btn-menu">
+                            <i class="fa-solid fa-x"></i>
+                            Close
+                        </div>
+                    </div>
+                </label>
             </div>
 
             <div class="contaner-balance">
@@ -784,6 +820,7 @@ export default {
                 </div>
             </div>
 
+            <BoxAction />
             <BoxAction />
             <MainGame ref="phaserRef" />
         </div>

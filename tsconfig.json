@@ -29,7 +29,8 @@
             "@utils/*": ["src/utils/*"],
             "@services/*": ["src/services/*"],
             "@styles/*": ["src/styles/*"],
-            "@interface/*": ["src/interface/*"]
+            "@interface/*": ["src/interface/*"],
+            "@config/*": ["src/config/*"]
         }
     },
     "include": ["src/**/*.ts", "src/**/*.vue"],

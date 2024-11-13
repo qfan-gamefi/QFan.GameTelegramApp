@@ -186,6 +186,9 @@ export default {
         },
         async handleUplevel() {
             try {
+                trackEventBtn({
+                    label: 'Booster',
+                });
                 this.loading = true;
                 await userService.postUplevel(this.idUser, this.typeBooster);
                 this.$emit("close");

@@ -241,6 +241,7 @@ import { mapState } from "vuex";
 import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
 import userService from "@/services/userService";
 import BackButtonTelegram from "@/mixins/BackButtonTelegram";
+import { trackEventBtn } from "@/utils";
 
 enum ButtonName {
     Inventory = "Inventory",
@@ -469,6 +470,9 @@ export default defineComponent({
                     CombineId: this.itemFusion.id,
                 };
                 const res = await userServiceInventory.makeFusion(data);
+                trackEventBtn({
+                    label: 'Claim_Inventory',
+                });
                 if (res.success) {
                     const mess = res?.data
                         ?.map((item) => {
@@ -523,18 +527,14 @@ export default defineComponent({
                     ItemId: item?.id,
                 };
                 const res = await userServiceInventory.useInventory(data);
-
+                trackEventBtn({
+                    label: 'Use_Inventory',
+                });
                 if (res.success) {
                     const valueRes = res?.data?.[0];
                     await this.renderSuccess(
                         `Received ${valueRes?.Value} ${valueRes?.ValueType}`
                     );
-                    // const resultInventory = this.itemsInventory?.map((el) => {
-                    //     return el.id === item.id
-                    //         ? { ...el, ItemCount: el.ItemCount - 1 }
-                    //         : el;
-                    // });
-                    // this.itemsInventory = resultInventory;
 
                     Object.keys(this.itemsInventory)?.forEach((key) => {
                         const items = this.itemsInventory[key];

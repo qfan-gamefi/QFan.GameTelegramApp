@@ -245,7 +245,7 @@ import LoadingForm from "@/components/LoadingForm.vue";
 import NotificationToast from "@/components/NotificationToast.vue";
 import PopupConfirm from "@/components/PopupConfirm.vue";
 import userServiceTelebot from "@/services/useServiceTeleBot";
-import { formatDateTimeUS, formattedBalance } from "@/utils";
+import { formatDateTimeUS, formattedBalance, trackEventBtn } from "@/utils";
 import { defineComponent } from "vue";
 import predictService from "@/services/predictService";
 import userService from "@/services/userService";
@@ -480,7 +480,9 @@ export default defineComponent({
                     side: 0,
                 };
                 const res = await predictService.makeFlip(data);
-
+                trackEventBtn({
+                    label: 'Flip',
+                });
                 if (res.success) {
                     this.balance = Number(this.balance) - 200;
                     this.startCountdown();
@@ -568,7 +570,9 @@ export default defineComponent({
             }
         },
         async yesAutoFlip() {
-            //set disable btn
+            trackEventBtn({
+                label: 'Auto_flip',
+            });
             this.$store.commit("setAutoFlip", true);
             if (this.isCount) {
                 this.$store.commit("setCountFlip", this.countAuto);

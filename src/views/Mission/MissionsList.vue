@@ -1,9 +1,8 @@
 <template>
     <transition name="popup">
         <div class="popup-mission" v-if="visible">
-            <LoadingForm :loading="loading" />
 
-            <div class="box-mission" v-if="!loading">
+            <div class="box-mission">
                 <div class="flex justify-between gap-3 p-[20px] bg-[#00256c]">
                     <div
                         v-for="(btn, index) in btnMission"
@@ -20,6 +19,8 @@
                 </div>
 
                 <div class="h-full mt-[15px]">
+                    <LoadingForm :loading="loading" />
+
                     <div class="box-desc-mission" v-dragscroll v-if="!loading">
                         <div
                             class="fade-in flex justify-between items-center gap-2 p-[10px] text-xs rounded-lg bg-[#00256c]"
@@ -118,7 +119,7 @@
                                         active: activeSubmit[item?.id],
                                     }"
                                 >
-                                    <div v-if="buttonText[item?.id] === 'Go'">
+                                    <div v-if="buttonText[item?.id] === 'Go' && !isCheckReward">
                                         Submit
                                     </div>
                                     <div v-else>
@@ -210,6 +211,7 @@ export default defineComponent({
             ],
             activeButton: "qfan",
             activeSubmit: {},
+            isCheckReward: false
         };
     },
     watch: {
@@ -258,7 +260,7 @@ export default defineComponent({
             const hasCompletedTask = findTab?.some(
                 (task) => task?.isStatus === false
             );
-            return hasCompletedTask;
+            return !this.loading && hasCompletedTask;
         },
         renderActiveAnswer(detailItem, itemAnswer) {
             if (detailItem?.isStatus) {
@@ -322,6 +324,7 @@ export default defineComponent({
                     });
 
                     this.missionData = res?.data;
+                    this.filterCategory(this.activeButton);
                 }
             } catch (error) {
                 this.missionData = [];
@@ -331,7 +334,7 @@ export default defineComponent({
         },
         async fetchListMissionReward() {
             try {
-                this.loading = true;
+                this.isCheckReward = true
                 const res = await userService.getListMissionReward(this.idUser);
                 this.missionRewardData = res.data;
 
@@ -383,7 +386,7 @@ export default defineComponent({
             } catch (error) {
                 this.missionRewardData = [];
             } finally {
-                this.loading = false;
+                this.isCheckReward = false
             }
         },
         async handleQA(detailAnswer, item) {

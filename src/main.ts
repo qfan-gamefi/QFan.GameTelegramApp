@@ -14,6 +14,10 @@ import "./styles/app.css";
 import "./styles/animation/popup.scss";
 import AutoMining from "./views/Home/AutoMining.vue";
 import { GA_TRACKING_ID } from "./config/googleAnalytics";
+import { createI18n } from 'vue-i18n';
+import en from './locales/en.json';
+import vi from './locales/vi.json';
+import zh from './locales/zh.json';
 
 // @ts-ignore
 window.Buffer = Buffer;
@@ -31,8 +35,20 @@ router.afterEach((to) => {
     }
 });
 
+const messages = {
+    en,
+    vi,
+    zh
+  };
+const i18n = createI18n({
+    locale: 'vi',
+    fallbackLocale: 'en',
+    messages
+  });
+
 app.use(VueDragscroll);
 app.use(router);
 app.use(store);
 app.component("AutoMining", AutoMining);
+app.use(i18n);
 app.mount("#app");

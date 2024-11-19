@@ -89,24 +89,21 @@ export default defineComponent({
     },
     data() {
         const dataUserTele = window?.Telegram?.WebApp?.initDataUnsafe;
-
-        let first_name = dataUserTele?.user?.first_name || "";
-        let last_name = dataUserTele?.user?.last_name || "";
+        let first_name = dataUserTele?.user?.first_name;
+        let last_name = dataUserTele?.user?.last_name;
 
         return {
             isTelegramLogin: !!first_name || !!last_name,
             idUser: dataUserTele.user?.id?.toString() ?? "",
-            first_name: first_name,
-            last_name: last_name,
+            first_name: first_name || '',
+            last_name: last_name || '',
             isAnimated: false,
             animationTimeout: null,
-
             urlAvt: "./../../../public/assets/no-img.jpg",
             dataLevel: {} as ILevel,
             expLevelNext: {} as ILevel,
             percentageLevel: 0,
             isMaxLv: false,
-
             urlBadge: "./../../../public/assets/event/beta test.png",
             itemsBadge: [] as IItemInventory[],
         };

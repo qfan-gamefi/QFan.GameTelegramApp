@@ -303,27 +303,7 @@ export default {
         },
 
         async isValidRefCode(referCode: string) {
-            const myHeaders = new Headers();
-            myHeaders.append("Content-Type", "application/json");
-
-            const raw = JSON.stringify({
-                data: {
-                    refererCode: referCode,
-                },
-            });
-
-            const requestOptions: any = {
-                method: "POST",
-                headers: myHeaders,
-                body: raw,
-                redirect: "follow",
-            };
-
-            var response = await fetch(
-                "https://qfan-api.qcloud.asia/api/player/checkRefererCode",
-                requestOptions
-            );
-            return response.status == 200;
+            return await userService.checkCode(referCode);
         },
         async submitCode() {
             this.isClaim = true;
@@ -365,7 +345,7 @@ export default {
 
         async handleReward() {
             trackEventBtn({
-                label: "Reward",
+                label: "Claim/Trainning",
             });
             try {
                 const res = await userService.takeReward(this.idUser!);
@@ -474,7 +454,7 @@ export default {
         handleButtonTab(tab) {
             if (window.gtag) {
                 window.gtag("config", GA_TRACKING_ID, {
-                    page_path: "/",
+                    page_path: `/${tab}`,
                     page_title: tab,
                 });
             }

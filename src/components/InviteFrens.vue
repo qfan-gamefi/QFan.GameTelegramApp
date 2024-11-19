@@ -92,9 +92,15 @@
             </div>
 
             <div class="box-btn-invite">
-                <button @click="handleInvite" class="rounded-lg">
-                    Invite Friend
-                </button>
+                <div class="flex gap-2">
+                    <button @click="handleInvite()" class="rounded-lg flex-3">
+                        Invite Friend
+                    </button>
+
+                    <button @click="handleCopy()" class="rounded-lg flex-1">
+                        <i class="fa-solid fa-copy"></i>
+                    </button>
+                </div>
             </div>
 
             <NotificationToast
@@ -112,7 +118,7 @@ import userService from "./../services/userService";
 import Loading from "./LoadingForm.vue";
 import EmptyForm from "./EmptyForm.vue";
 import NotificationToast from "./NotificationToast.vue";
-import { formattedBalance } from "@/utils";
+import { formattedBalance, trackEventBtn } from "@/utils";
 
 export default {
     props: {
@@ -169,11 +175,7 @@ export default {
     },
     methods: {
         formattedBalance,
-        handleInvite() {
-            trackEventBtn({
-                label: 'Invite Friend',
-            });
-
+        handleCopy(){
             this.notification = {
                 isShow: true,
                 type: "success",
@@ -188,6 +190,23 @@ export default {
             input.select();
             document.execCommand("copy");
             document.body.removeChild(input);
+
+            trackEventBtn({
+                label: "Invite ",
+            });
+        },
+        handleInvite() {
+            trackEventBtn({
+                label: "Invite ",
+            });
+
+            const dataUserTele =
+                window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+            const linkInvite = `https://t.me/QFanClubBot?start=r_${dataUserTele}`;
+            const textInvite = `Play to Airdrop $QUAI from Quai Network on QFAN. Don’t miss this opportunity as quantities are limited!`;
+            Telegram.WebApp.openTelegramLink(
+                `https://t.me/share/url?url=${linkInvite}&text=${textInvite}`
+            );
         },
         async fetchInviteData() {
             try {

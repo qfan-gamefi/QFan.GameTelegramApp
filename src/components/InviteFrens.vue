@@ -118,7 +118,7 @@ import userService from "./../services/userService";
 import Loading from "./LoadingForm.vue";
 import EmptyForm from "./EmptyForm.vue";
 import NotificationToast from "./NotificationToast.vue";
-import { formattedBalance } from "@/utils";
+import { formattedBalance, trackEventBtn } from "@/utils";
 
 export default {
     props: {
@@ -190,8 +190,16 @@ export default {
             input.select();
             document.execCommand("copy");
             document.body.removeChild(input);
+
+            trackEventBtn({
+                label: "Invite ",
+            });
         },
         handleInvite() {
+            trackEventBtn({
+                label: "Invite ",
+            });
+
             const dataUserTele =
                 window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
             const linkInvite = `https://t.me/QFanClubBot?start=r_${dataUserTele}`;

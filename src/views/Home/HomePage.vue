@@ -345,7 +345,7 @@ export default {
 
         async handleReward() {
             trackEventBtn({
-                label: "Reward",
+                label: "Claim/Trainning",
             });
             try {
                 const res = await userService.takeReward(this.idUser!);
@@ -454,7 +454,7 @@ export default {
         handleButtonTab(tab) {
             if (window.gtag) {
                 window.gtag("config", GA_TRACKING_ID, {
-                    page_path: "/",
+                    page_path: `/${tab}`,
                     page_title: tab,
                 });
             }

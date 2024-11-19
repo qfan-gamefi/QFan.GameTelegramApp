@@ -411,7 +411,9 @@ export default defineComponent({
         async submitQA() {
             const { id, code } = this.detailAnswer;
             this.buttonText[this.idMission] = `Verifying`;
-
+            trackEventBtn({
+                label: 'QA_Mission',
+            });
             userService
                 .postMissionQA(this.idUser, this.idMission, this.idAnswer, code)
                 .then(async () => {

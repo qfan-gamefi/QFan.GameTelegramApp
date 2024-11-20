@@ -1,5 +1,6 @@
 {
-    "hello": "Hello",
-    "welcome": "Welcome to our application"
-  }
+    "language": "Language",
+    "chinese": "Chinese",
+    "english": "English"
+}
   

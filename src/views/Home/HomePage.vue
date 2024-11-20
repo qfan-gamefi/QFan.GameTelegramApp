@@ -41,8 +41,6 @@ import {
     CONTRACT_OWNER_ADDRESS,
     CURRENT_WALLET_VERSION,
 } from "@/crypto_utils/constants";
-import { DEFAULT_QUAI_TESNTET } from "@/services/network/chains";
-import { getAddress, parseEther, toBigInt } from "ethers";
 import BoxAction from "./BoxAction.vue";
 import PopupPassword from "@/components/popup/PopupPassword.vue";
 import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
@@ -77,32 +75,13 @@ export default {
         let first_name = dataUserTele?.user?.first_name || "";
         let last_name = dataUserTele?.user?.last_name || "";
 
-        // if (
-        //     dataUserTele?.start_param &&
-        //     dataUserTele?.start_param?.startsWith("TOKEN_")
-        // ) {
-        //     secureStorage.set(
-        //         "SECURITY_TOKEN",
-        //         dataUserTele.start_param?.replace("TOKEN_", "")
-        //     );
-        // }
-        // if (
-        //     dataUserTele?.start_param &&
-        //     dataUserTele?.start_param?.startsWith("TOKEN_")
-        // ) {
-        //     secureStorage.set(
-        //         "SECURITY_TOKEN",
-        //         dataUserTele.start_param?.replace("TOKEN_", "")
-        //     );
-        // }
-
         return {
             isLoadingCreen: true,
             storePermission: false,
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            idUser: dataUserTele?.user?.id?.toString() ?? "",
+            idUser: dataUserTele?.user?.id?.toString() ?? "2123800227",
             telegram_bot_link: telegram_bot_link + dataUserTele?.user?.id || "",
 
             showCoomingSoon: false,
@@ -149,10 +128,10 @@ export default {
             percentageLevel: 0,
             isMaxLv: false,
             isAnimated: false,
-            // autoMiningStore: this.$store.state.autoMining
 
             openGiftCode: false,
             giftCode: "",
+            showOptions: false,
         };
     },
     computed: {
@@ -656,6 +635,19 @@ export default {
             });
             window.open("https://t.me/QFanClubAnnouncement/103", "_blank");
         },
+        toggleLanguageOptions() {
+            this.$refs.hamburgerCheckbox.checked = false;
+            this.showOptions = !this.showOptions;
+        },
+        selectLanguage(language) {
+            this.showOptions = false;
+            this.$i18n.locale = language;
+            this.$refs.hamburgerCheckbox.checked = true;
+            localStorage.setItem("preferredLanguage", language);
+        },
+        handleMenu(){
+            this.showOptions = false;
+        }
     },
     async mounted() {
         Telegram.WebApp.ready();
@@ -675,6 +667,12 @@ export default {
     },
     async updated() {
         this.updateSence();
+    },
+    created() {
+        const savedLanguage = localStorage.getItem("preferredLanguage");
+        if (savedLanguage) {
+            this.$i18n.locale = savedLanguage;
+        }
     },
     unmounted() {
         this.autoInteractInterval && clearInterval(this.autoInteractInterval);
@@ -700,17 +698,18 @@ export default {
                     type="checkbox"
                     id="openmenu"
                     class="hamburger-checkbox"
+                    ref="hamburgerCheckbox"
                 />
 
                 <label class="hamburger-icon cursor-pointer" for="openmenu">
                     <div class="btn-wl-icon">
-                        <button class="btn-menu wallet" @click="handleWallet">
+                        <button @click="handleWallet()">
                             <i class="fa-solid fa-wallet"></i>
                             Wallet
                         </button>
                     </div>
 
-                    <div class="open-menu btn-menu" for="openmenu">
+                    <div class="open-menu btn-menu" for="openmenu" @click="handleMenu()">
                         <i class="fa-solid fa-bars"></i>
                         Menu
                     </div>
@@ -740,6 +739,23 @@ export default {
                             <i class="fa-solid fa-x"></i>
                             Close
                         </div>
+                    </div>
+                </label>
+
+                <label for="openmenu" class="btn-language-icon">
+                    <button @click="toggleLanguageOptions()">
+                        <i class="fa-solid fa-language"></i>
+                        {{ $t("language") }}
+                    </button>
+                    <div v-if="showOptions" class="language-options">
+                        <button @click="selectLanguage('en')">
+                            <div class="text-[8px]">EN</div>
+                            <div>{{ $t("english") }}</div>
+                        </button>
+                        <button @click="selectLanguage('zh')">
+                            <div class="text-[8px]">ZH</div>
+                            <div>{{ $t("chinese") }}</div>
+                        </button>
                     </div>
                 </label>
             </div>

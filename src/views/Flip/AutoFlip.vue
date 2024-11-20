@@ -7,6 +7,7 @@ import { defineComponent, watch, onMounted, onUnmounted, computed } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import predictService from "@/services/predictService";
+import { trackEventBtn } from "@/utils";
 
 export default defineComponent({
     name: "AutoFlip",
@@ -63,6 +64,9 @@ export default defineComponent({
             isFlippingActive = true;
             if (total > 0) {
                 flipCount(countFlip.value);
+                trackEventBtn({
+                    label: 'Auto_flip',
+                });
             }
             if (total === 0) {
                 flipCount(-1);

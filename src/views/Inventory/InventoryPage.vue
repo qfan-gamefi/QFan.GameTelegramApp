@@ -471,7 +471,7 @@ export default defineComponent({
                 };
                 const res = await userServiceInventory.makeFusion(data);
                 trackEventBtn({
-                    label: 'Claim_Inventory',
+                    label: 'Fusion',
                 });
                 if (res.success) {
                     const mess = res?.data
@@ -528,7 +528,7 @@ export default defineComponent({
                 };
                 const res = await userServiceInventory.useInventory(data);
                 trackEventBtn({
-                    label: 'Use_Inventory',
+                    label: `${item?.Code}` || 'Use_Inventory',
                 });
                 if (res.success) {
                     const valueRes = res?.data?.[0];

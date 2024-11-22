@@ -16,7 +16,7 @@
                 :class="{ active: activeButton === button?.name }"
                 @click="setActiveButton(button?.name)"
             >
-                {{ button.label }}
+                {{ $t(button.label) }}
             </div>
         </div>
 
@@ -29,7 +29,7 @@
                         class="border-b border-[#2F9AD6] p-1 rounded-md animation-inventory"
                     >
                         <div class="text-[14px] mb-1 font-extrabold">
-                            {{ renderTitleKey(key) }}
+                            {{ $t(renderTitleKey(key)) }}
                         </div>
 
                         <div class="box-item">
@@ -67,7 +67,7 @@
                                                         class="fa fa-spinner fa-spin"
                                                     ></i>
                                                 </div>
-                                                Use
+                                                {{ $t("use") }}
                                             </button>
                                         </div>
 
@@ -84,7 +84,7 @@
                                                         class="fa fa-spinner fa-spin"
                                                     ></i>
                                                 </div>
-                                                Sell
+                                                {{ $t("sell") }}
                                             </button>
                                         </div>
                                     </div>
@@ -96,6 +96,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="box-item" v-if="activeButton === 'Badges'">
                     <div
                         class="item-badge"
@@ -104,7 +105,9 @@
                     >
                         <img class="img-badge" :src="item?.ItemDef?.ImageUrl" />
                         <div class="item-btn">
-                            <button @click="showCoomingSoon = true">Use</button>
+                            <button @click="showCoomingSoon = true">
+                                {{ $t("use") }}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -175,7 +178,7 @@
                                         ]"
                                     >
                                         <button @click="handleFausion(item)">
-                                            Claim
+                                            {{ $t("claim") }}
                                         </button>
                                     </div>
                                 </div>
@@ -188,7 +191,7 @@
 
         <PopupComingSoon
             :visible="showCoomingSoon"
-            message="Coming soon!"
+            message="coming_soon"
             @close="showCoomingSoon = false"
         />
 
@@ -201,7 +204,7 @@
 
         <PopupConfirm
             v-if="showClaim"
-            :text="`Do you want Claim!`"
+            text="do_you_want_claim"
             :visible="showClaim"
             @yes="handleYesClaim"
             @no="handleNoClaim"
@@ -277,10 +280,10 @@ export default defineComponent({
     },
     watch: {
         routerFusion(newVal, oldVal) {
-            if(newVal){
-                this.setActiveButton('Fusion')
+            if (newVal) {
+                this.setActiveButton("Fusion");
             }
-        }
+        },
     },
     data() {
         const userInfo = window.Telegram.WebApp.initDataUnsafe;
@@ -297,10 +300,10 @@ export default defineComponent({
             notificationType: "",
             activeButton: ButtonName.Inventory as ButtonName,
             buttonInventory: [
-                { name: "Inventory", label: "Inventory" },
-                { name: "Badges", label: "Badges" },
-                { name: "Fusion", label: "Fusion" },
-                { name: "History", label: "History" },
+                { name: "Inventory", label: "inventory" },
+                { name: "Badges", label: "badges" },
+                { name: "Fusion", label: "fusion" },
+                { name: "History", label: "history" },
             ] as Button[],
             showClaim: false,
             itemFusion: {} as IFusion,
@@ -471,7 +474,7 @@ export default defineComponent({
                 };
                 const res = await userServiceInventory.makeFusion(data);
                 trackEventBtn({
-                    label: 'Fusion',
+                    label: "Fusion",
                 });
                 if (res.success) {
                     const mess = res?.data
@@ -528,7 +531,7 @@ export default defineComponent({
                 };
                 const res = await userServiceInventory.useInventory(data);
                 trackEventBtn({
-                    label: `${item?.Code}` || 'Use_Inventory',
+                    label: `${item?.Code}` || "Use_Inventory",
                 });
                 if (res.success) {
                     const valueRes = res?.data?.[0];
@@ -583,10 +586,12 @@ export default defineComponent({
             this.getDataInventor();
         },
         renderTitleKey(key: string) {
-            return key
+            const title = key
                 .replace(/_/g, " ")
                 .toLowerCase()
                 .replace(/^\w/, (c) => c.toUpperCase());
+            const subTitle = `inventory_page.title.${title}`;
+            return subTitle;
         },
     },
 });

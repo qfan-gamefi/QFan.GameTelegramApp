@@ -1,11 +1,11 @@
 <template>
     <div class="input-wrapper">
-        <div class="label" v-if="label">{{ label }}</div>
+        <div class="label" v-if="label">{{ $t(label) }}</div>
         <input
             :type="type"
             :value="modelValue"
             class="input-field f-bangopro"
-            :placeholder="placeholder"
+            :placeholder="$t(placeholder)"
             :inputmode="type === 'number' ? 'decimal' : null"
             @input="onInput"
             :min="positiveIntegerOnly && type === 'number' ? 1 : null"

@@ -1,13 +1,13 @@
 <template>
     <div class="input-wrapper">
-        <div class="label" v-if="label">{{ label }}</div>
+        <div class="label" v-if="label">{{ $t(label) }}</div>
         <div class="input-container">
             <input
                 :type="type"
                 :value="modelValue"
                 @input="validateInput($event)"
                 class="input-field f-bangopro"
-                :placeholder="placeholder"
+                :placeholder="$t(placeholder)"
                 inputmode="numeric"
                 pattern="[0-9]*"
             />

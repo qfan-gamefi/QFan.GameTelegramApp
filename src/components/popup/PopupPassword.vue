@@ -10,7 +10,7 @@
                 <div class="title">
                     <div class="text-[16px] font-extrabold">
                         {{
-                            isCreatePass ? "Create password" : "Enter your password"
+                            isCreatePass ? $t('create_password') : $t('enter_your_password')
                         }}
                     </div>
                     <div @click="no()" class="close-popup">
@@ -33,7 +33,7 @@
                     <InputField
                         v-model="password"
                         type="password"
-                        placeholder="Enter password"
+                        :placeholder="$t('enter_your_password')"
                         label=""
                         v-if="!isCreatePass"
                     />
@@ -42,13 +42,13 @@
                         <InputField
                             v-model="newPassword"
                             type="password"
-                            placeholder="New password"
+                            :placeholder="$t('new_password')"
                             label=""
                         />
                         <InputField
                             v-model="confirmPassword"
                             type="password"
-                            placeholder="Confirm password"
+                            :placeholder="$t('confirm_password')"
                             label=""
                         />
                         <!-- <input
@@ -79,13 +79,13 @@
 
                 <div class="flex flex-col gap-2 p-[10px]">
                     <button @click="yes()">
-                        {{ !isCreatePass ? "OK" : "Create" }}
+                        {{ !isCreatePass ? $t("ok") : $t("create") }}
                     </button>
                     <button @click="handleCreatePass()">
                         {{
                             !isCreatePass
-                                ? "Create password"
-                                : "Enter password"
+                                ? $t("create_password")
+                                : $t("enter_password")
                         }}
                     </button>
                 </div>

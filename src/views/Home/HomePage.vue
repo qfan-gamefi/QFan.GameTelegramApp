@@ -47,6 +47,7 @@ import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
 import PopupComponent from "@/components/popup/PopupComponent.vue";
 import InputField from "@/components/Input/InputField.vue";
 import { GA_TRACKING_ID } from "@/config/googleAnalytics";
+import VersionPage from "./VersionPage.vue";
 
 const REF_MESS_PREFIX: string = "start r_";
 const REF_TOKEN_PREFIX: string = "TOKEN_";
@@ -111,7 +112,7 @@ export default {
             activeWallet: null as Wallet | null,
             isCheckin: false,
             isExecCheckin: false,
-            titleCheckin: "Checkin",
+            titleCheckin: "check_in",
             titleAutoInteract: "Auto Mining",
             isExecAutoInteract: false,
             autoInteractInterval: null as NodeJS.Timeout | null,
@@ -501,7 +502,7 @@ export default {
                 label: "Wallet",
             });
             try {
-                this.titleCheckin = "Processing";
+                this.titleCheckin = "processing";
                 this.isExecCheckin = true;
                 const keyringService = new HDKeyring();
                 const isUnlock = await keyringService.unlock();
@@ -547,7 +548,7 @@ export default {
                 this.isExecCheckin = false;
             } finally {
                 this.isExecCheckin = false;
-                this.titleCheckin = "Checkin";
+                this.titleCheckin = "check_in";
             }
         },
         async onAutoInteract() {
@@ -685,13 +686,13 @@ export default {
                     <div class="btn-wl-icon">
                         <button @click="handleWallet()">
                             <i class="fa-solid fa-wallet"></i>
-                            Wallet
+                            {{ $t("wallet") }}
                         </button>
                     </div>
 
                     <div class="open-menu btn-menu" for="openmenu" @click="handleMenu()">
                         <i class="fa-solid fa-bars"></i>
-                        Menu
+                        {{ $t("menu") }}
                     </div>
 
                     <div class="close-menu" for="openmenu">
@@ -701,23 +702,23 @@ export default {
                             v-bind:disabled="isExecCheckin"
                         >
                             <i class="fa-solid fa-calendar-days"></i>
-                            {{ titleCheckin }}
+                                {{ $t(titleCheckin) }}
                             <span v-if="isExecCheckin"
                                 ><i class="fa fa-spinner"></i
                             ></span>
                         </button>
                         <button @click="handleGiftCode()" class="btn-menu">
                             <i class="fa-solid fa-gift"></i>
-                            Gift code
+                            {{ $t('gift_code') }}
                         </button>
                         <button @click="handleTutorial()" class="btn-menu">
                             <i class="fa-solid fa-book"></i>
-                            Tutorials
+                            {{ $t('tutorials') }}
                         </button>
 
                         <div class="close-menu-icon btn-menu">
                             <i class="fa-solid fa-x"></i>
-                            Close
+                            {{ $t('close') }}
                         </div>
                     </div>
                 </label>
@@ -742,7 +743,7 @@ export default {
 
             <div class="contaner-balance">
                 <div class="wr-balance">
-                    Balance:
+                    {{ $t("balance") }}:
                     <div
                         class="text-balance"
                         :class="{ 'animate-text': isAnimated }"
@@ -760,7 +761,7 @@ export default {
                 <div class="wrap-commit_reward" :style="beforeStyle">
                     <div class="box-info">
                         <div v-if="isClaim" class="box-left-train">
-                            Click "Claim" to take +{{
+                            {{ $t("click_claim_to_take") }} +{{
                                 Number(dataQPoint?.rewardAmount) *
                                 dataQPoint?.rewardScheduleHour
                             }}
@@ -769,7 +770,7 @@ export default {
 
                         <div v-else class="box-left">
                             <div class="content">
-                                Remain time: {{ countdown }}
+                                {{ $t("remain_time") }}: {{ countdown }}
                             </div>
                         </div>
 
@@ -779,7 +780,7 @@ export default {
                                 @click="handleReward"
                                 :disabled="isCountingDown"
                             >
-                                {{ isClaim ? "Claim" : "Training..." }}
+                                {{ isClaim ? $t("claim") : $t("training") }}
                             </button>
                         </div>
                     </div>
@@ -809,7 +810,7 @@ export default {
                                         rotateMining: isExecAutoInteract,
                                     }"
                                 />
-                                Mining
+                                {{ $t("mining") }}
                             </div>
                         </div>
                     </div>
@@ -830,7 +831,7 @@ export default {
                 <div class="item-img">
                     <img src="@public/assets/button-icons/mission.svg" />
                 </div>
-                <div class="item-title">Mission</div>
+                <div class="item-title">{{ $t("mission") }}</div>
             </div>
             <div
                 class="btn-item"
@@ -840,7 +841,7 @@ export default {
                 <div class="item-img">
                     <img src="@public/assets/button-icons/event.svg" />
                 </div>
-                <div class="item-title">Event</div>
+                <div class="item-title">{{ $t("event") }}</div>
             </div>
             <div
                 class="btn-item"
@@ -854,7 +855,7 @@ export default {
                     class="item-title"
                     :class="{ active: activeButton === 'booster' }"
                 >
-                    Booster
+                    {{ $t("booster") }}
                 </div>
             </div>
             <div
@@ -865,7 +866,7 @@ export default {
                 <div class="item-img">
                     <img src="@public/assets/button-icons/invite-friend.svg" />
                 </div>
-                <div class="item-title">Invite Friend</div>
+                <div class="item-title">{{ $t("invite_friend") }}</div>
             </div>
 
             <div class="btn-item" @click="showPopupCoomingSoon">
@@ -873,7 +874,7 @@ export default {
                 <div class="item-img">
                     <img src="@public/assets/button-icons/shop.svg" />
                 </div>
-                <div class="item-title">Shop</div>
+                <div class="item-title">{{ $t("shop") }}</div>
                 <!-- </router-link> -->
             </div>
         </div>
@@ -926,7 +927,7 @@ export default {
 
         <PopupComingSoon
             :visible="showCoomingSoon"
-            message="Coming soon!"
+            message="coming_soon"
             @close="showCoomingSoon = false"
         />
 
@@ -948,7 +949,7 @@ export default {
 
         <PopupComponent
             :visible="openGiftCode"
-            title="Gift Code"
+            title="gift_code" 
             @yes="handleYesGiftCode()"
             @no="handleNoGiftCode()"
         >
@@ -957,10 +958,12 @@ export default {
                     <InputField
                         v-model="giftCode"
                         label=""
-                        placeholder="Enter the code"
+                        placeholder="enter_gift_code"
                     />
                 </div>
             </template>
         </PopupComponent>
+
+        <VersionPage />
     </div>
 </template>

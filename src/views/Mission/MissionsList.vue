@@ -14,7 +14,7 @@
                         }"
                         @click="setActiveButton(btn?.name)"
                     >
-                        {{ btn?.label }}
+                        {{ $t(btn?.label) }}
                     </div>
                 </div>
 
@@ -90,7 +90,7 @@
                                                 autoClaim(item?.id, item?.id)
                                             "
                                         >
-                                            {{ buttonText[item?.id] }}
+                                            {{ $t((buttonText[item?.id])?.toLowerCase()) }}
                                         </button>
                                     </a>
 
@@ -120,7 +120,7 @@
                                     }"
                                 >
                                     <div v-if="buttonText[item?.id] === 'Go' && !isCheckReward">
-                                        Submit
+                                        {{ $t('btn.submit') }}
                                     </div>
                                     <div v-else>
                                         <i class="fa fa-spinner fa-pulse"></i>
@@ -205,9 +205,9 @@ export default defineComponent({
             idMission: null,
             idAnswer: null,
             btnMission: [
-                { name: "qfan", label: "QFan" },
-                { name: "quai_discovery", label: "Quai Discovery" },
-                { name: "partnership", label: "Partnership" },
+                { name: "qfan", label: "qfan" },
+                { name: "quai_discovery", label: "quai_discovery" },
+                { name: "partnership", label: "partnership" },
             ],
             activeButton: "qfan",
             activeSubmit: {},
@@ -277,7 +277,7 @@ export default defineComponent({
                 label: 'Go_Mission',
             });
 
-            this.buttonText[id] = `Verifying`;
+            this.buttonText[id] = `verifying`;
             this.loadingBtn[id] = true;
 
             userService

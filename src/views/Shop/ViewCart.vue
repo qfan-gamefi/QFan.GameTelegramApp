@@ -3,7 +3,7 @@
     <transition name="popup">
         <div class="popup-template" v-if="isViewCart">
             <div class="header">
-                <div class="m-auto f-bangopro">ORDER CONFIRM</div>
+                <div class="m-auto f-bangopro">{{ $t('order_confirm')?.toUpperCase() }}</div>
 
                 <div @click="handleCloseCart" class="close-view-cart">
                     <i class="fa-solid fa-rectangle-xmark"></i>
@@ -27,7 +27,7 @@
                                 ]"
                                 @click="setActiveTab('buy')"
                             >
-                                Buy
+                                {{ $t('buy') }}
                             </div>
                             <div
                                 :class="[
@@ -39,7 +39,7 @@
                                 ]"
                                 @click="setActiveTab('sell')"
                             >
-                                Sell
+                                {{ $t('sell') }}
                             </div>
                         </div>
                     </div>
@@ -58,9 +58,9 @@
                             <div
                                 class="flex justify-between px-1 text-[#6c757d] uppercase"
                             >
-                                <div>Buy</div>
-                                <div>Price</div>
-                                <div>Sell</div>
+                                <div>{{ $t('buy') }}</div>
+                                <div>{{ $t('price') }}</div>
+                                <div>{{ $t('sell') }}</div>
                             </div>
 
                             <div class="flex relative">
@@ -145,8 +145,8 @@
 
                         <InputSelect
                             v-model="price"
-                            label="Price"
-                            placeholder="Enter price"
+                            label="price"
+                            placeholder="enter_price"
                             :options="quaiOptions"
                             v-model:selectedOption="selectedOption"
                             type="number"
@@ -155,30 +155,30 @@
                     <div class="quantity flex-1">
                         <InputNumber
                             v-model="quantity"
-                            label="Quantity"
-                            placeholder="Enter quantity"
+                            label="quantity"
+                            placeholder="enter_quantity"
                         />
                     </div>
                 </div>
 
                 <div class="desc-payment">
                     <div class="amount">
-                        <div>Amount</div>
+                        <div>{{ $t('amount') }}</div>
                         <div>{{ renderAmount() }}</div>
                     </div>
                     <div class="fee">
-                        <div>Fee ({{ this.orderFee?.ValueType }})</div>
+                        <div>{{ $t('fee') }} ({{ this.orderFee?.ValueType }})</div>
                         <div>{{ renderFee() }}</div>
                     </div>
                     <div class="total-payment">
                         <div v-if="activeTab === 'sell'">
-                            Total Amount Received
+                             {{ $t('total_amount_received') }}
                         </div>
-                        <div v-else>Total Payment</div>
+                        <div v-else>{{ $t('total_payment') }}</div>
                         <div>{{ renderTotal() }}</div>
                     </div>
                     <div class="text-note" v-if="activeTab === 'sell'">
-                        ( You will be charge 10% as Value Added Tax )
+                        ( {{ $t('tax_info') }} )
                     </div>
                 </div>
 
@@ -193,7 +193,7 @@
                             },
                         ]"
                     >
-                        Order
+                    {{ $t('order') }}
                     </div>
                 </div>
             </div>
@@ -311,7 +311,7 @@ export default defineComponent({
             listDetail: [],
 
             isBuySell: false,
-            textConfirm: "Sure about this Buy order",
+            textConfirm: "confirm_buy",
             isPass: false,
         };
     },
@@ -540,19 +540,19 @@ export default defineComponent({
             try {
                 if (this.activeTab === "buy") {
                     if (balance < total) {
-                        await this.renderErr(`Your balance is insufficient`);
+                        await this.renderErr(`insufficient_balance`);
                     } else {
                         const response =
                             await userServiceInventory.makeBuyOrder(payload);
-                        await handleResponse(response, `Buy Success`);
+                        await handleResponse(response, `noti.buy_success`);
                     }
                 } else if (this.activeTab === "sell") {
                     if (valueQuantity > countItem) {
-                        await this.renderErr(`Your quantity is insufficient`);
+                        await this.renderErr(`insufficient_quantity`);
                     } else {
                         const response =
                             await userServiceInventory.makeSellOrder(payload);
-                        await handleResponse(response, `Sell Success`);
+                        await handleResponse(response, `noti.sell_success`);
                     }
                 }
             } catch (error) {
@@ -567,9 +567,9 @@ export default defineComponent({
         },
         async submitData() {
             if (this.activeTab == "buy") {
-                this.textConfirm = `Sure about this Buy order?`;
+                this.textConfirm = `confirm_buy`;
             } else {
-                this.textConfirm = `Sure about this Sell order?`;
+                this.textConfirm = `confirm_sell`;
             }
             this.isBuySell = true;
         },

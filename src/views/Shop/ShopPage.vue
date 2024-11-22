@@ -3,13 +3,16 @@
         <div class="banner">
             <div>
                 <router-link to="/" class="close-to-home">
-                    <i class="fa-solid fa-chevron-left"></i>Back
+                    <i class="fa-solid fa-chevron-left"></i>{{ $t("back") }}
                 </router-link>
             </div>
 
             <div class="flex justify-between items-center w-full">
-                <div class="text-[24px] f-bangopro">Trading</div>
-                <div class="flex gap-4 text-[12px] f-bangopro" v-if="!loadingPage">
+                <div class="text-[24px] f-bangopro">{{ $t("trading") }}</div>
+                <div
+                    class="flex gap-4 text-[12px] f-bangopro"
+                    v-if="!loadingPage"
+                >
                     <div class="flex gap-1">
                         {{ (infoWallet?.balance || 0)?.toFixed(4) }}
                         <img
@@ -28,24 +31,28 @@
                     </div>
                 </div>
                 <div v-else><i class="fa-solid fa-rotate"></i></div>
-            </div> 
+            </div>
             <div class="flex gap-3 justify-end">
                 <div
                     class="btn-transaction bg-[#2ebd85] cursor-pointer"
                     @click="handleDeposit('deposit')"
                 >
-                    Deposit
+                    {{ $t("deposit") }}
                 </div>
                 <div
                     class="btn-transaction bg-[#f6465d] cursor-pointer"
                     @click="handleDeposit('withdraw')"
                 >
-                    Withdraw
+                    {{ $t("withdraw") }}
                 </div>
 
                 <div @click="callWalletInfo()" class="cursor-pointer">
-                    <div v-if="!loadingPage"><i class="fa-solid fa-rotate"></i></div>
-                    <div v-else><i class="fa-solid fa-spinner fa-spin"></i></div>
+                    <div v-if="!loadingPage">
+                        <i class="fa-solid fa-rotate"></i>
+                    </div>
+                    <div v-else>
+                        <i class="fa-solid fa-spinner fa-spin"></i>
+                    </div>
                 </div>
             </div>
         </div>
@@ -62,7 +69,7 @@
                         :class="{ active: activeButton === button?.name }"
                         @click="setActiveButton(button?.name)"
                     >
-                        {{ button.label }}
+                        {{ $t(button.label) }}
                     </div>
                 </div>
             </div>
@@ -72,10 +79,10 @@
             <div
                 class="flex text-[12px] border-b border-b-[#2f9ad6] font-extrabold px-4 py-2"
             >
-                <div class="w-[10%] text-left">No.</div>
-                <div class="w-[50%] text-left">Item</div>
-                <div class="w-[20%] text-center">Quantity</div>
-                <div class="w-[20%] text-right">Floor Price</div>
+                <div class="w-[10%] text-left">{{ $t("no") }}.</div>
+                <div class="w-[50%] text-left">{{ $t("item") }}</div>
+                <div class="w-[20%] text-center">{{ $t("quantity") }}</div>
+                <div class="w-[20%] text-right">{{ $t("floor_price") }}</div>
             </div>
 
             <div class="overflow-scroll h-[calc(100vh-200px)] no-scrollbar">
@@ -92,13 +99,13 @@
                                 loading="lazy"
                                 class="w-12"
                             />
-                            <div>{{ item.ItemDef.Name }}</div>
+                            <div>{{ item?.ItemDef?.Name }}</div>
                         </div>
                         <div class="w-[20%] text-center">
                             {{ formattedBalance(item?.TotalSell) }}
                         </div>
                         <div class="w-[20%] text-right">
-                            <div>Starting at:</div>
+                            <div>{{ $t("starting_at") }}:</div>
                             <div>
                                 {{ formattedBalance(item?.GoodSellPrice) }}
                                 {{ item?.GoodPriceType }}
@@ -133,7 +140,7 @@
 
         <PopupComingSoon
             :visible="showCoomingSoon"
-            message="Coming soon!"
+            message="coming_soon"
             @close="showCoomingSoon = false"
         />
     </div>
@@ -288,7 +295,7 @@ export default defineComponent({
                 this.infoWallet = res?.[0];
             } catch (error) {
                 console.log("Error", error);
-            }finally{
+            } finally {
                 this.loadingPage = false;
             }
         },

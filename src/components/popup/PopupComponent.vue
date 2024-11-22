@@ -12,13 +12,13 @@
                     ></i>
                 </div>
                 <div class="title">
-                    {{ title }}
+                    {{ $t(title) }}
                 </div>
 
                 <slot name="content"></slot>
 
                 <div class="popup-buttons">
-                    <button @click="yes()">OK</button>
+                    <button @click="yes()"> {{ $t("ok") }}</button>
                 </div>
             </div>
         </div>

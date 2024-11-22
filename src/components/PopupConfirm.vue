@@ -2,10 +2,10 @@
     <transition name="popup-fade">
         <div class="popup-container" v-if="visible">
             <div class="popup-content">
-                <p class="f-bangopro">{{ text }}</p>
+                <p class="f-bangopro">{{ $t(text) }}</p>
                 <div class="popup-buttons">
-                    <button @click="yes()">Yes</button>
-                    <button @click="no()">No</button>
+                    <button @click="yes()">{{ $t('yes') }}</button>
+                    <button @click="no()">{{ $t('no') }}</button>
                 </div>
             </div>
         </div>

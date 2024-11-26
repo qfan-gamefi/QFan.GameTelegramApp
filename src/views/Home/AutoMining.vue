@@ -90,7 +90,7 @@ export default defineComponent({
                     tx.hash
                 );
                 trackEventBtn({
-                    label: '(AutoMining',
+                    label: 'AutoMining',
                 });
                 if (autoInteract.error) {
                     store.commit("setAutoMessStore", false);

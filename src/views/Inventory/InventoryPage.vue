@@ -230,7 +230,6 @@ import {
     IItemDefFusion,
     IItemInventory,
 } from "@/interface";
-import "./style.scss";
 
 import NotificationToast from "@/components/NotificationToast.vue";
 import PopupConfirm from "@/components/PopupConfirm.vue";
@@ -242,17 +241,8 @@ import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
 import userService from "@/services/userService";
 import BackButtonTelegram from "@/mixins/BackButtonTelegram";
 import { trackEventBtn } from "@/utils";
-
-enum ButtonName {
-    Inventory = "Inventory",
-    Badges = "Badges",
-    Fusion = "Fusion",
-    History = "History",
-}
-interface Button {
-    name: ButtonName;
-    label: string;
-}
+import { renderTitleKey, formatNumber } from "./inventoryHelpers";
+import { ButtonName, Button } from "./defination-inventory";
 
 export default defineComponent({
     name: "InventoryPage",
@@ -277,10 +267,10 @@ export default defineComponent({
     },
     watch: {
         routerFusion(newVal, oldVal) {
-            if(newVal){
-                this.setActiveButton('Fusion')
+            if (newVal) {
+                this.setActiveButton("Fusion");
             }
-        }
+        },
     },
     data() {
         const userInfo = window.Telegram.WebApp.initDataUnsafe;
@@ -319,6 +309,8 @@ export default defineComponent({
         };
     },
     methods: {
+        renderTitleKey,
+        formatNumber,
         updateHeight() {
             const img = this.$refs.bannerInventory;
             if (img) {
@@ -351,15 +343,6 @@ export default defineComponent({
                 this.showCoomingSoon = true;
             } else {
                 this.activeButton = button;
-            }
-        },
-        formatNumber(num) {
-            if (num >= 1000000) {
-                return `${(num / 1000000).toFixed(2)}M`;
-            } else if (num >= 10000) {
-                return `${(num / 1000).toFixed(0)}K`;
-            } else {
-                return num?.toString();
             }
         },
         renderItemFusion(item: IItemDefFusion, type: "bg" | "count") {
@@ -471,7 +454,7 @@ export default defineComponent({
                 };
                 const res = await userServiceInventory.makeFusion(data);
                 trackEventBtn({
-                    label: 'Fusion',
+                    label: "Fusion",
                 });
                 if (res.success) {
                     const mess = res?.data
@@ -528,7 +511,7 @@ export default defineComponent({
                 };
                 const res = await userServiceInventory.useInventory(data);
                 trackEventBtn({
-                    label: `${item?.Code}` || 'Use_Inventory',
+                    label: `${item?.Code}` || "Use_Inventory",
                 });
                 if (res.success) {
                     const valueRes = res?.data?.[0];
@@ -581,12 +564,6 @@ export default defineComponent({
         closeViewCart() {
             this.isViewCart = false;
             this.getDataInventor();
-        },
-        renderTitleKey(key: string) {
-            return key
-                .replace(/_/g, " ")
-                .toLowerCase()
-                .replace(/^\w/, (c) => c.toUpperCase());
         },
     },
 });

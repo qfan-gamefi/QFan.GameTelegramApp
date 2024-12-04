@@ -18,7 +18,7 @@ export default defineComponent({
         const dataUserTele = window.Telegram?.WebApp?.initDataUnsafe;
         const idUser = dataUserTele?.user?.id?.toString() ?? "";
         const fullName = `${dataUserTele?.user?.first_name} ${dataUserTele?.user?.last_name}`;
-        // const fullName = `su fly 007 🍅`;
+        // const fullName = `su fly 007`;
         const countFlip = computed(() => store.state.countFlip);
         const autoFlipStore = computed(() => store.state.autoFlipStore);
         let isFlippingActive = false;

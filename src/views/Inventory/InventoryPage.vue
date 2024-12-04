@@ -217,6 +217,23 @@
         />
 
         <PopupPassword :visible="isPass" @cancel="isPass = false" />
+
+        <PopupComponent
+            :visible="openUseCount"
+            :title="useItem?.Name"
+            @yes="yesUseNumber()"
+            @no="noUseNumber()"
+        >
+            <template #content>
+                <div class="px-[10px]">
+                    <InputField
+                        v-model="countUse"
+                        label=""
+                        placeholder="Enter the number"
+                    />
+                </div>
+            </template>
+        </PopupComponent>
     </div>
 </template>
 
@@ -243,6 +260,8 @@ import BackButtonTelegram from "@/mixins/BackButtonTelegram";
 import { trackEventBtn } from "@/utils";
 import { renderTitleKey, formatNumber } from "./inventoryHelpers";
 import { ButtonName, Button } from "./defination-inventory";
+import PopupComponent from "@/components/popup/PopupComponent.vue";
+import InputField from "@/components/Input/InputField.vue";
 
 export default defineComponent({
     name: "InventoryPage",
@@ -253,6 +272,8 @@ export default defineComponent({
         ViewCart,
         PopupPassword,
         PopupComingSoon,
+        PopupComponent,
+        InputField,
     },
     created() {
         this.getDataInfo();
@@ -306,6 +327,9 @@ export default defineComponent({
             isViewCart: false,
             dataDetailCart: {} as IDetailCart,
             isPass: false,
+            useItem: {} as IItemInventory,
+            countUse: 1,
+            openUseCount: false,
         };
     },
     methods: {
@@ -502,48 +526,9 @@ export default defineComponent({
             this.itemFusion = item;
         },
         async handleUseInventory(item: IItemInventory) {
-            this.loadingBtn = true;
-            try {
-                const data = {
-                    UserId: this.userId,
-                    ItemCount: 1,
-                    ItemId: item?.id,
-                };
-                const res = await userServiceInventory.useInventory(data);
-                trackEventBtn({
-                    label: `${item?.Code}` || "Use_Inventory",
-                });
-                if (res.success) {
-                    const valueRes = res?.data?.[0];
-                    await this.renderSuccess(
-                        `Received ${valueRes?.Value} ${valueRes?.ValueType}`
-                    );
-
-                    Object.keys(this.itemsInventory)?.forEach((key) => {
-                        const items = this.itemsInventory[key];
-                        items?.forEach((el) => {
-                            const { id } = el;
-
-                            if (id === item?.id) {
-                                el.ItemCount -= 1;
-                            }
-                        });
-                    });
-
-                    if (item.ItemCount === 1) {
-                        await this.getDataInventor();
-                    }
-                } else {
-                    this.renderErr(`Received ${res?.data?.Message}`);
-                }
-            } catch (error) {
-                // this.renderErr(`Error!`);
-                if (error?.response?.status === 401) {
-                    this.isPass = true;
-                }
-            } finally {
-                this.loadingBtn = false;
-            }
+            console.log("item", item);
+            this.useItem = item;
+            this.openUseCount = true;
         },
         async handleSell(item: IItemInventory) {
             const res = await userServiceInventory.getItemMarket(
@@ -564,6 +549,53 @@ export default defineComponent({
         closeViewCart() {
             this.isViewCart = false;
             this.getDataInventor();
+        },
+        async yesUseNumber() {
+            this.loadingBtn = true;
+            try {
+                const data = {
+                    UserId: this.userId,
+                    ItemCount: this.countUse,
+                    ItemId: this.useItem?.id,
+                };
+                const res = await userServiceInventory.useInventory(data);
+                trackEventBtn({
+                    label: `${this.useItem?.Code}` || "Use_Inventory",
+                });
+                if (res.success) {
+                    const valueRes = res?.data?.[0];
+                    await this.renderSuccess(
+                        `Received ${valueRes?.Value} ${valueRes?.ValueType}`
+                    );
+
+                    Object.keys(this.itemsInventory)?.forEach((key) => {
+                        const items = this.itemsInventory[key];
+                        items?.forEach((el) => {
+                            const { id } = el;
+
+                            if (id === this.useItem?.id) {
+                                el.ItemCount -= this.countUse;
+                            }
+                        });
+                    });
+
+                    if (this.useItem.ItemCount === 1) {
+                        await this.getDataInventor();
+                    }
+                } else {
+                    this.renderErr(`Received ${res?.data?.Message}`);
+                }
+            } catch (error) {
+                if (error?.response?.status === 401) {
+                    this.isPass = true;
+                }
+            } finally {
+                this.loadingBtn = false;
+                this.openUseCount = false;
+            }
+        },
+        noUseNumber() {
+            this.openUseCount = false;
         },
     },
 });

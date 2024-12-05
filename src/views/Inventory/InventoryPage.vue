@@ -526,7 +526,6 @@ export default defineComponent({
             this.itemFusion = item;
         },
         async handleUseInventory(item: IItemInventory) {
-            console.log("item", item);
             this.useItem = item;
             this.openUseCount = true;
         },

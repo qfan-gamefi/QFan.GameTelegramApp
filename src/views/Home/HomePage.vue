@@ -77,25 +77,6 @@ export default {
         let first_name = dataUserTele?.user?.first_name || "";
         let last_name = dataUserTele?.user?.last_name || "";
 
-        // if (
-        //     dataUserTele?.start_param &&
-        //     dataUserTele?.start_param?.startsWith("TOKEN_")
-        // ) {
-        //     secureStorage.set(
-        //         "SECURITY_TOKEN",
-        //         dataUserTele.start_param?.replace("TOKEN_", "")
-        //     );
-        // }
-        // if (
-        //     dataUserTele?.start_param &&
-        //     dataUserTele?.start_param?.startsWith("TOKEN_")
-        // ) {
-        //     secureStorage.set(
-        //         "SECURITY_TOKEN",
-        //         dataUserTele.start_param?.replace("TOKEN_", "")
-        //     );
-        // }
-
         return {
             isLoadingCreen: true,
             storePermission: false,
@@ -549,8 +530,8 @@ export default {
                         activeWallet?.address as string,
                         tx.hash as string
                     );
-
                     await this.getInfoUser();
+                    
                     if (claimCheckin.error) {
                         this.renderErr(claimCheckin?.message);
                     } else {
@@ -559,17 +540,15 @@ export default {
                 } else {
                     this.$router.push({ name: "WalletCreate" });
                 }
-                this.isExecCheckin = false;
             } catch (error) {
                 console.log("error", error);
                 this.renderErr(
                     "Checkin failed! Chain is not ready to interact."
                 );
-                this.isExecCheckin = false;
-            } finally {
+            } finally {                
                 this.isExecCheckin = false;
                 this.titleCheckin = "Checkin";
-            }
+            }            
         },
         async onAutoInteract() {
             const walletType = localStorage.getItem("walletType");
@@ -636,11 +615,12 @@ export default {
             });
             window.open("https://t.me/QFanClubAnnouncement/103", "_blank");
         },
+        openAnnouncement(){
+            window.open('https://t.me/QFanClubAnnouncement', '_blank');
+        }
     },
     async mounted() {
         Telegram.WebApp.ready();
-        Telegram.WebApp.BackButton.hide();
-        this.$store.commit("setRouterFusion", false);
         Telegram.WebApp.BackButton.hide();
         this.$store.commit("setRouterFusion", false);
         await this.getInfoUser();
@@ -698,7 +678,7 @@ export default {
                     <div class="close-menu" for="openmenu">
                         <button
                             class="btn-menu"
-                            @click="onCheckIn()"
+                            @click="onCheckIn(), openAnnouncement()"
                             v-bind:disabled="isExecCheckin"
                         >
                             <i class="fa-solid fa-calendar-days"></i>

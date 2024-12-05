@@ -208,6 +208,15 @@ export default {
                 `https://t.me/share/url?url=${linkInvite}&text=${textInvite}`
             );
         },
+        handleInvite() {
+            const dataUserTele =
+                window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+            const linkInvite = `https://t.me/QFanClubBot?start=r_${dataUserTele}`;
+            const textInvite = `Play to Airdrop $QUAI from Quai Network on QFAN. Don’t miss this opportunity as quantities are limited!`;
+            Telegram.WebApp.openTelegramLink(
+                `https://t.me/share/url?url=${linkInvite}&text=${textInvite}`
+            );
+        },
         async fetchInviteData() {
             try {
                 this.loading = true;

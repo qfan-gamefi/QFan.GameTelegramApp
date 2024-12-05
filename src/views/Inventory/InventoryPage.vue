@@ -1,12 +1,11 @@
 <template>
     <div class="wr-inventory-page">
-        <!-- <div class="banner-inventory"></div> -->
-
         <img
             class="w-full object-cover"
             src="./../../../public/assets/inventory/banner-inventory.png"
             alt="banner_inventory"
             ref="bannerInventory"
+            loading="lazy"
         />
 
         <div class="btn-inventory">
@@ -214,9 +213,27 @@
             :detailCart="dataDetailCart"
             currentPage="inventory"
             @closeCallApi="closeViewCart()"
+            :dataInventory="arrInventory"
         />
 
         <PopupPassword :visible="isPass" @cancel="isPass = false" />
+
+        <PopupComponent
+            :visible="openUseCount"
+            :title="useItem?.Name"
+            @yes="yesUseNumber()"
+            @no="noUseNumber()"
+        >
+            <template #content>
+                <div class="px-[10px]">
+                    <InputField
+                        v-model="countUse"
+                        label=""
+                        placeholder="Enter the number"
+                    />
+                </div>
+            </template>
+        </PopupComponent>
     </div>
 </template>
 
@@ -230,7 +247,6 @@ import {
     IItemDefFusion,
     IItemInventory,
 } from "@/interface";
-import "./style.scss";
 
 import NotificationToast from "@/components/NotificationToast.vue";
 import PopupConfirm from "@/components/PopupConfirm.vue";
@@ -240,26 +256,24 @@ import PopupPassword from "@/components/popup/PopupPassword.vue";
 import { mapState } from "vuex";
 import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
 import userService from "@/services/userService";
-
-enum ButtonName {
-    Inventory = "Inventory",
-    Badges = "Badges",
-    Fusion = "Fusion",
-    History = "History",
-}
-interface Button {
-    name: ButtonName;
-    label: string;
-}
+import BackButtonTelegram from "@/mixins/BackButtonTelegram";
+import { trackEventBtn } from "@/utils";
+import { renderTitleKey, formatNumber } from "./inventoryHelpers";
+import { ButtonName, Button } from "./defination-inventory";
+import PopupComponent from "@/components/popup/PopupComponent.vue";
+import InputField from "@/components/Input/InputField.vue";
 
 export default defineComponent({
     name: "InventoryPage",
+    mixins: [BackButtonTelegram],
     components: {
         NotificationToast,
         PopupConfirm,
         ViewCart,
         PopupPassword,
         PopupComingSoon,
+        PopupComponent,
+        InputField,
     },
     created() {
         this.getDataInfo();
@@ -270,7 +284,14 @@ export default defineComponent({
         this.updateHeight();
     },
     computed: {
-        ...mapState(["rewardInfo"]),
+        ...mapState(["rewardInfo", "routerFusion"]),
+    },
+    watch: {
+        routerFusion(newVal, oldVal) {
+            if (newVal) {
+                this.setActiveButton("Fusion");
+            }
+        },
     },
     data() {
         const userInfo = window.Telegram.WebApp.initDataUnsafe;
@@ -306,9 +327,14 @@ export default defineComponent({
             isViewCart: false,
             dataDetailCart: {} as IDetailCart,
             isPass: false,
+            useItem: {} as IItemInventory,
+            countUse: 1,
+            openUseCount: false,
         };
     },
     methods: {
+        renderTitleKey,
+        formatNumber,
         updateHeight() {
             const img = this.$refs.bannerInventory;
             if (img) {
@@ -325,9 +351,6 @@ export default defineComponent({
             this.notificationMessage = message;
             this.notificationType = type;
             this.showNotification = true;
-            // setTimeout(() => {
-            //     this.showNotification = false;
-            // }, 2000);
         },
         async renderSuccess(text: string) {
             this.renderNotification(text, "success");
@@ -339,19 +362,11 @@ export default defineComponent({
             this.activeIndex = this.activeIndex === index ? null : index;
         },
         setActiveButton(button: ButtonName) {
+            this.$store.commit("setRouterFusion", false);
             if (button === ButtonName.History) {
                 this.showCoomingSoon = true;
             } else {
                 this.activeButton = button;
-            }
-        },
-        formatNumber(num) {
-            if (num >= 1000000) {
-                return `${(num / 1000000).toFixed(2)}M`;
-            } else if (num >= 10000) {
-                return `${(num / 1000).toFixed(0)}K`;
-            } else {
-                return num?.toString();
             }
         },
         renderItemFusion(item: IItemDefFusion, type: "bg" | "count") {
@@ -462,6 +477,9 @@ export default defineComponent({
                     CombineId: this.itemFusion.id,
                 };
                 const res = await userServiceInventory.makeFusion(data);
+                trackEventBtn({
+                    label: "Fusion",
+                });
                 if (res.success) {
                     const mess = res?.data
                         ?.map((item) => {
@@ -508,52 +526,8 @@ export default defineComponent({
             this.itemFusion = item;
         },
         async handleUseInventory(item: IItemInventory) {
-            this.loadingBtn = true;
-            try {
-                const data = {
-                    UserId: this.userId,
-                    ItemCount: 1,
-                    ItemId: item?.id,
-                };
-                const res = await userServiceInventory.useInventory(data);
-
-                if (res.success) {
-                    const valueRes = res?.data?.[0];
-                    await this.renderSuccess(
-                        `Received ${valueRes?.Value} ${valueRes?.ValueType}`
-                    );
-                    // const resultInventory = this.itemsInventory?.map((el) => {
-                    //     return el.id === item.id
-                    //         ? { ...el, ItemCount: el.ItemCount - 1 }
-                    //         : el;
-                    // });
-                    // this.itemsInventory = resultInventory;
-
-                    Object.keys(this.itemsInventory)?.forEach((key) => {
-                        const items = this.itemsInventory[key];
-                        items?.forEach((el) => {
-                            const { id } = el;
-
-                            if (id === item?.id) {
-                                el.ItemCount -= 1;
-                            }
-                        });
-                    });
-
-                    if (item.ItemCount === 1) {
-                        await this.getDataInventor();
-                    }
-                } else {
-                    this.renderErr(`Received ${res?.data?.Message}`);
-                }
-            } catch (error) {
-                // this.renderErr(`Error!`);
-                if (error?.response?.status === 401) {
-                    this.isPass = true;
-                }
-            } finally {
-                this.loadingBtn = false;
-            }
+            this.useItem = item;
+            this.openUseCount = true;
         },
         async handleSell(item: IItemInventory) {
             const res = await userServiceInventory.getItemMarket(
@@ -575,11 +549,52 @@ export default defineComponent({
             this.isViewCart = false;
             this.getDataInventor();
         },
-        renderTitleKey(key: string) {
-            return key
-                .replace(/_/g, " ")
-                .toLowerCase()
-                .replace(/^\w/, (c) => c.toUpperCase());
+        async yesUseNumber() {
+            this.loadingBtn = true;
+            try {
+                const data = {
+                    UserId: this.userId,
+                    ItemCount: this.countUse,
+                    ItemId: this.useItem?.id,
+                };
+                const res = await userServiceInventory.useInventory(data);
+                trackEventBtn({
+                    label: `${this.useItem?.Code}` || "Use_Inventory",
+                });
+                if (res.success) {
+                    const valueRes = res?.data?.[0];
+                    await this.renderSuccess(
+                        `Received ${valueRes?.Value} ${valueRes?.ValueType}`
+                    );
+
+                    Object.keys(this.itemsInventory)?.forEach((key) => {
+                        const items = this.itemsInventory[key];
+                        items?.forEach((el) => {
+                            const { id } = el;
+
+                            if (id === this.useItem?.id) {
+                                el.ItemCount -= this.countUse;
+                            }
+                        });
+                    });
+
+                    if (this.useItem.ItemCount === 1) {
+                        await this.getDataInventor();
+                    }
+                } else {
+                    this.renderErr(`Received ${res?.data?.Message}`);
+                }
+            } catch (error) {
+                if (error?.response?.status === 401) {
+                    this.isPass = true;
+                }
+            } finally {
+                this.loadingBtn = false;
+                this.openUseCount = false;
+            }
+        },
+        noUseNumber() {
+            this.openUseCount = false;
         },
     },
 });
@@ -587,6 +602,7 @@ export default defineComponent({
 
 <style scoped lang="scss">
 @import "@/styles/global.scss";
+
 .wr-inventory-page {
     height: 100%;
     position: absolute;
@@ -601,6 +617,7 @@ export default defineComponent({
     background-repeat: no-repeat;
     background-size: cover;
 }
+
 @keyframes fadeInDetailEvent {
     0% {
         opacity: 0;
@@ -613,15 +630,6 @@ export default defineComponent({
     }
 }
 
-.banner-inventory {
-    // background-image: url("./../../../public/assets/inventory/banner-inventory.png");
-    // background-position: center;
-    // background-repeat: no-repeat;
-    // background-size: cover;
-    // width: 100%;
-    // height: 100px;
-}
-
 .btn-inventory {
     display: flex;
     width: 100%;
@@ -631,6 +639,7 @@ export default defineComponent({
     font-size: 12px;
     font-weight: 800;
 }
+
 .btn-item-inventory.active {
     background: #ffa53a;
     color: white;
@@ -645,7 +654,6 @@ export default defineComponent({
 .wr-box {
     height: 100%;
     padding: 15px;
-    // height: calc(100% - 140px);
     .inventory-detail {
         height: 100%;
         display: flex;
@@ -656,35 +664,42 @@ export default defineComponent({
         overflow-y: auto;
         scrollbar-width: none;
     }
+
     .box-item {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
         gap: 20px 10px;
         animation: slideIn 0.5s forwards;
+
         button {
             padding: 12px;
             font-size: 12px;
             border-radius: 8px;
             min-width: fit-content;
         }
+
         .item {
             position: relative;
             display: flex;
         }
+
         .item-badge {
             position: relative;
             display: flex;
             flex-direction: column;
             gap: 5px;
+
             .img-badge {
                 width: 100%;
                 object-fit: cover;
             }
         }
+
         .item-img {
             width: 100%;
             position: relative;
             cursor: pointer;
+
             img {
                 width: 100%;
                 height: 100%;
@@ -701,11 +716,13 @@ export default defineComponent({
             border-radius: 8px;
         }
     }
+
     .disable {
         pointer-events: none;
         opacity: 0.5;
     }
 }
+
 .slot-item {
     font-size: 10px;
     font-weight: 800;
@@ -723,6 +740,7 @@ export default defineComponent({
 .animation-inventory {
     animation: slideIn 0.5s forwards;
 }
+
 .slideIn-fusion {
     animation: slideIn 0.5s forwards;
 }
@@ -731,6 +749,7 @@ export default defineComponent({
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
@@ -740,6 +759,7 @@ export default defineComponent({
     from {
         opacity: 1;
     }
+
     to {
         opacity: 0;
     }

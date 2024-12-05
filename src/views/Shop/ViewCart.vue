@@ -225,7 +225,7 @@ import PopupPassword from "@/components/popup/PopupPassword.vue";
 import PopupConfirm from "@/components/PopupConfirm.vue";
 import { EItemDefType, IItemInventory } from "@/interface";
 import userServiceInventory from "@/services/inventoryService";
-import { formattedBalance } from "@/utils";
+import { formattedBalance, trackEventBtn } from "@/utils";
 import {
     IDetailCart,
     TabTypeBS,
@@ -260,6 +260,10 @@ export default defineComponent({
             type: String as () => "inventory" | "",
             required: false,
         },
+        dataInventory: {
+            type: Array as PropType<IItemInventory[]>,
+            required: false,
+        }
     },
     watch: {
         isViewCart(newValue) {
@@ -270,7 +274,11 @@ export default defineComponent({
         },
     },
     created() {
-        this.getInventory();
+        if(!this.currentPage){
+            this.getInventory();
+        }else{
+            this.itemsInventory = this.dataInventory;
+        }
         this.getFee();
     },
     mounted() {
@@ -518,6 +526,9 @@ export default defineComponent({
             };
 
             const handleResponse = async (response, successMsg) => {
+                trackEventBtn({
+                    label: this.activeTab,
+                });
                 if (response.success) {
                     await this.renderSuccess(successMsg);
                     this.$emit("closeCallApi");

@@ -1,20 +1,27 @@
 <template>
     <div class="container-info" v-show="isTelegramLogin">
         <div class="info-user">
-            <div class="wr-avt" :style="{
-                backgroundImage: `url(${urlAvt})`,
-            }" />
+            <div
+                class="wr-avt"
+                :style="{
+                    backgroundImage: `url(${urlAvt})`,
+                }"
+            />
 
             <div class="wrap-username-lv">
-                <div class="username f-bangopro">{{ first_name }} {{ last_name }}</div>
+                <div class="username f-bangopro">
+                    {{ first_name }} {{ last_name }}
+                </div>
                 <div class="lv">
-
                     <div class="text f-bangopro">
                         {{ dataLevel?.attributes?.levelName }}
                     </div>
 
                     <div class="exp-lv">
-                        <div class="progress-bar" :style="{ width: percentageLevel + '%' }" />
+                        <div
+                            class="progress-bar"
+                            :style="{ width: percentageLevel + '%' }"
+                        />
                         <div class="progress-text">
                             <div class="number" v-if="isMaxLv">Max</div>
                             <div class="number" v-else>
@@ -29,11 +36,13 @@
 
         <div class="wr-badge">
             <div v-for="(item, index) in itemsBadge" :key="index">
-                <div class="badge-img" :style="{
-                    backgroundImage: `url(${item?.ItemDef?.ImageUrl})`,
-                }"></div>
+                <div
+                    class="badge-img"
+                    :style="{
+                        backgroundImage: `url(${item?.ItemDef?.ImageUrl})`,
+                    }"
+                ></div>
             </div>
-
         </div>
     </div>
 </template>
@@ -46,6 +55,7 @@ import { calcExpPercentage, calcLevel, nextExpLevel } from "@/utils/exp";
 import { defineComponent } from "vue";
 import { EItemDefType, IItemInventory } from "@/interface";
 import userServiceInventory from "@/services/inventoryService";
+import { mapState } from "vuex";
 
 export default defineComponent({
     name: "InfoUserPage",
@@ -56,6 +66,9 @@ export default defineComponent({
             required: true,
         },
     },
+    computed: {
+        ...mapState(["avtStore", "dataLvStore"]),
+    },
     watch: {
         dataLogin: {
             deep: true,
@@ -65,25 +78,32 @@ export default defineComponent({
             },
         },
     },
+    async mounted() {
+        await this.getLevels();
+        if (!this.avtStore) {
+            await this.getAvt();
+        } else {
+            this.urlAvt = this.avtStore;
+        }
+        await this.getListInventorHome();
+    },
     data() {
         const dataUserTele = window?.Telegram?.WebApp?.initDataUnsafe;
-
-        let first_name = dataUserTele?.user?.first_name || "";
-        let last_name = dataUserTele?.user?.last_name || "";
+        let first_name = dataUserTele?.user?.first_name;
+        let last_name = dataUserTele?.user?.last_name;
 
         return {
             isTelegramLogin: !!first_name || !!last_name,
             idUser: dataUserTele.user?.id?.toString() ?? "",
-            first_name: first_name,
-            last_name: last_name,
+            first_name: first_name || '',
+            last_name: last_name || '',
             isAnimated: false,
-
+            animationTimeout: null,
             urlAvt: "./../../../public/assets/no-img.jpg",
             dataLevel: {} as ILevel,
             expLevelNext: {} as ILevel,
             percentageLevel: 0,
             isMaxLv: false,
-
             urlBadge: "./../../../public/assets/event/beta test.png",
             itemsBadge: [] as IItemInventory[],
         };
@@ -91,16 +111,30 @@ export default defineComponent({
     methods: {
         triggerAnimation() {
             this.isAnimated = true;
-            setTimeout(() => {
+            if (this.animationTimeout) {
+                clearTimeout(this.animationTimeout);
+            }
+
+            this.animationTimeout = setTimeout(() => {
                 this.isAnimated = false;
+                this.animationTimeout = null;
             }, 1000);
         },
         async getAvt() {
             const res = await userServiceTelebot.getAvtTelegram(this.idUser);
             this.urlAvt = res;
+            this.$store.commit("setAvtStore", res);
         },
-        async getLevels() {
-            const dataLv: ILevel[] = await userService.getLevels();
+        async getLevels() {                        
+            const dataLv: ILevel[] =
+                this.dataLvStore?.length > 0
+                    ? this.dataLvStore
+                    : await userService.getLevels();
+                    
+            if (this.dataLvStore?.length === 0) {                
+                this.$store.commit("setDataLvStore", dataLv);
+            }
+            // const dataLv: ILevel[] = await userService.getLevels();
 
             const dataExpCurrent = this.dataLogin?.attributes?.exp;
 
@@ -118,7 +152,7 @@ export default defineComponent({
                 currentLv
             );
 
-            const maxLV = dataLv?.pop();
+            const maxLV = dataLv?.[dataLv?.length - 1];
 
             if (maxLV?.attributes?.level == currentLv?.attributes?.level) {
                 this.percentageLevel = 100;
@@ -139,20 +173,19 @@ export default defineComponent({
                 const res = await userServiceInventory.getListInventory(
                     Number(this.idUser)
                 );
-                    const filterBadge = res?.Items?.filter(
-                        (item) => item?.ItemDef?.Type === EItemDefType.Medal
-                    );
-                    this.itemsBadge = filterBadge;
-
+                const filterBadge = res?.Items?.filter(
+                    (item) => item?.ItemDef?.Type === EItemDefType.Medal
+                );
+                this.itemsBadge = filterBadge;
             } catch (error) {
                 console.error(error);
             }
         },
     },
-    async mounted() {
-        await this.getLevels();
-        await this.getAvt();
-        await this.getListInventorHome();
+    unmounted() {
+        if (this.animationTimeout) {
+            clearTimeout(this.animationTimeout);
+        }
     },
 });
 </script>
@@ -249,7 +282,7 @@ $deep-teal: #005662;
         top: 50%;
         transform: translate(0%, -50%);
         display: flex;
-        right: 2%; 
+        right: 2%;
         height: 10px;
     }
 }

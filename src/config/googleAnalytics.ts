@@ -1,0 +1,1 @@
+export const GA_TRACKING_ID = import.meta.env.VUE_APP_GA_TRACKING_ID

@@ -50,16 +50,15 @@ export default {
 .input-wrapper {
     display: flex;
     flex-direction: column;
-    margin-bottom: 10px;
+    text-align: left;
 }
 
 .input-field {
-    padding: 8px;
+    padding: 4px;
     border: 1px solid #ccc;
     border-radius: 4px;
     width: 100%;
     box-sizing: border-box;
-    text-align: right;
     color: black;
 }
 

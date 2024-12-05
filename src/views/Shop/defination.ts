@@ -160,3 +160,29 @@ export const selectOptionsStatus = [
 
 export type BuySellOption = "Buy" | "Sell" | "All";
 export type StatusOption = "A" | "FF" | "CC" | "All";
+
+export interface IMarketTransactions {
+    playerId: string;
+    amount: number;
+    unit: string;
+    walletType: string;
+    tranType: string;
+    opr: string;
+    status: WalletTransactionStatus;
+    address: string;
+    hash: string;
+    fee: number;
+    message: string | null;
+    id: number;
+    netAmount: number;
+    createdAt: Date;
+    updatedAt: Date;
+  }
+
+  export enum WalletTransactionStatus {
+    PENDING = 'PENDING',
+    SUCCESS = 'SUCCESS',
+    FAILED = 'FAILED',
+    PROCESSING = 'PROCESSING',
+  }
+  

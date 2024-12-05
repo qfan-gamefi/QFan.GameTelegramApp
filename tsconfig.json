@@ -1,12 +1,12 @@
 {
-    "files": [],
+    // "files": [],
     "references": [
-        {
-            "path": "./tsconfig.node.json"
-        },
-        {
-            "path": "./tsconfig.app.json"
-        }
+        // {
+        //     "path": "./tsconfig.node.json"
+        // },
+        // {
+        //     "path": "./tsconfig.app.json"
+        // }
     ],
     "compilerOptions": {
         "module": "esnext",
@@ -15,10 +15,10 @@
         "lib": ["esnext", "dom"],
         "allowJs": true,
         "noImplicitAny": false,
-        "noEmit": true,
+        "noEmit": false,
         "checkJs": false,
-        "esModuleInterop": true,
-        "forceConsistentCasingInFileNames": true,
+        // "esModuleInterop": true,
+        // "forceConsistentCasingInFileNames": true,
         "baseUrl": "./",
         "paths": {
             "@/*": ["src/*"],
@@ -29,9 +29,10 @@
             "@utils/*": ["src/utils/*"],
             "@services/*": ["src/services/*"],
             "@styles/*": ["src/styles/*"],
-            "@interface/*": ["src/interface/*"]
+            "@interface/*": ["src/interface/*"],
+            "@config/*": ["src/config/*"]
         }
     },
-    "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"],
+    "include": ["src/**/*.ts", "src/**/*.vue"],
     "exclude": ["node_modules", "dist"]
 }

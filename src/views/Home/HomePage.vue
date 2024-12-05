@@ -20,18 +20,15 @@ import InviteFrens from "@/components/InviteFrens.vue";
 import MissionList from "@/views/Mission/MissionsList.vue";
 import BoosterForm from "@/components/BoosterForm.vue";
 import userService from "@/services/userService";
-// import EventBus from "@/utils/eventBus";
 import EventList from "@/views/Event/EventList.vue";
 import CheckinForm from "@/views/Checkin/CheckinForm.vue";
 import { secureStorage, storage } from "@/storage/storage";
 import { quais, type Wallet } from "quais";
 import NotificationToast from "@/components/NotificationToast.vue";
-// import { title } from "process";
-// import { title } from "process";
 import type { ILevel } from "@/interface";
 import InfoUser from "@/views/InfoUser/InfoUser.vue";
 import LoadingScreen from "@/views/LoadingScreen/LoadingScreen.vue";
-import { formattedBalance } from "@/utils";
+import { formattedBalance, trackEventBtn } from "@/utils";
 import { mapState, useStore } from "vuex";
 import { preloadImages } from "@/utils/preloadImages";
 import HDKeyring from "@/crypto_utils/HDKeyring";
@@ -41,8 +38,8 @@ import type {
     QuaiTransactionResponse,
 } from "quais/lib/esm/providers";
 import {
-    QFPContractAddress,
-    QFPOwerWalletAddress,
+    CONTRACT_OWNER_ADDRESS,
+    CURRENT_WALLET_VERSION,
 } from "@/crypto_utils/constants";
 import { DEFAULT_QUAI_TESNTET } from "@/services/network/chains";
 import { getAddress, parseEther, toBigInt } from "ethers";
@@ -51,6 +48,7 @@ import PopupPassword from "@/components/popup/PopupPassword.vue";
 import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
 import PopupComponent from "@/components/popup/PopupComponent.vue";
 import InputField from "@/components/Input/InputField.vue";
+import { GA_TRACKING_ID } from "@/config/googleAnalytics";
 
 const REF_MESS_PREFIX: string = "start r_";
 const REF_TOKEN_PREFIX: string = "TOKEN_";
@@ -78,16 +76,6 @@ export default {
 
         let first_name = dataUserTele?.user?.first_name || "";
         let last_name = dataUserTele?.user?.last_name || "";
-
-        if (
-            dataUserTele?.start_param &&
-            dataUserTele?.start_param?.startsWith("TOKEN_")
-        ) {
-            secureStorage.set(
-                "SECURITY_TOKEN",
-                dataUserTele.start_param?.replace("TOKEN_", "")
-            );
-        }
 
         return {
             isLoadingCreen: true,
@@ -173,15 +161,16 @@ export default {
                 this.isExecAutoInteract = true;
             }
         },
-        autoMessStore(newVal, oldVal) {
+        autoMessTextStore(newVal, oldVal) {
             this.widthWining = 0;
-
             if (this.autoMessStore) {
-                this.renderSuccess(`Mining success +${30} QFP`);
+                this.renderSuccess(
+                    `Mining success, block reward is being calculated.`
+                );
                 this.calcWidthMining();
                 this.getInfoUser();
             } else {
-                this.renderErr(`${this.autoMessTextStore}`);
+                this.renderErr(newVal);
             }
         },
     },
@@ -279,7 +268,6 @@ export default {
                 } else {
                     const resData = data?.data?.[0];
 
-                    // secureStorage.set("data_login", resData);
                     this.$store.commit("setRewardInfo", resData);
                     this.dataLogin = resData;
                     this.dataQPoint =
@@ -296,27 +284,7 @@ export default {
         },
 
         async isValidRefCode(referCode: string) {
-            const myHeaders = new Headers();
-            myHeaders.append("Content-Type", "application/json");
-
-            const raw = JSON.stringify({
-                data: {
-                    refererCode: referCode,
-                },
-            });
-
-            const requestOptions: any = {
-                method: "POST",
-                headers: myHeaders,
-                body: raw,
-                redirect: "follow",
-            };
-
-            var response = await fetch(
-                "https://qfan-api.qcloud.asia/api/player/checkRefererCode",
-                requestOptions
-            );
-            return response.status == 200;
+            return await userService.checkCode(referCode);
         },
         async submitCode() {
             this.isClaim = true;
@@ -357,6 +325,9 @@ export default {
         },
 
         async handleReward() {
+            trackEventBtn({
+                label: "Claim/Trainning",
+            });
             try {
                 const res = await userService.takeReward(this.idUser!);
                 if (res) {
@@ -446,21 +417,32 @@ export default {
         },
         handleBackButton() {
             Telegram.WebApp.BackButton.show();
-
-            Telegram.WebApp.BackButton.onClick(() => {
+            const handleClick = () => {
                 this.$router.push("/");
-
                 this.showMission = false;
                 this.showEvent = false;
                 this.showBooster = false;
                 this.showInvite = false;
-
-                this.getInfoUser();
                 this.activeButton = "";
+                this.getInfoUser();
+
                 Telegram.WebApp.BackButton.hide();
-            });
+                Telegram.WebApp.BackButton.offClick(handleClick);
+            };
+
+            Telegram.WebApp.BackButton.onClick(handleClick);
         },
         handleButtonTab(tab) {
+            if (window.gtag) {
+                window.gtag("config", GA_TRACKING_ID, {
+                    page_path: `/${tab}`,
+                    page_title: tab,
+                });
+            }
+            trackEventBtn({
+                label: tab,
+            });
+
             this.isCheckin = false;
 
             this.handleBackButton();
@@ -498,10 +480,11 @@ export default {
             Object.assign(this, tabMappings[tab]);
         },
         async handleWallet() {
-            this.handleBackButton();
-
+            trackEventBtn({
+                label: "Wallet",
+            });
             const walletType = localStorage.getItem("walletType");
-            if (walletType !== "GOLDEN_AGE_WALLET_V3") {
+            if (walletType !== CURRENT_WALLET_VERSION) {
                 localStorage.removeItem("tallyVaults");
                 localStorage.removeItem("address");
                 this.$router.push({ name: "WalletCreate" });
@@ -516,6 +499,9 @@ export default {
             }
         },
         async onCheckIn() {
+            trackEventBtn({
+                label: "Wallet",
+            });
             try {
                 this.titleCheckin = "Processing";
                 this.isExecCheckin = true;
@@ -532,22 +518,20 @@ export default {
 
                     const request: QuaiTransactionRequest = {
                         from: address,
-                        to: QFPOwerWalletAddress,
+                        to: CONTRACT_OWNER_ADDRESS,
                     };
 
                     const tx = (await keyringService.sendTokenTransaction(
                         request
-                    )) as QuaiTransactionResponse;
+                    )) as unknown as unknown as QuaiTransactionResponse;
 
                     const claimCheckin = await userService.claimCheckin(
                         this.idUser,
                         activeWallet?.address as string,
                         tx.hash as string
                     );
-
-                    console.log("claimCheckin", claimCheckin);
-
                     await this.getInfoUser();
+                    
                     if (claimCheckin.error) {
                         this.renderErr(claimCheckin?.message);
                     } else {
@@ -556,84 +540,29 @@ export default {
                 } else {
                     this.$router.push({ name: "WalletCreate" });
                 }
-                this.isExecCheckin = false;
             } catch (error) {
-                this.renderErr(error?.message);
-                this.isExecCheckin = false;
-            } finally {
+                console.log("error", error);
+                this.renderErr(
+                    "Checkin failed! Chain is not ready to interact."
+                );
+            } finally {                
                 this.isExecCheckin = false;
                 this.titleCheckin = "Checkin";
-            }
+            }            
         },
         async onAutoInteract() {
-            this.$store.commit("setAutoMining", true);
-
-            // const keyringService = new HDKeyring();
-            // await keyringService.unlock();
-
-            // const activeWallet = keyringService
-            //     .getWallets()
-            //     ?.at(0) as PrivateKey;
-
-            // const address = await activeWallet?.addresses?.at(0);
-
-            // if (!address) {
-            //     this.$router.push({ name: "WalletCreate" });
-            //     return;
-            // }
-
-            // this.calcWidthMining();
-            // this.isExecAutoInteract = true;
-            // await this.autoInteract(keyringService);
-
-            // this.autoInteractInterval = setInterval(async () => {
-            //     await this.calcWidthMining();
-            //     await this.autoInteract(keyringService);
-            // }, MINING_INTERVAL);
+            const walletType = localStorage.getItem("walletType");
+            if (walletType !== CURRENT_WALLET_VERSION) {
+                localStorage.removeItem("tallyVaults");
+                localStorage.removeItem("address");
+                this.$router.push({ name: "WalletCreate" });
+            } else {
+                this.$store.commit("setAutoMining", true);
+                trackEventBtn({
+                    label: "AutoMining",
+                });
+            }
         },
-        // async autoInteract(keyringService: HDKeyring) {
-        //     try {
-        //         if (keyringService.getWallets().length > 0) {
-        //             this.isExecAutoInteract = true;
-        //             const activeWallet = keyringService.getActiveWallet();
-        //             if (!activeWallet) {
-        //                 this.$router.push({ name: "WalletCreate" });
-        //                 return;
-        //             }
-
-        //             const address = await activeWallet?.address;
-
-        //             const request: QuaiTransactionRequest = {
-        //                 from: address,
-        //                 to: QFPOwerWalletAddress,
-        //             };
-
-        //             const tx = (await keyringService.sendTokenTransaction(
-        //                 request
-        //             )) as QuaiTransactionResponse;
-
-        //             const autoInteract = await userService.autoInteract(
-        //                 this.idUser,
-        //                 activeWallet?.address as string,
-        //                 tx.hash as string
-        //             );
-        //             await this.getInfoUser();
-        //             if (autoInteract.error) {
-        //                 this.renderErr(autoInteract?.message);
-        //                 this.widthWining = 0;
-        //             } else {
-        //                 this.widthWining = 0;
-        //                 this.renderSuccess(`Mining success +${30} QFP`);
-        //                 this.calcWidthMining();
-        //             }
-        //         } else {
-        //             this.$router.push({ name: "WalletCreate" });
-        //         }
-        //     } catch (error) {
-        //         this.renderErr(error?.message);
-        //         await this.getInfoUser();
-        //     }
-        // },
         calcWidthMining() {
             const totalTime = MINING_INTERVAL;
             const updateInterval = 1000;
@@ -661,6 +590,9 @@ export default {
             await this.getInfoUser();
         },
         handleGiftCode() {
+            trackEventBtn({
+                label: "GiftCode",
+            });
             this.openGiftCode = true;
         },
         async handleYesGiftCode() {
@@ -678,10 +610,20 @@ export default {
             this.openGiftCode = false;
             this.giftCode = "";
         },
+        handleTutorial() {
+            trackEventBtn({
+                label: "Tutorial",
+            });
+            window.open("https://t.me/QFanClubAnnouncement/103", "_blank");
+        },
+        openAnnouncement(){
+            window.open('https://t.me/QFanClubAnnouncement', '_blank');
+        }
     },
     async mounted() {
         Telegram.WebApp.ready();
-        Telegram.WebApp.setHeaderColor("#ffffff");
+        Telegram.WebApp.BackButton.hide();
+        this.$store.commit("setRouterFusion", false);
         await this.getInfoUser();
 
         if (!this.hasLoaded) {
@@ -714,25 +656,53 @@ export default {
         <div class="container-game">
             <InfoUser v-if="dataLogin" :dataLogin="dataLogin" />
 
-            <div class="link-checkin">
-                <div>
-                    <button @click="handleWallet">
-                        <i class="fa-solid fa-wallet"></i>
-                        Wallet
-                    </button>
-                </div>
-                <button @click="onCheckIn()" v-bind:disabled="isExecCheckin">
-                    <i class="fa-solid fa-calendar-days"></i> {{ titleCheckin }}
-                    <span v-if="isExecCheckin"
-                        ><i class="fa fa-spinner"></i
-                    ></span>
-                </button>
-                <div>
-                    <button @click="handleGiftCode()">
-                        <i class="fa-solid fa-gift"></i>
-                        Gift code
-                    </button>
-                </div>
+            <div class="container-menu">
+                <input
+                    type="checkbox"
+                    id="openmenu"
+                    class="hamburger-checkbox"
+                />
+
+                <label class="hamburger-icon cursor-pointer" for="openmenu">
+                    <div class="btn-wl-icon">
+                        <button class="btn-menu wallet" @click="handleWallet">
+                            <i class="fa-solid fa-wallet"></i>
+                            Wallet
+                        </button>
+                    </div>
+
+                    <div class="open-menu btn-menu" for="openmenu">
+                        <i class="fa-solid fa-bars"></i>
+                        Menu
+                    </div>
+
+                    <div class="close-menu" for="openmenu">
+                        <button
+                            class="btn-menu"
+                            @click="onCheckIn(), openAnnouncement()"
+                            v-bind:disabled="isExecCheckin"
+                        >
+                            <i class="fa-solid fa-calendar-days"></i>
+                            {{ titleCheckin }}
+                            <span v-if="isExecCheckin"
+                                ><i class="fa fa-spinner"></i
+                            ></span>
+                        </button>
+                        <button @click="handleGiftCode()" class="btn-menu">
+                            <i class="fa-solid fa-gift"></i>
+                            Gift code
+                        </button>
+                        <button @click="handleTutorial()" class="btn-menu">
+                            <i class="fa-solid fa-book"></i>
+                            Tutorials
+                        </button>
+
+                        <div class="close-menu-icon btn-menu">
+                            <i class="fa-solid fa-x"></i>
+                            Close
+                        </div>
+                    </div>
+                </label>
             </div>
 
             <div class="contaner-balance">
@@ -779,7 +749,7 @@ export default {
                         </div>
                     </div>
 
-                    <!-- <div class="box-info" :style="styleWining">
+                    <div class="box-info" :style="styleWining">
                         <div class="auto-left">
                             <div class="woodwork-loader">
                                 <div
@@ -807,11 +777,12 @@ export default {
                                 Mining
                             </div>
                         </div>
-                    </div> -->
+                    </div>
                 </div>
             </div>
 
-            <BoxAction @back-clicked="handleBackButton" />
+            <BoxAction />
+            <BoxAction />
             <MainGame ref="phaserRef" />
         </div>
 
@@ -947,11 +918,13 @@ export default {
             @no="handleNoGiftCode()"
         >
             <template #content>
-                <InputField
-                    v-model="giftCode"
-                    label=""
-                    placeholder="Enter Code"
-                />
+                <div class="px-[10px]">
+                    <InputField
+                        v-model="giftCode"
+                        label=""
+                        placeholder="Enter the code"
+                    />
+                </div>
             </template>
         </PopupComponent>
     </div>

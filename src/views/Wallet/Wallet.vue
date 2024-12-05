@@ -34,7 +34,7 @@
                     <div class="flex gap-[10px]">
                         Total balance
 
-                        <div @click="toggleVisibility">
+                        <div @click="toggleVisibility()">
                             <div v-if="!isVisible">
                                 <i class="fa-solid fa-eye"></i>
                             </div>
@@ -68,6 +68,8 @@
                             v-bind:disabled="executing"
                         >
                             <i class="fa-solid fa-faucet"></i> Faucet
+                            <div v-if="isFaucet"><i class="fa fa-spinner loading"></i></div>
+                            
                         </button>
                     </div>
 
@@ -110,7 +112,8 @@
                                         src="@public/assets/logo-quai.svg"
                                         class="w-5"
                                     />
-                                    <h2>{{ balance }} QUAI</h2>
+                                    <h2 v-if="isVisible">{{ balance }} QUAI</h2>
+                                    <h2 v-else>*********</h2>
                                 </div>
                             </div>
                         </div>
@@ -337,9 +340,13 @@ import HDKeyring from "@/crypto_utils/HDKeyring";
 import { type WalletInfo } from "@/crypto_utils/type";
 import type { QuaiTransactionRequest } from "quais/lib/esm/providers";
 import { formatEther, parseEther, toBigInt } from "ethers";
+import { CURRENT_WALLET_VERSION } from "@/crypto_utils/constants";
+import BackButtonTelegram from "@/mixins/BackButtonTelegram";
+import { trackEventBtn } from "@/utils";
 
 export default defineComponent({
     name: "WalletDetail",
+    mixins: [BackButtonTelegram],
     components: {
         NotificationToast,
         LoadingForm,
@@ -372,6 +379,7 @@ export default defineComponent({
             filterStatus: "",
             transactionUrl: "",
             openReceive: false,
+            isFaucet: false,
         };
     },
     methods: {
@@ -405,12 +413,12 @@ export default defineComponent({
             this.activities = (await fetchActivity(
                 this.activeWallet?.address as string
             )) as never[];
-            console.log("activites", this.activities);
 
             this.executing = false;
         },
         async faucet() {
             try {
+                this.isFaucet = true;
                 this.executing = true;
                 this.errorMessage = "";
                 this.transactionUrl = "";
@@ -418,13 +426,16 @@ export default defineComponent({
                     this.playerId,
                     this.activeWallet?.address as string
                 );
-                // console.log("faucetResult", faucetResult);
+                trackEventBtn({
+                    label: 'Faucet',
+                });
                 if (
                     faucetResult.statusCode &&
                     faucetResult.statusCode !== 200
                 ) {
                     this.errorMessage = "Faucet error: " + faucetResult.message;
                     this.executing = false;
+                    this.isFaucet = false;
                     return;
                 }
                 if (faucetResult?.hash) {
@@ -432,11 +443,13 @@ export default defineComponent({
                         faucetResult?.hash
                     );
                 }
+                this.isFaucet = false;
                 this.executing = false;
             } catch (error) {
-                console.log("error", error);
+                // console.log("error", error);
                 this.errorMessage = "Faucet error: " + error?.message;
                 this.executing = false;
+                this.isFaucet = false;
             }
         },
         async linkToExplore(e: Event) {
@@ -476,7 +489,9 @@ export default defineComponent({
                 this.errorMessage = "Password is incorrect";
                 return;
             }
-
+            trackEventBtn({
+                label: 'Send_wallet',
+            });
             try {
                 this.executing = true;
                 const hdKeyring = new HDKeyring();
@@ -485,15 +500,13 @@ export default defineComponent({
                     from: this.activeWallet?.address as string,
                     to: this.toAddress,
                     value: parseEther(this.sendValue.toString()),
-                } as unknown as QuaiTransactionRequest;
-
-                // const signedData = await this.keyringService.signTransaction(this.toAddress, transaction);
+                } as unknown as QuaiTransactionRequest;                
 
                 const result = await hdKeyring.signAndSendQuaiTransaction(
                     transaction
                 );
 
-                // console.log("result", result);
+                console.log("result", result);
                 this.openSend = false;
                 setTimeout(() => {
                     this.setActiveTab(new Event(""), "activities");
@@ -552,7 +565,7 @@ export default defineComponent({
         // }
 
         const walletType = localStorage.getItem("walletType");
-        if (walletType !== "GOLDEN_AGE_WALLET_V3") {
+        if (walletType !== CURRENT_WALLET_VERSION) {
             localStorage.removeItem("tallyVaults");
             localStorage.removeItem("address");
             this.$router.push({ name: "WalletCreate" });

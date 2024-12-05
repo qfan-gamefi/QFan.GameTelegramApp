@@ -7,7 +7,7 @@ const userService = {
     },
     async getListMission() {
         const res = await axiosInstance.get(
-            `/missions?populate[QA][populate]=*&populate[category][populate]=*`
+            `/missions?populate[QA][populate]=*&populate[image][populate]=*&populate[category][populate]=*`
         );
 
         return res.data;
@@ -129,7 +129,7 @@ const userService = {
             return error?.response?.data;
         }
     },
-    async autoInteract(userId: string, toAddress: string, hash: string) {
+    async autoInteract(userId: string, toAddress: string, hash: any) {
         try {
             const dataForm = {
                 playerId: userId,
@@ -211,6 +211,23 @@ const userService = {
         );
         return res;
     },
+    async postWithdraw(
+        playerId: string,
+        address: string,
+        amount: number
+    ) {
+        const data = {
+            playerId,
+            address: address,
+            amount: amount,
+            unit: "QUAI"
+        };
+        const res = await networkAxiosInstance.post(
+            `/wallet/withdraw-onchain`,
+            data
+        );
+        return res;
+    },
     async getLevels() {
         const res = await axiosInstance.get(
             `/player-levels?pagination[pageSize]=9999`
@@ -264,6 +281,12 @@ const userService = {
             return error;
         }
     },
+    async walletTrasnsaction(idUser: string) {
+        const res = await networkAxiosInstance.get(
+            `/wallet/find-transaction-by-player/${idUser}`
+        );
+        return res;
+    }
 };
 
 export default userService;

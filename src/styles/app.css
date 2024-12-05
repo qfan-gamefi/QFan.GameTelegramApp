@@ -247,21 +247,18 @@
     font-size: 12px;
 }
 
-.link-checkin {
+.container-menu {
     position: absolute;
     top: 3%;
-    right: 3%;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    right: 2%;
+    z-index: 1;
 }
 
-.link-checkin a {
+.container-menu a {
     color: #fff;
     text-decoration: none;
 }
-
-.link-checkin button {
+.container-menu button {
     border: none;
     border-radius: 8px;
     font-size: 10px;
@@ -560,4 +557,56 @@
 
 .wr-balance img {
     width: 20px;
+}
+
+/* gr btn */
+.hamburger-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: end;
+}
+.btn-wl-icon{
+    width: 70px;
+    margin-bottom: 8px;
+}
+
+.open-menu,.close-menu-icon{
+    font-weight: 800;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffa53a;
+    border-radius: 8px;
+    padding: 10px;
+    height: 16px;
+    min-width: 64px;
+    justify-content: center;
+}
+.close-menu{
+    display: none;
+}
+#openmenu:checked ~ .hamburger-icon .open-menu {
+    display: none;
+}
+#openmenu:checked ~ .hamburger-icon .btn-wl-icon {
+    width: calc(50% - 4px);
+}
+
+#openmenu:checked ~ .hamburger-icon .close-menu {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    transition: 0.6s ease-in-out;
+    gap: 8px;
+}
+
+.btn-menu {
+    min-width: 70px;
+}
+input.hamburger-checkbox {
+    z-index: 3;
+    width: 1vw;
+    opacity: 0;
+    height: 1vh;
+    position: absolute;
 }

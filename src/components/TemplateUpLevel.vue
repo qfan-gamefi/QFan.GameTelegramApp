@@ -119,7 +119,7 @@ import userService from "../services/userService";
 import Notification from "./NotificationToast.vue";
 // import EmptyForm from "./EmptyForm.vue";
 import Loading from "./LoadingForm.vue";
-import { formattedBalance } from "@/utils";
+import { formattedBalance, trackEventBtn } from "@/utils";
 
 export default {
     components: {
@@ -186,6 +186,9 @@ export default {
         },
         async handleUplevel() {
             try {
+                trackEventBtn({
+                    label: 'Booster',
+                });
                 this.loading = true;
                 await userService.postUplevel(this.idUser, this.typeBooster);
                 this.$emit("close");

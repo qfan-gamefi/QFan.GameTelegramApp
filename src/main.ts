@@ -13,6 +13,7 @@ import "./styles/global.scss";
 import "./styles/app.css";
 import "./styles/animation/popup.scss";
 import AutoMining from "./views/Home/AutoMining.vue";
+import { GA_TRACKING_ID } from "./config/googleAnalytics";
 
 // @ts-ignore
 window.Buffer = Buffer;
@@ -20,6 +21,16 @@ window.global = window;
 
 // createApp(SampleGame).mount("#app");
 const app = createApp(SampleGame);
+
+router.afterEach((to) => {
+    if (window.gtag) {
+        window.gtag("config", GA_TRACKING_ID, {
+            page_path: to.fullPath,
+            page_title: to.name,
+        });
+    }
+});
+
 app.use(VueDragscroll);
 app.use(router);
 app.use(store);

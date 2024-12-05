@@ -68,14 +68,25 @@
                     ></div>
                 </div>
 
-                <div class="box-submit">
+                <div class="flex justify-center gap-3">
                     <button
                         class="btn-submit"
-                        @click="flipCoin"
+                        @click="flipCoin()"
                         :disabled="loadingSubmit"
+                        :class="{ isOn: autoFlipValue }"
                     >
                         Flip the coin - 200
                         <img src="@public/assets/logo.svg" />
+                    </button>
+
+                    <button
+                        class="btn-auto-flip"
+                        @click="handleAutoFlip()"
+                        :disabled="loadingSubmit"
+                    >
+                        Auto Flip
+                        <div class="btn-on" v-if="autoFlipValue">ON</div>
+                        <div class="btn-off" v-else>OFF</div>
                     </button>
                 </div>
 
@@ -85,7 +96,8 @@
                         {{ formattedBalance(balance) }}
                         <img src="@public/assets/logo.svg" />
                     </div>
-                    <div class="re-load" @click="history">
+
+                    <div class="re-load" @click="handleHistory()">
                         <i class="fa-solid fa-rotate"></i>
                     </div>
                 </div>
@@ -180,15 +192,52 @@
         </div>
     </div>
 
-    <PopupConfirm
+    <!-- <PopupConfirm
         v-if="isToken"
         :text="`Click yes to invoke your security token?`"
         :visible="isToken"
         @yes="handleYesToken"
         @no="handleNoToken"
-    />
+    /> -->
 
     <PopupPassword :visible="isPass" @cancel="isPass = false" />
+
+    <PopupComponent
+        :visible="openAuto"
+        title="AUTO FLIP"
+        @yes="yesAutoFlip()"
+        @no="noAutoFlip()"
+        background-color="#500d79"
+        border="1px solid #d631ff"
+    >
+        <template #content>
+            <div class="p-[10px] flex flex-col gap-3">
+                <div>
+                    <div class="text-[14px] mb-1">Number of Auto-Flips</div>
+                    <div class="flex gap-2">
+                        <div
+                            class="box-input w-[75px]"
+                            :class="{ active: isCount }"
+                            @click="(isCount = true), (countAuto = 1)"
+                        >
+                            <InputNumber
+                                v-model="countAuto"
+                                label=""
+                                placeholder="Enter number"
+                            />
+                        </div>
+                        <div
+                            class="btn-count"
+                            :class="{ active: !isCount }"
+                            @click="btnUnlimited()"
+                        >
+                            Unlimited
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </PopupComponent>
 </template>
 
 <script lang="ts">
@@ -196,40 +245,66 @@ import LoadingForm from "@/components/LoadingForm.vue";
 import NotificationToast from "@/components/NotificationToast.vue";
 import PopupConfirm from "@/components/PopupConfirm.vue";
 import userServiceTelebot from "@/services/useServiceTeleBot";
-import { formatDateTimeUS, formattedBalance } from "@/utils";
+import { formatDateTimeUS, formattedBalance, trackEventBtn } from "@/utils";
 import { defineComponent } from "vue";
 import predictService from "@/services/predictService";
 import userService from "@/services/userService";
 import { TFlipClass, TStatusFlip } from "@/interface";
 import PopupPassword from "@/components/popup/PopupPassword.vue";
+import PopupComponent from "@/components/popup/PopupComponent.vue";
+import InputNumber from "@/components/Input/InputNumber.vue";
+import { computed, ref, watch } from "vue";
+import { mapState, useStore } from "vuex";
+import BackButtonTelegram from "@/mixins/BackButtonTelegram";
 
 export default defineComponent({
     name: "FlipPage",
+    mixins: [BackButtonTelegram],
     components: {
         NotificationToast,
         LoadingForm,
         PopupConfirm,
         PopupPassword,
+        PopupComponent,
+        InputNumber,
     },
     props: {},
-    async created() {
-        this.getInfo();
-        this.getAvt();
-        this.history();
-        this.getRate();
+    computed: {
+        ...mapState(["autoFlipStore", "avtStore", "rewardInfo"]),
     },
-    mounted() {
+    async created() {},
+    watch: {
+        autoFlipStore(newValue) {            
+            this.autoFlipValue = newValue;
+            if (!newValue) {
+                this.getInfo();
+                this.history();
+                this.getRate();
+            }
+        },
+    },
+    async mounted() {
         this.updateHeight();
+
+        if (!this.avtStore) {
+            await this.getAvt();
+        } else {
+            this.urlImg = this.avtStore;
+        }
+
+        if (!this.rewardInfo) {
+            await this.getInfo();
+        } else {
+            this.balance = Number(
+                this?.rewardInfo?.attributes?.qpoint?.data?.attributes?.balance
+            );
+        }
+        await Promise.all([this.history(), this.getRate()]);
+        this.autoFlipValue = this.autoFlipStore;
     },
+
     data() {
         const userInfo = window.Telegram.WebApp.initDataUnsafe;
-        let startParam = "";
-        if (
-            userInfo.start_param &&
-            userInfo.start_param?.startsWith("TOKEN_")
-        ) {
-            startParam = userInfo.start_param?.replace("TOKEN_", "");
-        }
 
         return {
             imageHeight: 0,
@@ -238,7 +313,7 @@ export default defineComponent({
             loading: false,
             userId: userInfo?.user?.id || "",
             fullName: `${userInfo?.user?.first_name} ${userInfo?.user?.last_name}`,
-            tokenUser: startParam,
+            // fullName: "su fly 007",
             isPopup: false,
             flipClass: "" as TFlipClass,
             urlImg: null,
@@ -256,7 +331,7 @@ export default defineComponent({
             text: "",
             descWinner: "",
 
-            isToken: false,
+            // isToken: false,
             winRate: 0,
             lights: [],
             balance: 0,
@@ -264,6 +339,11 @@ export default defineComponent({
             lostFlip: 0,
 
             isPass: false,
+
+            isCount: true,
+            openAuto: false,
+            countAuto: 1,
+            autoFlipValue: null,
         };
     },
     methods: {
@@ -283,17 +363,17 @@ export default defineComponent({
                 return this.urlImgWinner || "./../../../public/assets/logo.jpg";
             }
         },
-        handleYesToken() {
-            this.isToken = false;
-            window.Telegram.WebApp.openTelegramLink(
-                "https://t.me/QFanClubBot?start=invoketoken"
-            );
-            window.Telegram.WebApp.close();
-        },
-        handleNoToken() {
-            this.loadingSubmit = false;
-            this.isToken = false;
-        },
+        // handleYesToken() {
+        //     this.isToken = false;
+        //     window.Telegram.WebApp.openTelegramLink(
+        //         "https://t.me/QFanClubBot?start=invoketoken"
+        //     );
+        //     window.Telegram.WebApp.close();
+        // },
+        // handleNoToken() {
+        //     this.loadingSubmit = false;
+        //     this.isToken = false;
+        // },
         showPopup() {
             this.isPopup = true;
         },
@@ -309,9 +389,6 @@ export default defineComponent({
             this.notificationMessage = message;
             this.notificationType = type;
             this.showNotification = true;
-            // setTimeout(() => {
-            //     this.showNotification = false;
-            // }, 2000);
         },
         async renderSuccess(text) {
             this.renderNotification(text, "success");
@@ -381,6 +458,7 @@ export default defineComponent({
             const response = await userServiceTelebot.getAvtTelegram(
                 this.userId
             );
+            this.$store.commit("setAvtStore", response);
             this.urlImg = response || "./../../../public/assets/no-img.jpg";
         },
         async getAvtOpponent(idOpponent: number) {
@@ -393,11 +471,6 @@ export default defineComponent({
 
         async handleSubmit() {
             try {
-                // const securityToken = await secureStorage.get("SECURITY_TOKEN");
-                // if (!securityToken) {
-                //     this.isToken = true;
-                //     return;
-                // }
                 const data = {
                     gameId: 58,
                     userId: this.userId,
@@ -405,10 +478,11 @@ export default defineComponent({
                     value: 200,
                     valueType: "QFP",
                     side: 0,
-                    // securityToken: securityToken?.toString(),
                 };
                 const res = await predictService.makeFlip(data);
-
+                trackEventBtn({
+                    label: 'Flip',
+                });
                 if (res.success) {
                     this.balance = Number(this.balance) - 200;
                     this.startCountdown();
@@ -441,12 +515,6 @@ export default defineComponent({
                 } else {
                     this.loadingSubmit = false;
                     this.renderErr(res?.data?.Reason);
-                    // if (res?.data?.SecurityToken) {
-                    //     return;
-                    // } else {
-                    //     this.loadingSubmit = false;
-                    //     this.renderErr(res?.data?.Reason);
-                    // }
                 }
             } catch (error) {
                 if (error?.response?.status === 401) {
@@ -458,8 +526,6 @@ export default defineComponent({
 
         async history() {
             this.loading = true;
-            this.getRate();
-            this.getInfo();
             try {
                 const res = await predictService.getHistoryFlip(this.userId);
                 this.loading = false;
@@ -491,6 +557,46 @@ export default defineComponent({
                 console.log(error);
             }
         },
+        handleAutoFlip() {
+            if (this.autoFlipValue === true) {
+                this.$store.commit("setAutoFlip", false);
+            } else {
+                const passVerify = localStorage.getItem("passVerify");
+                if (!passVerify) {
+                    this.isPass = true;
+                } else {
+                    this.openAuto = true;
+                }
+            }
+        },
+        async yesAutoFlip() {
+            trackEventBtn({
+                label: 'Auto_flip',
+            });
+            this.$store.commit("setAutoFlip", true);
+            if (this.isCount) {
+                this.$store.commit("setCountFlip", this.countAuto);
+                this.renderSuccess(`Auto Flip ${this.countAuto} times`);
+            } else {
+                this.renderSuccess("Auto Flip Unlimited");
+                this.$store.commit("setCountFlip", 0);
+            }
+            this.openAuto = false;
+        },
+        async noAutoFlip() {
+            this.openAuto = false;
+            this.countAuto = 1;
+            this.isCount = true;
+        },
+        btnUnlimited() {
+            this.isCount = false;
+            this.countAuto = 0;
+        },
+        async handleHistory() {
+            this.getInfo()
+            this.getRate()
+            this.history()
+        }
     },
 });
 </script>
@@ -505,25 +611,12 @@ export default defineComponent({
     top: 0%;
     left: 0;
     z-index: 999;
-    // animation: fadeInDetailEvent 0.1s ease forwards;
     color: #fff;
     background-image: url("./../../../public/assets/event/background-flip.png");
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
 }
-
-// @keyframes fadeInDetailEvent {
-//     0% {
-//         opacity: 0;
-//         transform: translate(50%, 50%) scale(0.5);
-//     }
-
-//     100% {
-//         opacity: 1;
-//         transform: translate(0%, 0%) scale(1);
-//     }
-// }
 
 .wr-cooldown {
     background-color: #500d79;
@@ -540,11 +633,13 @@ export default defineComponent({
         min-width: 40px;
         height: 40px;
     }
+
     .time {
         color: #ffcf56;
         text-align: center;
         transition: transform 0.5s ease-in-out;
     }
+
     .counter-animation {
         transform: scale(1.2);
     }
@@ -559,17 +654,21 @@ export default defineComponent({
         border-radius: 5px;
         margin: 0 auto;
         flex-wrap: wrap;
+
         .wl {
             width: 10px;
             height: 10px;
             border-radius: 10px;
         }
+
         .win {
             background: #42ff00;
         }
+
         .lose {
             background: #ff0000;
         }
+
         .placed {
             background: #ffe500;
         }
@@ -585,18 +684,21 @@ export default defineComponent({
     transition: transform 1s ease-in;
     transform-style: preserve-3d;
 }
+
 #coin.heads {
     -webkit-animation: flipHeads 5s ease-out forwards;
     -moz-animation: flipHeads 5s ease-out forwards;
     -o-animation: flipHeads 5s ease-out forwards;
     animation: flipHeads 5s ease-out forwards;
 }
+
 #coin.tails {
     -webkit-animation: flipTails 5s ease-out forwards;
     -moz-animation: flipTails 5s ease-out forwards;
     -o-animation: flipTails 5s ease-out forwards;
     animation: flipTails 5s ease-out forwards;
 }
+
 #coin div {
     position: absolute;
     backface-visibility: hidden;
@@ -611,6 +713,7 @@ export default defineComponent({
     height: 100%;
     width: 100%;
 }
+
 .side-b {
     height: 100%;
     width: 100%;
@@ -621,24 +724,28 @@ export default defineComponent({
     background-repeat: no-repeat;
     background-size: cover;
 }
+
 @keyframes flipHeads {
     from {
         -webkit-transform: rotateY(0);
         -moz-transform: rotateY(0);
         transform: rotateY(0);
     }
+
     to {
         -webkit-transform: rotateY(3600deg);
         -moz-transform: rotateY(3600deg);
         transform: rotateY(3600deg);
     }
 }
+
 @keyframes flipTails {
     from {
         -webkit-transform: rotateY(0);
         -moz-transform: rotateY(0);
         transform: rotateY(0);
     }
+
     to {
         -webkit-transform: rotateY(3780deg);
         -moz-transform: rotateY(3780deg);
@@ -646,43 +753,45 @@ export default defineComponent({
     }
 }
 
-// .wr-two-coin {
-//     display: flex;
-//     gap: 50px;
-// }
-// .box-qfp {
-//     background-position: center;
-//     background-repeat: no-repeat;
-//     background-size: cover;
-//     background-image: url("./../../../public/assets/event/coin-qfp.png");
-//     width: 55px;
-//     height: 55px;
-// }
-// .box-quai {
-//     background-position: center;
-//     background-repeat: no-repeat;
-//     background-size: cover;
-//     background-image: url("./../../../public/assets/event/coin-quai.png");
-//     width: 55px;
-//     height: 55px;
-// }
+.btn-submit,
+.btn-auto-flip {
+    padding: 10px;
+    border-radius: 5px;
+    width: fit-content;
+    cursor: pointer;
+    font-size: 12px;
+    img {
+        width: 15px;
+    }
+}
 
-.box-submit {
-    .btn-submit {
-        padding: 10px;
-        border-radius: 5px;
-        width: fit-content;
-        margin: 0 auto;
-        cursor: pointer;
-        font-size: 12px;
-        img {
-            width: 15px;
-        }
-    }
-    .btn-submit:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
+.btn-submit:disabled,
+.btn-auto-flip:disabled,
+// .box-input.active,
+.isOn {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.btn-auto-flip {
+    padding: 10px 0 10px 10px;
+}
+
+.btn-on,
+.btn-off {
+    display: flex;
+    align-items: center;
+    height: 16px;
+    padding: 10px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+.btn-on {
+    background: #42ff00;
+}
+.btn-off {
+    background: #ff0000;
 }
 
 .wr-history {
@@ -691,6 +800,7 @@ export default defineComponent({
     margin-top: 15px;
     border: 2px solid #d631ff;
     border-radius: 10px;
+
     .title {
         display: flex;
         text-align: center;
@@ -699,15 +809,19 @@ export default defineComponent({
         margin: 0 5px;
         font-size: 12px;
         font-weight: 800;
+
         .stt {
             flex: 0 0 30%;
         }
+
         .time {
             flex: 0 0 25%;
         }
+
         .status {
             flex: 0 0 20%;
         }
+
         .reward {
             flex: 0 0 25%;
         }
@@ -724,19 +838,24 @@ export default defineComponent({
             display: flex;
             justify-content: center;
         }
+
         .time {
             flex: 0 0 25%;
         }
+
         .status {
             flex: 0 0 20%;
             font-size: 10px;
+
             .win {
                 color: #ffe500;
             }
+
             .lose {
                 color: #fff;
             }
         }
+
         .reward {
             flex: 0 0 25%;
         }
@@ -756,11 +875,13 @@ export default defineComponent({
     animation: slideIn 0.5s forwards;
     border-radius: 10px;
     text-align: center;
+
     .box-img {
         display: flex;
         justify-content: center;
         padding: 10px;
     }
+
     .img {
         width: 50px;
         height: 50px;
@@ -769,13 +890,16 @@ export default defineComponent({
         background-repeat: no-repeat;
         border-radius: 8px;
     }
+
     .icon-win {
         color: #ffe500;
         font-size: 22px;
     }
+
     .text {
         font-size: 12px;
     }
+
     .desc {
         font-size: 12px;
         margin: 10px 0;
@@ -786,10 +910,12 @@ export default defineComponent({
     border-radius: 5px;
     font-size: 12px;
 }
+
 @keyframes slideIn {
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
@@ -814,8 +940,31 @@ export default defineComponent({
     padding: 3px 5px;
     border-radius: 10px;
     gap: 5px;
+
     img {
         width: 15px;
     }
+}
+
+.btn-count {
+    width: fit-content;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 5px 10px;
+    background: #412e17;
+    font-weight: 800;
+    opacity: 0.6;
+    border-radius: 5px;
+}
+
+.box-input {
+    opacity: 0.6;
+}
+.box-input.active {
+    opacity: 1;
+}
+.btn-count.active {
+    background: #ffa53a;
+    opacity: 1;
 }
 </style>

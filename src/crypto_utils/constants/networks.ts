@@ -8,6 +8,8 @@ import { QUAI, QUAI_LOCAL } from "./base-assets"
 import type SerialFallbackProvider from "../serial-fallback-provider"
 import { makeSerialFallbackProvider } from "../serial-fallback-provider"
 
+export const CURRENT_WALLET_VERSION = "WALLET_GOLDEN_AGE_V6";
+
 export const VALID_SHARDS: Array<string> = [
   "cyprus-1",
   "cyprus-2",
@@ -42,7 +44,7 @@ export const DEFAULT_QUAI_TESTNET = {
       name: "Cyprus One",
       shard: "cyprus-1",
       rpc: "https://rpc.quai.network",
-      blockExplorerUrl: "https://quaiscan.io",
+      blockExplorerUrl: "https://quaiscan.io", //https://quaiscan.io/
     }
   ],
 } as Network

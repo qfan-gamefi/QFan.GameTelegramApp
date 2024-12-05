@@ -88,7 +88,7 @@ export default {
 .title {
     padding: 10px 0;
     margin: 0 10px;
-    font-size: 16px;
+    font-size: 12px;
     font-weight: 800;
 }
 

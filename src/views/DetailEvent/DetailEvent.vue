@@ -290,7 +290,7 @@
                                     item?.Status?.toLowerCase() === 'lose'
                                 "
                             >
-                                <div>
+                                <div class="flex justify-center gap-1">
                                     {{ renderProfitQFP(item) }}
                                     <img
                                         src="./../../../public/assets/logo.svg"

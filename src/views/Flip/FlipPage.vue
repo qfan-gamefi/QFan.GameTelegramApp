@@ -313,7 +313,7 @@ export default defineComponent({
             loading: false,
             userId: userInfo?.user?.id || "",
             fullName: `${userInfo?.user?.first_name} ${userInfo?.user?.last_name}`,
-            // fullName: "su fly 007 🍅",
+            // fullName: "su fly 007",
             isPopup: false,
             flipClass: "" as TFlipClass,
             urlImg: null,

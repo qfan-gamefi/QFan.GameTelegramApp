@@ -4,7 +4,15 @@
             <div class="popup-content">
                 <p class="f-bangopro">{{ text }}</p>
                 <div class="popup-buttons">
-                    <button @click="yes()">Yes</button>
+                    <button @click="yes()" :disabled="loading">
+                        <div v-if="loading">
+                            <i class="fa-solid fa-spinner fa-spin"></i> Loading...
+                        </div>
+                        <div v-else>
+                            Yes
+                        </div>
+                    </button>
+
                     <button @click="no()">No</button>
                 </div>
             </div>
@@ -23,6 +31,11 @@ export default {
             type: Boolean,
             required: true,
             default: false,
+        },
+        loading: {
+            type: Boolean,
+            default: false,
+            required: false,
         },
     },
     methods: {
@@ -51,6 +64,7 @@ export default {
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    padding-bottom: 5%;
 }
 
 .popup-content {
@@ -72,5 +86,9 @@ export default {
     margin: 0 10px;
     padding: 10px 20px;
     font-size: 12px;
+}
+.popup-buttons button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 </style>

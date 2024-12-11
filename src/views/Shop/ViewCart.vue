@@ -210,6 +210,7 @@
         v-if="isBuySell"
         :text="textConfirm"
         :visible="isBuySell"
+        :loading="loadingBtn"
         @yes="yesBuySell"
         @no="noBuySell"
     />
@@ -225,7 +226,7 @@ import PopupPassword from "@/components/popup/PopupPassword.vue";
 import PopupConfirm from "@/components/PopupConfirm.vue";
 import { EItemDefType, IItemInventory } from "@/interface";
 import userServiceInventory from "@/services/inventoryService";
-import { formattedBalance, trackEventBtn } from "@/utils";
+import { debounce, formattedBalance, trackEventBtn } from "@/utils";
 import {
     IDetailCart,
     TabTypeBS,
@@ -280,6 +281,7 @@ export default defineComponent({
             this.itemsInventory = this.dataInventory;
         }
         this.getFee();
+        this.yesBuySell = debounce(this.yesBuySell, 500);
     },
     mounted() {
         this.initializeValues();
@@ -313,6 +315,7 @@ export default defineComponent({
             isBuySell: false,
             textConfirm: "Sure about this Buy order",
             isPass: false,
+            loadingBtn: false
         };
     },
     methods: {
@@ -502,8 +505,6 @@ export default defineComponent({
             this.listDetail = mergedList;
         },
         async yesBuySell() {
-            this.isBuySell = false;
-
             const detailCart: IDetailCart = this.detailCart;
             const balance =
                 this.rewardInfo?.attributes?.qpoint?.data?.attributes?.balance;
@@ -538,6 +539,7 @@ export default defineComponent({
             };
 
             try {
+                this.loadingBtn = true
                 if (this.activeTab === "buy") {
                     if (balance < total) {
                         await this.renderErr(`Your balance is insufficient`);
@@ -560,6 +562,9 @@ export default defineComponent({
                     this.isPass = true;
                     // localStorage.getItem("storePermission") === "true";
                 }
+            } finally{
+                this.isBuySell = false;
+                this.loadingBtn = false
             }
         },
         noBuySell() {

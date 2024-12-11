@@ -18,7 +18,14 @@
                 <slot name="content"></slot>
 
                 <div class="popup-buttons">
-                    <button @click="yes()">OK</button>
+                    <button @click="yes()" :disabled="loading">
+                        <span v-if="loading">
+                            <i class="fa-solid fa-spinner fa-spin"></i> Loading...
+                        </span>
+                        <span v-else>
+                            OK
+                        </span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -45,6 +52,11 @@ export default {
             type: Boolean,
             required: true,
             default: false,
+        },
+        loading: {
+            type: Boolean,
+            default: false,
+            required: false,
         },
     },
     methods: {
@@ -83,6 +95,7 @@ export default {
     align-items: center;
     z-index: 9999;
     color: #000000;
+    padding-bottom: 5%;
 }
 
 .title {
@@ -112,5 +125,9 @@ export default {
     font-size: 12px;
     color: #fff;
     border-radius: 5px;
+}
+.popup-buttons button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 </style>

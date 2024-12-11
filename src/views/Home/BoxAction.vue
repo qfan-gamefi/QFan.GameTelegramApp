@@ -1,12 +1,12 @@
 <template>
     <div class="box-action">
-            <router-link to="/airdrop">
-                <img
-                    loading="lazy"
-                    src="./../../../public/assets/airdrop/airdrop_logo.png"
-                    class="img-fusion"
-                />
-            </router-link>
+        <router-link to="/airdrop">
+            <img
+                loading="lazy"
+                src="./../../../public/assets/airdrop/airdrop_logo.png"
+                class="w-[50px]"
+            />
+        </router-link>
         <div @click="setRouterFusion()">
             <router-link to="/inventory">
                 <img
@@ -21,7 +21,7 @@
                 <img
                     loading="lazy"
                     class="img-market"
-                    src="./../../../public/assets/shop/marketplace.png"
+                    src="./../../../public/assets/shop/marketplace_logo.png"
                 />
                 <div class="shine shine-1"></div>
                 <div class="shine shine-4"></div>
@@ -31,7 +31,7 @@
             <img
                 loading="lazy"
                 class="img-inventory"
-                src="./../../../public/assets/inventory/inventory.png"
+                src="./../../../public/assets/inventory/inventory_logo.png"
             />
         </router-link>
         <router-link to="/flip">
@@ -86,9 +86,9 @@ export default {
         // handleBackButton() {
         //     this.$emit("back-clicked");
         // },
-        setRouterFusion(){
+        setRouterFusion() {
             this.$store.commit("setRouterFusion", true);
-        }
+        },
     },
 };
 </script>
@@ -293,7 +293,7 @@ export default {
     object-fit: cover;
 }
 .img-fusion {
-    height: 55px;
+    height: 58px;
     object-fit: cover;
 }
 
@@ -308,16 +308,16 @@ export default {
 }
 .market {
     position: relative;
-    border: 1px solid #fff;
-    border-radius: 5px;
-    background: #320460;
+    /* border: 1px solid #fff; */
+    /* border-radius: 5px; */
+    /* background: #320460; */
     display: flex;
     align-items: center;
-    padding: 0 5px;
-    height: 50px;
+    /* padding: 0 5px; */
+    /* height: 50px; */
 }
 .img-market {
-    height: 40px;
+    height: 50px;
     object-fit: cover;
 }
 </style>

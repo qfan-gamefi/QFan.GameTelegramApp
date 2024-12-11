@@ -6,33 +6,86 @@
                     v-for="(item, index) in title_airdrop"
                     :key="index"
                     class="p-3 flex w-full items-center border-b-2 border-b-[#129900] gap-3"
-                    >
+                >
                     <div><img :src="item.image" class="w-[40px]" /></div>
                     <div>{{ item.text }}</div>
                 </div>
             </div>
             <div>
-                <button disabled class="">CHECK AIRDROP</button>
+                <button :disabled="loading" @click="checkAirdrrop()">
+                    <span v-if="loading">
+                        <i class="fa-solid fa-spinner fa-spin"></i> Loading...
+                    </span>
+                    CHECK AIRDROP
+                </button>
             </div>
         </div>
     </div>
+
+    <NotificationToast
+        v-if="showNotification"
+        :message="notificationMessage"
+        :type="notificationType"
+        @close="showNotification = false"
+    />
 </template>
 
-<script>
-export default {
+<script lang="ts">
+// import { useApiNetWork } from "@/services/apiClient";
+import { useApiNetWork } from "@/services/apiClient";
+import { IAirdrop } from "./defination-airdrop";
+import { defineComponent } from "vue";
+import NotificationToast from "@/components/NotificationToast.vue";
+
+export default defineComponent({
     name: "AirdropPage",
+    components: {
+        NotificationToast,
+    },
     data() {
-    return {
-        title_airdrop: [
-        { image: "/assets/airdrop/cup.png", text: "BADGE BETA TESTER" },
-        { image: "/assets/airdrop/cup.png", text: "LEVEL" },
-        { image: "/assets/airdrop/cup.png", text: "MASTER MINER" },
-        { image: "/assets/airdrop/cup.png", text: "MINI GAME" },
-        { image: "/assets/airdrop/cup.png", text: "REFFERALS" },
-      ],
-    };
-  },
-};
+        const userInfo = window.Telegram.WebApp.initDataUnsafe;
+
+        return {
+            showNotification: false,
+            notificationMessage: "",
+            notificationType: "",
+            loading: false,
+            userId: userInfo?.user?.id || "",
+            title_airdrop: [
+                { image: "/assets/airdrop/cup.png", text: "BADGE BETA TESTER" },
+                { image: "/assets/airdrop/cup.png", text: "LEVEL BADGES" },
+                { image: "/assets/airdrop/cup.png", text: "MASTER MINER" },
+                { image: "/assets/airdrop/cup.png", text: "MINI GAME" },
+                { image: "/assets/airdrop/cup.png", text: "REFFERALS" },
+            ],
+            dataAirdrop: {} as IAirdrop,
+        };
+    },
+    methods: {
+        async renderNotification(message, type) {
+            this.notificationMessage = message;
+            this.notificationType = type;
+            this.showNotification = true;
+        },
+        async renderSuccess(text: string) {
+            this.renderNotification(text, "success");
+        },
+        async renderErr(text) {
+            this.renderNotification(text, "error");
+        },
+        async checkAirdrrop() {
+            try {
+                const res = await useApiNetWork.check_airdrop(this.userId);
+                // this.dataAirdrop = res?.data?.[0]
+                this.renderSuccess(
+                    `Congratulations! You will be airdropped ${res?.data?.[0]?.amount} Quai`
+                );
+            } catch (error) {
+                this.renderErr(`Error`);
+            }
+        },
+    },
+});
 </script>
 
 <style scoped lang="scss">

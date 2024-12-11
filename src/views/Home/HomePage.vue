@@ -533,21 +533,22 @@ export default {
                     await this.getInfoUser();
                     
                     if (claimCheckin.error) {
-                        this.renderErr(claimCheckin?.message);
+                         this.renderErr(claimCheckin?.message);
+                         
                     } else {
-                        this.renderSuccess("Checkin success!");
+                        await this.renderSuccess("Checkin success!");
                     }
                 } else {
                     this.$router.push({ name: "WalletCreate" });
                 }
             } catch (error) {
-                console.log("error", error);
                 this.renderErr(
                     "Checkin failed! Chain is not ready to interact."
                 );
             } finally {                
                 this.isExecCheckin = false;
                 this.titleCheckin = "Checkin";
+                // this.openAnnouncement()
             }            
         },
         async onAutoInteract() {
@@ -617,7 +618,24 @@ export default {
             window.open("https://t.me/QFanClubAnnouncement/103", "_blank");
         },
         openAnnouncement(){
-            window.open('https://t.me/QFanClubAnnouncement', '_blank');
+            const platform = window.Telegram.WebApp.platform;
+
+            const channelLink = "https://t.me/QFanClubAnnouncement";
+            const tgSchemaLink = "tg://resolve?domain=QFanClubAnnouncement";
+
+                    // if( platform?.includes("desktop")){
+                    //     window.location.href = channelLink;
+                    // }
+
+            if(platform?.includes("web")){
+                const link = document.createElement('a');
+                    link.href = channelLink;
+                    link.target = '_blank';
+                    link.click();
+                    link.remove();
+            }else{
+                window.location.href = channelLink;
+            }
         }
     },
     async mounted() {
@@ -679,7 +697,7 @@ export default {
                     <div class="close-menu" for="openmenu">
                         <button
                             class="btn-menu"
-                            @click="onCheckIn(), openAnnouncement()"
+                            @click="onCheckIn()"
                             v-bind:disabled="isExecCheckin"
                         >
                             <i class="fa-solid fa-calendar-days"></i>

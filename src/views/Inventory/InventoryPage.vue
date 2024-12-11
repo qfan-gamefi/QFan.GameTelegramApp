@@ -96,15 +96,24 @@
                         </div>
                     </div>
                 </div>
-                <div class="box-item" v-if="activeButton === 'Badges'">
+                <div v-if="activeButton === 'Badges'">
                     <div
-                        class="item-badge"
-                        v-for="(item, index) in itemsBadge"
-                        :key="index"
+                        v-for="(items, category) in groupedBadge"
+                        :key="category"
+                        class="border-b border-[#2F9AD6] p-1 rounded-md animation-inventory"
                     >
-                        <img class="img-badge" :src="item?.ItemDef?.ImageUrl" />
-                        <div class="item-btn">
-                            <button @click="showCoomingSoon = true">Use</button>
+                        <div class="text-[14px] mb-1 font-extrabold">
+                            {{ category }}
+                        </div>
+                        <div class="box-item">
+                            <div v-for="item in items" :key="item.id">
+                                <img
+                                    class="img-badge"
+                                    :src="item?.ItemDef?.ImageUrl"
+                                    alt="ItemBadge"
+                                    loading="lazy"
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -202,6 +211,7 @@
         <PopupConfirm
             v-if="showClaim"
             :text="`Do you want Claim!`"
+            :loading="loadingBtn"
             :visible="showClaim"
             @yes="handleYesClaim"
             @no="handleNoClaim"
@@ -221,6 +231,7 @@
         <PopupComponent
             :visible="openUseCount"
             :title="useItem?.Name"
+            :loading="loadingBtn"
             @yes="yesUseNumber()"
             @no="noUseNumber()"
         >
@@ -257,7 +268,7 @@ import { mapState } from "vuex";
 import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
 import userService from "@/services/userService";
 import BackButtonTelegram from "@/mixins/BackButtonTelegram";
-import { trackEventBtn } from "@/utils";
+import { debounce, trackEventBtn } from "@/utils";
 import { renderTitleKey, formatNumber } from "./inventoryHelpers";
 import { ButtonName, Button } from "./defination-inventory";
 import PopupComponent from "@/components/popup/PopupComponent.vue";
@@ -279,6 +290,9 @@ export default defineComponent({
         this.getDataInfo();
         this.getDataInventor();
         this.getFausion();
+
+        this.yesUseNumber = debounce(this.yesUseNumber, 500);
+        this.handleYesClaim = debounce(this.handleYesClaim, 500);
     },
     mounted() {
         this.updateHeight();
@@ -330,6 +344,7 @@ export default defineComponent({
             useItem: {} as IItemInventory,
             countUse: 1,
             openUseCount: false,
+            groupedBadge: {} as { [key: string]: IItemInventory[] },
         };
     },
     methods: {
@@ -445,8 +460,17 @@ export default defineComponent({
                 const filterBadge = res?.Items?.filter(
                     (item) => item?.ItemDef?.Type === EItemDefType.Medal
                 );
-
                 this.itemsBadge = filterBadge;
+                const groupedData = filterBadge.reduce((acc, item) => {
+                    const category = item.ItemDef.Category;
+                    if (!acc[category]) {
+                        acc[category] = [];
+                    }
+                    acc[category].push(item);
+                    return acc;
+                }, {});
+                this.groupedBadge = groupedData;
+
                 this.arrInventory = filterData;
 
                 const groupedItems = filterData?.reduce(
@@ -470,8 +494,8 @@ export default defineComponent({
             this.showClaim = false;
         },
         async handleYesClaim() {
-            this.showClaim = false;
             try {
+                this.loadingBtn = true;
                 const data = {
                     UserId: this.userId,
                     CombineId: this.itemFusion.id,
@@ -497,10 +521,12 @@ export default defineComponent({
             } catch (error) {
                 if (error?.response?.status === 401) {
                     this.isPass = true;
-                    // localStorage.getItem("storePermission") === "true";
                 } else {
                     this.renderErr(`Error!`);
                 }
+            } finally {
+                this.showClaim = false;
+                this.loadingBtn = false;
             }
         },
         async getFausion() {
@@ -528,6 +554,7 @@ export default defineComponent({
         async handleUseInventory(item: IItemInventory) {
             this.useItem = item;
             this.openUseCount = true;
+            this.countUse = 1;
         },
         async handleSell(item: IItemInventory) {
             const res = await userServiceInventory.getItemMarket(
@@ -550,14 +577,21 @@ export default defineComponent({
             this.getDataInventor();
         },
         async yesUseNumber() {
-            this.loadingBtn = true;
             try {
-                const data = {
+                const targetItem = this.arrInventory.find(
+                    (el) => el.id === this.useItem?.id
+                );
+                if (this.countUse > targetItem.ItemCount) {
+                    this.renderErr(`Your quantity is insufficient`);
+                    return;
+                }
+                this.loadingBtn = true;
+                const payload = {
                     UserId: this.userId,
                     ItemCount: this.countUse,
                     ItemId: this.useItem?.id,
                 };
-                const res = await userServiceInventory.useInventory(data);
+                const res = await userServiceInventory.useInventory(payload);
                 trackEventBtn({
                     label: `${this.useItem?.Code}` || "Use_Inventory",
                 });
@@ -567,19 +601,16 @@ export default defineComponent({
                         `Received ${valueRes?.Value} ${valueRes?.ValueType}`
                     );
 
-                    Object.keys(this.itemsInventory)?.forEach((key) => {
+                    for (const key of Object.keys(this.itemsInventory)) {
                         const items = this.itemsInventory[key];
-                        items?.forEach((el) => {
-                            const { id } = el;
-
-                            if (id === this.useItem?.id) {
+                        for (const el of items) {
+                            if (el.id === this.useItem?.id) {
                                 el.ItemCount -= this.countUse;
+                                if (el.ItemCount <= 0) {
+                                    await this.getDataInventor();
+                                }
                             }
-                        });
-                    });
-
-                    if (this.useItem.ItemCount === 1) {
-                        await this.getDataInventor();
+                        }
                     }
                 } else {
                     this.renderErr(`Received ${res?.data?.Message}`);
@@ -665,6 +696,10 @@ export default defineComponent({
         scrollbar-width: none;
     }
 
+    .img-badge {
+        width: 100%;
+        object-fit: cover;
+    }
     .box-item {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
@@ -681,18 +716,6 @@ export default defineComponent({
         .item {
             position: relative;
             display: flex;
-        }
-
-        .item-badge {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-
-            .img-badge {
-                width: 100%;
-                object-fit: cover;
-            }
         }
 
         .item-img {

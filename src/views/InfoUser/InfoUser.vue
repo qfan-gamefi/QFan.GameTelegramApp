@@ -122,7 +122,7 @@ export default defineComponent({
         },
         async getAvt() {
             const res = await userServiceTelebot.getAvtTelegram(this.idUser);
-            this.urlAvt = res;
+            this.urlAvt = res?.length > 0 ? res : "./../../../public/assets/logo.jpg";
             this.$store.commit("setAvtStore", res);
         },
         async getLevels() {                        

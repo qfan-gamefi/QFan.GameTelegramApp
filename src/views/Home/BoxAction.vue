@@ -1,5 +1,12 @@
 <template>
     <div class="box-action">
+            <router-link to="/airdrop">
+                <img
+                    loading="lazy"
+                    src="./../../../public/assets/airdrop/airdrop_logo.png"
+                    class="img-fusion"
+                />
+            </router-link>
         <div @click="setRouterFusion()">
             <router-link to="/inventory">
                 <img

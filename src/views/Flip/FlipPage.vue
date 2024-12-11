@@ -272,7 +272,9 @@ export default defineComponent({
     computed: {
         ...mapState(["autoFlipStore", "avtStore", "rewardInfo"]),
     },
-    async created() {},
+    async created() {
+        // this.yesBuySell = debounce(this.yesBuySell, 500);
+    },
     watch: {
         autoFlipStore(newValue) {            
             this.autoFlipValue = newValue;
@@ -459,13 +461,12 @@ export default defineComponent({
                 this.userId
             );
             this.$store.commit("setAvtStore", response);
-            this.urlImg = response || "./../../../public/assets/no-img.jpg";
+            this.urlImg = response?.length > 0 ? response : "./../../../public/assets/logo.jpg";
         },
         async getAvtOpponent(idOpponent: number) {
             const response = await userServiceTelebot.getAvtTelegram(
                 idOpponent
             );
-
             this.urlImgWinner = response;
         },
 

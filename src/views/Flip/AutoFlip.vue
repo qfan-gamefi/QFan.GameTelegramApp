@@ -22,6 +22,7 @@ export default defineComponent({
         const countFlip = computed(() => store.state.countFlip);
         const autoFlipStore = computed(() => store.state.autoFlipStore);
         let isFlippingActive = false;
+        const timeLoop = 25000;
 
         const flipCount = async (count?: number) => {
             const data = {
@@ -39,22 +40,36 @@ export default defineComponent({
                 return;
             }
 
-            const res = await predictService.makeFlip(data);
-            if (
-                res.success === false &&
-                res?.data?.Reason?.includes("Pending")
-            ) {
-                if (isFlippingActive) {
-                    setTimeout(() => {
-                        flipCount(count === -1 ? -1 : count);
-                    }, 10000);
+            try {
+                const res = await predictService.makeFlip(data);
+
+                if (res.success === true && res?.data?.Status) {
+                    if (isFlippingActive) {
+                        setTimeout(() => {
+                            flipCount(count === -1 ? -1 : count - 1);
+                        }, timeLoop);
+                    }
+                } else if (
+                    res.success === false &&
+                    res?.data?.Reason?.includes("Pending")
+                ) {
+                    if (isFlippingActive) {
+                        setTimeout(() => {
+                            flipCount(count);
+                        }, timeLoop);
+                    }
+                } else {
+                    if (isFlippingActive) {
+                        setTimeout(() => {
+                            flipCount(count);
+                        }, timeLoop);
+                    }
                 }
-            }
-            if (res.success === true && res?.data?.Status) {
+            } catch (error) {
                 if (isFlippingActive) {
                     setTimeout(() => {
-                        flipCount(count === -1 ? -1 : count - 1);
-                    }, 10000);
+                        flipCount(count);
+                    }, timeLoop);
                 }
             }
         };
@@ -63,9 +78,9 @@ export default defineComponent({
             const total = countFlip.value;
             isFlippingActive = true;
             if (total > 0) {
-                flipCount(countFlip.value);
+                flipCount(total);
                 trackEventBtn({
-                    label: 'Auto_flip',
+                    label: "Auto_flip",
                 });
             }
             if (total === 0) {

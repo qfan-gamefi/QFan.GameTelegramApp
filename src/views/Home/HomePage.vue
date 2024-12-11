@@ -548,7 +548,7 @@ export default {
             } finally {                
                 this.isExecCheckin = false;
                 this.titleCheckin = "Checkin";
-                // this.openAnnouncement()
+                this.openAnnouncement()
             }            
         },
         async onAutoInteract() {

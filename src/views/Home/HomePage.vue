@@ -83,7 +83,7 @@ export default {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            idUser: dataUserTele?.user?.id?.toString() ?? "",
+            idUser: dataUserTele?.user?.id?.toString() ?? "2123800227",
             telegram_bot_link: telegram_bot_link + dataUserTele?.user?.id || "",
 
             showCoomingSoon: false,
@@ -537,6 +537,7 @@ export default {
                          
                     } else {
                         await this.renderSuccess("Checkin success!");
+                        await this.openAnnouncement()
                     }
                 } else {
                     this.$router.push({ name: "WalletCreate" });
@@ -548,7 +549,7 @@ export default {
             } finally {                
                 this.isExecCheckin = false;
                 this.titleCheckin = "Checkin";
-                this.openAnnouncement()
+                
             }            
         },
         async onAutoInteract() {

@@ -36,9 +36,11 @@ import { useApiNetWork } from "@/services/apiClient";
 import { IAirdrop } from "./defination-airdrop";
 import { defineComponent } from "vue";
 import NotificationToast from "@/components/NotificationToast.vue";
+import BackButtonTelegram from "@/mixins/BackButtonTelegram";
 
 export default defineComponent({
     name: "AirdropPage",
+    mixins: [BackButtonTelegram],
     components: {
         NotificationToast,
     },

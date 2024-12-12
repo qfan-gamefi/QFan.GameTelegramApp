@@ -12,7 +12,7 @@
                 </div>
             </div>
             <div>
-                <button :disabled="loading" @click="checkAirdrrop()">
+                <button :disabled="true" @click="checkAirdrrop()">
                     <span v-if="loading">
                         <i class="fa-solid fa-spinner fa-spin"></i> Loading...
                     </span>

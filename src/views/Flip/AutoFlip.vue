@@ -42,7 +42,6 @@ export default defineComponent({
             
             try {
                 const res = await predictService.makeFlip(data);
-
                 if (res.success === true && res?.data?.Status) {
                     if (isFlippingActive) {
                         setTimeout(() => {

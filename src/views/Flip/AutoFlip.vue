@@ -39,10 +39,9 @@ export default defineComponent({
                 isFlippingActive = false;
                 return;
             }
-
+            
             try {
                 const res = await predictService.makeFlip(data);
-
                 if (res.success === true && res?.data?.Status) {
                     if (isFlippingActive) {
                         setTimeout(() => {
@@ -67,6 +66,7 @@ export default defineComponent({
                 }
             } catch (error) {
                 if (isFlippingActive) {
+                    
                     setTimeout(() => {
                         flipCount(count);
                     }, timeLoop);

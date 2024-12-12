@@ -89,7 +89,7 @@ export default defineComponent({
     },
     data() {
         const dataUserTele = window?.Telegram?.WebApp?.initDataUnsafe;
-        let first_name = dataUserTele?.user?.first_name;
+        let first_name = dataUserTele?.user?.first_name || '';
         let last_name = dataUserTele?.user?.last_name;
 
         return {
@@ -176,7 +176,17 @@ export default defineComponent({
                 const filterBadge = res?.Items?.filter(
                     (item) => item?.ItemDef?.Type === EItemDefType.Medal
                 );
-                this.itemsBadge = filterBadge;
+                const categoryMap = {};
+                filterBadge.forEach(item => {
+                    const category = item.ItemDef.Category;
+                    const itemDefId = item.ItemDefId;
+                    if (!categoryMap[category] || itemDefId > categoryMap[category]?.ItemDefId) {
+                        categoryMap[category] = item;
+                    }
+                });
+                const highestBadgePerCategory  = Object?.values(categoryMap);                
+                
+                this.itemsBadge = highestBadgePerCategory ;
             } catch (error) {
                 console.error(error);
             }

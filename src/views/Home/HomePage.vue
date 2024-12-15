@@ -537,7 +537,6 @@ export default {
                          
                     } else {
                         await this.renderSuccess("Checkin success!");
-                        await this.openAnnouncement()
                     }
                 } else {
                     this.$router.push({ name: "WalletCreate" });
@@ -623,10 +622,6 @@ export default {
 
             const channelLink = "https://t.me/QFanClubAnnouncement";
             const tgSchemaLink = "tg://resolve?domain=QFanClubAnnouncement";
-
-                    // if( platform?.includes("desktop")){
-                    //     window.location.href = channelLink;
-                    // }
 
             if(platform?.includes("web")){
                 const link = document.createElement('a');

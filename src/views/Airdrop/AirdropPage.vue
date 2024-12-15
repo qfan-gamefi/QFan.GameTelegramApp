@@ -110,8 +110,6 @@ export default defineComponent({
             try {
                 this.loading = true
                 const res = await useApiNetWork.check_airdrop(this.userId);
-                console.log(res);
-                
                 if(res?.data?.length > 0){
                     this.show_image = true
                     this.image_airdrop = "/assets/airdrop/obtain_airdrop.png"

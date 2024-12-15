@@ -2,13 +2,13 @@
     <div class="airdrop-page fade-in">
     
         <div class="absolute w-full top-[35%] px-5 flex flex-col gap-5">
-            <div class="p-3 bg-[#003702] rounded-lg border border-[#129900]">
+            <div class="p-1 bg-[#003702] rounded-lg border border-[#129900]">
                 <div
                     v-for="(item, index) in title_airdrop"
                     :key="index"
-                    class="p-3 flex w-full items-center border-b-2 border-b-[#129900] gap-3"
+                    class="p-2 flex w-full items-center border-b-2 border-b-[#129900] gap-3 last:border-b-0"
                 >
-                    <div><img :src="item.image" class="w-[40px]" /></div>
+                    <div><img :src="item.image" class="w-[35px]" /></div>
                     <div>{{ item.text }}</div>
                 </div>
             </div>

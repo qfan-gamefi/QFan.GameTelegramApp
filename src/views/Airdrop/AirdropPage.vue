@@ -110,7 +110,9 @@ export default defineComponent({
             try {
                 this.loading = true
                 const res = await useApiNetWork.check_airdrop(this.userId);
-                if(res?.data?.[0]?.amount){
+                console.log(res);
+                
+                if(res?.data?.length > 0){
                     this.show_image = true
                     this.image_airdrop = "/assets/airdrop/obtain_airdrop.png"
                     this.number_airdrop = res?.data?.[0]?.amount
@@ -119,7 +121,7 @@ export default defineComponent({
                     // );
                 }else{
                     this.show_image = true
-                    this.image_airdrop = "/assets/airdrop/close_airdrop.png"
+                    this.image_airdrop = "/assets/airdrop/lose_airdrop.png"
                 }
                 
             } catch (error) {

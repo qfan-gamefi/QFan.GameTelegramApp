@@ -548,7 +548,7 @@ export default {
             } finally {                
                 this.isExecCheckin = false;
                 this.titleCheckin = "Checkin";
-                this.openAnnouncement()
+                
             }            
         },
         async onAutoInteract() {
@@ -622,10 +622,6 @@ export default {
 
             const channelLink = "https://t.me/QFanClubAnnouncement";
             const tgSchemaLink = "tg://resolve?domain=QFanClubAnnouncement";
-
-                    // if( platform?.includes("desktop")){
-                    //     window.location.href = channelLink;
-                    // }
 
             if(platform?.includes("web")){
                 const link = document.createElement('a');

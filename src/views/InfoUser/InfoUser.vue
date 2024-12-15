@@ -89,7 +89,7 @@ export default defineComponent({
     },
     data() {
         const dataUserTele = window?.Telegram?.WebApp?.initDataUnsafe;
-        let first_name = dataUserTele?.user?.first_name;
+        let first_name = dataUserTele?.user?.first_name || '';
         let last_name = dataUserTele?.user?.last_name;
 
         return {

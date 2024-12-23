@@ -78,7 +78,7 @@
     "upgrade": "Upgrade",
     "friends": "Friends",
     "per_hour": "Per hour",
-    "score_bonus_message": "Score +{ score1 }% from buddies and +{ score2 }% from their refererals",
+    "score_bonus_message": "Invite your friends and earn +{ score1 }% of their QFP, ",
     "play_pass_message": "Get a play pass for each friend",
     "friends_list": "Friends list",
     "copied_to_clipboard": "Copied to clipboard!",
@@ -192,7 +192,8 @@
     "verifying": "Verifying",
     "close_in": "Close in",
     "get_a": "Get a",
-    "play_pass_for_each_friend": "play pass for each friend",
+    "play_pass_for_each_friend": "plus a bonus +{ score2 }% from their referrals!",
+    "invite_telegram": "Play to Airdrop $QUAI from Quai Network on QFAN. Don't miss this opportunity as quantities are limited!",
 
     "inventory_page": {
         "title": {

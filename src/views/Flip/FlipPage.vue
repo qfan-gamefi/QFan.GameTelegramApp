@@ -298,7 +298,9 @@ export default defineComponent({
     computed: {
         ...mapState(["autoFlipStore", "avtStore", "rewardInfo"]),
     },
-    async created() {},
+    async created() {
+        // this.yesBuySell = debounce(this.yesBuySell, 500);
+    },
     watch: {
         autoFlipStore(newValue) {
             this.autoFlipValue = newValue;
@@ -339,7 +341,7 @@ export default defineComponent({
             loading: false,
             userId: userInfo?.user?.id || "",
             fullName: `${userInfo?.user?.first_name} ${userInfo?.user?.last_name}`,
-            // fullName: "su fly 007 🍅",
+            // fullName: "su fly 007",
             isPopup: false,
             flipClass: "" as TFlipClass,
             urlImg: null,
@@ -485,13 +487,12 @@ export default defineComponent({
                 this.userId
             );
             this.$store.commit("setAvtStore", response);
-            this.urlImg = response || "./../../../public/assets/no-img.jpg";
+            this.urlImg = response?.length > 0 ? response : "./../../../public/assets/logo.jpg";
         },
         async getAvtOpponent(idOpponent: number) {
             const response = await userServiceTelebot.getAvtTelegram(
                 idOpponent
             );
-
             this.urlImgWinner = response;
         },
 

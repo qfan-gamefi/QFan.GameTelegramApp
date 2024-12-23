@@ -82,7 +82,7 @@ export default {
             isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
-            idUser: dataUserTele?.user?.id?.toString() ?? "2123800227",
+            idUser: dataUserTele?.user?.id?.toString() ?? "",
             telegram_bot_link: telegram_bot_link + dataUserTele?.user?.id || "",
 
             showCoomingSoon: false,
@@ -529,24 +529,22 @@ export default {
                         activeWallet?.address as string,
                         tx.hash as string
                     );
-
                     await this.getInfoUser();
+                    
                     if (claimCheckin.error) {
-                        this.renderErr(claimCheckin?.message);
+                         this.renderErr(claimCheckin?.message);
+                         
                     } else {
-                        this.renderSuccess("Checkin success!");
+                        await this.renderSuccess("Checkin success!");
                     }
                 } else {
                     this.$router.push({ name: "WalletCreate" });
                 }
-                this.isExecCheckin = false;
             } catch (error) {
-                console.log("error", error);
                 this.renderErr(
                     "Checkin failed! Chain is not ready to interact."
                 );
-                this.isExecCheckin = false;
-            } finally {
+            } finally {                
                 this.isExecCheckin = false;
                 this.titleCheckin = "check_in";
             }
@@ -598,6 +596,7 @@ export default {
         },
         async handleYesGiftCode() {
             const res = await userService.giftCode(this.idUser, this.giftCode);
+                        
             if (res.status === 200) {
                 this.renderSuccess(`+ ${res?.data?.amount} ${res?.data?.unit}`);
                 this.handleNoGiftCode();
@@ -628,12 +627,26 @@ export default {
         },
         handleMenu(){
             this.showOptions = false;
+        },
+        openAnnouncement(){
+            const platform = window.Telegram.WebApp.platform;
+
+            const channelLink = "https://t.me/QFanClubAnnouncement";
+            const tgSchemaLink = "tg://resolve?domain=QFanClubAnnouncement";
+
+            if(platform?.includes("web")){
+                const link = document.createElement('a');
+                    link.href = channelLink;
+                    link.target = '_blank';
+                    link.click();
+                    link.remove();
+            }else{
+                window.location.href = channelLink;
+            }
         }
     },
     async mounted() {
         Telegram.WebApp.ready();
-        Telegram.WebApp.BackButton.hide();
-        this.$store.commit("setRouterFusion", false);
         Telegram.WebApp.BackButton.hide();
         this.$store.commit("setRouterFusion", false);
         await this.getInfoUser();

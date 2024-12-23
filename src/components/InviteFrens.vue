@@ -25,16 +25,16 @@
                             <!-- Score +{{ referalRewardLv1Percent }}% from buddies
                             and +{{ referalRewardLv2Percent }}% from their
                             fererals -->
-                            {{ $t('score_bonus_message', { score1: referalRewardLv1Percent }, { score2: referalRewardLv2Percent }) }}
+                            {{ $t('score_bonus_message', { score1: referalRewardLv1Percent }) }}
                         </div>
                         <div class="flex items-center justify-center gap-1">
-                             {{ $t('get_a') }}
-                            <img
+                             <!-- {{ $t('get_a') }} -->
+                            <!-- <img
                                 class="w-[15px]"
                                 src="./../../public/assets/logo.svg"
                                 loading="lazy"
-                            />
-                             {{ $t('play_pass_for_each_friend') }}
+                            /> -->
+                             {{ $t('play_pass_for_each_friend', { score2: referalRewardLv2Percent }) }}
                         </div>
                     </div>
                 </div>
@@ -209,6 +209,15 @@ export default {
                 `https://t.me/share/url?url=${linkInvite}&text=${textInvite}`
             );
         },
+        // handleInvite() {
+        //     const dataUserTele =
+        //         window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+        //     const linkInvite = `https://t.me/QFanClubBot?start=r_${dataUserTele}`;
+        //     const textInvite = `Play to Airdrop $QUAI from Quai Network on QFAN. Don't miss this opportunity as quantities are limited!`;
+        //     Telegram.WebApp.openTelegramLink(
+        //         `https://t.me/share/url?url=${linkInvite}&text=${textInvite}`
+        //     );
+        // },
         async fetchInviteData() {
             try {
                 this.loading = true;

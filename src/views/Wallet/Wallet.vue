@@ -65,7 +65,7 @@
                         <button
                             class="btn-item-wl"
                             @click="faucet()"
-                            v-bind:disabled="executing"
+                            v-bind:disabled="isFaucet"
                         >
                             <i class="fa-solid fa-faucet"></i>
                             {{ $t("faucet") }}
@@ -347,7 +347,6 @@ import {
     fetchActivity,
     getAddressLinkToExplorer,
     getTxLinkToExplorer,
-    signAndSendTransaction,
 } from "@/crypto_utils/networks";
 import HDKeyring from "@/crypto_utils/HDKeyring";
 import { type WalletInfo } from "@/crypto_utils/type";
@@ -459,7 +458,6 @@ export default defineComponent({
                 this.isFaucet = false;
                 this.executing = false;
             } catch (error) {
-                // console.log("error", error);
                 this.errorMessage = "Faucet error: " + error?.message;
                 this.executing = false;
                 this.isFaucet = false;

@@ -161,7 +161,7 @@ import MyOrderPage from "./MyOrder.vue";
 import TransactionPage from "./TransactionPage.vue";
 import DepositInShop from "./Deposit.vue";
 import { mapState } from "vuex";
-import { formattedBalance } from "@/utils";
+import { debounce, formattedBalance } from "@/utils";
 import userService from "@/services/userService";
 import userServiceInventory from "@/services/inventoryService";
 import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
@@ -183,6 +183,8 @@ export default defineComponent({
     created() {
         this.getListMarket();
         this.callWalletInfo();
+
+        this.callWalletInfo = debounce(this.callWalletInfo, 500);
     },
     data() {
         const userInfo = window.Telegram.WebApp.initDataUnsafe;

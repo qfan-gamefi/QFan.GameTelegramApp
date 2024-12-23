@@ -2,7 +2,7 @@
     <div class="wr-inventory-page">
         <img
             class="w-full object-cover"
-            src="./../../../public/assets/inventory/banner-inventory.png"
+            :src="bannerSrc"
             alt="banner_inventory"
             ref="bannerInventory"
             loading="lazy"
@@ -96,18 +96,24 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="box-item" v-if="activeButton === 'Badges'">
+                <div v-if="activeButton === 'Badges'">
                     <div
-                        class="item-badge"
-                        v-for="(item, index) in itemsBadge"
-                        :key="index"
+                        v-for="(items, category) in groupedBadge"
+                        :key="category"
+                        class="border-b border-[#2F9AD6] p-1 rounded-md animation-inventory"
                     >
-                        <img class="img-badge" :src="item?.ItemDef?.ImageUrl" />
-                        <div class="item-btn">
-                            <button @click="showCoomingSoon = true">
-                                {{ $t("use") }}
-                            </button>
+                        <div class="text-[14px] mb-1 font-extrabold">
+                            {{ category }}
+                        </div>
+                        <div class="box-item">
+                            <div v-for="item in items" :key="item.id">
+                                <img
+                                    class="img-badge"
+                                    :src="item?.ItemDef?.ImageUrl"
+                                    alt="ItemBadge"
+                                    loading="lazy"
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -205,6 +211,7 @@
         <PopupConfirm
             v-if="showClaim"
             text="do_you_want_claim"
+            :loading="loadingBtn"
             :visible="showClaim"
             @yes="handleYesClaim"
             @no="handleNoClaim"
@@ -220,6 +227,24 @@
         />
 
         <PopupPassword :visible="isPass" @cancel="isPass = false" />
+
+        <PopupComponent
+            :visible="openUseCount"
+            :title="useItem?.Name"
+            :loading="loadingBtn"
+            @yes="yesUseNumber()"
+            @no="noUseNumber()"
+        >
+            <template #content>
+                <div class="px-[10px]">
+                    <InputField
+                        v-model="countUse"
+                        label=""
+                        placeholder="0"
+                    />
+                </div>
+            </template>
+        </PopupComponent>
     </div>
 </template>
 
@@ -233,7 +258,6 @@ import {
     IItemDefFusion,
     IItemInventory,
 } from "@/interface";
-import "./style.scss";
 
 import NotificationToast from "@/components/NotificationToast.vue";
 import PopupConfirm from "@/components/PopupConfirm.vue";
@@ -244,18 +268,11 @@ import { mapState } from "vuex";
 import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
 import userService from "@/services/userService";
 import BackButtonTelegram from "@/mixins/BackButtonTelegram";
-import { trackEventBtn } from "@/utils";
-
-enum ButtonName {
-    Inventory = "Inventory",
-    Badges = "Badges",
-    Fusion = "Fusion",
-    History = "History",
-}
-interface Button {
-    name: ButtonName;
-    label: string;
-}
+import { debounce, trackEventBtn } from "@/utils";
+import { renderTitleKey, formatNumber } from "./inventoryHelpers";
+import { ButtonName, Button } from "./defination-inventory";
+import PopupComponent from "@/components/popup/PopupComponent.vue";
+import InputField from "@/components/Input/InputField.vue";
 
 export default defineComponent({
     name: "InventoryPage",
@@ -266,17 +283,30 @@ export default defineComponent({
         ViewCart,
         PopupPassword,
         PopupComingSoon,
+        PopupComponent,
+        InputField,
     },
     created() {
         this.getDataInfo();
         this.getDataInventor();
         this.getFausion();
+
+        this.yesUseNumber = debounce(this.yesUseNumber, 500);
+        this.handleYesClaim = debounce(this.handleYesClaim, 500);
     },
     mounted() {
         this.updateHeight();
     },
     computed: {
         ...mapState(["rewardInfo", "routerFusion"]),
+        bannerSrc() {
+            if (this.$i18n.locale === 'zh') {
+                return '/assets/inventory/banner-inventory-zh.png';
+            } else if (this.$i18n.locale === 'vi') {
+                return '/assets/inventory/banner-inventory.png';
+            }
+            return '/assets/inventory/banner-inventory.png';
+        }
     },
     watch: {
         routerFusion(newVal, oldVal) {
@@ -319,9 +349,15 @@ export default defineComponent({
             isViewCart: false,
             dataDetailCart: {} as IDetailCart,
             isPass: false,
+            useItem: {} as IItemInventory,
+            countUse: 1,
+            openUseCount: false,
+            groupedBadge: {} as { [key: string]: IItemInventory[] },
         };
     },
     methods: {
+        renderTitleKey,
+        formatNumber,
         updateHeight() {
             const img = this.$refs.bannerInventory;
             if (img) {
@@ -354,15 +390,6 @@ export default defineComponent({
                 this.showCoomingSoon = true;
             } else {
                 this.activeButton = button;
-            }
-        },
-        formatNumber(num) {
-            if (num >= 1000000) {
-                return `${(num / 1000000).toFixed(2)}M`;
-            } else if (num >= 10000) {
-                return `${(num / 1000).toFixed(0)}K`;
-            } else {
-                return num?.toString();
             }
         },
         renderItemFusion(item: IItemDefFusion, type: "bg" | "count") {
@@ -441,8 +468,17 @@ export default defineComponent({
                 const filterBadge = res?.Items?.filter(
                     (item) => item?.ItemDef?.Type === EItemDefType.Medal
                 );
-
                 this.itemsBadge = filterBadge;
+                const groupedData = filterBadge.reduce((acc, item) => {
+                    const category = item.ItemDef.Category;
+                    if (!acc[category]) {
+                        acc[category] = [];
+                    }
+                    acc[category].push(item);
+                    return acc;
+                }, {});
+                this.groupedBadge = groupedData;
+
                 this.arrInventory = filterData;
 
                 const groupedItems = filterData?.reduce(
@@ -466,8 +502,8 @@ export default defineComponent({
             this.showClaim = false;
         },
         async handleYesClaim() {
-            this.showClaim = false;
             try {
+                this.loadingBtn = true;
                 const data = {
                     UserId: this.userId,
                     CombineId: this.itemFusion.id,
@@ -493,10 +529,12 @@ export default defineComponent({
             } catch (error) {
                 if (error?.response?.status === 401) {
                     this.isPass = true;
-                    // localStorage.getItem("storePermission") === "true";
                 } else {
                     this.renderErr(`Error!`);
                 }
+            } finally {
+                this.showClaim = false;
+                this.loadingBtn = false;
             }
         },
         async getFausion() {
@@ -522,48 +560,9 @@ export default defineComponent({
             this.itemFusion = item;
         },
         async handleUseInventory(item: IItemInventory) {
-            this.loadingBtn = true;
-            try {
-                const data = {
-                    UserId: this.userId,
-                    ItemCount: 1,
-                    ItemId: item?.id,
-                };
-                const res = await userServiceInventory.useInventory(data);
-                trackEventBtn({
-                    label: `${item?.Code}` || "Use_Inventory",
-                });
-                if (res.success) {
-                    const valueRes = res?.data?.[0];
-                    await this.renderSuccess(
-                        `Received ${valueRes?.Value} ${valueRes?.ValueType}`
-                    );
-
-                    Object.keys(this.itemsInventory)?.forEach((key) => {
-                        const items = this.itemsInventory[key];
-                        items?.forEach((el) => {
-                            const { id } = el;
-
-                            if (id === item?.id) {
-                                el.ItemCount -= 1;
-                            }
-                        });
-                    });
-
-                    if (item.ItemCount === 1) {
-                        await this.getDataInventor();
-                    }
-                } else {
-                    this.renderErr(`Received ${res?.data?.Message}`);
-                }
-            } catch (error) {
-                // this.renderErr(`Error!`);
-                if (error?.response?.status === 401) {
-                    this.isPass = true;
-                }
-            } finally {
-                this.loadingBtn = false;
-            }
+            this.useItem = item;
+            this.openUseCount = true;
+            this.countUse = 1;
         },
         async handleSell(item: IItemInventory) {
             const res = await userServiceInventory.getItemMarket(
@@ -585,13 +584,56 @@ export default defineComponent({
             this.isViewCart = false;
             this.getDataInventor();
         },
-        renderTitleKey(key: string) {
-            const title = key
-                .replace(/_/g, " ")
-                .toLowerCase()
-                .replace(/^\w/, (c) => c.toUpperCase());
-            const subTitle = `inventory_page.title.${title}`;
-            return subTitle;
+        async yesUseNumber() {
+            try {
+                const targetItem = this.arrInventory.find(
+                    (el) => el.id === this.useItem?.id
+                );
+                if (this.countUse > targetItem.ItemCount) {
+                    this.renderErr(`Your quantity is insufficient`);
+                    return;
+                }
+                this.loadingBtn = true;
+                const payload = {
+                    UserId: this.userId,
+                    ItemCount: this.countUse,
+                    ItemId: this.useItem?.id,
+                };
+                const res = await userServiceInventory.useInventory(payload);
+                trackEventBtn({
+                    label: `${this.useItem?.Code}` || "Use_Inventory",
+                });
+                if (res.success) {
+                    const valueRes = res?.data?.[0];
+                    await this.renderSuccess(
+                        `Received ${valueRes?.Value} ${valueRes?.ValueType}`
+                    );
+
+                    for (const key of Object.keys(this.itemsInventory)) {
+                        const items = this.itemsInventory[key];
+                        for (const el of items) {
+                            if (el.id === this.useItem?.id) {
+                                el.ItemCount -= this.countUse;
+                                if (el.ItemCount <= 0) {
+                                    await this.getDataInventor();
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    this.renderErr(`Received ${res?.data?.Message}`);
+                }
+            } catch (error) {
+                if (error?.response?.status === 401) {
+                    this.isPass = true;
+                }
+            } finally {
+                this.loadingBtn = false;
+                this.openUseCount = false;
+            }
+        },
+        noUseNumber() {
+            this.openUseCount = false;
         },
     },
 });
@@ -662,6 +704,10 @@ export default defineComponent({
         scrollbar-width: none;
     }
 
+    .img-badge {
+        width: 100%;
+        object-fit: cover;
+    }
     .box-item {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
@@ -678,18 +724,6 @@ export default defineComponent({
         .item {
             position: relative;
             display: flex;
-        }
-
-        .item-badge {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-
-            .img-badge {
-                width: 100%;
-                object-fit: cover;
-            }
         }
 
         .item-img {

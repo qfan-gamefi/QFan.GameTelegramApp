@@ -78,7 +78,7 @@
     "upgrade": "升级",
     "friends": "好友",
     "per_hour": "每小时",
-    "score_bonus_message": "推荐好友获得 +{ score1 }% 的 QFP，从好友推荐人获得 +{ score2 }% 的 QFP",
+    "score_bonus_message": "邀请你的朋友，赚取他们 QFP 的 +{ score1 }%,",
     "play_pass_message": "每邀请一位好友可获得一个游戏通行证",
     "friends_list": "好友列表",
     "copied_to_clipboard": "已复制到剪贴板！",
@@ -192,7 +192,8 @@
     "verifying": "正在验证",
     "close_in": "关闭于",
     "get_a": "获取一张",
-    "play_pass_for_each_friend": "为每位朋友的游戏通行证",
+    "play_pass_for_each_friend": "另外再从他们的推荐中获得 +{ score2 }% 奖金",
+    "invite_telegram": "在 QFAN 上玩游戏，赢取 Quai Network 的 $QUAI 空投，机会有限，千万不要错过",
 
     "inventory_page": {
         "title": {

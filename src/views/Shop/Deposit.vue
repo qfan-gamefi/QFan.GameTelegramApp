@@ -7,7 +7,7 @@
                 <i class="fa-solid fa-chevron-left"></i>
             </div>
 
-            <div class="title">{{ labelType }} QUAI</div>
+            <div class="title">{{ $t((labelType)?.toLowerCase()) }} QUAI</div>
 
             <div @click="handleClose()" class="absolute top-2 right-2">
                 <i
@@ -21,27 +21,28 @@
             <div class="desc" v-if="!isConfirm">
                 <InputField
                     v-model="amount"
-                    label="Amount"
-                    placeholder="Enter Amount"
+                    label="amount"
+                    placeholder="enter_amount"
                     type="number"
                 />
 
-                <span v-if="amountError" class="error-message">{{
-                    messAmountError
-                }}</span>
+                <span v-if="amountError" class="error-message">
+                    {{ $t(messAmountError) }}
+                </span>
                 <InputField
                     v-model="password"
-                    label="Password"
-                    placeholder="Enter Password"
+                    label="password"
+                    placeholder="enter_password"
                     type="password"
                 />
                 <span v-if="passwordError" class="error-message">{{
-                    messPassError
+                    $t(messPassError)
                 }}</span>
             </div>
             <div class="desc" v-else>
                 <div class="text-center">
-                    Are you sure {{ labelType }} {{ amount }} Quai to address
+                    {{ $t('noti.are_you_sure') }} {{ $t((labelType)?.toLowerCase()) }} {{ amount }} Quai
+                    {{ $t('to', { text: $t('address') })?.toLowerCase() }}
                     {{ addressWallet }}
                 </div>
             </div>
@@ -54,7 +55,7 @@
                 v-bind:disabled="isLoading"
                 @click="isConfirm ? submit() : handleConfirm()"
             >
-                {{ labelType }}
+                {{ $t((labelType).toLowerCase()) }}
                 <span v-if="isLoading"><i class="fa fa-spinner"></i></span>
             </a>
         </div>
@@ -152,10 +153,12 @@ export default defineComponent({
         validateAmount() {
             if (this.amount <= 0) {
                 this.amountError = true;
-                this.messAmountError = "Amount must be greater than 0.";
+                this.messAmountError = "amount_invalid";
+                return false
             } else {
                 this.amountError = false;
                 this.messAmountError = "";
+                return true
             }
         },
         validatePassword() {
@@ -163,10 +166,10 @@ export default defineComponent({
 
             if (!this.password) {
                 this.passwordError = true;
-                this.messPassError = "Password is required.";
+                this.messPassError = "required_password";
             } else if (getPassword !== this.password) {
                 this.passwordError = true;
-                this.messPassError = "Password is incorrect.";
+                this.messPassError = "incorrect_password";
             } else {
                 this.passwordError = false;
                 this.messPassError = "";
@@ -178,8 +181,9 @@ export default defineComponent({
             }
         },
         handleConfirm() {
-            this.validateAmount();
-            this.validatePassword();
+            if (this.validateAmount()) { 
+                this.validatePassword();
+            }
         },
         async submit() {
             trackEventBtn({
@@ -209,7 +213,7 @@ export default defineComponent({
                 const balance = await keyringService.getBalance(address);
 
                 if (balance < Number(amount)) {
-                    this.renderErr("Insufficient balance");
+                    this.renderErr("insufficient_balance");
                     this.isLoading = false;
                     return;
                 }
@@ -233,9 +237,7 @@ export default defineComponent({
 
                 if (res?.status === 201 || res?.status === 200) {
                     this.handleClose();
-                    this.renderSuccess(
-                        `${this.labelType} successfully! Please wait to confirm.`
-                    );
+                    this.renderSuccess(`noti.deposit_success`);
                 } else {
                     this.renderErr(
                         `${this.labelType} error. ${res.data?.message}`
@@ -254,7 +256,7 @@ export default defineComponent({
             const balance = this.infoWallet?.balance;
             if (balance < this.amount) {
                 this.isLoading = false;
-                this.renderErr("Insufficient balance");
+                this.renderErr("insufficient_balance");
                 return;
             }
 
@@ -268,9 +270,7 @@ export default defineComponent({
                 );
                 if (res?.status === 201 || res?.status === 200) {
                     this.handleClose();
-                    this.renderSuccess(
-                        `${this.labelType} successfully! Please wait to confirm.`
-                    );
+                    this.renderSuccess(`nofi.withdraw_success`);
                 } else {
                     this.renderErr(
                         `${this.labelType} error. ${res.data?.message}`

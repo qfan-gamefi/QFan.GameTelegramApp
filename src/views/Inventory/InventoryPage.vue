@@ -2,7 +2,7 @@
     <div class="wr-inventory-page">
         <img
             class="w-full object-cover"
-            src="./../../../public/assets/inventory/banner-inventory.png"
+            :src="bannerSrc"
             alt="banner_inventory"
             ref="bannerInventory"
             loading="lazy"
@@ -16,7 +16,7 @@
                 :class="{ active: activeButton === button?.name }"
                 @click="setActiveButton(button?.name)"
             >
-                {{ button.label }}
+                {{ $t(button.label) }}
             </div>
         </div>
 
@@ -29,7 +29,7 @@
                         class="border-b border-[#2F9AD6] p-1 rounded-md animation-inventory"
                     >
                         <div class="text-[14px] mb-1 font-extrabold">
-                            {{ renderTitleKey(key) }}
+                            {{ $t(renderTitleKey(key)) }}
                         </div>
 
                         <div class="box-item">
@@ -67,7 +67,7 @@
                                                         class="fa fa-spinner fa-spin"
                                                     ></i>
                                                 </div>
-                                                Use
+                                                {{ $t("use") }}
                                             </button>
                                         </div>
 
@@ -84,7 +84,7 @@
                                                         class="fa fa-spinner fa-spin"
                                                     ></i>
                                                 </div>
-                                                Sell
+                                                {{ $t("sell") }}
                                             </button>
                                         </div>
                                     </div>
@@ -184,7 +184,7 @@
                                         ]"
                                     >
                                         <button @click="handleFausion(item)">
-                                            Claim
+                                            {{ $t("claim") }}
                                         </button>
                                     </div>
                                 </div>
@@ -197,7 +197,7 @@
 
         <PopupComingSoon
             :visible="showCoomingSoon"
-            message="Coming soon!"
+            message="coming_soon"
             @close="showCoomingSoon = false"
         />
 
@@ -210,7 +210,7 @@
 
         <PopupConfirm
             v-if="showClaim"
-            :text="`Do you want Claim!`"
+            text="do_you_want_claim"
             :loading="loadingBtn"
             :visible="showClaim"
             @yes="handleYesClaim"
@@ -240,7 +240,7 @@
                     <InputField
                         v-model="countUse"
                         label=""
-                        placeholder="Enter the number"
+                        placeholder="0"
                     />
                 </div>
             </template>
@@ -299,6 +299,14 @@ export default defineComponent({
     },
     computed: {
         ...mapState(["rewardInfo", "routerFusion"]),
+        bannerSrc() {
+            if (this.$i18n.locale === 'zh') {
+                return '/assets/inventory/banner-inventory-zh.png';
+            } else if (this.$i18n.locale === 'vi') {
+                return '/assets/inventory/banner-inventory.png';
+            }
+            return '/assets/inventory/banner-inventory.png';
+        }
     },
     watch: {
         routerFusion(newVal, oldVal) {
@@ -322,10 +330,10 @@ export default defineComponent({
             notificationType: "",
             activeButton: ButtonName.Inventory as ButtonName,
             buttonInventory: [
-                { name: "Inventory", label: "Inventory" },
-                { name: "Badges", label: "Badges" },
-                { name: "Fusion", label: "Fusion" },
-                { name: "History", label: "History" },
+                { name: "Inventory", label: "inventory" },
+                { name: "Badges", label: "badges" },
+                { name: "Fusion", label: "fusion" },
+                { name: "History", label: "history" },
             ] as Button[],
             showClaim: false,
             itemFusion: {} as IFusion,

@@ -1,38 +1,22 @@
 <template>
     <div class="box-action">
         <router-link to="/airdrop">
-            <img
-                loading="lazy"
-                src="./../../../public/assets/airdrop/airdrop_logo.png"
-                class="w-[50px]"
-            />
+            <img loading="lazy" :src="iconAirdrop" class="w-[50px]" />
         </router-link>
         <div @click="setRouterFusion()">
             <router-link to="/inventory">
-                <img
-                    loading="lazy"
-                    src="./../../../public/assets/inventory/fusion_icon.png"
-                    class="img-fusion"
-                />
+                <img loading="lazy" :src="iconFusion" class="img-fusion" />
             </router-link>
         </div>
         <div class="market">
             <router-link to="/market">
-                <img
-                    loading="lazy"
-                    class="img-market"
-                    src="./../../../public/assets/shop/marketplace_logo.png"
-                />
+                <img loading="lazy" class="img-market" :src="iconMarket" />
                 <div class="shine shine-1"></div>
                 <div class="shine shine-4"></div>
             </router-link>
         </div>
         <router-link to="/inventory">
-            <img
-                loading="lazy"
-                class="img-inventory"
-                src="./../../../public/assets/inventory/inventory_logo.png"
-            />
+            <img loading="lazy" class="img-inventory" :src="iconInventory" />
         </router-link>
         <router-link to="/flip">
             <img
@@ -73,6 +57,34 @@ export default {
     },
     computed: {
         ...mapState(["autoFlipStore"]),
+        iconAirdrop() {
+            if (this.$i18n.locale === "zh") {
+                return "/assets/airdrop/airdrop_logo_zh.png";
+            } else {
+                return "/assets/airdrop/airdrop_logo.png";
+            }
+        },
+        iconFusion() {
+            if (this.$i18n.locale === "zh") {
+                return "/assets/inventory/fusion_icon_zh.png";
+            } else {
+                return "/assets/inventory/fusion_icon.png";
+            }
+        },
+        iconMarket() {
+            if (this.$i18n.locale === "zh") {
+                return "/assets/shop/marketplace_logo_zh.png";
+            } else {
+                return "/assets/shop/marketplace_logo.png";
+            }
+        },
+        iconInventory() {
+            if (this.$i18n.locale === "zh") {
+                return "/assets/inventory/inventory_logo_zh.png";
+            } else {
+                return "/assets/inventory/inventory_logo.png";
+            }
+        },
     },
     watch: {
         autoFlipStore(newValue) {
@@ -99,7 +111,7 @@ export default {
     top: 37%;
     right: 5%;
     display: flex;
-    gap: 20px;
+    gap: 15px;
     align-items: end;
 }
 

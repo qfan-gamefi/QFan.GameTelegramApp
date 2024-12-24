@@ -1,6 +1,6 @@
 <template>
     <div class="input-wrapper">
-        <div class="label" v-if="label">{{ label }}</div>
+        <div class="label" v-if="label">{{ $t(label) }}</div>
         <input
             type="number"
             :value="modelValue"
@@ -8,7 +8,7 @@
             inputmode="numeric"
             pattern="[0-9]*"
             class="input-field f-bangopro"
-            :placeholder="placeholder"
+            :placeholder="$t(placeholder)"
         />
     </div>
 </template>

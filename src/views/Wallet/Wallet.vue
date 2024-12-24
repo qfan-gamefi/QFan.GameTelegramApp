@@ -11,7 +11,7 @@
                     <div>
                         <img src="@public/assets/logo.svg" class="w-[25px]" />
                     </div>
-                    <div>Address</div>
+                    <div>{{ $t("address") }}</div>
                     <div class="text-[#8f8f8f]">
                         (<a href="#" @click="linkToExplore($event)">{{ activeWallet?.address.substring(0, 5) }}...</a>)
                     </div>
@@ -30,8 +30,7 @@
             <div class="body-wl">
                 <div class="wr-balance-wl">
                     <div class="flex gap-[10px]">
-                        Total balance
-
+                        {{ $t("total_balance") }}
                         <div @click="toggleVisibility()">
                             <div v-if="!isVisible">
                                 <i class="fa-solid fa-eye"></i>
@@ -49,16 +48,26 @@
                     </div>
 
                     <div class="flex text-[12px] gap-2">
-                        <button class="btn-item-wl" @click="() => (openReceive = true)">
-                            <i class="fa-solid fa-copy"></i> Receive
+                        <button
+                            class="btn-item-wl"
+                            @click="() => (openReceive = true)"
+                        >
+                            <i class="fa-solid fa-copy"></i> {{ $t("receive") }}
                         </button>
                         <button @click="onSend()" class="btn-item-wl">
-                            <i class="fa-solid fa-paper-plane"></i> Send
+                            <i class="fa-solid fa-paper-plane"></i>
+                            {{ $t("send") }}
                         </button>
-                        <button class="btn-item-wl" @click="faucet()" v-bind:disabled="executing">
-                            <i class="fa-solid fa-faucet"></i> Faucet
-                            <div v-if="isFaucet"><i class="fa fa-spinner loading"></i></div>
-
+                        <button
+                            class="btn-item-wl"
+                            @click="faucet()"
+                            v-bind:disabled="isFaucet"
+                        >
+                            <i class="fa-solid fa-faucet"></i>
+                            {{ $t("faucet") }}
+                            <div v-if="isFaucet">
+                                <i class="fa fa-spinner loading"></i>
+                            </div>
                         </button>
                     </div>
 
@@ -66,19 +75,31 @@
                         {{ errorMessage }}
                     </span>
 
-                    <span class="faucet-success" v-if="transactionUrl">Faucet success. Click
-                        <a v-bind:href="transactionUrl" target="_blank">here</a>
-                        to view transaction on explorer</span>
+                    <span class="faucet-success" v-if="transactionUrl"
+                        >{{ $t("faucet_success_click") }}
+                        <a v-bind:href="transactionUrl" target="_blank">{{
+                            $t("here")
+                        }}</a>
+                        {{ $t("to_view_transaction_on_explorer") }}</span
+                    >
                 </div>
 
                 <div class="wr-coin">
                     <div class="title">
-                        <a href="#" @click="setActiveTab($event, 'token')"
-                            v-bind:class="activeTab === 'token' ? 'active' : ''">Token</a>
-                        <a href="#" @click="setActiveTab($event, 'nft')"
-                            v-bind:class="activeTab === 'nft' ? 'active' : ''">NFT</a>
-                        <a href="#" @click="setActiveTab($event, 'activities')" v-bind:class="activeTab === 'activities' ? 'active' : ''
-                            ">Activities</a>
+                        <a
+                            href="#"
+                            @click="setActiveTab($event, 'token')"
+                            v-bind:class="activeTab === 'token' ? 'active' : ''"
+                            >Token</a
+                        >
+                        <a
+                            href="#"
+                            @click="setActiveTab($event, 'activities')"
+                            v-bind:class="
+                                activeTab === 'activities' ? 'active' : ''
+                            "
+                            >Activities</a
+                        >
                     </div>
 
                     <div class="box-content" v-if="activeTab === 'token'">
@@ -107,11 +128,15 @@
 
                     <div class="box-content" v-if="activeTab === 'activities'">
                         <div class="filter">
-                            Status:
+                            {{ $t("status") }}:
                             <select v-model="filterStatus">
-                                <option value="">All</option>
-                                <option value="pending">Pending</option>
-                                <option value="confirmed">Confirmed</option>
+                                <option value="">{{ $t("all") }}</option>
+                                <option value="pending">
+                                    {{ $t("pending") }}
+                                </option>
+                                <option value="confirmed">
+                                    {{ $t("confirmed") }}
+                                </option>
                             </select>
                         </div>
 
@@ -140,13 +165,20 @@
                                 </div>
                                 <div class="w-full">
                                     <div>
-                                        <a v-if="
-                                            transaction.type === 'receive'
-                                        " class="address">From:
+                                        <a
+                                            v-if="
+                                                transaction.type === 'receive'
+                                            "
+                                            class="address"
+                                            >From:
                                             {{
                                                 formatAddress(transaction?.from)
-                                            }}</a>
-                                        <a v-if="transaction.type === 'send'" class="address">To:
+                                            }}</a
+                                        >
+                                        <a
+                                            v-if="transaction.type === 'send'"
+                                            class="address"
+                                            >To:
                                             {{
                                                 formatAddress(transaction?.to)
                                             }}</a>
@@ -172,37 +204,64 @@
             <div class="popup-referer-code">
                 <a href="#" @click="closeSend" class="close"><i class="fa fa-close"></i></a>
 
-                <div class="popup-title">Input address and value to send</div>
+                <div class="popup-title">
+                    {{ $t("input_address_and_value_to_send") }}
+                </div>
 
                 <form @submit.prevent="executeSend">
                     <table>
                         <tr class="form-group">
                             <td>
-                                <label class="label" for="address">Address</label>
+                                <label class="label" for="address"
+                                    >Address</label
+                                >
                             </td>
                             <td>
-                                <input class="code-input-wl" :class="{ 'input-error-wl': errorMessage }" type="text"
-                                    v-model="toAddress" id="address" @input="clearError" placeholder="Enter address" />
+                                <input
+                                    class="code-input-wl"
+                                    :class="{ 'input-error-wl': errorMessage }"
+                                    type="text"
+                                    v-model="toAddress"
+                                    id="address"
+                                    @input="clearError"
+                                    placeholder="Enter address"
+                                />
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                <label class="label" for="value">Value</label>
+                                <label class="label" for="value">{{
+                                    $t("value")
+                                }}</label>
                             </td>
                             <td>
-                                <input class="code-input-wl" :class="{ 'input-error-wl': errorMessage }" type="number"
-                                    v-model="sendValue" id="value" @input="clearError"
-                                    placeholder="Enter value to send" />
+                                <input
+                                    class="code-input-wl"
+                                    :class="{ 'input-error-wl': errorMessage }"
+                                    type="number"
+                                    v-model="sendValue"
+                                    id="value"
+                                    @input="clearError"
+                                    placeholder="Enter value to send"
+                                />
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                <label class="label" for="value">Password</label>
+                                <label class="label" for="value"
+                                    >Password</label
+                                >
                             </td>
                             <td>
-                                <input class="code-input-wl" :class="{ 'input-error-wl': errorMessage }" type="password"
-                                    v-model="sendPassword" id="password" @input="clearError"
-                                    placeholder="Enter password" />
+                                <input
+                                    class="code-input-wl"
+                                    :class="{ 'input-error-wl': errorMessage }"
+                                    type="password"
+                                    v-model="sendPassword"
+                                    id="password"
+                                    @input="clearError"
+                                    placeholder="Enter password"
+                                />
                             </td>
                         </tr>
                     </table>
@@ -210,9 +269,17 @@
                         {{ errorMessage }}
                     </div>
 
-                    <button class="btn-submit-code" @click="executeSend()" v-bind:disabled="executing" type="submit">
-                        <span>Send
-                            <a v-if="executing"><i class="fa fa-spinner loading"></i></a></span>
+                    <button
+                        class="btn-submit-code"
+                        @click="executeSend()"
+                        v-bind:disabled="executing"
+                        type="submit"
+                    >
+                        <span
+                            >Send
+                            <a v-if="executing"
+                                ><i class="fa fa-spinner loading"></i></a
+                        ></span>
                     </button>
                 </form>
             </div>
@@ -220,7 +287,9 @@
         <div v-if="openReceive">
             <div class="popup-overlay"></div>
             <div class="popup-referer-code">
-                <a href="#" @click="handleCloseReceive" class="close"><i class="fa fa-close"></i></a>
+                <a href="#" @click="handleCloseReceive" class="close"
+                    ><i class="fa fa-close"></i
+                ></a>
                 <div class="popup-title">Receive Address</div>
                 <div class="wl-addr">
                     <div class="mb-3">
@@ -228,8 +297,11 @@
                             v-bind:src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${activeWallet?.address}`" />
                     </div>
                     <div class="flex justify-center">
-                        <a href="#" @click="copyAddress($event)"
-                            class="text-white bg-[#1568e5] p-2.5 rounded font text-xs">
+                        <a
+                            href="#"
+                            @click="copyAddress($event)"
+                            class="text-white bg-[#1568e5] p-2.5 rounded font text-xs"
+                        >
                             <i class="fa-solid fa-copy"></i> Copy Address
                         </a>
                     </div>
@@ -252,7 +324,6 @@ import {
     getAddressLinkToExplorer,
     getNFTList,
     getTxLinkToExplorer,
-    signAndSendTransaction,
 } from "@/crypto_utils/networks";
 import HDKeyring from "@/crypto_utils/HDKeyring";
 import { type WalletInfo } from "@/crypto_utils/type";
@@ -260,6 +331,7 @@ import type { QuaiTransactionRequest } from "quais/lib/esm/providers";
 import { formatEther, parseEther, toBigInt } from "ethers";
 import { CURRENT_WALLET_VERSION } from "@/crypto_utils/constants";
 import BackButtonTelegram from "@/mixins/BackButtonTelegram";
+import { trackEventBtn } from "@/utils";
 
 export default defineComponent({
     name: "WalletDetail",
@@ -356,6 +428,9 @@ export default defineComponent({
                     this.playerId,
                     this.activeWallet?.address as string
                 );
+                trackEventBtn({
+                    label: "Faucet",
+                });
                 if (
                     faucetResult.statusCode &&
                     faucetResult.statusCode !== 200
@@ -373,7 +448,6 @@ export default defineComponent({
                 this.isFaucet = false;
                 this.executing = false;
             } catch (error) {
-                // console.log("error", error);
                 this.errorMessage = "Faucet error: " + error?.message;
                 this.executing = false;
                 this.isFaucet = false;
@@ -416,7 +490,9 @@ export default defineComponent({
                 this.errorMessage = "Password is incorrect";
                 return;
             }
-
+            trackEventBtn({
+                label: "Send_wallet",
+            });
             try {
                 this.executing = true;
                 const hdKeyring = new HDKeyring();
@@ -428,7 +504,7 @@ export default defineComponent({
                 } as unknown as QuaiTransactionRequest;
 
                 console.log("transaction", transaction);
-
+                
 
                 const result = await hdKeyring.signAndSendQuaiTransaction(
                     transaction
@@ -504,7 +580,6 @@ export default defineComponent({
         await hdKeyring.unlock();
         if (hdKeyring.isSigning) {
             this.activeWallet = hdKeyring.getActiveWallet();
-            console.log("activeWallet", this.activeWallet);
 
             const address = await this.activeWallet?.address;
             if (!address) {

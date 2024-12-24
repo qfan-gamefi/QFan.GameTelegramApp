@@ -89,24 +89,21 @@ export default defineComponent({
     },
     data() {
         const dataUserTele = window?.Telegram?.WebApp?.initDataUnsafe;
-
-        let first_name = dataUserTele?.user?.first_name || "1";
-        let last_name = dataUserTele?.user?.last_name || "2";
+        let first_name = dataUserTele?.user?.first_name || '';
+        let last_name = dataUserTele?.user?.last_name;
 
         return {
             isTelegramLogin: !!first_name || !!last_name,
             idUser: dataUserTele.user?.id?.toString() ?? "",
-            first_name: first_name,
-            last_name: last_name,
+            first_name: first_name || '',
+            last_name: last_name || '',
             isAnimated: false,
             animationTimeout: null,
-
             urlAvt: "./../../../public/assets/no-img.jpg",
             dataLevel: {} as ILevel,
             expLevelNext: {} as ILevel,
             percentageLevel: 0,
             isMaxLv: false,
-
             urlBadge: "./../../../public/assets/event/beta test.png",
             itemsBadge: [] as IItemInventory[],
         };
@@ -125,7 +122,7 @@ export default defineComponent({
         },
         async getAvt() {
             const res = await userServiceTelebot.getAvtTelegram(this.idUser);
-            this.urlAvt = res;
+            this.urlAvt = res?.length > 0 ? res : "./../../../public/assets/logo.jpg";
             this.$store.commit("setAvtStore", res);
         },
         async getLevels() {                        
@@ -179,7 +176,17 @@ export default defineComponent({
                 const filterBadge = res?.Items?.filter(
                     (item) => item?.ItemDef?.Type === EItemDefType.Medal
                 );
-                this.itemsBadge = filterBadge;
+                const categoryMap = {};
+                filterBadge.forEach(item => {
+                    const category = item.ItemDef.Category;
+                    const itemDefId = item.ItemDefId;
+                    if (!categoryMap[category] || itemDefId > categoryMap[category]?.ItemDefId) {
+                        categoryMap[category] = item;
+                    }
+                });
+                const highestBadgePerCategory  = Object?.values(categoryMap);                
+                
+                this.itemsBadge = highestBadgePerCategory ;
             } catch (error) {
                 console.error(error);
             }

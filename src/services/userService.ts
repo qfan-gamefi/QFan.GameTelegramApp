@@ -286,7 +286,8 @@ const userService = {
             `/wallet/find-transaction-by-player/${idUser}`
         );
         return res;
-    }
+    },
+    
 };
 
 export default userService;

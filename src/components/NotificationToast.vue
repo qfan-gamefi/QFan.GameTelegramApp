@@ -14,7 +14,7 @@
             
         </div>
 
-        <div>{{ message }}</div>
+        <div>{{ $t(message, { count: count }) }}</div>
 
         <div @click="closeNotification()">
             <i class="fa-solid fa-xmark"></i>
@@ -39,6 +39,10 @@ export default {
             type: Number,
             default: 2000,
         },
+        count: {
+            type: Number,
+            required: false
+        }
     },
     setup(props, { emit }) {
         const visible = ref(true);

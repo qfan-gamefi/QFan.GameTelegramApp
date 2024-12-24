@@ -15,6 +15,7 @@ import type {
 } from "quais/lib/esm/providers";
 import { CONTRACT_OWNER_ADDRESS } from "@/crypto_utils/constants";
 import userService from "@/services/userService";
+import { trackEventBtn } from "@/utils";
 
 export default defineComponent({
     name: "AutoMining",
@@ -88,6 +89,9 @@ export default defineComponent({
                     activeWallet?.address as string,
                     tx.hash
                 );
+                trackEventBtn({
+                    label: 'AutoMining',
+                });
                 if (autoInteract.error) {
                     store.commit("setAutoMessStore", false);
                     store.commit("setAutoMessTextStore", autoInteract.message || autoInteract.error);

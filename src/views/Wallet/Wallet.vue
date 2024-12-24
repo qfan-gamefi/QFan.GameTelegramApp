@@ -100,6 +100,14 @@
                             "
                             >Activities</a
                         >
+                        <a
+                            href="#"
+                            @click="setActiveTab($event, 'nft')"
+                            v-bind:class="
+                                activeTab === 'nft' ? 'active' : ''
+                            "
+                            >NFTs</a
+                        >
                     </div>
 
                     <div class="box-content" v-if="activeTab === 'token'">
@@ -113,8 +121,8 @@
                             </div>
                         </div>
                     </div>
-                    <div class="" v-if="activeTab === 'nft'">
-                        <div class="grid grid-cols-3 gap-4">
+                    <div class="box-content" v-if="activeTab === 'nft'">
+                        <div class="grid grid-cols-3 gap-4 nft-list">
                             <div v-for="item in nftList" :key="item.id" class="border-solid border-blue-400 border-2 rounded-lg p-2">
                                 <div class="flex flex-col items-center">
                                     <img v-if="item.image_url" :src="item.image_url" class="w-full h-full object-contain" />
@@ -696,6 +704,11 @@ button:hover {
                     color: #333;
                     outline: none;
                 }
+            }
+            
+            .nft-list {
+                max-height: calc(100vh - 275px);
+                overflow-y: auto;
             }
 
             .item-list {

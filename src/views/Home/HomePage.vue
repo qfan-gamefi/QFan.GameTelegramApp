@@ -499,7 +499,7 @@ export default {
                     showBooster: false,
                     activeButton: "invite",
                     showInvite: true,
-                },
+                }
             };
 
             Object.assign(this, tabMappings[tab]);
@@ -519,6 +519,9 @@ export default {
             } else {
                 this.$router.push({ name: "WalletForm" });
             }
+        },
+        async goToShop() {
+            this.$router.push({ name: "Shop" });
         },
         async onCheckIn() {
             try {
@@ -832,7 +835,7 @@ export default {
                 <div class="item-title">Invite Friend</div>
             </div>
 
-            <div class="btn-item" @click="showPopupCoomingSoon">
+            <div class="btn-item" @click="goToShop()">
                 <!-- <router-link to=""> -->
                 <div class="item-img">
                     <img src="@public/assets/button-icons/shop.svg" />

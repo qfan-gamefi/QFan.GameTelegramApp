@@ -13,9 +13,7 @@
                     </div>
                     <div>Address</div>
                     <div class="text-[#8f8f8f]">
-                        (<a href="#" @click="linkToExplore($event)"
-                            >{{ activeWallet?.address.substring(0, 5) }}...</a
-                        >)
+                        (<a href="#" @click="linkToExplore($event)">{{ activeWallet?.address.substring(0, 5) }}...</a>)
                     </div>
                     <div class="text-[#8f8f8f]">
                         <a href="#" @click="copyAddress($event)">
@@ -43,9 +41,7 @@
                             </div>
                         </div>
                         <div>
-                            <a href="#" @click="refreshWallet($event)"
-                                ><i class="fa-solid fa-refresh"></i
-                            ></a>
+                            <a href="#" @click="refreshWallet($event)"><i class="fa-solid fa-refresh"></i></a>
                         </div>
                     </div>
                     <div>
@@ -53,23 +49,16 @@
                     </div>
 
                     <div class="flex text-[12px] gap-2">
-                        <button
-                            class="btn-item-wl"
-                            @click="() => (openReceive = true)"
-                        >
+                        <button class="btn-item-wl" @click="() => (openReceive = true)">
                             <i class="fa-solid fa-copy"></i> Receive
                         </button>
                         <button @click="onSend()" class="btn-item-wl">
                             <i class="fa-solid fa-paper-plane"></i> Send
                         </button>
-                        <button
-                            class="btn-item-wl"
-                            @click="faucet()"
-                            v-bind:disabled="executing"
-                        >
+                        <button class="btn-item-wl" @click="faucet()" v-bind:disabled="executing">
                             <i class="fa-solid fa-faucet"></i> Faucet
                             <div v-if="isFaucet"><i class="fa fa-spinner loading"></i></div>
-                            
+
                         </button>
                     </div>
 
@@ -77,43 +66,40 @@
                         {{ errorMessage }}
                     </span>
 
-                    <span class="faucet-success" v-if="transactionUrl"
-                        >Faucet success. Click
+                    <span class="faucet-success" v-if="transactionUrl">Faucet success. Click
                         <a v-bind:href="transactionUrl" target="_blank">here</a>
-                        to view transaction on explorer</span
-                    >
+                        to view transaction on explorer</span>
                 </div>
 
                 <div class="wr-coin">
                     <div class="title">
-                        <a
-                            href="#"
-                            @click="setActiveTab($event, 'token')"
-                            v-bind:class="activeTab === 'token' ? 'active' : ''"
-                            >Token</a
-                        >
-                        <a
-                            href="#"
-                            @click="setActiveTab($event, 'activities')"
-                            v-bind:class="
-                                activeTab === 'activities' ? 'active' : ''
-                            "
-                            >Activities</a
-                        >
+                        <a href="#" @click="setActiveTab($event, 'token')"
+                            v-bind:class="activeTab === 'token' ? 'active' : ''">Token</a>
+                        <a href="#" @click="setActiveTab($event, 'nft')"
+                            v-bind:class="activeTab === 'nft' ? 'active' : ''">NFT</a>
+                        <a href="#" @click="setActiveTab($event, 'activities')" v-bind:class="activeTab === 'activities' ? 'active' : ''
+                            ">Activities</a>
                     </div>
 
                     <div class="box-content" v-if="activeTab === 'token'">
                         <div class="item-list">
                             <div class="box-item">
-                                <div
-                                    class="flex justify-between items-center gap-2 w-full"
-                                >
-                                    <img
-                                        src="@public/assets/logo-quai.svg"
-                                        class="w-5"
-                                    />
+                                <div class="flex justify-between items-center gap-2 w-full">
+                                    <img src="@public/assets/logo-quai.svg" class="w-5" />
                                     <h2 v-if="isVisible">{{ balance }} QUAI</h2>
                                     <h2 v-else>*********</h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="" v-if="activeTab === 'nft'">
+                        <div class="grid grid-cols-3 gap-4">
+                            <div v-for="item in nftList" :key="item.id" class="border-solid border-blue-400 border-2 rounded-lg p-2">
+                                <div class="flex flex-col items-center">
+                                    <img v-if="item.image_url" :src="item.image_url" class="w-full h-full object-contain" />
+                                    <img v-else src="@public/assets/nft.png" class="w-full h-full object-contain" />
+                                    <span class="mt-2 text-center text-xs">{{ item?.token?.name }}</span>
+                                    <a target="_blank" :href="`https://quaiscan.io/token/${item?.token?.address}/instance/${item?.id}`" class="mt-2 text-center text-xs underline">({{ item?.token?.symbol }})</a>
                                 </div>
                             </div>
                         </div>
@@ -132,68 +118,45 @@
                         <LoadingForm :loading="executing" />
 
                         <div class="item-list" v-if="!executing">
-                            <div
-                                class="box-item"
-                                v-for="(
+                            <div class="box-item" v-for="(
                                     transaction, index
                                 ) in activities.filter(
-                                    (x) =>
-                                        !filterStatus ||
-                                        x.status === filterStatus
-                                )"
-                                :key="index"
-                            >
-                                <div
-                                    class="flex justify-between items-center gap-[10px] w-full"
-                                >
-                                    <span
-                                        ><i class="fa-solid fa-exchange"></i
-                                        >&nbsp;{{
-                                            transaction.type.toUpperCase()
-                                        }}</span
-                                    >
-                                    <a
-                                        href="#"
-                                        @click="
-                                            getLinkTx($event, transaction.hash)
-                                        "
-                                        >({{
+                                        (x) =>
+                                            !filterStatus ||
+                                            x.status === filterStatus
+                                    )" :key="index">
+                                <div class="flex justify-between items-center gap-[10px] w-full">
+                                    <span><i class="fa-solid fa-exchange"></i>&nbsp;{{
+                                        transaction.type.toUpperCase()
+                                        }}</span>
+                                    <a href="#" @click="
+                                        getLinkTx($event, transaction.hash)
+                                        ">({{
                                             formatAddress(transaction.hash)
-                                        }})</a
-                                    >
+                                        }})</a>
                                     <div v-bind:class="transaction.status">
                                         {{ transaction.status.toUpperCase() }}
                                     </div>
                                 </div>
                                 <div class="w-full">
                                     <div>
-                                        <a
-                                            v-if="
-                                                transaction.type === 'receive'
-                                            "
-                                            class="address"
-                                            >From:
+                                        <a v-if="
+                                            transaction.type === 'receive'
+                                        " class="address">From:
                                             {{
                                                 formatAddress(transaction?.from)
-                                            }}</a
-                                        >
-                                        <a
-                                            v-if="transaction.type === 'send'"
-                                            class="address"
-                                            >To:
+                                            }}</a>
+                                        <a v-if="transaction.type === 'send'" class="address">To:
                                             {{
                                                 formatAddress(transaction?.to)
-                                            }}</a
-                                        >
+                                            }}</a>
                                     </div>
                                 </div>
                                 <div class="w-full text-right">
-                                    <span
-                                        >{{ formatValue(transaction?.value) }}
+                                    <span>{{ formatValue(transaction?.value) }}
                                         {{
                                             transaction?.tokenSymbol ?? "QUAI"
-                                        }}</span
-                                    >
+                                        }}</span>
                                 </div>
                             </div>
                         </div>
@@ -202,18 +165,12 @@
             </div>
         </div>
 
-        <NotificationToast
-            v-if="notification.visible"
-            :message="notification.message"
-            :type="notification.type"
-        />
+        <NotificationToast v-if="notification.visible" :message="notification.message" :type="notification.type" />
 
         <div v-if="openSend">
             <div class="popup-overlay"></div>
             <div class="popup-referer-code">
-                <a href="#" @click="closeSend" class="close"
-                    ><i class="fa fa-close"></i
-                ></a>
+                <a href="#" @click="closeSend" class="close"><i class="fa fa-close"></i></a>
 
                 <div class="popup-title">Input address and value to send</div>
 
@@ -221,20 +178,11 @@
                     <table>
                         <tr class="form-group">
                             <td>
-                                <label class="label" for="address"
-                                    >Address</label
-                                >
+                                <label class="label" for="address">Address</label>
                             </td>
                             <td>
-                                <input
-                                    class="code-input-wl"
-                                    :class="{ 'input-error-wl': errorMessage }"
-                                    type="text"
-                                    v-model="toAddress"
-                                    id="address"
-                                    @input="clearError"
-                                    placeholder="Enter address"
-                                />
+                                <input class="code-input-wl" :class="{ 'input-error-wl': errorMessage }" type="text"
+                                    v-model="toAddress" id="address" @input="clearError" placeholder="Enter address" />
                             </td>
                         </tr>
                         <tr>
@@ -242,54 +190,29 @@
                                 <label class="label" for="value">Value</label>
                             </td>
                             <td>
-                                <input
-                                    class="code-input-wl"
-                                    :class="{ 'input-error-wl': errorMessage }"
-                                    type="number"
-                                    v-model="sendValue"
-                                    id="value"
-                                    @input="clearError"
-                                    placeholder="Enter value to send"
-                                />
+                                <input class="code-input-wl" :class="{ 'input-error-wl': errorMessage }" type="number"
+                                    v-model="sendValue" id="value" @input="clearError"
+                                    placeholder="Enter value to send" />
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                <label class="label" for="value"
-                                    >Password</label
-                                >
+                                <label class="label" for="value">Password</label>
                             </td>
                             <td>
-                                <input
-                                    class="code-input-wl"
-                                    :class="{ 'input-error-wl': errorMessage }"
-                                    type="password"
-                                    v-model="sendPassword"
-                                    id="password"
-                                    @input="clearError"
-                                    placeholder="Enter password"
-                                />
+                                <input class="code-input-wl" :class="{ 'input-error-wl': errorMessage }" type="password"
+                                    v-model="sendPassword" id="password" @input="clearError"
+                                    placeholder="Enter password" />
                             </td>
                         </tr>
                     </table>
-                    <div
-                        v-if="errorMessage"
-                        class="text-xs text-red-500 text-center"
-                    >
+                    <div v-if="errorMessage" class="text-xs text-red-500 text-center">
                         {{ errorMessage }}
                     </div>
 
-                    <button
-                        class="btn-submit-code"
-                        @click="executeSend()"
-                        v-bind:disabled="executing"
-                        type="submit"
-                    >
-                        <span
-                            >Send
-                            <a v-if="executing"
-                                ><i class="fa fa-spinner loading"></i></a
-                        ></span>
+                    <button class="btn-submit-code" @click="executeSend()" v-bind:disabled="executing" type="submit">
+                        <span>Send
+                            <a v-if="executing"><i class="fa fa-spinner loading"></i></a></span>
                     </button>
                 </form>
             </div>
@@ -297,22 +220,16 @@
         <div v-if="openReceive">
             <div class="popup-overlay"></div>
             <div class="popup-referer-code">
-                <a href="#" @click="handleCloseReceive" class="close"
-                    ><i class="fa fa-close"></i
-                ></a>
+                <a href="#" @click="handleCloseReceive" class="close"><i class="fa fa-close"></i></a>
                 <div class="popup-title">Receive Address</div>
                 <div class="wl-addr">
                     <div class="mb-3">
                         <img
-                            v-bind:src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${activeWallet?.address}`"
-                        />
+                            v-bind:src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${activeWallet?.address}`" />
                     </div>
                     <div class="flex justify-center">
-                        <a
-                            href="#"
-                            @click="copyAddress($event)"
-                            class="text-white bg-[#1568e5] p-2.5 rounded font text-xs"
-                        >
+                        <a href="#" @click="copyAddress($event)"
+                            class="text-white bg-[#1568e5] p-2.5 rounded font text-xs">
                             <i class="fa-solid fa-copy"></i> Copy Address
                         </a>
                     </div>
@@ -333,6 +250,7 @@ import {
     activeProvider,
     fetchActivity,
     getAddressLinkToExplorer,
+    getNFTList,
     getTxLinkToExplorer,
     signAndSendTransaction,
 } from "@/crypto_utils/networks";
@@ -379,6 +297,8 @@ export default defineComponent({
             transactionUrl: "",
             openReceive: false,
             isFaucet: false,
+            tokenList: [],
+            nftList: [],
         };
     },
     methods: {
@@ -402,6 +322,9 @@ export default defineComponent({
             if (tab === "activities") {
                 await this.fetchActivity();
             }
+            else if (tab === "nft") {
+                await this.fetchNftList();
+            }
         },
         copyAddress(e: Event) {
             e.preventDefault();
@@ -414,6 +337,14 @@ export default defineComponent({
             )) as never[];
 
             this.executing = false;
+        },
+        async fetchNftList() {
+            const nftList = await getNFTList(
+                this.activeWallet?.address as string
+            );
+            console.log("nftList", nftList);
+
+            this.nftList = nftList?.items;
         },
         async faucet() {
             try {
@@ -497,7 +428,7 @@ export default defineComponent({
                 } as unknown as QuaiTransactionRequest;
 
                 console.log("transaction", transaction);
-                
+
 
                 const result = await hdKeyring.signAndSendQuaiTransaction(
                     transaction
@@ -540,8 +471,9 @@ export default defineComponent({
         },
         async refreshWallet($event?: Event) {
             if ($event) $event.preventDefault();
-            await this.getBalance();
-            await this.fetchActivity();
+            this.getBalance();
+            this.fetchActivity();
+            this.fetchNftList();
         },
         removeWallet() {
             localStorage.clear();
@@ -594,6 +526,7 @@ export default defineComponent({
 button {
     padding: 25px 50px;
 }
+
 button:hover {
     box-shadow: none;
 }

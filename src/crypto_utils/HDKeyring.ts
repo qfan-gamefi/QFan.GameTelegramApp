@@ -39,7 +39,7 @@ import { secureStorage, storage } from "@/storage/storage";
 import { activeProvider } from "./networks";
 import { ERC20_INTERFACE } from "./erc20";
 import { formatEther, parseEther } from "ethers";
-import type { TransactionReceipt } from "@ethersproject/providers";
+import type { TransactionReceipt, TransactionRequest } from "@ethersproject/providers";
 import { CONTRACT_ADDRESS, CONTRACT_OWNER_ADDRESS } from "./constants";
 import { QuaiTransactionRequest, QuaiTransactionResponse } from "quais/lib/commonjs/providers";
 import { HexString } from "quais/lib/commonjs/utils";
@@ -530,6 +530,32 @@ export default class HDKeyring {
                 throw error;
             }
         }
+    }
+
+    async callContractMethod(method: string, fromAddress: string, contractAddress: string, abi: any, args: any[]) {
+        try {
+            const signerWithType = this.findSigner(fromAddress);
+            if (!signerWithType) {
+                throw new Error(
+                    `Signing transaction failed. Signer for address ${fromAddress} was not found.`
+                );
+            }
+
+            if (this.isSignerPrivateKeyType(signerWithType)) {
+                const jsonRpcProvider = activeProvider();
+                const tokenContract = new Contract(
+                    contractAddress,
+                    abi,
+                    signerWithType.signer.connect(jsonRpcProvider)
+                );
+                const result = await tokenContract[method](...args);
+                console.log("result", result);
+                return Promise.resolve(result);
+            }
+        } catch (error) {
+            return Promise.reject(error);
+        }
+
     }
 
     isSignerPrivateKeyType = (

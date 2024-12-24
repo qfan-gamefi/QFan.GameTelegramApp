@@ -7,6 +7,7 @@ import FlipPage from "@/views/Flip/FlipPage.vue";
 import Wallet from "@/views/Wallet/Wallet.vue";
 import InventoryPage from "@/views/Inventory/InventoryPage.vue";
 import ShopPage from "@/views/Shop/ShopPage.vue";
+import NFT from "@/views/NFT/NFT.vue";
 import AirdropPage from "@/views/Airdrop/AirdropPage.vue";
 
 const routes = [
@@ -44,6 +45,11 @@ const routes = [
         path: "/market",
         name: "ShopPage",
         component: ShopPage,
+    },
+    {
+        path: "/shop",
+        name: "Shop",
+        component: NFT,
     },
     {
         path: "/airdrop",

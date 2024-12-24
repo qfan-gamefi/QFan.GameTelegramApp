@@ -28,6 +28,9 @@ import NotificationToast from '@/components/NotificationToast.vue';
 import DreamTeamNFT from '../../crypto_utils/constants/DreamTeamNFT.json';
 import HDKeyring from "@/crypto_utils/HDKeyring";
 export default {
+  components: {
+    NotificationToast,
+  },
   data() {
     return {
       cards: [

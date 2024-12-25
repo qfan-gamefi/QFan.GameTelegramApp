@@ -2,7 +2,7 @@
   <div class="shop-container h-screen w-screen">
     <div class="header px-6">
       <h1 class="shop-title">NFT COLLECTION</h1>
-      <p class="shop-total">Total: {{ cards.length }} items</p>
+      <p class="shop-total" v-if="!loading">Total: {{ cards.length }} items</p>
     </div>
     <div class="card-grid">
       <div v-for="card in cards" :key="card.id" class="card">
@@ -37,6 +37,7 @@ export default {
     return {
       apiUrl: NETORK_ADMIN_BASE_URL,
       cards: [],
+      loading: false,
       isMinting: false,
       currentMintingCard: null,
       notification: {
@@ -91,8 +92,9 @@ export default {
       this.notification.message = message;
       this.notification.type = "error";
     },
-    getNFTCollection() {
-      networkAdminAxiosInstance.get('items/nft_collection')
+    async getNFTCollection() {
+      this.loading = true;
+      await networkAdminAxiosInstance.get('items/nft_collection')
         .then(async (response) => {
           const keyringService = new HDKeyring();
           await keyringService.unlock();
@@ -117,6 +119,9 @@ export default {
         .catch((error) => {
           console.error(error);
           this.showError("Error fetching NFTs. " + error.reason || error.message);
+        })
+        .finally(() => {
+          this.loading = false;
         });
     }
   },

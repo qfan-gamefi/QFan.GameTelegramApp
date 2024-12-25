@@ -550,10 +550,11 @@ export default class HDKeyring {
                 );
                 const result = await tokenContract[method](...args);
                 console.log("result", result);
-                return Promise.resolve(result);
+                return result;
             }
         } catch (error) {
-            return Promise.reject(error);
+           console.log("callContractMethod error", error);
+           Promise.reject(error);
         }
 
     }

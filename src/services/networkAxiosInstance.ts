@@ -7,3 +7,11 @@ export const networkAxiosInstance = axios.create({
         "Content-Type": "application/json",
     },
 });
+
+export const NETORK_ADMIN_BASE_URL = `${URL_API}/network/api/`;
+export const networkAdminAxiosInstance = axios.create({
+    baseURL: NETORK_ADMIN_BASE_URL,
+    headers: {
+        "Content-Type": "application/json",
+    },
+});

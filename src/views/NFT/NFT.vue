@@ -6,15 +6,14 @@
     </div>
     <div class="card-grid">
       <div v-for="card in cards" :key="card.id" class="card">
-        <img :src="card.image" :alt="card.title" class="card-image" />
-        <p class="card-id">{{ card.name }}</p>
+        <img :src="apiUrl + '/assets/' + card.thumb_image" :alt="card.title" class="card-image" />
+        <p class="card-id">{{ card.name }}({{ card?.symbol }})</p>
         <div class="card-info">
-          <span class="card-price">{{ card.price }} Quai</span>
-          <!-- <span class="card-quantity">{{ card.quantity }}</span> -->
+          <span class="card-quantity">{{ card?.remain }}/{{ card?.totalSupply }}</span>
+
         </div>
         <button class="mint-button" v-bind:disabled="isMinting" v-on:click="this.mintNFT(card)">
-          <span v-if="card.id === 0">Random Mint</span>
-          <span v-if="card.id !== 0">Mint</span>
+          Mint (-{{ card.price }} Quai)
           <span v-if="isMinting && currentMintingCard === card.id"><i class="fa fa-spinner"></i></span></button>
       </div>
     </div>
@@ -25,9 +24,10 @@
 
 <script>
 import NotificationToast from '@/components/NotificationToast.vue';
-import DreamTeamNFT from '../../crypto_utils/constants/DreamTeamNFT.json';
+import NFTGoldenAgeCollection from '../../crypto_utils/constants/NFTGoldenAgeCollection.json';
 import HDKeyring from "@/crypto_utils/HDKeyring";
 import BackButtonTelegram from '@/mixins/BackButtonTelegram';
+import { networkAdminAxiosInstance, NETORK_ADMIN_BASE_URL } from '@/services/networkAxiosInstance';
 export default {
   mixins: [BackButtonTelegram],
   components: {
@@ -35,112 +35,8 @@ export default {
   },
   data() {
     return {
-      cards: [
-        {
-          id: 0,
-          name: "Dream Team Collection 0",
-          address: "0x002A78bf69d8148b03DbfF028886E58EA92DC00a",
-          image: "https://turquoise-elaborate-dolphin-481.mypinata.cloud/ipfs/bafkreidkj3coudb4dfo7xzrk5plkmva23kic4jc5mo3cnjy4vmvwdmzhba", // Replace with actual image paths
-          price: 1,
-          quantity: 1200000,
-        },
-        {
-          id: 1,
-          name: "Dream Team Collection 12",
-          address: "0x002A78bf69d8148b03DbfF028886E58EA92DC00a",
-          image: "https://turquoise-elaborate-dolphin-481.mypinata.cloud/ipfs/bafkreibvmblejzef3udzcv3ybvtweksakmospdcros37bc4l6gnf3myhq4", // Replace with actual image paths
-          price: 1,
-          quantity: 1200000,
-        },
-        {
-          id: 2,
-          name: "Dream Team Collection 11",
-          address: "0x002A78bf69d8148b03DbfF028886E58EA92DC00a",
-          image: "https://turquoise-elaborate-dolphin-481.mypinata.cloud/ipfs/bafkreibnjjiqgpwnvzkts4y2rmwym2fiukz2rtwcqu57k7grxnk7wfs5pi", // Replace with actual image paths
-          price: 1,
-          quantity: 1200000,
-        },
-        {
-          id: 3,
-          name: "Dream Team Collection 10",
-          address: "0x002A78bf69d8148b03DbfF028886E58EA92DC00a",
-          image: "https://turquoise-elaborate-dolphin-481.mypinata.cloud/ipfs/bafkreigrlmfpxbt2v6a7jyl5fh4o63yz5xc6sqn5sytp3ogyldrucuz6ni", // Replace with actual image paths
-          price: 1,
-          quantity: 1200000,
-        },
-        {
-          id: 4,
-          name: "Dream Team Collection 9",
-          address: "0x002A78bf69d8148b03DbfF028886E58EA92DC00a",
-          image: "https://turquoise-elaborate-dolphin-481.mypinata.cloud/ipfs/bafkreibb6chbl2fas2bk3pqnfcnvv4orxtgqi5do4nadb2kaj3y4h56luy", // Replace with actual image paths
-          price: 1,
-          quantity: 1200000,
-        },
-        {
-          id: 5,
-          name: "Dream Team Collection 8",
-          address: "0x002A78bf69d8148b03DbfF028886E58EA92DC00a",
-          image: "https://turquoise-elaborate-dolphin-481.mypinata.cloud/ipfs/bafkreihvoxhgoovurxzi5igjsvle4a3w2wivrct7q2jllfn2s2xwnnihki", // Replace with actual image paths
-          price: 1,
-          quantity: 1200000,
-        },
-        {
-          id: 6,
-          name: "Dream Team Collection 7",
-          address: "0x002A78bf69d8148b03DbfF028886E58EA92DC00a",
-          image: "https://turquoise-elaborate-dolphin-481.mypinata.cloud/ipfs/bafkreifge3gbi4ekw55ec3vsoztmnme7eg2eo6hru425cb6hp3yn24bste", // Replace with actual image paths
-          price: 1,
-          quantity: 1200000,
-        },
-        {
-          id: 7,
-          name: "Dream Team Collection 6",
-          address: "0x002A78bf69d8148b03DbfF028886E58EA92DC00a",
-          image: "https://turquoise-elaborate-dolphin-481.mypinata.cloud/ipfs/bafkreibzgi7nfydzfqpeifpcwjwxw5o4wqtaiuzuk6lqajgrrgc52jdyra", // Replace with actual image paths
-          price: 1,
-          quantity: 1200000,
-        },
-        {
-          id: 8,
-          name: "Dream Team Collection 5",
-          address: "0x002A78bf69d8148b03DbfF028886E58EA92DC00a",
-          image: "https://turquoise-elaborate-dolphin-481.mypinata.cloud/ipfs/bafkreig4orqlvmhconpsj5qiq3raitgkfxue2ebmvoypwrxeugaa6il74m", // Replace with actual image paths
-          price: 1,
-          quantity: 1200000,
-        },
-        {
-          id: 9,
-          name: "Dream Team Collection 4",
-          address: "0x002A78bf69d8148b03DbfF028886E58EA92DC00a",
-          image: "https://turquoise-elaborate-dolphin-481.mypinata.cloud/ipfs/bafkreibsqqvf36i77h3q3cnerpdc7cqkhkrjmypbztzqm7zpfh2xkyldci", // Replace with actual image paths
-          price: 1,
-          quantity: 1200000,
-        },
-        {
-          id: 10,
-          name: "Dream Team Collection 3",
-          address: "0x002A78bf69d8148b03DbfF028886E58EA92DC00a",
-          image: "https://turquoise-elaborate-dolphin-481.mypinata.cloud/ipfs/bafkreiejbqceikehxxq7gxqzmh4ubblmegs4oqubzpf3vh6ni2csmimzqq", // Replace with actual image paths
-          price: 1,
-          quantity: 1200000,
-        },
-        {
-          id: 11,
-          name: "Dream Team Collection 2",
-          address: "0x002A78bf69d8148b03DbfF028886E58EA92DC00a",
-          image: "https://turquoise-elaborate-dolphin-481.mypinata.cloud/ipfs/bafkreiegpz7iz6ehv6lglmh33qsj5hffonvitngpb3q4ypo7rmlbjxdp5m", // Replace with actual image paths
-          price: 1,
-          quantity: 1200000,
-        },
-        {
-          id: 12,
-          name: "Dream Team Collection 1",
-          address: "0x002A78bf69d8148b03DbfF028886E58EA92DC00a",
-          image: "https://turquoise-elaborate-dolphin-481.mypinata.cloud/ipfs/bafkreifgjvdrct3p7qhed53jagiaragpcarys3qkdftnlocs4biw3m2ixq", // Replace with actual image paths
-          price: 1,
-          quantity: 1200000,
-        }
-      ],
+      apiUrl: NETORK_ADMIN_BASE_URL,
+      cards: [],
       isMinting: false,
       currentMintingCard: null,
       notification: {
@@ -149,6 +45,9 @@ export default {
         type: "",
       },
     };
+  },
+  mounted() {
+    this.getNFTCollection();
   },
   methods: {
     async mintNFT(card) {
@@ -159,22 +58,14 @@ export default {
       this.currentMintingCard = card.id;
       console.log("Minting NFT", card);
       try {
-        const contractAddress = card.address;
+        const contractAddress = card.contract_address;
         const keyringService = new HDKeyring();
         await keyringService.unlock();
         const fromAddress = keyringService.getActiveWallet().address;
-        const price = await keyringService.callContractMethod('mintPrice', fromAddress, contractAddress, DreamTeamNFT.abi, []);
+        const price = await keyringService.callContractMethod('mintPrice', fromAddress, contractAddress, NFTGoldenAgeCollection.abi, []);
         console.log({ price });
-        let contractTransaction = null;
-        if (card.id === 0) {
-          contractTransaction = await keyringService.callContractMethod('mint', fromAddress, contractAddress, DreamTeamNFT.abi, [{ value: price }]);
-        }
-        else {
-          contractTransaction = await keyringService.callContractMethod('premint', fromAddress, contractAddress, DreamTeamNFT.abi, [fromAddress, card.image, { value: price }]);
-        }
-
+        let contractTransaction = await keyringService.callContractMethod('mint', fromAddress, contractAddress, NFTGoldenAgeCollection.abi, [fromAddress, { value: price }]);
         console.log({ contractTransaction });
-
         const txReceipt = await contractTransaction.wait();
         console.log({ txReceipt });
         if (txReceipt.hash) {
@@ -192,6 +83,7 @@ export default {
       finally {
         this.isMinting = false;
         this.currentMintingCard = null;
+        this.getNFTCollection();
       }
     },
     showError(message) {
@@ -199,6 +91,34 @@ export default {
       this.notification.message = message;
       this.notification.type = "error";
     },
+    getNFTCollection() {
+      networkAdminAxiosInstance.get('items/nft_collection')
+        .then(async (response) => {
+          const keyringService = new HDKeyring();
+          await keyringService.unlock();
+          const fromAddress = keyringService.getActiveWallet().address;
+          console.log(response.data);
+          let collections = response.data?.data || [];
+          for (let i = 0; i < collections.length; i++) {
+            const contractAddress = collections[i].contract_address;
+            const tokenId = await keyringService.callContractMethod('tokenIds', fromAddress, contractAddress, NFTGoldenAgeCollection.abi, []);
+            console.log({ tokenId });
+            const tokenSupply = collections[i].totalSupply;
+            if ((Number(tokenId) >= 0) && (Number(tokenSupply) >= 0)) {
+              if (tokenId == 0) {
+                collections[i].remain = Number(tokenSupply);
+              } else {
+                collections[i].remain = Number(tokenSupply) - Number(tokenId);
+              }
+            }
+          }
+          this.cards = collections;
+        })
+        .catch((error) => {
+          console.error(error);
+          this.showError("Error fetching NFTs. " + error.reason || error.message);
+        });
+    }
   },
 };
 </script>
@@ -223,8 +143,8 @@ export default {
 }
 
 .card-grid {
-  @apply grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-6 overflow-y-auto;
-  height: calc(100% - 100px);
+  @apply grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-4 gap-6 px-6 overflow-y-auto;
+  max-height: calc(100% - 100px);
 }
 
 .card {
@@ -253,6 +173,7 @@ export default {
 
 .mint-button {
   @apply bg-yellow-400 text-black font-bold py-2 px-4 rounded hover:bg-yellow-500 transition;
+  padding: 1rem 2rem;
 }
 
 /* Custom CSS */

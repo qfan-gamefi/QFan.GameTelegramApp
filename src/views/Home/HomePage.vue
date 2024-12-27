@@ -888,9 +888,9 @@ export default {
             <div class="btn-item" @click="goToShop()">
                 <!-- <router-link to=""> -->
                 <div class="item-img">
-                    <img src="@public/assets/button-icons/shop.svg" />
+                    <img src="@public/assets/button-icons/NFT.svg" />
                 </div>
-                <div class="item-title">{{ $t("shop") }}</div>
+                <div class="item-title">{{ $t("nft") }}</div>
                 <!-- </router-link> -->
             </div>
         </div>

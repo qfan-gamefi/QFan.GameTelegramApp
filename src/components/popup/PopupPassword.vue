@@ -11,8 +11,8 @@
                     <div class="text-[16px] font-extrabold">
                         {{
                             isCreatePass
-                                ? "Create password"
-                                : "Enter your password"
+                                ? $t("create_password")
+                                : $t("enter_your_password")
                         }}
                     </div>
                     <div @click="no()" class="close-popup">
@@ -27,7 +27,7 @@
                     <InputField
                         v-model="password"
                         type="password"
-                        placeholder="Enter password"
+                        :placeholder="$t('enter_your_password')"
                         label=""
                         v-if="!isCreatePass"
                     />
@@ -36,13 +36,13 @@
                         <InputField
                             v-model="newPassword"
                             type="password"
-                            placeholder="New password"
+                            :placeholder="$t('new_password')"
                             label=""
                         />
                         <InputField
                             v-model="confirmPassword"
                             type="password"
-                            placeholder="Confirm password"
+                            :placeholder="$t('confirm_password')"
                             label=""
                         />
                     </div>
@@ -60,16 +60,18 @@
                 <div class="flex flex-col gap-2 p-[10px]">
                     <button @click="yes()" :disabled="loadBtn">
                         <div v-if="loadBtn">
-                            <i class="fa-solid fa-spinner fa-spin"></i> Loading...
+                            <i class="fa-solid fa-spinner fa-spin"></i>
                         </div>
                         <div v-else>
-                            {{ !isCreatePass ? "OK" : "Create" }}
+                            {{ !isCreatePass ? $t("ok") : $t("create") }}
                         </div>
                     </button>
 
                     <button @click="handleCreatePass()" :disabled="loadBtn">
                         {{
-                            !isCreatePass ? "Create password" : "Enter password"
+                            !isCreatePass
+                                ? $t("create_password")
+                                : $t("enter_password")
                         }}
                     </button>
                 </div>
@@ -122,7 +124,7 @@ export default {
             message: "",
             isSuccess: false,
             showMess: false,
-            loadBtn: false
+            loadBtn: false,
         };
     },
     methods: {
@@ -150,7 +152,7 @@ export default {
 
             if (isValid) {
                 try {
-                    this.loadBtn = true
+                    this.loadBtn = true;
                     if (this.isCreatePass) {
                         const dataCreate = {
                             UserId: this.userId,
@@ -204,8 +206,8 @@ export default {
                     }
                 } catch (error) {
                     console.error("Error:", error);
-                }finally{
-                    this.loadBtn = false
+                } finally {
+                    this.loadBtn = false;
                 }
             }
         },

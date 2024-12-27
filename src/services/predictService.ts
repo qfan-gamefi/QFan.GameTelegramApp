@@ -9,9 +9,13 @@ const predictService = {
         return res.status == 200 ? JSON.parse(res.data.message).data : {};
     },
     async getLeaderBoard(domainCode: string) {
+        console.log('domainCode', domainCode);
+        
         const res = await axiosPredictInstance.get(
             `leaderboard?domainCode=${domainCode}`
         );
+        console.log('12312', JSON.parse(res.data.message));
+        
         return res.status == 200 ? JSON.parse(res.data.message).data : {};
     },
     async addBidding(data: object) {

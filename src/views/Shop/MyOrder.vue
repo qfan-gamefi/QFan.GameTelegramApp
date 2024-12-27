@@ -7,14 +7,14 @@
                 <SelectBox
                     v-model:value="selectedStatus"
                     :options="selectOptionsStatus"
-                    label="Status"
+                    label="status"
                 />
             </div>
             <div class="w-20">
                 <SelectBox
                     v-model:value="selectedValue"
                     :options="selectOptions"
-                    label="Buy / Sell"
+                    label="btn.buy_sell"
                 />
             </div>
         </div>
@@ -32,23 +32,23 @@
                 </div>
                 <div class="content text-[12px]">
                     <div class="title">
-                        {{ item?.ItemDef?.Code }}
+                        {{ item?.ItemDef?.Name }}
                     </div>
                     <div class="desc">
                         <div class="price-row">
-                            <span>Price:</span>
+                            <span>{{ $t("price") }}:</span>
                             <span class="price-value">{{
                                 formattedBalance(item?.Price)
                             }}</span>
                         </div>
                         <div class="qty-row">
-                            <span>Remain QTTY:</span>
+                            <span>{{ $t("remain_qtty") }}:</span>
                             <span class="qty-value">
                                 {{ item?.Count }}/{{ item?.OriginCount }}
                             </span>
                         </div>
                         <div class="amount-row">
-                            <span>Amount:</span>
+                            <span>{{ $t("amount") }}:</span>
                             <span class="amount-value">
                                 {{
                                     formattedBalance(
@@ -64,7 +64,7 @@
             <div class="flex">
                 <div class="flex flex-col justify-between text-right">
                     <div class="text-xs" :class="[statusColorClass(item)]">
-                        <div>{{ renderStatus(item) }}</div>
+                        <div>{{ $t(renderStatus(item)) }}</div>
                         <div
                             class="text-[10px]"
                             v-if="
@@ -81,7 +81,7 @@
                             class="font-extrabold text-[12px]"
                             :class="classBS(item)"
                         >
-                            {{ renderBS(item) }}
+                            {{ $t(renderBS(item)) }}
                         </div>
                         <div class="status-date">
                             {{ formatDateDDMMYYYY(item?.createdAt) }}
@@ -93,7 +93,7 @@
 
                         <div v-if="item?.Status === 'A'">
                             <button @click="handleCancelOrder(item?.id)">
-                                Cancel
+                                {{ $t("cancel") }}
                             </button>
                         </div>
                     </div>
@@ -197,21 +197,21 @@ export default defineComponent({
         },
         renderStatus(item: IOrderList) {
             if (item?.Status === "A") {
-                return "Active";
+                return "active";
             }
             if (item?.Status === "FF") {
-                return "Full Filled ";
+                return "full_filled";
             }
             if (item?.Status === "CC") {
-                return "Cancel ";
+                return "cancel";
             }
         },
         renderBS(item: IOrderList) {
             if (item.Side === "B") {
-                return "Buy";
+                return "buy";
             }
             if (item.Side === "S") {
-                return "Sell";
+                return "sell";
             }
         },
         classBS(item: IOrderList) {

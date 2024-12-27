@@ -23,21 +23,6 @@
                                 {{ item?.attributes?.description }}
                             </div>
                         </div>
-
-                        <!-- <div class="btn-join-now">
-                            <button @click="handleJoin(item)">Join Now</button>
-                        </div> -->
-                        <!-- <div class="box-time">
-                            <span
-                                ><i class="fa-solid fa-clock"></i>
-                                {{
-                                    item?.attributes?.content?.[1]?.children?.[0]?.text?.replace(
-                                        "Time: ",
-                                        ""
-                                    )
-                                }}</span
-                            >
-                        </div> -->
                     </div>
                 </div>
             </div>
@@ -192,7 +177,7 @@ export default {
 
 .box-event {
     padding: 20px;
-    height: calc(100% - 125px);
+    height: calc(98% - 60px);
 }
 
 .box-desc-event {

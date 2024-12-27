@@ -11,8 +11,10 @@
 
             <div class="container-level">
                 <div class="box-title-level">
-                    <div class="title-level f-bangopro">{{ titleUpload }}</div>
-                    <div class="desc-level">{{ descUpload }}</div>
+                    <div class="title-level f-bangopro">
+                        {{ $t(titleUpload) }}
+                    </div>
+                    <div class="desc-level">{{ $t(descUpload) }}</div>
                 </div>
 
                 <div class="box-lv" v-if="!isMax">
@@ -23,13 +25,14 @@
                     </div>
                     <div class="r-lv">
                         <div class="level-lv t-primary-color">
-                            Level {{ dataNext?.attributes?.applyLevel }}
+                            {{ $t("level") }}
+                            {{ dataNext?.attributes?.applyLevel }}
                         </div>
                         <div class="title-lv f-bangopro">
-                            {{ dataNext?.attributes?.name }}
+                            {{ $t(dataNext?.attributes?.name?.toLowerCase()) }}
                         </div>
                         <div class="content-lv" v-if="typeBooster === 'SPEED'">
-                            Claim every
+                            {{ $t("claim_every") }}
                             {{
                                 renderTextStadium(
                                     dataNext?.attributes?.applyQtty
@@ -37,15 +40,16 @@
                             }}
                         </div>
                         <div class="content-lv" v-if="typeBooster === 'AMOUNT'">
-                            Speed {{ dataNext?.attributes?.applyQtty }}
-                            <img src="./../../public/assets/logo.svg" /> per
-                            hour
+                            {{ $t("speed") }}
+                            {{ dataNext?.attributes?.applyQtty }}
+                            <img src="./../../public/assets/logo.svg" />
+                            {{ $t("per_hour") }}
                         </div>
                     </div>
                 </div>
 
                 <div class="text-full-lv" v-if="isMax">
-                    Your level is maximum level. You can not upgrade anymore
+                    {{ $t("max_level_message") }}
                 </div>
 
                 <div class="icon-up-lv">
@@ -61,25 +65,25 @@
                     </div>
                     <div class="r-lv">
                         <div class="level-lv t-primary-color">
-                            Level
+                            {{ $t("level") }}
                             {{ items?.attributes?.applyLevel }}
                         </div>
                         <div class="title-lv f-bangopro">
-                            {{ items?.attributes?.name }}
+                            {{ $t(items?.attributes?.name?.toLowerCase()) }}
                         </div>
                         <div class="content-lv" v-if="typeBooster === 'SPEED'">
-                            Claim every
+                            {{ $t("claim_every") }}
                             {{
                                 renderTextStadium(items?.attributes?.applyQtty)
                             }}
                         </div>
                         <div class="content-lv" v-if="typeBooster === 'AMOUNT'">
-                            Speed {{ items?.attributes?.applyQtty }}
+                            {{ $t("speed") }} {{ items?.attributes?.applyQtty }}
                             <img
                                 src="./../../public/assets/logo.svg"
                                 loading="lazy"
                             />
-                            per hour
+                            {{ $t("per_hour") }}
                         </div>
                     </div>
                 </div>
@@ -98,7 +102,7 @@
                         :disabled="isMax"
                         :class="{ 'disabled-button': isMax }"
                     >
-                        UPGRADE
+                        {{ $t("upgrade") }}
                     </button>
                 </div>
             </div>
@@ -187,7 +191,7 @@ export default {
         async handleUplevel() {
             try {
                 trackEventBtn({
-                    label: 'Booster',
+                    label: "Booster",
                 });
                 this.loading = true;
                 await userService.postUplevel(this.idUser, this.typeBooster);
@@ -215,9 +219,9 @@ export default {
         renderTextStadium(time) {
             const newTime = Number(time);
             if (newTime >= 2) {
-                return `${newTime} hours`;
+                return `${newTime} ${this.$t("hours")}`;
             } else {
-                return `${newTime} hour`;
+                return `${newTime} ${this.$t("hour")}`;
             }
         },
     },

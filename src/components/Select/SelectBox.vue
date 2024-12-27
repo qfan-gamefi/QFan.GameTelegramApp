@@ -1,5 +1,5 @@
 <template>
-    <div>{{ label }}</div>
+    <div>{{ $t(label) }}</div>
     <div class="custom-select">
         <select :value="value" @change="onChange($event)">
             <option
@@ -7,7 +7,7 @@
                 :key="option.value"
                 :value="option.value"
             >
-                {{ option.text }}
+                {{ $t(option.text) }}
             </option>
         </select>
     </div>

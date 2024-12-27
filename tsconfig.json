@@ -17,8 +17,9 @@
         "noImplicitAny": false,
         "noEmit": false,
         "checkJs": false,
-        // "esModuleInterop": true,
         // "forceConsistentCasingInFileNames": true,
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
         "baseUrl": "./",
         "paths": {
             "@/*": ["src/*"],
@@ -30,9 +31,10 @@
             "@services/*": ["src/services/*"],
             "@styles/*": ["src/styles/*"],
             "@interface/*": ["src/interface/*"],
-            "@config/*": ["src/config/*"]
+            "@config/*": ["src/config/*"],
+            "@locales/*": ["src/locales/*"],
         }
     },
-    "include": ["src/**/*.ts", "src/**/*.vue"],
-    "exclude": ["node_modules", "dist"]
+    "include": ["src/**/*.ts", "src/**/*.vue", "src/locales/**/*.json"],
+    "exclude": ["node_modules", "dist"],
 }

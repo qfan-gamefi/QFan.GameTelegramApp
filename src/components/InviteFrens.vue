@@ -9,7 +9,7 @@
                     v-if="!loading"
                 >
                     <div class="f-bangopro">
-                        {{ inviteData?.length }} Friends
+                        {{ inviteData?.length }}  {{ $t('friends') }}
                     </div>
                     <div class="flex items-center gap-1 t-primary-color">
                         ~{{ perHour }}
@@ -18,29 +18,30 @@
                             loading="lazy"
                             class="w-[20px]"
                         />
-                        per hour
+                         {{ $t('per_hour') }}
                     </div>
                     <div class="text-center text-[10px]">
                         <div>
-                            Score +{{ referalRewardLv1Percent }}% from buddies
+                            <!-- Score +{{ referalRewardLv1Percent }}% from buddies
                             and +{{ referalRewardLv2Percent }}% from their
-                            fererrals
+                            fererals -->
+                            {{ $t('score_bonus_message', { score1: referalRewardLv1Percent }) }}
                         </div>
                         <div class="flex items-center justify-center gap-1">
-                            Get a
-                            <img
+                             <!-- {{ $t('get_a') }} -->
+                            <!-- <img
                                 class="w-[15px]"
                                 src="./../../public/assets/logo.svg"
                                 loading="lazy"
-                            />
-                            play pass for each fren
+                            /> -->
+                             {{ $t('play_pass_for_each_friend', { score2: referalRewardLv2Percent }) }}
                         </div>
                     </div>
                 </div>
 
                 <div class="box-content" v-if="!loading">
                     <div class="mt-[10px] mb-1 text-outline-black">
-                        Friends list
+                        {{ $t('friends_list') }}
                     </div>
 
                     <div class="box-desc" v-if="!loading">
@@ -94,7 +95,7 @@
             <div class="box-btn-invite">
                 <div class="flex gap-2">
                     <button @click="handleInvite()" class="rounded-lg flex-3">
-                        Invite Friend
+                         {{ $t('invite_friend') }}
                     </button>
 
                     <button @click="handleCopy()" class="rounded-lg flex-1">
@@ -179,7 +180,7 @@ export default {
             this.notification = {
                 isShow: true,
                 type: "success",
-                mess: "Copied to clipboard!",
+                mess: "copied_to_clipboard",
             };
 
             const input = document.createElement("input");
@@ -203,20 +204,20 @@ export default {
             const dataUserTele =
                 window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
             const linkInvite = `https://t.me/QFanClubBot?start=r_${dataUserTele}`;
-            const textInvite = `Play to Airdrop $QUAI from Quai Network on QFAN. Don’t miss this opportunity as quantities are limited!`;
+            const textInvite = `Play to Airdrop $QUAI from Quai Network on QFAN. Don't miss this opportunity as quantities are limited!`;
             Telegram.WebApp.openTelegramLink(
                 `https://t.me/share/url?url=${linkInvite}&text=${textInvite}`
             );
         },
-        handleInvite() {
-            const dataUserTele =
-                window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
-            const linkInvite = `https://t.me/QFanClubBot?start=r_${dataUserTele}`;
-            const textInvite = `Play to Airdrop $QUAI from Quai Network on QFAN. Don’t miss this opportunity as quantities are limited!`;
-            Telegram.WebApp.openTelegramLink(
-                `https://t.me/share/url?url=${linkInvite}&text=${textInvite}`
-            );
-        },
+        // handleInvite() {
+        //     const dataUserTele =
+        //         window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+        //     const linkInvite = `https://t.me/QFanClubBot?start=r_${dataUserTele}`;
+        //     const textInvite = `Play to Airdrop $QUAI from Quai Network on QFAN. Don't miss this opportunity as quantities are limited!`;
+        //     Telegram.WebApp.openTelegramLink(
+        //         `https://t.me/share/url?url=${linkInvite}&text=${textInvite}`
+        //     );
+        // },
         async fetchInviteData() {
             try {
                 this.loading = true;

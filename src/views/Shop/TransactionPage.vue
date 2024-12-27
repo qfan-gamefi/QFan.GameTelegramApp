@@ -9,48 +9,52 @@
         >
             <div class="text-[12px]">
                 <div class="flex justify-between">
-                    <span>{{ item?.tranType }}</span>
+                    <span>{{ $t(item?.tranType?.toLowerCase()) }}</span>
                     <span class="font-extrabold">
-                        <i v-if="item?.opr === '+'"
-                        class="fa-solid fa-plus fa-lg"
-                        style="color: #00ff1e;"></i>
-                        <i v-else-if="item?.opr === '-'"
-                        class="fa-solid fa-minus fa-lg "
-                        style="color: #db0000;"></i>
+                        <i
+                            v-if="item?.opr === '+'"
+                            class="fa-solid fa-plus fa-lg"
+                            style="color: #00ff1e"
+                        ></i>
+                        <i
+                            v-else-if="item?.opr === '-'"
+                            class="fa-solid fa-minus fa-lg"
+                            style="color: #db0000"
+                        ></i>
                     </span>
                 </div>
-                
+
                 <div class="flex justify-between">
-                    <span class="">Status:</span>
-                    <span :class="getStatusClass(item?.status)">{{
-                        item?.status
-                    }}</span>
+                    <span class="">{{ $t("status") }}:</span>
+                    <span :class="getStatusClass(item?.status)">
+                        {{ $t(`stt.${item?.status?.toLowerCase()}`) }}</span
+                    >
                 </div>
                 <div class="flex justify-between">
-                    <span class="">Amount:</span>
+                    <span class="">{{ $t("amount") }}:</span>
                     <span>{{ item?.netAmount }}</span>
                 </div>
                 <div class="flex justify-between">
-                    <span class="">Fee:</span>
+                    <span class="">{{ $t("fee") }}:</span>
                     <span>{{ item?.fee }}</span>
                 </div>
                 <div class="flex justify-between">
-                    <span class="">Received Amount:</span>
+                    <span class="">{{ $t("received_amount") }}:</span>
                     <span>{{ item?.amount }}</span>
                 </div>
                 <div class="flex justify-between" v-if="item?.hash?.length > 5">
-                    <span class="">Hash:</span>
-                    <span class="underline" @click="linkHash(item?.hash)">{{ renderHash(item?.hash) }}</span>
+                    <span class="">{{ $t("hash") }}:</span>
+                    <span class="underline" @click="linkHash(item?.hash)">{{
+                        renderHash(item?.hash)
+                    }}</span>
                 </div>
                 <div class="flex justify-between">
-                    <span class=""
-                        >Created Date:</span
-                    >
+                    <span class="">{{ $t("created_date") }}:</span>
                     <span>{{ formatDateTimeUS(item?.createdAt) }}</span>
                 </div>
                 <div v-if="item?.message" class="flex justify-between">
-                    <span>Message:</span>
-                    <span>{{ item?.message }}</span>
+                    <span>{{ $t("message") }}:</span>
+                    <span>{{ $t(renderMess(item?.message)) }}</span>
                 </div>
             </div>
         </div>
@@ -109,7 +113,7 @@ export default defineComponent({
 
         async callTransaction() {
             try {
-                const res = await userService.walletTrasnsaction(this.userId);                
+                const res = await userService.walletTrasnsaction(this.userId);
                 this.listTransaction = res?.data;
             } catch (error) {
                 console.log(error);
@@ -131,11 +135,20 @@ export default defineComponent({
                 "text-yellow-500": status === WalletTransactionStatus.PENDING,
                 "text-red-500": status === WalletTransactionStatus.FAILED,
                 "text-blue-500": status === WalletTransactionStatus.PROCESSING,
-                };
+            };
         },
         async linkHash(hash: string) {
             const exploreUrl = await getTxLinkToExplorer(hash);
             window.open(exploreUrl, "_blank");
+        },
+        renderMess(text: string) {
+            if (text === "Transaction success") {
+                return `transaction_success`;
+            } else if (text === "Transaction rejected") {
+                return `transaction_rejected`;
+            } else {
+                return text;
+            }
         },
     },
 });

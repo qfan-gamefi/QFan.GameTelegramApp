@@ -422,8 +422,6 @@ export default defineComponent({
             const nftList = await getNFTList(
                 this.activeWallet?.address as string
             );
-            console.log("nftList", nftList);
-
             this.nftList = nftList?.items;
         },
         async faucet() {

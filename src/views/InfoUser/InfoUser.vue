@@ -121,8 +121,24 @@ export default defineComponent({
             }, 1000);
         },
         async getAvt() {
+            //get avt from localstorage
+            const avt = localStorage.getItem("avt");
+            const avtExpTime = localStorage.getItem("avtExpTime");
+            if (avt && avtExpTime && new Date(avtExpTime) > new Date()) {
+                this.urlAvt = avt;
+                this.$store.commit("setAvtStore", avt);
+                return;
+            }
+
             const res = await userServiceTelebot.getAvtTelegram(this.idUser);
             this.urlAvt = res?.length > 0 ? res : "./../../../public/assets/logo.jpg";
+            //set avt to localstorage
+            localStorage.setItem("avt", res);
+            //set expire time for avt to 10 days
+            const date = new Date();
+            date.setDate(date.getDate() + 10);
+            localStorage.setItem("avtExpTime", date.toString());
+            
             this.$store.commit("setAvtStore", res);
         },
         async getLevels() {                        

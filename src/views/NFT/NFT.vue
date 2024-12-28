@@ -178,7 +178,7 @@ export default {
             const img = this.$refs.banner_nft;
             if (img) {
                 img.onload = () => {
-                    this.calcHeightBanner = `calc(100% - 57px - ${img.clientHeight}px)`;
+                    this.calcHeightBanner = `calc(100% - 15px - ${img.clientHeight}px)`;
                 };
             }
         },

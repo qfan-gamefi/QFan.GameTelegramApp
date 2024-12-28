@@ -1,7 +1,7 @@
 <template>
     <div class="wr-flip-page fade-in">
         <img
-            src="./../../../public/assets/event/banner-flip.png"
+            :src="bannerFlip"
             loading="lazy"
             ref="bannerImage"
             alt="banner-flip"

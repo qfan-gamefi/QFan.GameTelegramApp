@@ -1,11 +1,22 @@
 <template>
     <div class="shop-container h-screen w-screen">
-        <img src="/assets/shop/banner-nft.png" loading="lazy" ref="banner_nft" alt="nft" class="w-full" />
+        <img
+            src="/assets/shop/banner-nft.png"
+            loading="lazy"
+            ref="banner_nft"
+            alt="nft"
+            class="w-full"
+        />
 
         <div class="box-btn">
             <div class="btn-nft">
-                <div v-for="(button, index) in buttons" :key="index" class="btn-item-nft"
-                    :class="{ active: activeButton === button?.name }" @click="setActiveButton(button?.name)">
+                <div
+                    v-for="(button, index) in buttons"
+                    :key="index"
+                    class="btn-item-nft"
+                    :class="{ active: activeButton === button?.name }"
+                    @click="setActiveButton(button?.name)"
+                >
                     {{ button.label }}
                 </div>
             </div>
@@ -21,41 +32,88 @@
             <div class="card-grid" v-if="activeButton === 'buy_nft'">
                 <div v-for="card in cards" :key="card.id" class="card">
                     <p class="card-id">{{ card.name }}</p>
-                    <img :src="apiUrl + '/assets/' + card.thumb_image" :alt="card.title" class="card-image" />
+                    <img
+                        :src="apiUrl + '/assets/' + card.thumb_image"
+                        :alt="card.title"
+                        class="card-image"
+                    />
 
                     <div class="card-info">
-                        <div class="text-price flex flex-row"><img src="/assets/logo-quai.svg" class="w-3"> <span
-                                class="pl-1 font-bold">{{ card.price }}</span></div>
-                        <div class="card-quantity font-bold">{{ card?.remain ?? "-" }}/{{ card?.totalSupply }}</div>
+                        <div class="text-price flex flex-row">
+                            <img src="/assets/logo-quai.svg" class="w-3" />
+                            <span class="pl-1 font-bold">{{ card.price }}</span>
+                        </div>
+                        <div class="card-quantity font-bold">
+                            {{ card?.remain ?? "-" }}/{{ card?.totalSupply }}
+                        </div>
                     </div>
-                    <div class="mint-button" v-bind:disabled="isMinting" v-on:click="this.mintNFT(card)">
+                    <div
+                        class="mint-button"
+                        v-bind:disabled="isMinting"
+                        v-on:click="this.mintNFT(card)"
+                    >
                         Mint
-                        <span v-if="isMinting && currentMintingCard === card.id"><i class="fa fa-spinner"></i></span>
+                        <span v-if="isMinting && currentMintingCard === card.id"
+                            ><i class="fa fa-spinner"></i
+                        ></span>
                     </div>
                 </div>
             </div>
 
             <div class="card-grid" v-else>
-                <div v-for="item in nftList" :key="item?.id" class="card relative">
-                    <a target="_blank" :href="`https://quaiscan.io/token/${item?.token?.address}/instance/${item?.id}`"
-                        class="mt-2 text-center text-xs underline absolute left-5 top-2 border-solid bg-red-400 pt-1 pl-2 pr-2 pb-1 rounded font-bold">#{{
-                            item?.id }}</a>
-                    <img v-if="item?.external_app_url" :src="item?.external_app_url" class="card-image" />
-                    <img v-else src="@public/assets/nft.png" class="card-image" />
+                <div
+                    v-for="item in nftList"
+                    :key="item?.id"
+                    class="card relative"
+                >
+                    <a
+                        target="_blank"
+                        :href="`https://quaiscan.io/token/${item?.token?.address}/instance/${item?.id}`"
+                        class="mt-2 text-center text-xs underline absolute left-5 top-2 border-solid bg-red-400 pt-1 pl-2 pr-2 pb-1 rounded font-bold"
+                        >#{{ item?.id }}</a
+                    >
+                    <img
+                        v-if="item?.external_app_url"
+                        :src="item?.external_app_url"
+                        class="card-image"
+                    />
+                    <img
+                        v-else
+                        src="@public/assets/nft.png"
+                        class="card-image"
+                    />
 
                     <span class="mt-2 text-center text-xs font-extrabold">{{
                         item?.token?.name
-                        }}</span>
-
+                    }}</span>
                 </div>
             </div>
         </div>
     </div>
-    <NotificationToast v-if="notification?.show" :message="notification?.message" :type="notification?.type"
-        @close="notification.show = false" />
+    <NotificationToast
+        v-if="notification?.show"
+        :message="notification?.message"
+        :type="notification?.type"
+        @close="notification.show = false"
+    />
+    <!-- <PopupConfirm
+            v-if="showMint"
+            text="do_you_want_mint_nft"
+            :loading="false"
+            :visible="showMint"
+            @yes="yesMint()"
+            @no="showMint = false"
+        /> -->
+        <MintPage 
+            :isMint="showMint"
+            @close="closePopup()"
+            @closeReload="closeReload()"
+            :cardItem="cardItem"            
+        />
 </template>
 
 <script>
+import PopupConfirm from "@/components/PopupConfirm.vue";
 import NotificationToast from "@/components/NotificationToast.vue";
 import NFTGoldenAgeCollection from "../../crypto_utils/constants/NFTGoldenAgeCollection.json";
 import HDKeyring from "@/crypto_utils/HDKeyring";
@@ -66,12 +124,15 @@ import {
 } from "@/services/networkAxiosInstance";
 import { getNFTList } from "@/crypto_utils/networks";
 import { debounce } from "@/utils";
+import MintPage from "./MintPage.vue";
 
 export default {
     name: "NFTPage",
     mixins: [BackButtonTelegram],
     components: {
         NotificationToast,
+        PopupConfirm,
+        MintPage
     },
     data() {
         return {
@@ -94,6 +155,8 @@ export default {
             },
             nftList: [],
             activeWallet: null,
+            showMint: false,
+            cardItem: []
         };
     },
     created() {
@@ -108,7 +171,6 @@ export default {
         if (hdKeyring.isSigning) {
             this.activeWallet = hdKeyring.getActiveWallet();
         }
-
         this.fetchNftList();
     },
     methods: {
@@ -122,7 +184,7 @@ export default {
         },
         setActiveButton(button) {
             this.activeButton = button;
-            if (button === 'my_nft') {
+            if (button === "my_nft") {
                 this.debouncedFetchNftList();
             }
         },
@@ -130,10 +192,14 @@ export default {
             // Call the mintNFT function from the contract
             // Use the address, price, and quantity from the card
             // Update the quantity of the card
+            this.showMint = true;
+            this.cardItem = card
+        },
+        async mintNFTStep2(){
             this.isMinting = true;
-            this.currentMintingCard = card.id;
+            this.currentMintingCard = this.card.id;
             try {
-                const contractAddress = card.contract_address;
+                const contractAddress = this.card.contract_address;
                 const keyringService = new HDKeyring();
                 await keyringService.unlock();
                 const fromAddress = keyringService.getActiveWallet().address;
@@ -182,15 +248,16 @@ export default {
         },
         async getNFTCollection() {
             this.loading = true;
-            const response = await networkAdminAxiosInstance.get("items/nft_collection");
+            const response = await networkAdminAxiosInstance.get(
+                "items/nft_collection"
+            );
             this.cards = response.data?.data;
             console.log("cards", this.cards);
 
             if (this.cards.length > 0) {
                 const keyringService = new HDKeyring();
                 await keyringService.unlock();
-                const fromAddress =
-                    keyringService.getActiveWallet().address;
+                const fromAddress = keyringService.getActiveWallet().address;
                 let collections = response.data?.data || [];
                 for (let i = 0; i < collections.length; i++) {
                     const contractAddress = collections[i].contract_address;
@@ -221,11 +288,10 @@ export default {
                 //filter the nftList to show only the nft that symbol is equal to the symbol of the cards
 
                 this.nftList = nftList?.items?.filter((nft) => {
-                    return this.cards.some((card) => card.contract_address === nft.token.address);
+                    return this.cards.some(
+                        (card) => card.contract_address === nft.token.address
+                    );
                 });
-
-                console.log("nftList", this.nftList);
-
             }
         },
         renderTotal() {
@@ -235,6 +301,13 @@ export default {
                 return this.nftList?.length;
             }
         },
+        closePopup(){
+            this.showMint = false
+        },
+        closeReload(){
+            this.showMint = false
+            this.getNFTCollection();
+        }
     },
 };
 </script>

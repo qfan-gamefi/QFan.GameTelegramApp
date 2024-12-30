@@ -1,8 +1,8 @@
 <template>
     <div class="box-action">
-        <router-link to="/airdrop">
+        <!-- <router-link to="/airdrop">
             <img loading="lazy" :src="iconAirdrop" class="w-[50px]" />
-        </router-link>
+        </router-link> -->
         <div @click="setRouterFusion()">
             <router-link to="/inventory">
                 <img loading="lazy" :src="iconFusion" class="img-fusion" />

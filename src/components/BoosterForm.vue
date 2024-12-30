@@ -84,7 +84,7 @@
                                 <div class="content-stadium f-bangopro">
                                     {{
                                         $t(
-                                            stadiumItems?.attributes?.name?.toLowerCase()
+                                            trainingItems?.attributes?.name?.toLowerCase()
                                         )
                                     }}
                                 </div>
@@ -95,7 +95,7 @@
                                 <div class="desc-stadium">
                                     {{
                                         $t(
-                                            stadiumItems?.attributes?.description?.toLowerCase()
+                                            trainingItems?.attributes?.description?.toLowerCase()
                                         )
                                     }}
                                 </div>

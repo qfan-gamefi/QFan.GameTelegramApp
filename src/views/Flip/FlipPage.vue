@@ -197,14 +197,6 @@
         </div>
     </div>
 
-    <!-- <PopupConfirm
-        v-if="isToken"
-        :text="`Click yes to invoke your security token?`"
-        :visible="isToken"
-        @yes="handleYesToken"
-        @no="handleNoToken"
-    /> -->
-
     <PopupPassword :visible="isPass" @cancel="isPass = false" />
 
     <PopupComponent
@@ -389,17 +381,6 @@ export default defineComponent({
                 return this.urlImgWinner || "./../../../public/assets/logo.jpg";
             }
         },
-        // handleYesToken() {
-        //     this.isToken = false;
-        //     window.Telegram.WebApp.openTelegramLink(
-        //         "https://t.me/QFanClubBot?start=invoketoken"
-        //     );
-        //     window.Telegram.WebApp.close();
-        // },
-        // handleNoToken() {
-        //     this.loadingSubmit = false;
-        //     this.isToken = false;
-        // },
         showPopup() {
             this.isPopup = true;
         },
@@ -518,7 +499,7 @@ export default defineComponent({
                         this.flipClass = "heads";
 
                         this.text = `Flip success!`;
-                        this.descWinner = null;
+                        this.descWinner = "";
                     } else {
                         if (result?.Status === "Win") {
                             this.status = "win";

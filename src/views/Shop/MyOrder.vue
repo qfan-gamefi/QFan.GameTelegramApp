@@ -1,22 +1,18 @@
 <template>
-    <div class="">
-        <div
-            class="flex justify-end border-b border-b-[#2f9ad6] mx-4 py-2 w-[calc(100%-30px)] gap-3 text-[12px]"
-        >
-            <div class="w-24">
-                <SelectBox
-                    v-model:value="selectedStatus"
-                    :options="selectOptionsStatus"
-                    label="status"
-                />
-            </div>
-            <div class="w-20">
-                <SelectBox
-                    v-model:value="selectedValue"
-                    :options="selectOptions"
-                    label="btn.buy_sell"
-                />
-            </div>
+    <div class="header-actions">
+        <div class="w-24">
+            <SelectBox
+                v-model:value="selectedStatus"
+                :options="selectOptionsStatus"
+                label="status"
+            />
+        </div>
+        <div class="w-20">
+            <SelectBox
+                v-model:value="selectedValue"
+                :options="selectOptions"
+                label="btn.buy_sell"
+            />
         </div>
     </div>
     <div class="box-item h-[calc(100vh-220px)] p-[10px_15px] overflow-auto">
@@ -30,7 +26,7 @@
                         loading="lazy"
                     />
                 </div>
-                <div class="content text-[12px]">
+                <div class="content text-xs">
                     <div class="title">
                         {{ item?.ItemDef?.Name }}
                     </div>
@@ -78,7 +74,7 @@
 
                     <div class="text-[9px]">
                         <div
-                            class="font-extrabold text-[12px]"
+                            class="font-extrabold text-xs"
                             :class="classBS(item)"
                         >
                             {{ $t(renderBS(item)) }}
@@ -110,6 +106,21 @@
     />
 
     <PopupPassword :visible="isPass" @cancel="isPass = false" />
+
+    <PopupConfirm
+        v-if="showPopup"
+        text="do_you_want_cancel"
+        :loading="loadingBtn"
+        :visible="showPopup"
+        @yes="handleYes()"
+        @no="showPopup = false"
+    />
+
+    <PopupComingSoon
+        :visible="isMaintenance"
+        message="under_maintenance"
+        @close="isMaintenance = false"
+    />
 </template>
 
 <script lang="ts">
@@ -126,6 +137,8 @@ import {
 } from "@/views/Shop/defination";
 import { defineComponent } from "vue";
 import PopupPassword from "@/components/popup/PopupPassword.vue";
+import PopupConfirm from "@/components/PopupConfirm.vue";
+import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
 
 export default defineComponent({
     name: "MyOrderPage",
@@ -134,6 +147,8 @@ export default defineComponent({
         SelectBox,
         NotificationToast,
         PopupPassword,
+        PopupConfirm,
+        PopupComingSoon
     },
     created() {
         this.callOrderShop();
@@ -166,6 +181,10 @@ export default defineComponent({
             selectOptions,
             selectOptionsStatus,
             isPass: false,
+            itemId: null,
+            loadingBtn: false,
+            showPopup: false,
+            isMaintenance: false,
         };
     },
     methods: {
@@ -262,22 +281,31 @@ export default defineComponent({
             }
         },
         async handleCancelOrder(id: number) {
+            this.isMaintenance = true
+            // this.showPopup = true;
+            // this.itemId = id;
+        },
+        async handleYes() {
             try {
+                this.loadingBtn = true;
                 const res = await userServiceInventory.cancelOrder(
-                    id,
+                    this.itemId,
                     this.userId
                 );
                 if (res.success) {
-                    this.renderSuccess("Cancel success!");
+                    this.renderSuccess("stt.success");
                     await this.callOrderShop();
                 } else {
-                    this.renderErr("Cancel Error!");
+                    this.renderErr("stt.failed");
                 }
             } catch (error) {
                 if (error?.response?.status === 401) {
                     this.isPass = true;
-                    // localStorage.getItem("storePermission") === "true";
                 }
+            } finally {
+                this.loadingBtn = false;
+                this.showPopup = false;
+                this.itemId = null;
             }
         },
     },
@@ -285,8 +313,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "@/styles/global.scss";
-
 $t-white-color: rgb(255, 255, 255);
 
 button {
@@ -295,6 +321,15 @@ button {
     border-radius: 3px;
     letter-spacing: 0;
     font-weight: 600;
+    cursor: pointer;
+}
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.header-actions {
+    @apply flex justify-end border-b border-b-[#2f9ad6] mx-4 py-2 w-[calc(100%-30px)] gap-3 text-xs;
 }
 
 .box-item {

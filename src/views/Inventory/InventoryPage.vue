@@ -245,6 +245,12 @@
                 </div>
             </template>
         </PopupComponent>
+
+        <PopupComingSoon
+            :visible="isMaintenance"
+            message="under_maintenance"
+            @close="isMaintenance = false"
+        />
     </div>
 </template>
 
@@ -353,6 +359,7 @@ export default defineComponent({
             countUse: 1,
             openUseCount: false,
             groupedBadge: {} as { [key: string]: IItemInventory[] },
+            isMaintenance: false,
         };
     },
     methods: {
@@ -556,13 +563,15 @@ export default defineComponent({
             }
         },
         async handleFausion(item) {
-            this.showClaim = true;
-            this.itemFusion = item;
+            this.isMaintenance = true
+            // this.showClaim = true;
+            // this.itemFusion = item;
         },
         async handleUseInventory(item: IItemInventory) {
-            this.useItem = item;
-            this.openUseCount = true;
-            this.countUse = 1;
+            this.isMaintenance = true
+            // this.useItem = item;
+            // this.openUseCount = true;
+            // this.countUse = 1;
         },
         async handleSell(item: IItemInventory) {
             const res = await userServiceInventory.getItemMarket(

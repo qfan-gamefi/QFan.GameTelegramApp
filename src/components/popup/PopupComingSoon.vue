@@ -6,7 +6,7 @@
         >
             <div class="popup-coming-soon">
                 <p>{{ $t(message) }}</p>
-                <button @click="closePopup">{{ $t("close") }}</button>
+                <button class="rounded-md" @click="closePopup">{{ $t("close") }}</button>
             </div>
         </div>
     </transition>
@@ -47,7 +47,7 @@ export default defineComponent({
     left: 50%;
     transform: translate(-50%, -50%);
     background: white;
-    padding: 30px;
+    padding: 20px;
     border: 1px solid #ccc;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     border-radius: 10px;

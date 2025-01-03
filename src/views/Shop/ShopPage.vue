@@ -34,13 +34,13 @@
             </div>
             <div class="flex gap-3 justify-end">
                 <div
-                    class="btn-transaction bg-[#2ebd85] cursor-pointer"
+                    class="btn-transaction bg-[#2ebd85]"
                     @click="handleDeposit('deposit')"
                 >
                     {{ $t("deposit") }}
                 </div>
                 <div
-                    class="btn-transaction bg-[#f6465d] cursor-pointer"
+                    class="btn-transaction bg-[#f6465d]"
                     @click="handleDeposit('withdraw')"
                 >
                     {{ $t("withdraw") }}
@@ -279,7 +279,6 @@ export default defineComponent({
             this.dataDetailCart = item;
         },
         handleDeposit(labelType: "withdraw" | "deposit") {
-            // this.showCoomingSoon = true
             this.isDeposit = true;
             if (labelType === "deposit") {
                 this.labelTransaction = "DEPOSIT";
@@ -385,8 +384,9 @@ button {
     width: fit-content;
     padding: 0 10px;
     border-radius: 5px;
-    font-size: 13px;
+    font-size: 12px;
     display: flex;
     align-items: center;
+    cursor: pointer;
 }
 </style>

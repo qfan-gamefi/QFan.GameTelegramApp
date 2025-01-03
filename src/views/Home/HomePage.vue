@@ -2,7 +2,7 @@
 // import MainGame from "./rising-star/MainGame.vue";
 import MainGame from "./../../rising-star/MainGame.vue";
 // import Phaser from "phaser";
-import { ref, toRaw, onMounted } from "vue";
+import { onMounted, ref, toRaw } from "vue";
 
 interface PhaserScene {
     changeScene: () => void;
@@ -16,37 +16,34 @@ onMounted(() => {
 </script>
 
 <script lang="ts">
-import InviteFrens from "@/components/InviteFrens.vue";
-import MissionList from "@/views/Mission/MissionsList.vue";
 import BoosterForm from "@/components/BoosterForm.vue";
-import userService from "@/services/userService";
-import EventList from "@/views/Event/EventList.vue";
-import CheckinForm from "@/views/Checkin/CheckinForm.vue";
-import { secureStorage, storage } from "@/storage/storage";
-import { quais, type Wallet } from "quais";
+import InputField from "@/components/Input/InputField.vue";
+import InviteFrens from "@/components/InviteFrens.vue";
 import NotificationToast from "@/components/NotificationToast.vue";
-import type { ILevel } from "@/interface";
-import InfoUser from "@/views/InfoUser/InfoUser.vue";
-import LoadingScreen from "@/views/LoadingScreen/LoadingScreen.vue";
-import { formattedBalance, trackEventBtn } from "@/utils";
-import { mapState, useStore } from "vuex";
-import { preloadImages } from "@/utils/preloadImages";
-import HDKeyring from "@/crypto_utils/HDKeyring";
-import type { PrivateKey } from "@/crypto_utils/type";
-import type {
-    QuaiTransactionRequest,
-    QuaiTransactionResponse,
-} from "quais/lib/esm/providers";
-import {
-    CONTRACT_OWNER_ADDRESS,
-    CURRENT_WALLET_VERSION,
-} from "@/crypto_utils/constants";
-import BoxAction from "./BoxAction.vue";
-import PopupPassword from "@/components/popup/PopupPassword.vue";
 import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
 import PopupComponent from "@/components/popup/PopupComponent.vue";
-import InputField from "@/components/Input/InputField.vue";
+import PopupPassword from "@/components/popup/PopupPassword.vue";
 import { GA_TRACKING_ID } from "@/config/googleAnalytics";
+import {
+CONTRACT_OWNER_ADDRESS,
+CURRENT_WALLET_VERSION,
+} from "@/crypto_utils/constants";
+import HDKeyring from "@/crypto_utils/HDKeyring";
+import type { ILevel } from "@/interface";
+import userService from "@/services/userService";
+import { formattedBalance, trackEventBtn } from "@/utils";
+import CheckinForm from "@/views/Checkin/CheckinForm.vue";
+import EventList from "@/views/Event/EventList.vue";
+import InfoUser from "@/views/InfoUser/InfoUser.vue";
+import LoadingScreen from "@/views/LoadingScreen/LoadingScreen.vue";
+import MissionList from "@/views/Mission/MissionsList.vue";
+import { type Wallet } from "quais";
+import type {
+QuaiTransactionRequest,
+QuaiTransactionResponse,
+} from "quais/lib/esm/providers";
+import { mapState } from "vuex";
+import BoxAction from "./BoxAction.vue";
 import VersionPage from "./VersionPage.vue";
 
 const REF_MESS_PREFIX: string = "start r_";
@@ -77,9 +74,9 @@ export default {
         let last_name = dataUserTele?.user?.last_name || "";
 
         return {
-            isLoadingCreen: true,
+            // isLoadingCreen: true,
             storePermission: false,
-            isTelegramLogin: !!first_name || !!last_name,
+            // isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
             idUser: dataUserTele?.user?.id?.toString() ?? "",
@@ -214,10 +211,8 @@ export default {
                 const dataForm = {
                     id: this.idUser,
                     is_bot: false,
-                    first_name:
-                        window.Telegram.WebApp.initDataUnsafe.user?.first_name,
-                    last_name:
-                        window.Telegram.WebApp.initDataUnsafe.user?.last_name,
+                    first_name: this.first_name,
+                    last_name: this.last_name,
                     language_code: "vi",
                 };
                 const res = await userService.getCallBack(
@@ -227,17 +222,16 @@ export default {
 
                 if (res) {
                     this.isSuccess = true;
-                    setTimeout(() => {
-                        this.isSuccess = false;
-                    }, 2000);
                     this.code = "";
 
                     this.getInfoUser();
                 } else {
-                    alert("Error");
+                    this.renderErr('Error')
                 }
             } catch (error) {
                 console.error("Error fetching API data:", error);
+            }finally{
+                this.isSuccess = false;
             }
         },
 
@@ -302,7 +296,6 @@ export default {
                     this.register();
                 }
             } catch (error: any) {
-                // this.register();
                 this.errorMessage = error?.response?.data?.error?.message;
             }
         },
@@ -834,7 +827,6 @@ export default {
             </div>
 
             <BoxAction />
-            <BoxAction />
             <MainGame ref="phaserRef" />
         </div>
 
@@ -886,12 +878,10 @@ export default {
             </div>
 
             <div class="btn-item" @click="goToShop()">
-                <!-- <router-link to=""> -->
                 <div class="item-img">
                     <img src="@public/assets/button-icons/NFT.svg" />
                 </div>
                 <div class="item-title">{{ $t("nft") }}</div>
-                <!-- </router-link> -->
             </div>
         </div>
 

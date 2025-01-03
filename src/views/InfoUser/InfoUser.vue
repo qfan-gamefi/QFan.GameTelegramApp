@@ -89,24 +89,21 @@ export default defineComponent({
     },
     data() {
         const dataUserTele = window?.Telegram?.WebApp?.initDataUnsafe;
-
-        let first_name = dataUserTele?.user?.first_name || "1";
-        let last_name = dataUserTele?.user?.last_name || "2";
+        let first_name = dataUserTele?.user?.first_name || '';
+        let last_name = dataUserTele?.user?.last_name;
 
         return {
             isTelegramLogin: !!first_name || !!last_name,
             idUser: dataUserTele.user?.id?.toString() ?? "",
-            first_name: first_name,
-            last_name: last_name,
+            first_name: first_name || '',
+            last_name: last_name || '',
             isAnimated: false,
             animationTimeout: null,
-
             urlAvt: "./../../../public/assets/no-img.jpg",
             dataLevel: {} as ILevel,
             expLevelNext: {} as ILevel,
             percentageLevel: 0,
             isMaxLv: false,
-
             urlBadge: "./../../../public/assets/event/beta test.png",
             itemsBadge: [] as IItemInventory[],
         };
@@ -124,8 +121,24 @@ export default defineComponent({
             }, 1000);
         },
         async getAvt() {
+            //get avt from localstorage
+            const avt = localStorage.getItem("avt");
+            const avtExpTime = localStorage.getItem("avtExpTime");
+            if (avt && avtExpTime && new Date(avtExpTime) > new Date()) {
+                this.urlAvt = avt;
+                this.$store.commit("setAvtStore", avt);
+                return;
+            }
+
             const res = await userServiceTelebot.getAvtTelegram(this.idUser);
-            this.urlAvt = res;
+            this.urlAvt = res?.length > 0 ? res : "./../../../public/assets/logo.jpg";
+            //set avt to localstorage
+            localStorage.setItem("avt", res);
+            //set expire time for avt to 10 days
+            const date = new Date();
+            date.setDate(date.getDate() + 10);
+            localStorage.setItem("avtExpTime", date.toString());
+            
             this.$store.commit("setAvtStore", res);
         },
         async getLevels() {                        
@@ -179,7 +192,17 @@ export default defineComponent({
                 const filterBadge = res?.Items?.filter(
                     (item) => item?.ItemDef?.Type === EItemDefType.Medal
                 );
-                this.itemsBadge = filterBadge;
+                const categoryMap = {};
+                filterBadge.forEach(item => {
+                    const category = item.ItemDef.Category;
+                    const itemDefId = item.ItemDefId;
+                    if (!categoryMap[category] || itemDefId > categoryMap[category]?.ItemDefId) {
+                        categoryMap[category] = item;
+                    }
+                });
+                const highestBadgePerCategory  = Object?.values(categoryMap);                
+                
+                this.itemsBadge = highestBadgePerCategory ;
             } catch (error) {
                 console.error(error);
             }

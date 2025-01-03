@@ -6,43 +6,43 @@
             </div>
 
             <div class="wr-content-wallet">
-                <div class="title">Import Wallet</div>
+                <div class="title">{{ $t("import_wallet") }}</div>
 
                 <!-- <div class="desc">
                     This account has been logged into from another device.
                     Please enter your passphrase to use this account.
                 </div> -->
-                <div class="title-pass">Wallet Password</div>
+                <div class="title-pass">{{ $t("wallet_password") }}</div>
                 <div class="wl-addr">
-                    <div class="title-addr">Password</div>
+                    <div class="title-addr">{{ $t("password") }}</div>
                     <input
                         type="password"
                         v-model="walletPassword"
                         id="code"
                         @input="clearError"
-                        placeholder="Enter password"
+                        :placeholder="$t('enter_password')"
                         @focus="onFocus"
                         @blur="onBlur"
                     />
-                    <div class="title-addr">Confirm password</div>
+                    <div class="title-addr">{{ $t("confirm_password") }}</div>
                     <input
                         type="password"
                         v-model="confirmPassword"
                         id="code"
                         @input="clearError"
-                        placeholder="Enter password"
+                        :placeholder="$t('enter_password')"
                         @focus="onFocus"
                         @blur="onBlur"
                     />
                 </div>
-                <div class="title-pass">Private Key</div>
+                <div class="title-pass">{{ $t("private_key") }}</div>
                 <div class="wr-phrase">
                     <textarea
                         type="text"
                         v-model="mnemonic"
                         id="code"
                         @input="clearError"
-                        placeholder="Enter private key export from Pelagus Wallet"
+                        :placeholder="$t('enter_private_key')"
                         @focus="onFocus"
                         @blur="onBlur"
                     ></textarea>
@@ -52,34 +52,33 @@
                     v-if="errorMessage"
                     class="bg-[#e49f9f] text-white p-2.5 rounded-md"
                 >
-                    {{ errorMessage }}
+                    {{ $t(errorMessage) }}
                 </div>
 
                 <div class="wr-btn flex flex-col gap-2">
                     <div class="flex text-[12px] justify-center">
-                    <div>If you don’t have a &nbsp;</div>
-                    <div class="cursor-pointe">
-                        <a
-                        href="https://pelaguswallet.io/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="underline"
-                    >
-                         Pelagus Wallet,
-                    </a>
-                    <a
-                        href="https://chromewebstore.google.com/detail/pelagus/nhccebmfjcbhghphpclcfdkkekheegop"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="underline"
-                    >
-                        create one here.
-                    </a>
+                        <div>{{ $t("create_wallet_message1") }}&nbsp;</div>
+                        <div class="cursor-pointe">
+                            <a
+                                href="https://pelaguswallet.io/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="underline"
+                            >
+                                {{ $t("create_wallet_message2") }}
+                            </a>
+                            <a
+                                href="https://chromewebstore.google.com/detail/pelagus/nhccebmfjcbhghphpclcfdkkekheegop"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="underline"
+                            >
+                                {{ $t("create_wallet_message3") }}
+                            </a>
+                        </div>
                     </div>
-                    
-                </div>
                     <button @click="createWallet()" style="color: #000">
-                        Import
+                        {{ $t("import") }}
                     </button>
                 </div>
             </div>
@@ -94,9 +93,11 @@ import { SignerImportSource, SignerSourceTypes } from "@/crypto_utils/type";
 import { secureStorage, storage } from "@/storage/storage";
 import userService from "@/services/userService";
 import { CURRENT_WALLET_VERSION } from "@/crypto_utils/constants";
+import BackButtonTelegram from "@/mixins/BackButtonTelegram";
 
 export default defineComponent({
     name: "WalletCreate",
+    mixins: [BackButtonTelegram],
     data() {
         const userInfo = window.Telegram.WebApp.initDataUnsafe;
         let first_name = userInfo?.user?.first_name || "";
@@ -125,7 +126,7 @@ export default defineComponent({
             if (!this.walletPassword) {
                 this.errorMessage = "";
                 setTimeout(() => {
-                    this.errorMessage = "Please enter password";
+                    this.errorMessage = "please_enter_password";
                 }, 200);
 
                 return;
@@ -134,7 +135,7 @@ export default defineComponent({
             if (this.walletPassword !== this.confirmPassword) {
                 this.errorMessage = "";
                 setTimeout(() => {
-                    this.errorMessage = "Password does not match";
+                    this.errorMessage = "password_does_not_match";
                 }, 200);
 
                 return;
@@ -143,7 +144,7 @@ export default defineComponent({
             if (!this.mnemonic) {
                 this.errorMessage = "";
                 setTimeout(() => {
-                    this.errorMessage = "Please enter seed phrase";
+                    this.errorMessage = "please_enter_seed_phrase";
                 }, 200);
 
                 return;
@@ -316,7 +317,7 @@ export default defineComponent({
 }
 
 .wr-btn {
-    margin-top: 20px;
+    margin: 20px 0;
     font-weight: 800;
 
     button {

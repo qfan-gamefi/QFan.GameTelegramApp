@@ -38,9 +38,9 @@ export enum EButtonName {
     Transactions = "Transactions",
 }
 export enum EButtonLabel {
-    MarketPlace = "Market Place",
-    MyOrders = "My Orders",
-    Transactions = "Transactions",
+    MarketPlace = "market_place",
+    MyOrders = "my_order",
+    Transactions = "transactions",
 }
 
 export const btnShop = [
@@ -146,16 +146,16 @@ export interface IItemOrderConfirm {
 }
 
 export const selectOptions = [
-    { value: "All", text: "All" },
-    { value: "Buy", text: "Buy" },
-    { value: "Sell", text: "Sell" },
+    { value: "All", text: "all" },
+    { value: "Buy", text: "buy" },
+    { value: "Sell", text: "sell" },
 ];
 
 export const selectOptionsStatus = [
-    { value: "All", text: "All" },
-    { value: "A", text: "Active" },
-    { value: "FF", text: "Fulfilled" },
-    { value: "CC", text: "Cancel" },
+    { value: "All", text: "all" },
+    { value: "A", text: "active" },
+    { value: "FF", text: "fulfilled" },
+    { value: "CC", text: "cancel" },
 ];
 
 export type BuySellOption = "Buy" | "Sell" | "All";

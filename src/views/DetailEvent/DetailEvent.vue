@@ -8,7 +8,7 @@
                     backgroundImage: `url(${apiBaseUrl}${detailEvent?.attributes?.banner?.data?.attributes?.url})`,
                 }"
             >
-                <div class="text-banner">
+                <!-- <div class="text-banner">
                     <div class="title-item">
                         <div class="event-title-detail">
                             {{ detailEvent?.attributes?.title }}
@@ -17,7 +17,7 @@
                             {{ detailEvent?.attributes?.description }}
                         </div>
                     </div>
-                </div>
+                </div> -->
             </div>
             <div class="btn-banner f-nunito">
                 <div
@@ -27,7 +27,7 @@
                     :class="{ active: activeButton === button?.name }"
                     @click="setActiveButton(button?.name)"
                 >
-                    {{ button.label }}
+                    {{ $t(button.label) }}
                 </div>
             </div>
 
@@ -58,7 +58,7 @@
                                     item?.CloseCountDown !== -1
                                 "
                             >
-                                Close in:
+                                {{ $t('close_in') }}:
                                 <CountDown
                                     :countDownValue="item?.CloseCountDown"
                                 />
@@ -107,7 +107,7 @@
                                 ]"
                             >
                                 <div @click="handleSelectBid(index, indexSide)">
-                                    <div>{{ side }}</div>
+                                    <div>{{ $t((side)?.toLowerCase()) }}</div>
                                     <div
                                         v-if="item?.RateData?.[indexSide] !== 0"
                                     >
@@ -159,7 +159,7 @@
                                     },
                                 ]"
                             >
-                                <div>Predict&nbsp;</div>
+                                <div>{{$t('predict')}}&nbsp;</div>
                                 <div
                                     v-if="
                                         item?.['GameTemplate.DefaultBidValue']
@@ -207,7 +207,7 @@
                                     {{ item?.UserName || item?.UserId }}
                                 </div>
                                 <div class="your-point">
-                                    Point: {{ item?.Balance }} <br />
+                                    {{$t('point')}}: {{ item?.Balance }} <br />
                                     QFP: {{ item?.QFP_VALUE || 0 }}
                                 </div>
                             </div>
@@ -217,7 +217,7 @@
             </div>
 
             <div class="box-your-rank" v-if="activeButton === 'Leaderboard'">
-                <div class="title-your-rank">Your rank</div>
+                <div class="title-your-rank">{{$t('your_rank')}}</div>
                 <div class="content-your-rank">
                     <div class="your-rank-lv">
                         <span>{{ dataRankCurrent?.rank }}</span>
@@ -253,11 +253,11 @@
             <div class="list-history" v-if="activeButton === 'HistoryReward'">
                 <div class="box-history">
                     <div class="box-title-columns">
-                        <div class="title-columns">No.</div>
-                        <div class="title-columns">Match</div>
-                        <div class="title-columns">Predict</div>
-                        <div class="title-columns">Time</div>
-                        <div class="title-columns">Profit</div>
+                        <div class="title-columns">{{$t('no')}}.</div>
+                        <div class="title-columns">{{$t('match')}}</div>
+                        <div class="title-columns">{{$t('predict')}}</div>
+                        <div class="title-columns">{{$t('time')}}</div>
+                        <div class="title-columns">{{$t('profit')}}</div>
                     </div>
 
                     <div
@@ -290,7 +290,7 @@
                                     item?.Status?.toLowerCase() === 'lose'
                                 "
                             >
-                                <div>
+                                <div class="flex justify-center gap-1">
                                     {{ renderProfitQFP(item) }}
                                     <img
                                         src="./../../../public/assets/logo.svg"
@@ -301,7 +301,7 @@
                                 </div>
                             </div>
                             <div v-else>
-                                <div>Waiting</div>
+                                <div>{{$t('stt.waiting')}}</div>
                             </div>
                         </div>
                     </div>
@@ -319,7 +319,7 @@
 
         <PopupConfirm
             v-if="showPopup"
-            :text="`Do you want Predict`"
+            text="do_you_want_predict"
             :visible="showPopup"
             @yes="handleYesPredict"
             @no="handleNoPredict"
@@ -338,7 +338,7 @@ import duration from "dayjs/plugin/duration";
 import EmptyForm from "../../components/EmptyForm.vue";
 import { IEvent, IGameExtraData } from "../../interface";
 import CountDown from "../../components/count-down/CountDown.vue";
-import { formatDateToDDMMMYY } from "../../utils";
+import { formatDateToDDMMMYY, trackEventBtn } from "../../utils";
 import PopupPassword from "@/components/popup/PopupPassword.vue";
 
 dayjs.extend(duration);
@@ -384,9 +384,9 @@ export default {
             dataTo: null,
             activeButton: "Predict",
             buttonsBanner: [
-                { name: "Predict", label: "Match" },
-                { name: "Leaderboard", label: "Leaderboard" },
-                { name: "HistoryReward", label: "History & Reward" },
+                { name: "Predict", label: "match" },
+                { name: "Leaderboard", label: "leaderboard" },
+                { name: "HistoryReward", label: "history_reward" },
             ],
             games: [],
             leaderboard: [],
@@ -435,10 +435,10 @@ export default {
             }, 1000);
         },
         async renderSuccess() {
-            this.renderNotification("Predict Success!", "success");
+            this.renderNotification("predict_success", "success");
         },
         async renderErr() {
-            this.renderNotification("Predict Error!", "error");
+            this.renderNotification("predict_error", "error");
         },
         async renderWarning(mess) {
             this.renderNotification(mess, "warning");
@@ -504,14 +504,17 @@ export default {
                 this.indexPredict = index;
                 this.showPopup = true;
             } else {
-                this.renderWarning("Choose your side!");
+                this.renderWarning("choose_your_side");
             }
         },
         async callPredict() {
+            trackEventBtn({
+                label: 'PredictEvent',
+            });
             const balance = Number(this.dataQPoint?.balance);
 
             if (balance < this.bidValue) {
-                return this.renderWarning("Insufficient QFP!");
+                return this.renderWarning("insufficient_qfp");
             }
 
             if (
@@ -610,10 +613,11 @@ export default {
                         );
                     }
                 });
-
+                console.log('this.detailEvent', this.detailEvent);
+                
                 this.leaderboard = await predictService.getLeaderBoard(
                     this.detailEvent?.attributes?.domainCode
-                );
+                );                
 
                 this.history = await predictService.getFilterData("bids", {
                     where: {
@@ -751,13 +755,13 @@ export default {
     cursor: pointer;
 }
 
-.text-banner {
+/* .text-banner {
     padding: 10px 15px 55px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     gap: 10px;
-}
+} */
 
 .title-banner {
     font-size: 24px;
@@ -1246,19 +1250,19 @@ export default {
     color: #ffa53a;
 }
 
-.title-item {
+/* .title-item {
     font-weight: bold;
-}
+} */
 
-.event-title-detail {
+/* .event-title-detail {
     font-size: 24px;
     color: #ff0000;
     text-shadow: 1px 1px 1px white;
-}
+} */
 
-.event-content-detail {
+/* .event-content-detail {
     margin-left: 2px;
-}
+} */
 
 .time-end {
     display: flex;

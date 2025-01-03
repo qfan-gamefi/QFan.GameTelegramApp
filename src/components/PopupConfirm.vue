@@ -2,10 +2,18 @@
     <transition name="popup-fade">
         <div class="popup-container" v-if="visible">
             <div class="popup-content">
-                <p class="f-bangopro">{{ text }}</p>
+                <p class="f-bangopro">{{ $t(text) }}</p>
                 <div class="popup-buttons">
-                    <button @click="yes()">Yes</button>
-                    <button @click="no()">No</button>
+                    <button @click="yes()" :disabled="loading">
+                        <div v-if="loading">
+                            <i class="fa-solid fa-spinner fa-spin"></i>
+                        </div>
+                        <div v-else>
+                            {{ $t("yes") }}
+                        </div>
+                    </button>
+
+                    <button @click="no()">{{ $t("no") }}</button>
                 </div>
             </div>
         </div>
@@ -23,6 +31,11 @@ export default {
             type: Boolean,
             required: true,
             default: false,
+        },
+        loading: {
+            type: Boolean,
+            default: false,
+            required: false,
         },
     },
     methods: {
@@ -51,6 +64,7 @@ export default {
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    padding-bottom: 5%;
 }
 
 .popup-content {
@@ -72,5 +86,9 @@ export default {
     margin: 0 10px;
     padding: 10px 20px;
     font-size: 12px;
+}
+.popup-buttons button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 </style>

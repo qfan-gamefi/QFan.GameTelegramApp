@@ -7,15 +7,16 @@
             <div class="box-content-booster" v-if="!loading">
                 <div class="your-balance">
                     <div class="title-your-balance f-bangopro">
-                        Your Balance
+                        {{ $t("your_balance") }}
                     </div>
                     <div class="point-balance t-primary-color f-bangopro">
                         {{ animatedBalance }}
                         <img src="./../../public/assets/logo.svg" />
                     </div>
                     <div class="desc-your-balance">
-                        Training Speed: {{ rewardAmount }}
-                        <img src="./../../public/assets/logo.svg" />/ hour
+                        {{ $t("training_speed") }}: {{ rewardAmount }}
+                        <img src="./../../public/assets/logo.svg" />/
+                        {{ $t("hour") }}
                     </div>
                 </div>
 
@@ -34,14 +35,22 @@
                         <div class="box-stadium">
                             <div class="stadium-left">
                                 <div class="content-stadium f-bangopro">
-                                    {{ stadiumItems?.attributes?.name }}
+                                    {{
+                                        $t(
+                                            stadiumItems?.attributes?.name?.toLowerCase()
+                                        )
+                                    }}
                                 </div>
                                 <div class="lv-stadium t-primary-color">
-                                    Level
+                                    {{ $t("level") }}
                                     {{ stadiumItems?.attributes?.applyLevel }}
                                 </div>
                                 <div class="desc-stadium">
-                                    {{ stadiumItems?.attributes?.description }}
+                                    {{
+                                        $t(
+                                            stadiumItems?.attributes?.description?.toLowerCase()
+                                        )
+                                    }}
                                 </div>
                             </div>
 
@@ -73,14 +82,22 @@
                         <div class="box-stadium">
                             <div class="stadium-left">
                                 <div class="content-stadium f-bangopro">
-                                    {{ trainingItems?.attributes?.name }}
+                                    {{
+                                        $t(
+                                            trainingItems?.attributes?.name?.toLowerCase()
+                                        )
+                                    }}
                                 </div>
                                 <div class="lv-stadium t-primary-color">
-                                    Level
+                                    {{ $t("level") }}
                                     {{ trainingItems?.attributes?.applyLevel }}
                                 </div>
                                 <div class="desc-stadium">
-                                    {{ trainingItems?.attributes?.description }}
+                                    {{
+                                        $t(
+                                            trainingItems?.attributes?.description?.toLowerCase()
+                                        )
+                                    }}
                                 </div>
                             </div>
 
@@ -108,8 +125,8 @@
             :dataNext="dataNext"
             :idUser="idUser"
             :isMax="isMax"
-            :titleUpload="'Stadium'"
-            :descUpload="'Bigger Stadium holds more QFP and you can claim less often'"
+            :titleUpload="'stadium'"
+            :descUpload="'bigger_stadium_message'"
             :typeBooster="typeBooster"
             @closeDetailNoCall="closeDetailNoCall"
         />
@@ -121,8 +138,8 @@
             :dataNext="dataNext"
             :idUser="idUser"
             :isMax="isMax"
-            :titleUpload="'Skill'"
-            :descUpload="'Boosts training speed'"
+            :titleUpload="'skill'"
+            :descUpload="'boost_training_speed'"
             :typeBooster="typeBooster"
             @closeDetailNoCall="closeDetailNoCall"
         />

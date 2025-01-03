@@ -373,7 +373,6 @@ export const activeProvider = (): quais.JsonRpcProvider => {
     const fromChain = QUAI_NETWORK.chains?.find(
         (x) => x.shard === "cyprus-1"
     ) as ChainData;
-    console.log("-------");
     
     const provider = new quais.JsonRpcProvider(fromChain.rpc, undefined, {
         usePathing: true
@@ -524,6 +523,10 @@ export function getTxLinkToExplorer(txHash: string) {
         }/tx/${txHash}`;
 }
 
-export function sendAssets(){
-    
+export function getNFTList(address: string) {
+    return fetch(
+        `${QUAI_NETWORK.chains?.find((x) => x.shard === "cyprus-1")
+            ?.blockExplorerUrl
+            }/api/v2/addresses/${address}/nft?type=ERC-721`
+    ).then((response) => response.json());
 }

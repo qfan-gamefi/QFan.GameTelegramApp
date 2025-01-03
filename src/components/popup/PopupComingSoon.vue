@@ -1,12 +1,12 @@
 <template>
     <transition name="popup-fade">
         <div
-            class="fixed inset-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-[9999]"
+            class="fixed inset-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-[9999] text-center"
             v-if="visible"
         >
             <div class="popup-coming-soon">
-                <p>{{ message }}</p>
-                <button @click="closePopup">Close</button>
+                <p>{{ $t(message) }}</p>
+                <button @click="closePopup">{{ $t("close") }}</button>
             </div>
         </div>
     </transition>
@@ -24,7 +24,7 @@ export default defineComponent({
         },
         message: {
             type: String,
-            default: "Coming soon!",
+            default: "coming_soon",
         },
     },
     emits: ["close"],

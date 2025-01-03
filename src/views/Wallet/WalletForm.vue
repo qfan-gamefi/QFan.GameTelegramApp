@@ -6,35 +6,25 @@
                     <img src="@public/assets/wallet/logo-pegalus.svg" />
                 </div>
                 <div class="title-wallet text-outline-black">
-                    PELAGUS Wallet, the first web wallet for Quai Network, is
-                    here.
+                    {{ $t('pelagus_wallet_message') }}
                 </div>
             </div>
 
             <div class="box-btn flex flex-col gap-2">
                 <div class="flex text-[12px] justify-center">
-                    <div>If you don’t have a &nbsp;</div>
+                    <div>{{ $t('create_wallet_message1') }}&nbsp;</div>
                     <div class="cursor-pointe">
-                        <a
-                            href="https://pelaguswallet.io/"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="underline"
-                        >
-                            Pelagus Wallet,
+                        <a href="https://pelaguswallet.io/" target="_blank" rel="noopener noreferrer" class="underline">
+                            {{ $t('create_wallet_message2') }}
                         </a>
-                        <a
-                            href="https://chromewebstore.google.com/detail/pelagus/nhccebmfjcbhghphpclcfdkkekheegop"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="underline"
-                        >
-                            create one here.
+                        <a href="https://chromewebstore.google.com/detail/pelagus/nhccebmfjcbhghphpclcfdkkekheegop"
+                            target="_blank" rel="noopener noreferrer" class="underline">
+                            {{ $t('create_wallet_message3') }}
                         </a>
                     </div>
                 </div>
                 <button @click="navigateToCreateWallet">
-                    <div class="btn-title">Import Wallet</div>
+                    <div class="btn-title">{{ $t('import_wallet') }}</div>
                 </button>
             </div>
         </div>
@@ -43,11 +33,12 @@
 
 <script lang="ts">
 import HDKeyring from "@/crypto_utils/HDKeyring";
-import { storage } from "@/storage/storage";
+import BackButtonTelegram from "@/mixins/BackButtonTelegram";
 import { defineComponent } from "vue";
 
 export default defineComponent({
     name: "WalletForm",
+    mixins: [BackButtonTelegram],
     data() {
         return {};
     },
@@ -150,6 +141,7 @@ export default defineComponent({
     color: #000;
     font-weight: 800;
 }
+
 .text-link {
     text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff,
         1px 1px 0 #fff;

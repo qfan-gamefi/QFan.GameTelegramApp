@@ -10,7 +10,9 @@
                 <div class="title">
                     <div class="text-[16px] font-extrabold">
                         {{
-                            isCreatePass ? "Create password" : "Enter your password"
+                            isCreatePass
+                                ? $t("create_password")
+                                : $t("enter_your_password")
                         }}
                     </div>
                     <div @click="no()" class="close-popup">
@@ -20,20 +22,12 @@
                         ></i>
                     </div>
                 </div>
-                
 
                 <div class="p-[10px]">
-                    <!-- <input
-                        type="password"
-                        v-model="password"
-                        placeholder="Enter password"
-                        class="border border-gray-100 p-1 rounded-md f-bangopro w-full"
-                        v-if="!isCreatePass"
-                    /> -->
                     <InputField
                         v-model="password"
                         type="password"
-                        placeholder="Enter password"
+                        :placeholder="$t('enter_your_password')"
                         label=""
                         v-if="!isCreatePass"
                     />
@@ -42,29 +36,15 @@
                         <InputField
                             v-model="newPassword"
                             type="password"
-                            placeholder="New password"
+                            :placeholder="$t('new_password')"
                             label=""
                         />
                         <InputField
                             v-model="confirmPassword"
                             type="password"
-                            placeholder="Confirm password"
+                            :placeholder="$t('confirm_password')"
                             label=""
                         />
-                        <!-- <input
-                            type="password"
-                            v-model="newPassword"
-                            placeholder="New password"
-                            class="border border-gray-100 p-1 rounded-md f-bangopro w-full"
-                            v-if="isCreatePass"
-                        />
-                        <input
-                            type="password"
-                            v-model="confirmPassword"
-                            placeholder="Confirm password"
-                            class="border border-gray-100 p-1 rounded-md f-bangopro w-full"
-                            v-if="isCreatePass"
-                        /> -->
                     </div>
 
                     <div
@@ -78,14 +58,20 @@
                 </div>
 
                 <div class="flex flex-col gap-2 p-[10px]">
-                    <button @click="yes()">
-                        {{ !isCreatePass ? "OK" : "Create" }}
+                    <button @click="yes()" :disabled="loadBtn">
+                        <div v-if="loadBtn">
+                            <i class="fa-solid fa-spinner fa-spin"></i>
+                        </div>
+                        <div v-else>
+                            {{ !isCreatePass ? $t("ok") : $t("create") }}
+                        </div>
                     </button>
-                    <button @click="handleCreatePass()">
+
+                    <button @click="handleCreatePass()" :disabled="loadBtn">
                         {{
                             !isCreatePass
-                                ? "Create password"
-                                : "Enter password"
+                                ? $t("create_password")
+                                : $t("enter_password")
                         }}
                     </button>
                 </div>
@@ -138,12 +124,13 @@ export default {
             message: "",
             isSuccess: false,
             showMess: false,
+            loadBtn: false,
         };
     },
     methods: {
         logPassword() {
-        console.log(this.password);
-    },
+            console.log(this.password);
+        },
         validateForm() {
             this.showMess = true;
             this.isSuccess = false;
@@ -165,6 +152,7 @@ export default {
 
             if (isValid) {
                 try {
+                    this.loadBtn = true;
                     if (this.isCreatePass) {
                         const dataCreate = {
                             UserId: this.userId,
@@ -175,7 +163,6 @@ export default {
                                 dataCreate
                             );
 
-                        console.log(response)
                         if (response?.success) {
                             this.message = response?.data?.message;
                             this.isCreatePass = false;
@@ -184,7 +171,8 @@ export default {
                         } else {
                             this.showMess = true;
                             this.isSuccess = false;
-                            this.message = response?.data?.message || response?.data;
+                            this.message =
+                                response?.data?.message || response?.data;
                         }
                     } else {
                         const dataVerify = {
@@ -218,10 +206,10 @@ export default {
                     }
                 } catch (error) {
                     console.error("Error:", error);
+                } finally {
+                    this.loadBtn = false;
                 }
             }
-
-            // this.$emit("yes");
         },
         no() {
             this.$emit("cancel");
@@ -262,10 +250,13 @@ button {
 }
 
 .title {
-    /* border-bottom: 1px solid #89a2ef; */
     padding: 10px 0;
     margin: 0 10px;
     font-size: 16px;
     font-weight: 800;
+}
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 </style>

@@ -20,18 +20,15 @@ import InviteFrens from "@/components/InviteFrens.vue";
 import MissionList from "@/views/Mission/MissionsList.vue";
 import BoosterForm from "@/components/BoosterForm.vue";
 import userService from "@/services/userService";
-// import EventBus from "@/utils/eventBus";
 import EventList from "@/views/Event/EventList.vue";
 import CheckinForm from "@/views/Checkin/CheckinForm.vue";
 import { secureStorage, storage } from "@/storage/storage";
 import { quais, type Wallet } from "quais";
 import NotificationToast from "@/components/NotificationToast.vue";
-// import { title } from "process";
-// import { title } from "process";
 import type { ILevel } from "@/interface";
 import InfoUser from "@/views/InfoUser/InfoUser.vue";
 import LoadingScreen from "@/views/LoadingScreen/LoadingScreen.vue";
-import { formattedBalance } from "@/utils";
+import { formattedBalance, trackEventBtn } from "@/utils";
 import { mapState, useStore } from "vuex";
 import { preloadImages } from "@/utils/preloadImages";
 import HDKeyring from "@/crypto_utils/HDKeyring";
@@ -44,13 +41,13 @@ import {
     CONTRACT_OWNER_ADDRESS,
     CURRENT_WALLET_VERSION,
 } from "@/crypto_utils/constants";
-import { DEFAULT_QUAI_TESNTET } from "@/services/network/chains";
-import { getAddress, parseEther, toBigInt } from "ethers";
 import BoxAction from "./BoxAction.vue";
 import PopupPassword from "@/components/popup/PopupPassword.vue";
 import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
 import PopupComponent from "@/components/popup/PopupComponent.vue";
 import InputField from "@/components/Input/InputField.vue";
+import { GA_TRACKING_ID } from "@/config/googleAnalytics";
+import VersionPage from "./VersionPage.vue";
 
 const REF_MESS_PREFIX: string = "start r_";
 const REF_TOKEN_PREFIX: string = "TOKEN_";
@@ -78,16 +75,6 @@ export default {
 
         let first_name = dataUserTele?.user?.first_name || "";
         let last_name = dataUserTele?.user?.last_name || "";
-
-        if (
-            dataUserTele?.start_param &&
-            dataUserTele?.start_param?.startsWith("TOKEN_")
-        ) {
-            secureStorage.set(
-                "SECURITY_TOKEN",
-                dataUserTele.start_param?.replace("TOKEN_", "")
-            );
-        }
 
         return {
             isLoadingCreen: true,
@@ -125,7 +112,7 @@ export default {
             activeWallet: null as Wallet | null,
             isCheckin: false,
             isExecCheckin: false,
-            titleCheckin: "Checkin",
+            titleCheckin: "check_in",
             titleAutoInteract: "Auto Mining",
             isExecAutoInteract: false,
             autoInteractInterval: null as NodeJS.Timeout | null,
@@ -142,10 +129,10 @@ export default {
             percentageLevel: 0,
             isMaxLv: false,
             isAnimated: false,
-            // autoMiningStore: this.$store.state.autoMining
 
             openGiftCode: false,
             giftCode: "",
+            showOptions: false,
         };
     },
     computed: {
@@ -177,7 +164,7 @@ export default {
             this.widthWining = 0;
             if (this.autoMessStore) {
                 this.renderSuccess(
-                    `Mining send success. Please wait to confirm to take 30 QFP.`
+                    `Mining success, block reward is being calculated.`
                 );
                 this.calcWidthMining();
                 this.getInfoUser();
@@ -280,7 +267,6 @@ export default {
                 } else {
                     const resData = data?.data?.[0];
 
-                    // secureStorage.set("data_login", resData);
                     this.$store.commit("setRewardInfo", resData);
                     this.dataLogin = resData;
                     this.dataQPoint =
@@ -297,27 +283,7 @@ export default {
         },
 
         async isValidRefCode(referCode: string) {
-            const myHeaders = new Headers();
-            myHeaders.append("Content-Type", "application/json");
-
-            const raw = JSON.stringify({
-                data: {
-                    refererCode: referCode,
-                },
-            });
-
-            const requestOptions: any = {
-                method: "POST",
-                headers: myHeaders,
-                body: raw,
-                redirect: "follow",
-            };
-
-            var response = await fetch(
-                "https://qfan-api.qcloud.asia/api/player/checkRefererCode",
-                requestOptions
-            );
-            return response.status == 200;
+            return await userService.checkCode(referCode);
         },
         async submitCode() {
             this.isClaim = true;
@@ -358,6 +324,9 @@ export default {
         },
 
         async handleReward() {
+            trackEventBtn({
+                label: "Claim/Trainning",
+            });
             try {
                 const res = await userService.takeReward(this.idUser!);
                 if (res) {
@@ -447,22 +416,32 @@ export default {
         },
         handleBackButton() {
             Telegram.WebApp.BackButton.show();
-
-            Telegram.WebApp.BackButton.onClick(() => {
+            const handleClick = () => {
                 this.$router.push("/");
-                this.$store.commit("setRouterFusion", false);
-
                 this.showMission = false;
                 this.showEvent = false;
                 this.showBooster = false;
                 this.showInvite = false;
-
-                this.getInfoUser();
                 this.activeButton = "";
+                this.getInfoUser();
+
                 Telegram.WebApp.BackButton.hide();
-            });
+                Telegram.WebApp.BackButton.offClick(handleClick);
+            };
+
+            Telegram.WebApp.BackButton.onClick(handleClick);
         },
         handleButtonTab(tab) {
+            if (window.gtag) {
+                window.gtag("config", GA_TRACKING_ID, {
+                    page_path: `/${tab}`,
+                    page_title: tab,
+                });
+            }
+            trackEventBtn({
+                label: tab,
+            });
+
             this.isCheckin = false;
 
             this.handleBackButton();
@@ -494,14 +473,15 @@ export default {
                     showBooster: false,
                     activeButton: "invite",
                     showInvite: true,
-                },
+                }
             };
 
             Object.assign(this, tabMappings[tab]);
         },
         async handleWallet() {
-            this.handleBackButton();
-
+            trackEventBtn({
+                label: "Wallet",
+            });
             const walletType = localStorage.getItem("walletType");
             if (walletType !== CURRENT_WALLET_VERSION) {
                 localStorage.removeItem("tallyVaults");
@@ -517,9 +497,15 @@ export default {
                 this.$router.push({ name: "WalletForm" });
             }
         },
+        async goToShop() {
+            this.$router.push({ name: "Shop" });
+        },
         async onCheckIn() {
+            trackEventBtn({
+                label: "Wallet",
+            });
             try {
-                this.titleCheckin = "Processing";
+                this.titleCheckin = "processing";
                 this.isExecCheckin = true;
                 const keyringService = new HDKeyring();
                 const isUnlock = await keyringService.unlock();
@@ -541,35 +527,29 @@ export default {
                         request
                     )) as unknown as unknown as QuaiTransactionResponse;
 
-                    console.log("tx", tx);
-
                     const claimCheckin = await userService.claimCheckin(
                         this.idUser,
                         activeWallet?.address as string,
                         tx.hash as string
                     );
-
-                    console.log("claimCheckin", claimCheckin);
-
                     await this.getInfoUser();
+                    
                     if (claimCheckin.error) {
-                        this.renderErr(claimCheckin?.message);
+                         this.renderErr(claimCheckin?.message);
+                         
                     } else {
-                        this.renderSuccess("Checkin success!");
+                        await this.renderSuccess("Checkin success!");
                     }
                 } else {
                     this.$router.push({ name: "WalletCreate" });
                 }
-                this.isExecCheckin = false;
             } catch (error) {
-                console.log("error", error);
                 this.renderErr(
                     "Checkin failed! Chain is not ready to interact."
                 );
+            } finally {                
                 this.isExecCheckin = false;
-            } finally {
-                this.isExecCheckin = false;
-                this.titleCheckin = "Checkin";
+                this.titleCheckin = "check_in";
             }
         },
         async onAutoInteract() {
@@ -578,8 +558,12 @@ export default {
                 localStorage.removeItem("tallyVaults");
                 localStorage.removeItem("address");
                 this.$router.push({ name: "WalletCreate" });
+            } else {
+                this.$store.commit("setAutoMining", true);
+                trackEventBtn({
+                    label: "AutoMining",
+                });
             }
-            this.$store.commit("setAutoMining", true);
         },
         calcWidthMining() {
             const totalTime = MINING_INTERVAL;
@@ -608,10 +592,14 @@ export default {
             await this.getInfoUser();
         },
         handleGiftCode() {
+            trackEventBtn({
+                label: "GiftCode",
+            });
             this.openGiftCode = true;
         },
         async handleYesGiftCode() {
             const res = await userService.giftCode(this.idUser, this.giftCode);
+                        
             if (res.status === 200) {
                 this.renderSuccess(`+ ${res?.data?.amount} ${res?.data?.unit}`);
                 this.handleNoGiftCode();
@@ -625,12 +613,45 @@ export default {
             this.giftCode = "";
         },
         handleTutorial() {
+            trackEventBtn({
+                label: "Tutorial",
+            });
             window.open("https://t.me/QFanClubAnnouncement/103", "_blank");
         },
+        toggleLanguageOptions() {
+            this.$refs.hamburgerCheckbox.checked = false;
+            this.showOptions = !this.showOptions;
+        },
+        selectLanguage(language) {
+            this.showOptions = false;
+            this.$i18n.locale = language;
+            this.$refs.hamburgerCheckbox.checked = true;
+            localStorage.setItem("preferredLanguage", language);
+        },
+        handleMenu(){
+            this.showOptions = false;
+        },
+        openAnnouncement(){
+            const platform = window.Telegram.WebApp.platform;
+
+            const channelLink = "https://t.me/QFanClubAnnouncement";
+            const tgSchemaLink = "tg://resolve?domain=QFanClubAnnouncement";
+
+            if(platform?.includes("web")){
+                const link = document.createElement('a');
+                    link.href = channelLink;
+                    link.target = '_blank';
+                    link.click();
+                    link.remove();
+            }else{
+                window.location.href = channelLink;
+            }
+        }
     },
     async mounted() {
         Telegram.WebApp.ready();
-        // Telegram.WebApp.setHeaderColor("#ffffff");
+        Telegram.WebApp.BackButton.hide();
+        this.$store.commit("setRouterFusion", false);
         await this.getInfoUser();
 
         if (!this.hasLoaded) {
@@ -643,6 +664,12 @@ export default {
     },
     async updated() {
         this.updateSence();
+    },
+    created() {
+        const savedLanguage = localStorage.getItem("preferredLanguage");
+        if (savedLanguage) {
+            this.$i18n.locale = savedLanguage;
+        }
     },
     unmounted() {
         this.autoInteractInterval && clearInterval(this.autoInteractInterval);
@@ -663,62 +690,76 @@ export default {
         <div class="container-game">
             <InfoUser v-if="dataLogin" :dataLogin="dataLogin" />
 
-            <div class="container-wl">
-                <button @click="handleWallet">
-                    <i class="fa-solid fa-wallet"></i>
-                    Wallet
-                </button>
-            </div>
-            <div class="link-checkin">
+            <div class="container-menu">
                 <input
                     type="checkbox"
                     id="openmenu"
                     class="hamburger-checkbox"
+                    ref="hamburgerCheckbox"
                 />
 
                 <label class="hamburger-icon cursor-pointer" for="openmenu">
-                    <label for="openmenu" id="hamburger-label">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </label>
-                    <div class="title-menu">MENU</div>
+                    <div class="btn-wl-icon">
+                        <button @click="handleWallet()">
+                            <i class="fa-solid fa-wallet"></i>
+                            {{ $t("wallet") }}
+                        </button>
+                    </div>
+
+                    <div class="open-menu btn-menu" for="openmenu" @click="handleMenu()">
+                        <i class="fa-solid fa-bars"></i>
+                        {{ $t("menu") }}
+                    </div>
+
+                    <div class="close-menu" for="openmenu">
+                        <button
+                            class="btn-menu"
+                            @click="onCheckIn()"
+                            v-bind:disabled="isExecCheckin"
+                        >
+                            <i class="fa-solid fa-calendar-days"></i>
+                                {{ $t(titleCheckin) }}
+                            <span v-if="isExecCheckin"
+                                ><i class="fa fa-spinner"></i
+                            ></span>
+                        </button>
+                        <button @click="handleGiftCode()" class="btn-menu">
+                            <i class="fa-solid fa-gift"></i>
+                            {{ $t('gift_code') }}
+                        </button>
+                        <button @click="handleTutorial()" class="btn-menu">
+                            <i class="fa-solid fa-book"></i>
+                            {{ $t('tutorials') }}
+                        </button>
+
+                        <div class="close-menu-icon btn-menu">
+                            <i class="fa-solid fa-x"></i>
+                            {{ $t('close') }}
+                        </div>
+                    </div>
                 </label>
 
-                <div class="menu-pane">
-                    <nav>
-                        <ul class="menu-links">
-                            <button
-                                @click="onCheckIn()"
-                                v-bind:disabled="isExecCheckin"
-                            >
-                                <i class="fa-solid fa-calendar-days"></i>
-                                {{ titleCheckin }}
-                                <span v-if="isExecCheckin"
-                                    ><i class="fa fa-spinner"></i
-                                ></span>
-                            </button>
-                            <div>
-                                <button @click="handleGiftCode()">
-                                    <i class="fa-solid fa-gift"></i>
-                                    Gift code
-                                </button>
-                            </div>
-                            <div>
-                                <button @click="handleTutorial()">
-                                    <i class="fa-solid fa-book"></i>
-                                    Tutorials
-                                </button>
-                            </div>
-                        </ul>
-                    </nav>
-                </div>
+                <label for="openmenu" class="btn-language-icon">
+                    <button @click="toggleLanguageOptions()">
+                        <i class="fa-solid fa-language"></i>
+                        {{ $t("language") }}
+                    </button>
+                    <div v-if="showOptions" class="language-options">
+                        <button @click="selectLanguage('en')">
+                            <div class="text-[8px]">EN</div>
+                            <div>{{ $t("english") }}</div>
+                        </button>
+                        <button @click="selectLanguage('zh')">
+                            <div class="text-[8px]">ZH</div>
+                            <div>{{ $t("chinese") }}</div>
+                        </button>
+                    </div>
+                </label>
             </div>
 
             <div class="contaner-balance">
                 <div class="wr-balance">
-                    Balance:
+                    {{ $t("balance") }}:
                     <div
                         class="text-balance"
                         :class="{ 'animate-text': isAnimated }"
@@ -736,7 +777,7 @@ export default {
                 <div class="wrap-commit_reward" :style="beforeStyle">
                     <div class="box-info">
                         <div v-if="isClaim" class="box-left-train">
-                            Click "Claim" to take +{{
+                            {{ $t("click_claim_to_take") }} +{{
                                 Number(dataQPoint?.rewardAmount) *
                                 dataQPoint?.rewardScheduleHour
                             }}
@@ -745,7 +786,7 @@ export default {
 
                         <div v-else class="box-left">
                             <div class="content">
-                                Remain time: {{ countdown }}
+                                {{ $t("remain_time") }}: {{ countdown }}
                             </div>
                         </div>
 
@@ -755,7 +796,7 @@ export default {
                                 @click="handleReward"
                                 :disabled="isCountingDown"
                             >
-                                {{ isClaim ? "Claim" : "Training..." }}
+                                {{ isClaim ? $t("claim") : $t("training") }}
                             </button>
                         </div>
                     </div>
@@ -785,14 +826,15 @@ export default {
                                         rotateMining: isExecAutoInteract,
                                     }"
                                 />
-                                Mining
+                                {{ $t("mining") }}
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <BoxAction @back-clicked="handleBackButton" />
+            <BoxAction />
+            <BoxAction />
             <MainGame ref="phaserRef" />
         </div>
 
@@ -805,7 +847,7 @@ export default {
                 <div class="item-img">
                     <img src="@public/assets/button-icons/mission.svg" />
                 </div>
-                <div class="item-title">Mission</div>
+                <div class="item-title">{{ $t("mission") }}</div>
             </div>
             <div
                 class="btn-item"
@@ -815,7 +857,7 @@ export default {
                 <div class="item-img">
                     <img src="@public/assets/button-icons/event.svg" />
                 </div>
-                <div class="item-title">Event</div>
+                <div class="item-title">{{ $t("event") }}</div>
             </div>
             <div
                 class="btn-item"
@@ -829,7 +871,7 @@ export default {
                     class="item-title"
                     :class="{ active: activeButton === 'booster' }"
                 >
-                    Booster
+                    {{ $t("booster") }}
                 </div>
             </div>
             <div
@@ -840,15 +882,15 @@ export default {
                 <div class="item-img">
                     <img src="@public/assets/button-icons/invite-friend.svg" />
                 </div>
-                <div class="item-title">Invite Friend</div>
+                <div class="item-title">{{ $t("invite_friend") }}</div>
             </div>
 
-            <div class="btn-item" @click="showPopupCoomingSoon">
+            <div class="btn-item" @click="goToShop()">
                 <!-- <router-link to=""> -->
                 <div class="item-img">
-                    <img src="@public/assets/button-icons/shop.svg" />
+                    <img src="@public/assets/button-icons/NFT.svg" />
                 </div>
-                <div class="item-title">Shop</div>
+                <div class="item-title">{{ $t("nft") }}</div>
                 <!-- </router-link> -->
             </div>
         </div>
@@ -901,7 +943,7 @@ export default {
 
         <PopupComingSoon
             :visible="showCoomingSoon"
-            message="Coming soon!"
+            message="coming_soon"
             @close="showCoomingSoon = false"
         />
 
@@ -923,7 +965,7 @@ export default {
 
         <PopupComponent
             :visible="openGiftCode"
-            title="Gift Code"
+            title="gift_code" 
             @yes="handleYesGiftCode()"
             @no="handleNoGiftCode()"
         >
@@ -932,10 +974,12 @@ export default {
                     <InputField
                         v-model="giftCode"
                         label=""
-                        placeholder="Enter the code"
+                        placeholder="enter_gift_code"
                     />
                 </div>
             </template>
         </PopupComponent>
+
+        <VersionPage />
     </div>
 </template>

@@ -1,7 +1,7 @@
 <template>
     <div class="wr-flip-page fade-in">
         <img
-            src="./../../../public/assets/event/banner-flip.png"
+            src="/assets/event/banner-flip.png"
             loading="lazy"
             ref="bannerImage"
             alt="banner-flip"
@@ -23,7 +23,7 @@
                         <div class="flex flex-col gap-[5px] text-[10px]">
                             <div>{{ fullName }}</div>
                             <div class="text-rate">
-                                Win Rate 50 Flips:
+                                {{ $t("win_rate_50_flips") }}
                                 <span
                                     class="text-[#ffcf56]"
                                     v-bind:class="{ 'loader-rate': loading }"
@@ -31,7 +31,7 @@
                                 >
                             </div>
                             <div>
-                                Total W/L:
+                                {{ $t("total_w_l") }}:
                                 <span class="text-[#ffcf56]"
                                     >{{ winFlip }}/{{ lostFlip }}</span
                                 >
@@ -41,7 +41,7 @@
 
                     <div class="box-cd">
                         <div class="text-center text-[16px] text-[#e6b2ff]">
-                            Cooldown
+                            {{ $t("cooldown") }}
                         </div>
                         <div
                             class="time"
@@ -75,7 +75,7 @@
                         :disabled="loadingSubmit"
                         :class="{ isOn: autoFlipValue }"
                     >
-                        Flip the coin - 200
+                        {{ $t("flip_the_coin") }} - 200
                         <img src="@public/assets/logo.svg" />
                     </button>
 
@@ -84,15 +84,17 @@
                         @click="handleAutoFlip()"
                         :disabled="loadingSubmit"
                     >
-                        Auto Flip
-                        <div class="btn-on" v-if="autoFlipValue">ON</div>
-                        <div class="btn-off" v-else>OFF</div>
+                        {{ $t("auto_flip") }}
+                        <div class="btn-on" v-if="autoFlipValue">
+                            {{ $t("on") }}
+                        </div>
+                        <div class="btn-off" v-else>{{ $t("off") }}</div>
                     </button>
                 </div>
 
                 <div class="flex justify-between px-[10px] pb-[5px]">
                     <div class="your-balance">
-                        Your balance:
+                        {{ $t("your_balance") }}:
                         {{ formattedBalance(balance) }}
                         <img src="@public/assets/logo.svg" />
                     </div>
@@ -105,10 +107,10 @@
 
             <div class="wr-history" :style="{ height: calculatedHeight }">
                 <div class="title">
-                    <div class="stt">Opponent</div>
-                    <div class="time">Time</div>
-                    <div class="status">Status</div>
-                    <div class="reward">Reward</div>
+                    <div class="stt">{{ $t("opponent") }}</div>
+                    <div class="time">{{ $t("time") }}</div>
+                    <div class="status">{{ $t("status") }}</div>
+                    <div class="reward">{{ $t("reward") }}</div>
                 </div>
 
                 <LoadingForm :loading="loading" />
@@ -145,11 +147,11 @@
                             <div
                                 v-if="item?.Status?.toLowerCase() === 'placed'"
                             >
-                                Placed
+                                {{ $t("placed") }}
                             </div>
                         </div>
                         <div class="reward">
-                            Exp: 5
+                            {{ $t("exp") }}: 5
                             <br />
                             <div>
                                 {{ item?.ValueType }}:
@@ -170,12 +172,13 @@
             :message="notificationMessage"
             :type="notificationType"
             @close="showNotification = false"
+            :count="countAuto"
         />
 
         <div v-bind:class="{ 'overlay-popup': isPopup }"></div>
         <div :class="['popup', { 'closing-popup': !isPopup }]" v-if="isPopup">
             <div class="icon-win" v-if="status !== 'placed'">
-                <div>Winner</div>
+                <div>{{ $t("winner") }}</div>
             </div>
             <div class="box-img">
                 <div
@@ -186,25 +189,19 @@
                 />
             </div>
 
-            <div class="text">{{ text }}</div>
-            <div class="desc">{{ descWinner }}</div>
-            <button @click="hidePopup" class="btn-close">Close</button>
+            <div class="text">{{ $t(text) }}</div>
+            <div class="desc">{{ $t(descWinner) }}</div>
+            <button @click="hidePopup" class="btn-close">
+                {{ $t("close") }}
+            </button>
         </div>
     </div>
-
-    <!-- <PopupConfirm
-        v-if="isToken"
-        :text="`Click yes to invoke your security token?`"
-        :visible="isToken"
-        @yes="handleYesToken"
-        @no="handleNoToken"
-    /> -->
 
     <PopupPassword :visible="isPass" @cancel="isPass = false" />
 
     <PopupComponent
         :visible="openAuto"
-        title="AUTO FLIP"
+        :title="$t('auto_flip')"
         @yes="yesAutoFlip()"
         @no="noAutoFlip()"
         background-color="#500d79"
@@ -213,7 +210,9 @@
         <template #content>
             <div class="p-[10px] flex flex-col gap-3">
                 <div>
-                    <div class="text-[14px] mb-1">Number of Auto-Flips</div>
+                    <div class="text-[14px] mb-1">
+                        {{ $t("number_of_auto_flips") }}
+                    </div>
                     <div class="flex gap-2">
                         <div
                             class="box-input w-[75px]"
@@ -223,7 +222,7 @@
                             <InputNumber
                                 v-model="countAuto"
                                 label=""
-                                placeholder="Enter number"
+                                :placeholder="$t('number')"
                             />
                         </div>
                         <div
@@ -231,7 +230,7 @@
                             :class="{ active: !isCount }"
                             @click="btnUnlimited()"
                         >
-                            Unlimited
+                            {{ $t("unlimited") }}
                         </div>
                     </div>
                 </div>
@@ -245,7 +244,7 @@ import LoadingForm from "@/components/LoadingForm.vue";
 import NotificationToast from "@/components/NotificationToast.vue";
 import PopupConfirm from "@/components/PopupConfirm.vue";
 import userServiceTelebot from "@/services/useServiceTeleBot";
-import { formatDateTimeUS, formattedBalance } from "@/utils";
+import { formatDateTimeUS, formattedBalance, trackEventBtn } from "@/utils";
 import { defineComponent } from "vue";
 import predictService from "@/services/predictService";
 import userService from "@/services/userService";
@@ -255,9 +254,12 @@ import PopupComponent from "@/components/popup/PopupComponent.vue";
 import InputNumber from "@/components/Input/InputNumber.vue";
 import { computed, ref, watch } from "vue";
 import { mapState, useStore } from "vuex";
+import BackButtonTelegram from "@/mixins/BackButtonTelegram";
+import { useI18n } from "vue-i18n";
 
 export default defineComponent({
     name: "FlipPage",
+    mixins: [BackButtonTelegram],
     components: {
         NotificationToast,
         LoadingForm,
@@ -267,12 +269,32 @@ export default defineComponent({
         InputNumber,
     },
     props: {},
+    setup() {
+        const { locale } = useI18n();
+        const urlEN = "./../../../public/assets/event/banner-flip.png";
+        const urlZH = "./../../../public/assets/event/banner-flip-zh.png";
+
+        const bannerFlip = computed(() => {
+            if (locale.value === "en") {
+                return urlEN;
+            } else if (locale.value === "zh") {
+                return urlZH;
+            } else {
+                return urlEN;
+            }
+        });
+        return {
+            bannerFlip,
+        };
+    },
     computed: {
         ...mapState(["autoFlipStore", "avtStore", "rewardInfo"]),
     },
-    async created() {},
+    async created() {
+        // this.yesBuySell = debounce(this.yesBuySell, 500);
+    },
     watch: {
-        autoFlipStore(newValue) {            
+        autoFlipStore(newValue) {
             this.autoFlipValue = newValue;
             if (!newValue) {
                 this.getInfo();
@@ -311,7 +333,6 @@ export default defineComponent({
             loading: false,
             userId: userInfo?.user?.id || "",
             fullName: `${userInfo?.user?.first_name} ${userInfo?.user?.last_name}`,
-            // fullName: "su fly 007 🍅",
             isPopup: false,
             flipClass: "" as TFlipClass,
             urlImg: null,
@@ -329,7 +350,6 @@ export default defineComponent({
             text: "",
             descWinner: "",
 
-            // isToken: false,
             winRate: 0,
             lights: [],
             balance: 0,
@@ -361,17 +381,6 @@ export default defineComponent({
                 return this.urlImgWinner || "./../../../public/assets/logo.jpg";
             }
         },
-        // handleYesToken() {
-        //     this.isToken = false;
-        //     window.Telegram.WebApp.openTelegramLink(
-        //         "https://t.me/QFanClubBot?start=invoketoken"
-        //     );
-        //     window.Telegram.WebApp.close();
-        // },
-        // handleNoToken() {
-        //     this.loadingSubmit = false;
-        //     this.isToken = false;
-        // },
         showPopup() {
             this.isPopup = true;
         },
@@ -457,13 +466,12 @@ export default defineComponent({
                 this.userId
             );
             this.$store.commit("setAvtStore", response);
-            this.urlImg = response || "./../../../public/assets/no-img.jpg";
+            this.urlImg = response?.length > 0 ? response : "./../../../public/assets/logo.jpg";
         },
         async getAvtOpponent(idOpponent: number) {
             const response = await userServiceTelebot.getAvtTelegram(
                 idOpponent
             );
-
             this.urlImgWinner = response;
         },
 
@@ -478,7 +486,9 @@ export default defineComponent({
                     side: 0,
                 };
                 const res = await predictService.makeFlip(data);
-
+                trackEventBtn({
+                    label: "Flip",
+                });
                 if (res.success) {
                     this.balance = Number(this.balance) - 200;
                     this.startCountdown();
@@ -489,19 +499,19 @@ export default defineComponent({
                         this.flipClass = "heads";
 
                         this.text = `Flip success!`;
-                        this.descWinner = null;
+                        this.descWinner = "";
                     } else {
                         if (result?.Status === "Win") {
                             this.status = "win";
                             this.flipClass = "tails";
-                            this.descWinner = "You Win";
+                            this.descWinner = "you_win";
                             this.urlImgWinner = this.urlImg;
                         }
                         if (result?.Status === "Lose") {
                             this.getAvtOpponent(result?.WinnerInfo?.UserId);
                             this.status = "lose";
                             this.flipClass = "heads";
-                            this.descWinner = "You Lose";
+                            this.descWinner = "you_lose";
                         }
                         const text = `${result?.WinnerInfo?.UserName}`;
 
@@ -566,13 +576,16 @@ export default defineComponent({
             }
         },
         async yesAutoFlip() {
-            //set disable btn
+            trackEventBtn({
+                label: "Auto_flip",
+            });
             this.$store.commit("setAutoFlip", true);
             if (this.isCount) {
                 this.$store.commit("setCountFlip", this.countAuto);
-                this.renderSuccess(`Auto Flip ${this.countAuto} times`);
+                // this.renderSuccess(`Auto Flip ${this.countAuto} times`);
+                this.renderSuccess(`auto_flip_count`);
             } else {
-                this.renderSuccess("Auto Flip Unlimited");
+                this.renderSuccess("auto_flip_unlimited");
                 this.$store.commit("setCountFlip", 0);
             }
             this.openAuto = false;
@@ -587,10 +600,10 @@ export default defineComponent({
             this.countAuto = 0;
         },
         async handleHistory() {
-            this.getInfo()
-            this.getRate()
-            this.history()
-        }
+            this.getInfo();
+            this.getRate();
+            this.history();
+        },
     },
 });
 </script>

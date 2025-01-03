@@ -11,11 +11,9 @@
                     <div>
                         <img src="@public/assets/logo.svg" class="w-[25px]" />
                     </div>
-                    <div>Address</div>
+                    <div>{{ $t("address") }}</div>
                     <div class="text-[#8f8f8f]">
-                        (<a href="#" @click="linkToExplore($event)"
-                            >{{ activeWallet?.address.substring(0, 5) }}...</a
-                        >)
+                        (<a href="#" @click="linkToExplore($event)">{{ activeWallet?.address.substring(0, 5) }}...</a>)
                     </div>
                     <div class="text-[#8f8f8f]">
                         <a href="#" @click="copyAddress($event)">
@@ -32,8 +30,7 @@
             <div class="body-wl">
                 <div class="wr-balance-wl">
                     <div class="flex gap-[10px]">
-                        Total balance
-
+                        {{ $t("total_balance") }}
                         <div @click="toggleVisibility()">
                             <div v-if="!isVisible">
                                 <i class="fa-solid fa-eye"></i>
@@ -43,9 +40,7 @@
                             </div>
                         </div>
                         <div>
-                            <a href="#" @click="refreshWallet($event)"
-                                ><i class="fa-solid fa-refresh"></i
-                            ></a>
+                            <a href="#" @click="refreshWallet($event)"><i class="fa-solid fa-refresh"></i></a>
                         </div>
                     </div>
                     <div>
@@ -57,19 +52,22 @@
                             class="btn-item-wl"
                             @click="() => (openReceive = true)"
                         >
-                            <i class="fa-solid fa-copy"></i> Receive
+                            <i class="fa-solid fa-copy"></i> {{ $t("receive") }}
                         </button>
                         <button @click="onSend()" class="btn-item-wl">
-                            <i class="fa-solid fa-paper-plane"></i> Send
+                            <i class="fa-solid fa-paper-plane"></i>
+                            {{ $t("send") }}
                         </button>
                         <button
                             class="btn-item-wl"
                             @click="faucet()"
-                            v-bind:disabled="executing"
+                            v-bind:disabled="isFaucet"
                         >
-                            <i class="fa-solid fa-faucet"></i> Faucet
-                            <div v-if="isFaucet"><i class="fa fa-spinner loading"></i></div>
-                            
+                            <i class="fa-solid fa-faucet"></i>
+                            {{ $t("faucet") }}
+                            <div v-if="isFaucet">
+                                <i class="fa fa-spinner loading"></i>
+                            </div>
                         </button>
                     </div>
 
@@ -78,9 +76,11 @@
                     </span>
 
                     <span class="faucet-success" v-if="transactionUrl"
-                        >Faucet success. Click
-                        <a v-bind:href="transactionUrl" target="_blank">here</a>
-                        to view transaction on explorer</span
+                        >{{ $t("faucet_success_click") }}
+                        <a v-bind:href="transactionUrl" target="_blank">{{
+                            $t("here")
+                        }}</a>
+                        {{ $t("to_view_transaction_on_explorer") }}</span
                     >
                 </div>
 
@@ -100,20 +100,35 @@
                             "
                             >Activities</a
                         >
+                        <a
+                            href="#"
+                            @click="setActiveTab($event, 'nft')"
+                            v-bind:class="
+                                activeTab === 'nft' ? 'active' : ''
+                            "
+                            >NFTs</a
+                        >
                     </div>
 
                     <div class="box-content" v-if="activeTab === 'token'">
                         <div class="item-list">
                             <div class="box-item">
-                                <div
-                                    class="flex justify-between items-center gap-2 w-full"
-                                >
-                                    <img
-                                        src="@public/assets/logo-quai.svg"
-                                        class="w-5"
-                                    />
+                                <div class="flex justify-between items-center gap-2 w-full">
+                                    <img src="@public/assets/logo-quai.svg" class="w-5" />
                                     <h2 v-if="isVisible">{{ balance }} QUAI</h2>
                                     <h2 v-else>*********</h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-content" v-if="activeTab === 'nft'">
+                        <div class="grid grid-cols-3 gap-4 nft-list">
+                            <div v-for="item in nftList" :key="item.id" class="border-solid border-blue-400 border-2 rounded-lg p-2">
+                                <div class="flex flex-col items-center">
+                                    <img v-if="item.image_url" :src="item.image_url" class="w-full h-full object-contain" />
+                                    <img v-else src="@public/assets/nft.png" class="w-full h-full object-contain" />
+                                    <span class="mt-2 text-center text-xs">{{ item?.token?.name }}</span>
+                                    <a target="_blank" :href="`https://quaiscan.io/token/${item?.token?.address}/instance/${item?.id}`" class="mt-2 text-center text-xs underline">({{ item?.token?.symbol }})</a>
                                 </div>
                             </div>
                         </div>
@@ -121,46 +136,37 @@
 
                     <div class="box-content" v-if="activeTab === 'activities'">
                         <div class="filter">
-                            Status:
+                            {{ $t("status") }}:
                             <select v-model="filterStatus">
-                                <option value="">All</option>
-                                <option value="pending">Pending</option>
-                                <option value="confirmed">Confirmed</option>
+                                <option value="">{{ $t("all") }}</option>
+                                <option value="pending">
+                                    {{ $t("pending") }}
+                                </option>
+                                <option value="confirmed">
+                                    {{ $t("confirmed") }}
+                                </option>
                             </select>
                         </div>
 
                         <LoadingForm :loading="executing" />
 
                         <div class="item-list" v-if="!executing">
-                            <div
-                                class="box-item"
-                                v-for="(
+                            <div class="box-item" v-for="(
                                     transaction, index
                                 ) in activities.filter(
-                                    (x) =>
-                                        !filterStatus ||
-                                        x.status === filterStatus
-                                )"
-                                :key="index"
-                            >
-                                <div
-                                    class="flex justify-between items-center gap-[10px] w-full"
-                                >
-                                    <span
-                                        ><i class="fa-solid fa-exchange"></i
-                                        >&nbsp;{{
-                                            transaction.type.toUpperCase()
-                                        }}</span
-                                    >
-                                    <a
-                                        href="#"
-                                        @click="
-                                            getLinkTx($event, transaction.hash)
-                                        "
-                                        >({{
+                                        (x) =>
+                                            !filterStatus ||
+                                            x.status === filterStatus
+                                    )" :key="index">
+                                <div class="flex justify-between items-center gap-[10px] w-full">
+                                    <span><i class="fa-solid fa-exchange"></i>&nbsp;{{
+                                        transaction.type.toUpperCase()
+                                        }}</span>
+                                    <a href="#" @click="
+                                        getLinkTx($event, transaction.hash)
+                                        ">({{
                                             formatAddress(transaction.hash)
-                                        }})</a
-                                    >
+                                        }})</a>
                                     <div v-bind:class="transaction.status">
                                         {{ transaction.status.toUpperCase() }}
                                     </div>
@@ -183,17 +189,14 @@
                                             >To:
                                             {{
                                                 formatAddress(transaction?.to)
-                                            }}</a
-                                        >
+                                            }}</a>
                                     </div>
                                 </div>
                                 <div class="w-full text-right">
-                                    <span
-                                        >{{ formatValue(transaction?.value) }}
+                                    <span>{{ formatValue(transaction?.value) }}
                                         {{
                                             transaction?.tokenSymbol ?? "QUAI"
-                                        }}</span
-                                    >
+                                        }}</span>
                                 </div>
                             </div>
                         </div>
@@ -202,20 +205,16 @@
             </div>
         </div>
 
-        <NotificationToast
-            v-if="notification.visible"
-            :message="notification.message"
-            :type="notification.type"
-        />
+        <NotificationToast v-if="notification.visible" :message="notification.message" :type="notification.type" />
 
         <div v-if="openSend">
             <div class="popup-overlay"></div>
             <div class="popup-referer-code">
-                <a href="#" @click="closeSend" class="close"
-                    ><i class="fa fa-close"></i
-                ></a>
+                <a href="#" @click="closeSend" class="close"><i class="fa fa-close"></i></a>
 
-                <div class="popup-title">Input address and value to send</div>
+                <div class="popup-title">
+                    {{ $t("input_address_and_value_to_send") }}
+                </div>
 
                 <form @submit.prevent="executeSend">
                     <table>
@@ -239,7 +238,9 @@
                         </tr>
                         <tr>
                             <td>
-                                <label class="label" for="value">Value</label>
+                                <label class="label" for="value">{{
+                                    $t("value")
+                                }}</label>
                             </td>
                             <td>
                                 <input
@@ -272,10 +273,7 @@
                             </td>
                         </tr>
                     </table>
-                    <div
-                        v-if="errorMessage"
-                        class="text-xs text-red-500 text-center"
-                    >
+                    <div v-if="errorMessage" class="text-xs text-red-500 text-center">
                         {{ errorMessage }}
                     </div>
 
@@ -304,8 +302,7 @@
                 <div class="wl-addr">
                     <div class="mb-3">
                         <img
-                            v-bind:src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${activeWallet?.address}`"
-                        />
+                            v-bind:src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${activeWallet?.address}`" />
                     </div>
                     <div class="flex justify-center">
                         <a
@@ -333,17 +330,20 @@ import {
     activeProvider,
     fetchActivity,
     getAddressLinkToExplorer,
+    getNFTList,
     getTxLinkToExplorer,
-    signAndSendTransaction,
 } from "@/crypto_utils/networks";
 import HDKeyring from "@/crypto_utils/HDKeyring";
 import { type WalletInfo } from "@/crypto_utils/type";
 import type { QuaiTransactionRequest } from "quais/lib/esm/providers";
 import { formatEther, parseEther, toBigInt } from "ethers";
 import { CURRENT_WALLET_VERSION } from "@/crypto_utils/constants";
+import BackButtonTelegram from "@/mixins/BackButtonTelegram";
+import { trackEventBtn } from "@/utils";
 
 export default defineComponent({
     name: "WalletDetail",
+    mixins: [BackButtonTelegram],
     components: {
         NotificationToast,
         LoadingForm,
@@ -377,6 +377,8 @@ export default defineComponent({
             transactionUrl: "",
             openReceive: false,
             isFaucet: false,
+            tokenList: [],
+            nftList: [],
         };
     },
     methods: {
@@ -400,6 +402,9 @@ export default defineComponent({
             if (tab === "activities") {
                 await this.fetchActivity();
             }
+            else if (tab === "nft") {
+                await this.fetchNftList();
+            }
         },
         copyAddress(e: Event) {
             e.preventDefault();
@@ -410,9 +415,14 @@ export default defineComponent({
             this.activities = (await fetchActivity(
                 this.activeWallet?.address as string
             )) as never[];
-            console.log("activites", this.activities);
 
             this.executing = false;
+        },
+        async fetchNftList() {
+            const nftList = await getNFTList(
+                this.activeWallet?.address as string
+            );
+            this.nftList = nftList?.items;
         },
         async faucet() {
             try {
@@ -424,6 +434,9 @@ export default defineComponent({
                     this.playerId,
                     this.activeWallet?.address as string
                 );
+                trackEventBtn({
+                    label: "Faucet",
+                });
                 if (
                     faucetResult.statusCode &&
                     faucetResult.statusCode !== 200
@@ -441,7 +454,6 @@ export default defineComponent({
                 this.isFaucet = false;
                 this.executing = false;
             } catch (error) {
-                // console.log("error", error);
                 this.errorMessage = "Faucet error: " + error?.message;
                 this.executing = false;
                 this.isFaucet = false;
@@ -484,7 +496,9 @@ export default defineComponent({
                 this.errorMessage = "Password is incorrect";
                 return;
             }
-
+            trackEventBtn({
+                label: "Send_wallet",
+            });
             try {
                 this.executing = true;
                 const hdKeyring = new HDKeyring();
@@ -539,8 +553,9 @@ export default defineComponent({
         },
         async refreshWallet($event?: Event) {
             if ($event) $event.preventDefault();
-            await this.getBalance();
-            await this.fetchActivity();
+            this.getBalance();
+            this.fetchActivity();
+            this.fetchNftList();
         },
         removeWallet() {
             localStorage.clear();
@@ -571,7 +586,6 @@ export default defineComponent({
         await hdKeyring.unlock();
         if (hdKeyring.isSigning) {
             this.activeWallet = hdKeyring.getActiveWallet();
-            console.log("activeWallet", this.activeWallet);
 
             const address = await this.activeWallet?.address;
             if (!address) {
@@ -593,6 +607,7 @@ export default defineComponent({
 button {
     padding: 25px 50px;
 }
+
 button:hover {
     box-shadow: none;
 }
@@ -687,6 +702,11 @@ button:hover {
                     color: #333;
                     outline: none;
                 }
+            }
+            
+            .nft-list {
+                max-height: calc(100vh - 275px);
+                overflow-y: auto;
             }
 
             .item-list {

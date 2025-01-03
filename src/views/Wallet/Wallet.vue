@@ -2,7 +2,7 @@
 <template>
     <router-view>
         <div class="wr-detail-wallet">
-            <div class="flex justify-between items-center p-[20px]">
+            <div class="flex justify-between items-center p-5">
                 <div>
                     <a @click="removeWallet()"><i class="fa fa-trash"></i></a>
                 </div>
@@ -320,26 +320,25 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import { secureStorage } from "@/storage/storage";
-import userService from "@/services/userService";
-import { quais, Wallet } from "quais";
-import NotificationToast from "@/components/NotificationToast.vue";
 import LoadingForm from "@/components/LoadingForm.vue";
-import {
-    activeProvider,
-    fetchActivity,
-    getAddressLinkToExplorer,
-    getNFTList,
-    getTxLinkToExplorer,
-} from "@/crypto_utils/networks";
-import HDKeyring from "@/crypto_utils/HDKeyring";
-import { type WalletInfo } from "@/crypto_utils/type";
-import type { QuaiTransactionRequest } from "quais/lib/esm/providers";
-import { formatEther, parseEther, toBigInt } from "ethers";
+import NotificationToast from "@/components/NotificationToast.vue";
 import { CURRENT_WALLET_VERSION } from "@/crypto_utils/constants";
+import HDKeyring from "@/crypto_utils/HDKeyring";
+import {
+activeProvider,
+fetchActivity,
+getAddressLinkToExplorer,
+getNFTList,
+getTxLinkToExplorer,
+} from "@/crypto_utils/networks";
+import { type WalletInfo } from "@/crypto_utils/type";
 import BackButtonTelegram from "@/mixins/BackButtonTelegram";
+import userService from "@/services/userService";
+import { secureStorage } from "@/storage/storage";
 import { trackEventBtn } from "@/utils";
+import { formatEther, parseEther } from "ethers";
+import type { QuaiTransactionRequest } from "quais/lib/esm/providers";
+import { defineComponent } from "vue";
 
 export default defineComponent({
     name: "WalletDetail",

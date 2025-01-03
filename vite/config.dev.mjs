@@ -22,6 +22,9 @@ export default defineConfig({
         //     },
         // }
     ],
+    css: {
+        postcss: './postcss.config.js',
+    },
     resolve: {
         alias: {
             // "@public": fileURLToPath(new URL("./../public",

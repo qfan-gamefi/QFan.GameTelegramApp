@@ -196,6 +196,8 @@
     "play_pass_for_each_friend": "plus a bonus +{ score2 }% from their referrals!",
     "invite_telegram": "Play to Airdrop $QUAI from Quai Network on QFAN. Don't miss this opportunity as quantities are limited!",
     "do_you_want_mint_nft": "Do you want to Mint this NFT?",
+    "do_you_want_cancel": "Do you want Cancel?",
+
     "inventory_page": {
         "title": {
             "Quai event": "Quai event ",
@@ -214,7 +216,6 @@
         "success": "Success",
         "failed": "Failed",
         "pending": "Pending",
-        "failed": "Failed",
         "processing": "Processing",
         "waiting": "Waiting"
     },

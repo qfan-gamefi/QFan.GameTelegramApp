@@ -270,7 +270,7 @@ export default defineComponent({
                 );
                 if (res?.status === 201 || res?.status === 200) {
                     this.handleClose();
-                    this.renderSuccess(`nofi.withdraw_success`);
+                    this.renderSuccess(`noti.withdraw_success`);
                 } else {
                     this.renderErr(
                         `${this.labelType} error. ${res.data?.message}`

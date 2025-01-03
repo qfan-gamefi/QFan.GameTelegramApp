@@ -199,6 +199,7 @@
             </div>
         </div>
     </transition>
+
     <NotificationToast
         v-if="showNotification"
         :message="notificationMessage"
@@ -216,12 +217,19 @@
     />
 
     <PopupPassword :visible="isPass" @cancel="cancelPass()" />
+
+    <PopupComingSoon
+        :visible="isMaintenance"
+        message="under_maintenance"
+        @close="isMaintenance = false"
+    />
 </template>
 
 <script lang="ts">
 import InputNumber from "@/components/Input/InputNumber.vue";
 import InputSelect from "@/components/Input/InputSelect.vue";
 import NotificationToast from "@/components/NotificationToast.vue";
+import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
 import PopupPassword from "@/components/popup/PopupPassword.vue";
 import PopupConfirm from "@/components/PopupConfirm.vue";
 import { EItemDefType, IItemInventory } from "@/interface";
@@ -244,6 +252,7 @@ export default defineComponent({
         InputNumber,
         PopupConfirm,
         PopupPassword,
+        PopupComingSoon
     },
     computed: {
         ...mapState(["rewardInfo"]),
@@ -315,7 +324,8 @@ export default defineComponent({
             isBuySell: false,
             textConfirm: "confirm_buy",
             isPass: false,
-            loadingBtn: false
+            loadingBtn: false,
+            isMaintenance: false,
         };
     },
     methods: {
@@ -571,12 +581,13 @@ export default defineComponent({
             this.isBuySell = false;
         },
         async submitData() {
-            if (this.activeTab == "buy") {
-                this.textConfirm = `confirm_buy`;
-            } else {
-                this.textConfirm = `confirm_sell`;
-            }
-            this.isBuySell = true;
+            this.isMaintenance = true
+            // if (this.activeTab == "buy") {
+            //     this.textConfirm = `confirm_buy`;
+            // } else {
+            //     this.textConfirm = `confirm_sell`;
+            // }
+            // this.isBuySell = true;
         },
         renderFee() {
             return this.orderFee?.Value;

@@ -115,6 +115,12 @@
         @yes="handleYes()"
         @no="showPopup = false"
     />
+
+    <PopupComingSoon
+        :visible="isMaintenance"
+        message="under_maintenance"
+        @close="isMaintenance = false"
+    />
 </template>
 
 <script lang="ts">
@@ -132,6 +138,7 @@ import {
 import { defineComponent } from "vue";
 import PopupPassword from "@/components/popup/PopupPassword.vue";
 import PopupConfirm from "@/components/PopupConfirm.vue";
+import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
 
 export default defineComponent({
     name: "MyOrderPage",
@@ -141,6 +148,7 @@ export default defineComponent({
         NotificationToast,
         PopupPassword,
         PopupConfirm,
+        PopupComingSoon
     },
     created() {
         this.callOrderShop();
@@ -176,6 +184,7 @@ export default defineComponent({
             itemId: null,
             loadingBtn: false,
             showPopup: false,
+            isMaintenance: false,
         };
     },
     methods: {
@@ -272,8 +281,9 @@ export default defineComponent({
             }
         },
         async handleCancelOrder(id: number) {
-            this.showPopup = true;
-            this.itemId = id;
+            this.isMaintenance = true
+            // this.showPopup = true;
+            // this.itemId = id;
         },
         async handleYes() {
             try {

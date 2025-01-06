@@ -5,8 +5,8 @@
             v-if="visible"
         >
             <div class="popup-coming-soon">
-                <p>{{ $t(message) }}</p>
-                <button class="rounded-md" @click="closePopup">{{ $t("close") }}</button>
+                <p class="mb-3">{{ $t(message) }}</p>
+                <button class="btn-close" @click="closePopup">{{ $t("close") }}</button>
             </div>
         </div>
     </transition>
@@ -46,15 +46,18 @@ export default defineComponent({
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: white;
+    background: #00175f;
     padding: 20px;
-    border: 1px solid #ccc;
+    border: 1px solid #89a2ef;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
+    border-radius: 4px;
+    color: #fff;
 }
 
-.popup-coming-soon p {
-    color: black;
-    margin-bottom: 10px;
+.btn-close {
+    font-size: 12px;
+    border-radius: 4px;
+    width: fit-content;
+    margin: auto;
 }
 </style>

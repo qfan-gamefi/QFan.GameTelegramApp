@@ -317,11 +317,18 @@
             </div>
         </div>
     </router-view>
+
+    <PopupComingSoon
+        :visible="isMaintenance"
+        message="under_maintenance"
+        @close="isMaintenance = false"
+    />
 </template>
 
 <script lang="ts">
 import LoadingForm from "@/components/LoadingForm.vue";
 import NotificationToast from "@/components/NotificationToast.vue";
+import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
 import { CURRENT_WALLET_VERSION } from "@/crypto_utils/constants";
 import HDKeyring from "@/crypto_utils/HDKeyring";
 import {
@@ -346,6 +353,7 @@ export default defineComponent({
     components: {
         NotificationToast,
         LoadingForm,
+        PopupComingSoon
     },
     data() {
         return {
@@ -378,6 +386,7 @@ export default defineComponent({
             isFaucet: false,
             tokenList: [],
             nftList: [],
+            isMaintenance: false,
         };
     },
     methods: {
@@ -424,42 +433,42 @@ export default defineComponent({
             this.nftList = nftList?.items;
         },
         async faucet() {
-            try {
-                this.isFaucet = true;
-                this.executing = true;
-                this.errorMessage = "";
-                this.transactionUrl = "";
-                const faucetResult = await userService.faucet(
-                    this.playerId,
-                    this.activeWallet?.address as string
-                );
-                trackEventBtn({
-                    label: "Faucet",
-                });
-                if (
-                    faucetResult.statusCode &&
-                    faucetResult.statusCode !== 200
-                ) {
-                    this.errorMessage = "Faucet error: " + faucetResult.message;
-                    this.executing = false;
-                    this.isFaucet = false;
-                    return;
-                }
-                if (faucetResult?.hash) {
-                    this.transactionUrl = await getTxLinkToExplorer(
-                        faucetResult?.hash
-                    );
-                }
-                this.isFaucet = false;
-                this.executing = false;
-            } catch (error) {
-                this.errorMessage = "Faucet error: " + error?.message;
-                this.executing = false;
-                this.isFaucet = false;
-            }
+            this.isMaintenance = true
+            // try {
+            //     this.isFaucet = true;
+            //     this.executing = true;
+            //     this.errorMessage = "";
+            //     this.transactionUrl = "";
+            //     const faucetResult = await userService.faucet(
+            //         this.playerId,
+            //         this.activeWallet?.address as string
+            //     );
+            //     trackEventBtn({
+            //         label: "Faucet",
+            //     });
+            //     if (
+            //         faucetResult.statusCode &&
+            //         faucetResult.statusCode !== 200
+            //     ) {
+            //         this.errorMessage = "Faucet error: " + faucetResult.message;
+            //         this.executing = false;
+            //         this.isFaucet = false;
+            //         return;
+            //     }
+            //     if (faucetResult?.hash) {
+            //         this.transactionUrl = await getTxLinkToExplorer(
+            //             faucetResult?.hash
+            //         );
+            //     }
+            //     this.isFaucet = false;
+            //     this.executing = false;
+            // } catch (error) {
+            //     this.errorMessage = "Faucet error: " + error?.message;
+            //     this.executing = false;
+            //     this.isFaucet = false;
+            // }
         },
         async linkToExplore(e: Event) {
-            console.log("Link to explore");
             e.preventDefault();
             const exploreUrl = await getAddressLinkToExplorer(
                 this.activeWallet?.address as string

@@ -96,20 +96,18 @@
         :type="notification?.type"
         @close="notification.show = false"
     />
-    <!-- <PopupConfirm
-            v-if="showMint"
-            text="do_you_want_mint_nft"
-            :loading="false"
-            :visible="showMint"
-            @yes="yesMint()"
-            @no="showMint = false"
-        /> -->
-        <MintPage 
-            :isMint="showMint"
-            @close="closePopup()"
-            @closeReload="closeReload()"
-            :cardItem="cardItem"            
-        />
+
+    <MintPage 
+        :isMint="showMint"
+        @close="closePopup()"
+        @closeReload="closeReload()"
+        :cardItem="cardItem"            
+    />
+    <PopupComingSoon
+        :visible="isMaintenance"
+        message="under_maintenance"
+        @close="isMaintenance = false"
+    />
 </template>
 
 <script>
@@ -125,6 +123,7 @@ import {
 import { getNFTList } from "@/crypto_utils/networks";
 import { debounce } from "@/utils";
 import MintPage from "./MintPage.vue";
+import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
 
 export default {
     name: "NFTPage",
@@ -132,7 +131,8 @@ export default {
     components: {
         NotificationToast,
         PopupConfirm,
-        MintPage
+        MintPage,
+        PopupComingSoon
     },
     data() {
         return {
@@ -156,7 +156,8 @@ export default {
             nftList: [],
             activeWallet: null,
             showMint: false,
-            cardItem: []
+            cardItem: [],
+            isMaintenance: false,
         };
     },
     created() {
@@ -189,11 +190,11 @@ export default {
             }
         },
         async mintNFT(card) {
-            // Call the mintNFT function from the contract
-            // Use the address, price, and quantity from the card
-            // Update the quantity of the card
-            this.showMint = true;
-            this.cardItem = card
+            //alert Maintenance
+            this.isMaintenance = true
+
+            // this.showMint = true;
+            // this.cardItem = card
         },
         async mintNFTStep2(){
             this.isMinting = true;

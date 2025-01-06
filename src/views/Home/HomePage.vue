@@ -130,6 +130,7 @@ export default {
             openGiftCode: false,
             giftCode: "",
             showOptions: false,
+            isMaintenance: false,
         };
     },
     computed: {
@@ -495,68 +496,73 @@ export default {
         },
         async onCheckIn() {
             trackEventBtn({
-                label: "Wallet",
+                label: "Checkin",
             });
-            try {
-                this.titleCheckin = "processing";
-                this.isExecCheckin = true;
-                const keyringService = new HDKeyring();
-                const isUnlock = await keyringService.unlock();
-                if (isUnlock) {
-                    const activeWallet = keyringService.getActiveWallet();
-                    const address = await activeWallet?.address;
+            this.isMaintenance = true
+            // try {
+            //     this.titleCheckin = "processing";
+            //     this.isExecCheckin = true;
+            //     const keyringService = new HDKeyring();
+            //     const isUnlock = await keyringService.unlock();
+            //     if (isUnlock) {
+            //         const activeWallet = keyringService.getActiveWallet();
+            //         const address = await activeWallet?.address;
 
-                    if (!address) {
-                        this.$router.push({ name: "WalletCreate" });
-                        return;
-                    }
+            //         if (!address) {
+            //             this.$router.push({ name: "WalletCreate" });
+            //             return;
+            //         }
 
-                    const request: QuaiTransactionRequest = {
-                        from: address,
-                        to: CONTRACT_OWNER_ADDRESS,
-                    };
+            //         const request: QuaiTransactionRequest = {
+            //             from: address,
+            //             to: CONTRACT_OWNER_ADDRESS,
+            //         };
 
-                    const tx = (await keyringService.sendTokenTransaction(
-                        request
-                    )) as unknown as unknown as QuaiTransactionResponse;
+            //         const tx = (await keyringService.sendTokenTransaction(
+            //             request
+            //         )) as unknown as unknown as QuaiTransactionResponse;
 
-                    const claimCheckin = await userService.claimCheckin(
-                        this.idUser,
-                        activeWallet?.address as string,
-                        tx.hash as string
-                    );
-                    await this.getInfoUser();
+            //         const claimCheckin = await userService.claimCheckin(
+            //             this.idUser,
+            //             activeWallet?.address as string,
+            //             tx.hash as string
+            //         );
+            //         await this.getInfoUser();
                     
-                    if (claimCheckin.error) {
-                         this.renderErr(claimCheckin?.message);
+            //         if (claimCheckin.error) {
+            //              this.renderErr(claimCheckin?.message);
                          
-                    } else {
-                        await this.renderSuccess("Checkin success!");
-                    }
-                } else {
-                    this.$router.push({ name: "WalletCreate" });
-                }
-            } catch (error) {
-                this.renderErr(
-                    "Checkin failed! Chain is not ready to interact."
-                );
-            } finally {                
-                this.isExecCheckin = false;
-                this.titleCheckin = "check_in";
-            }
+            //         } else {
+            //             await this.renderSuccess("Checkin success!");
+            //         }
+            //     } else {
+            //         this.$router.push({ name: "WalletCreate" });
+            //     }
+            // } catch (error) {
+            //     this.renderErr(
+            //         "Checkin failed! Chain is not ready to interact."
+            //     );
+            // } finally {                
+            //     this.isExecCheckin = false;
+            //     this.titleCheckin = "check_in";
+            // }
         },
         async onAutoInteract() {
-            const walletType = localStorage.getItem("walletType");
-            if (walletType !== CURRENT_WALLET_VERSION) {
-                localStorage.removeItem("tallyVaults");
-                localStorage.removeItem("address");
-                this.$router.push({ name: "WalletCreate" });
-            } else {
-                this.$store.commit("setAutoMining", true);
-                trackEventBtn({
-                    label: "AutoMining",
-                });
-            }
+            this.isMaintenance = true
+            trackEventBtn({
+                label: "AutoMining",
+            });
+            // const walletType = localStorage.getItem("walletType");
+            // if (walletType !== CURRENT_WALLET_VERSION) {
+            //     localStorage.removeItem("tallyVaults");
+            //     localStorage.removeItem("address");
+            //     this.$router.push({ name: "WalletCreate" });
+            // } else {
+            //     this.$store.commit("setAutoMining", true);
+            //     trackEventBtn({
+            //         label: "AutoMining",
+            //     });
+            // }
         },
         calcWidthMining() {
             const totalTime = MINING_INTERVAL;
@@ -970,6 +976,11 @@ export default {
             </template>
         </PopupComponent>
 
+        <PopupComingSoon
+            :visible="isMaintenance"
+            message="under_maintenance"
+            @close="isMaintenance = false"
+        />
         <VersionPage />
     </div>
 </template>

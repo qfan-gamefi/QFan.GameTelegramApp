@@ -568,10 +568,10 @@ export default defineComponent({
             this.itemFusion = item;
         },
         async handleUseInventory(item: IItemInventory) {
-            this.isMaintenance = true
-            // this.useItem = item;
-            // this.openUseCount = true;
-            // this.countUse = 1;
+            // this.isMaintenance = true
+            this.useItem = item;
+            this.openUseCount = true;
+            this.countUse = 1;
         },
         async handleSell(item: IItemInventory) {
             const res = await userServiceInventory.getItemMarket(

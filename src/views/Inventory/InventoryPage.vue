@@ -563,9 +563,9 @@ export default defineComponent({
             }
         },
         async handleFausion(item) {
-            this.isMaintenance = true
-            // this.showClaim = true;
-            // this.itemFusion = item;
+            // this.isMaintenance = true
+            this.showClaim = true;
+            this.itemFusion = item;
         },
         async handleUseInventory(item: IItemInventory) {
             this.isMaintenance = true

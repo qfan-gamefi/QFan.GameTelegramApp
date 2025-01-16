@@ -26,6 +26,28 @@ export interface IItemInventory {
     Tradable: boolean;
     ItemCount: number;
     ItemDef: IItemDef;
+    Configuration: any
+    ConfigurationArr?: any
+    DefaultInStack: boolean
+}
+
+export interface IDetailPlayer {
+    id: number;
+    Name: string;
+    Code: string;
+    Description: string | null;
+    AttachmentId: number | null;
+    InventoryId: number;
+    ItemDefId: number;
+    Status: string;
+    Stackable: boolean;
+    Tradable: boolean;
+    ItemCount: number;
+    ItemDef: IItemDef;
+    Configuration: any
+    ConfigurationText: string
+    ConfigurationArr?: any
+    DefaultInStack: boolean
 }
 
 export interface IInventory {
@@ -47,6 +69,7 @@ export interface IItemDefFusion {
     ImageUrl: string;
     CashValue: string;
     AutoCash: number;
+    AutoCashType: string
 }
 export interface IFusionBase {
     id: number;

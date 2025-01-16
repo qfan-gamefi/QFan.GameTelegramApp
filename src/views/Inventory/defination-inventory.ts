@@ -2,7 +2,7 @@ export enum ButtonName {
     Inventory = "Inventory",
     Badges = "Badges",
     Fusion = "Fusion",
-    History = "History",
+    Player = "Player",
 }
 
 export interface Button {

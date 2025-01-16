@@ -32,3 +32,9 @@
     animation: slideUp 0.3s ease-in-out;
 }
 
+.fadein {
+    animation: slideUp 0.3s ease-in forwards;
+}
+.fadeout {
+    animation: slideDown 0.3s ease-out forwards;
+}

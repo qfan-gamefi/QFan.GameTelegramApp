@@ -203,7 +203,7 @@
                                 />
                             </div>
                             <div class="your-name-point">
-                                <div class="your-name">
+                                <div class="max-w-40 truncate whitespace-nowrap overflow-hidden">
                                     {{ item?.UserName || item?.UserId }}
                                 </div>
                                 <div class="your-point">
@@ -613,7 +613,6 @@ export default {
                         );
                     }
                 });
-                console.log('this.detailEvent', this.detailEvent);
                 
                 this.leaderboard = await predictService.getLeaderBoard(
                     this.detailEvent?.attributes?.domainCode
@@ -1116,7 +1115,7 @@ export default {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 18px;
+    font-size: 12px;
     font-weight: bold;
 }
 

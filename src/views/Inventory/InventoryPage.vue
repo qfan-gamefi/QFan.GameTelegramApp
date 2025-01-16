@@ -8,11 +8,11 @@
             loading="lazy"
         />
 
-        <div class="btn-inventory">
+        <div class="inventory-btns-banner">
             <div
                 v-for="(button, index) in buttonInventory"
                 :key="index"
-                class="btn-item-inventory"
+                class="inventory-btn-banner"
                 :class="{ active: activeButton === button?.name }"
                 @click="setActiveButton(button?.name)"
             >
@@ -21,28 +21,29 @@
         </div>
 
         <div class="wr-box" :style="{ height: calcHeightInventory }">
-            <div class="inventory-detail p-2">
+            <div class="inventory-btn-page">
                 <div v-if="activeButton === 'Inventory'">
                     <div
                         v-for="(itemTitle, key) in itemsInventory"
                         :key="key"
-                        class="border-b border-[#2F9AD6] p-1 rounded-md animation-inventory"
+                        class="row-page fadein"
                     >
-                        <div class="text-[14px] mb-1 font-extrabold">
+                        <div class="title-row">
                             {{ $t(renderTitleKey(key)) }}
                         </div>
 
                         <div class="box-item">
                             <div
-                                class="item"
+                                class="relative flex"
                                 v-for="(item, index) in itemTitle"
                                 :key="index"
                             >
                                 <div
-                                    class="item-img"
+                                    class="w-full relative cursor-pointer"
                                     @click="toggleButtons(item?.id)"
                                 >
                                     <img
+                                        class="w-full h-full object-cover rounded"
                                         :src="item?.ItemDef?.ImageUrl"
                                         :alt="item?.Description"
                                         loading="lazy"
@@ -52,37 +53,25 @@
                                         v-if="activeIndex === item?.id"
                                         class="button-overlay"
                                     >
-                                        <div
-                                            class="item-btn"
-                                            v-if="item?.ItemDef?.Consumable"
-                                        >
+                                        <div v-if="item?.ItemDef?.Consumable">
                                             <button
-                                                @click="
-                                                    handleUseInventory(item)
-                                                "
+                                                @click="useInventory(item)"
                                                 :disabled="loadingBtn"
                                             >
                                                 <div v-if="loadingBtn">
-                                                    <i
-                                                        class="fa fa-spinner fa-spin"
-                                                    ></i>
+                                                    <i class="fa fa-spinner fa-spin"></i>
                                                 </div>
                                                 {{ $t("use") }}
                                             </button>
                                         </div>
 
-                                        <div
-                                            class="item-btn"
-                                            v-if="item?.Tradable"
-                                        >
+                                        <div v-if="item?.Tradable">
                                             <button
                                                 @click="handleSell(item)"
                                                 :disabled="loadingBtn"
                                             >
                                                 <div v-if="loadingBtn">
-                                                    <i
-                                                        class="fa fa-spinner fa-spin"
-                                                    ></i>
+                                                    <i class="fa fa-spinner fa-spin"></i>
                                                 </div>
                                                 {{ $t("sell") }}
                                             </button>
@@ -96,19 +85,20 @@
                         </div>
                     </div>
                 </div>
+
                 <div v-if="activeButton === 'Badges'">
                     <div
                         v-for="(items, category) in groupedBadge"
                         :key="category"
-                        class="border-b border-[#2F9AD6] p-1 rounded-md animation-inventory"
+                        class="row-page fadein"
                     >
-                        <div class="text-[14px] mb-1 font-extrabold">
+                        <div class="title-row">
                             {{ category }}
                         </div>
                         <div class="box-item">
                             <div v-for="item in items" :key="item.id">
                                 <img
-                                    class="img-badge"
+                                    class="w-full object-cover"
                                     :src="item?.ItemDef?.ImageUrl"
                                     alt="ItemBadge"
                                     loading="lazy"
@@ -119,7 +109,7 @@
                 </div>
 
                 <div
-                    class="flex flex-col gap-[5px]"
+                    class="custom-flex-column"
                     v-if="activeButton === 'Fusion'"
                 >
                     <div
@@ -127,14 +117,12 @@
                         v-for="(item, index) in listFusion"
                         :key="index"
                     >
-                        <div
-                            class="slideIn-fusion flex justify-between p-1.5 border-2 border-[#56d6ff] rounded-md"
-                        >
+                        <div class="slideIn-fusion">
                             <div
                                 class="flex items-center gap-2.5 w-[220px] overflow-auto"
                             >
                                 <div
-                                    class="flex flex-col gap-[5px] min-w-[55px]"
+                                    class="custom-flex-column min-w-[55px]"
                                     v-for="(
                                         el, idx
                                     ) in item?.ResourcesItemDefIds"
@@ -142,9 +130,9 @@
                                 >
                                     <div
                                         class="text-center p-1 rounded-md"
-                                        :class="renderItemFusion(el, 'bg')"
+                                        :class="renderItemFusion(el, 'bg', arrInventory, dataInfo)"
                                     >
-                                        {{ renderItemFusion(el, "count") }}
+                                        {{ renderItemFusion(el, "count", arrInventory, dataInfo) }}
                                     </div>
                                     <img
                                         class="w-[55px]"
@@ -154,11 +142,11 @@
                                 </div>
                             </div>
 
-                            <div class="flex gap-[15px]">
+                            <div class="flex gap-3">
                                 <div class="flex items-center">
                                     <img
                                         class="w-2.5"
-                                        src="@public/assets/inventory/triangle.png"
+                                        src="/assets/inventory/triangle.png"
                                     />
                                 </div>
                                 <div class="flex flex-col gap-2 items-center">
@@ -179,7 +167,7 @@
                                             'btn-fusion',
                                             {
                                                 disable:
-                                                    checkDisableFusion(item),
+                                                    disableFusion(item, dataInfo, arrInventory),
                                             },
                                         ]"
                                     >
@@ -188,6 +176,38 @@
                                         </button>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-if="activeButton === 'Player'">
+                    <div
+                        v-for="(player, title) in arrPlayer"
+                        :key="title"
+                        class="row-page animation-row"
+                    >
+                        <div class="title-row">
+                            {{ title }}
+                        </div>
+                        <div class="box-item">
+                            <div v-for="item in player" :key="item?.id" class="relative cursor-pointer" @click="handlePlayer(item)">
+                                <img
+                                    class="w-full object-cover"
+                                    :src="JSON.parse(item?.ItemDef?.ImageUrl)?.Plate"
+                                    loading="lazy"
+                                />
+                                <div v-if="['iconic', 'legendary'].includes(item?.ItemDef?.Grade?.toLowerCase())" class="shine shine-2"></div>
+                                <div v-if="['iconic', 'legendary'].includes(item?.ItemDef?.Grade?.toLowerCase())" class="shine shine-3"></div>
+                                <img
+                                    class="object-cover absolute top-[16%] right-[5%] w-[60%]"
+                                    :src="JSON.parse(item?.ItemDef?.ImageUrl)?.Player"
+                                    loading="lazy"
+                                />
+                                <div class="number-configuration">{{item?.Configuration}}</div>
+                                <div class="code-configuration">{{item?.Code}}</div>
+                                <div class="name-item-player">{{item?.Name}}</div>
+                                <div class="slot-item">{{item?.ItemCount}}</div>
                             </div>
                         </div>
                     </div>
@@ -213,8 +233,8 @@
             text="do_you_want_claim"
             :loading="loadingBtn"
             :visible="showClaim"
-            @yes="handleYesClaim"
-            @no="handleNoClaim"
+            @yes="handleYesClaim()"
+            @no="showClaim = false"
         />
 
         <ViewCart
@@ -233,7 +253,7 @@
             :title="useItem?.Name"
             :loading="loadingBtn"
             @yes="yesUseNumber()"
-            @no="noUseNumber()"
+            @no="openUseCount = false"
         >
             <template #content>
                 <div class="px-[10px]">
@@ -250,6 +270,20 @@
             :visible="isMaintenance"
             message="under_maintenance"
             @close="isMaintenance = false"
+        />
+
+        <PopupItem 
+            :visible="openItem" 
+            @no="openItem = false"  
+            :listData = "listDetailPlayer"
+            :idDefault = "itemDefault"
+            @refeshData="refeshData()"
+        />
+
+        <PopupFusionPlayerPage
+            :visible="isFusionPlayer" 
+            @no="isFusionPlayer = false"  
+            :data = "dataFusionPlayer"
         />
     </div>
 </template>
@@ -275,10 +309,16 @@ import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
 import userService from "@/services/userService";
 import BackButtonTelegram from "@/mixins/BackButtonTelegram";
 import { debounce, trackEventBtn } from "@/utils";
-import { renderTitleKey, formatNumber } from "./inventoryHelpers";
+import { renderTitleKey, formatNumber, disableFusion, renderConfiguration, renderItemFusion } from "./inventoryHelpers";
 import { ButtonName, Button } from "./defination-inventory";
 import PopupComponent from "@/components/popup/PopupComponent.vue";
 import InputField from "@/components/Input/InputField.vue";
+import axios from "axios";
+import PopupItem from "./PopupItem.vue";
+import PopupFusionPlayerPage from "./PopupFusionPlayer.vue";
+import { countNameDefaultInStack } from "../Fomation/defination-fomation";
+import { sortedGroupPlayer } from "../Fomation/defination-fomation";
+import { groupedPlayer } from "../Fomation/defination-fomation";
 
 export default defineComponent({
     name: "InventoryPage",
@@ -291,6 +331,8 @@ export default defineComponent({
         PopupComingSoon,
         PopupComponent,
         InputField,
+        PopupItem,
+        PopupFusionPlayerPage
     },
     created() {
         this.getDataInfo();
@@ -339,7 +381,7 @@ export default defineComponent({
                 { name: "Inventory", label: "inventory" },
                 { name: "Badges", label: "badges" },
                 { name: "Fusion", label: "fusion" },
-                { name: "History", label: "history" },
+                { name: "Player", label: "player" },
             ] as Button[],
             showClaim: false,
             itemFusion: {} as IFusion,
@@ -347,6 +389,8 @@ export default defineComponent({
             itemsInventory: {} as Record<string, IItemInventory[]>,
             itemsBadge: [] as IItemInventory[],
             arrInventory: [] as IItemInventory[],
+            arrPlayer: {} as { [key: string]: IItemInventory[] },
+            dataPlayer: {} as { [key: string]: IItemInventory[] }, //data not merge count
 
             listFusion: [] as IFusion[],
             showButtons: false,
@@ -360,11 +404,19 @@ export default defineComponent({
             openUseCount: false,
             groupedBadge: {} as { [key: string]: IItemInventory[] },
             isMaintenance: false,
+            openItem: false,
+            listDetailPlayer: [] as IItemInventory[],
+            itemDefault: 0,
+            isFusionPlayer: false,
+            dataFusionPlayer: {} as IItemInventory
         };
     },
     methods: {
         renderTitleKey,
         formatNumber,
+        disableFusion,
+        renderConfiguration,
+        renderItemFusion,
         updateHeight() {
             const img = this.$refs.bannerInventory;
             if (img) {
@@ -393,103 +445,37 @@ export default defineComponent({
         },
         setActiveButton(button: ButtonName) {
             this.$store.commit("setRouterFusion", false);
-            if (button === ButtonName.History) {
-                this.showCoomingSoon = true;
-            } else {
-                this.activeButton = button;
-            }
-        },
-        renderItemFusion(item: IItemDefFusion, type: "bg" | "count") {
-            const { ItemDefId, AutoCash, CashValue, Count } = item || {};
-            const filterIdItem: IItemInventory = this.arrInventory?.find(
-                (el) => el.ItemDefId === ItemDefId
-            );
-            const dataBalance =
-                this.dataInfo?.attributes?.qpoint?.data?.attributes;
-            // this.rewardInfo?.attributes?.qpoint?.data?.attributes;
-            const formatBalace = this.formatNumber(dataBalance?.balance);
-            const countItem = filterIdItem?.ItemCount || 0;
-            const countHash = Count || 0;
-
-            if (type === "count") {
-                if (AutoCash && AutoCash === 1) {
-                    const formatCashValue = this.formatNumber(CashValue);
-
-                    return `${formatBalace}/${formatCashValue}`;
-                } else {
-                    return `${countItem}/${countHash}`;
-                }
-            }
-            if (type === "bg") {
-                const bgRed = "bg-[#FF0000]";
-                const bgGreen = "bg-[#2cde00]";
-
-                if (AutoCash && AutoCash === 1) {
-                    return dataBalance?.balance >= CashValue ? bgGreen : bgRed;
-                } else {
-                    return countItem >= countHash ? bgGreen : bgRed;
-                }
-            }
-        },
-
-        checkDisableFusion(item) {
-            const arrRow = item.ResourcesItemDefIds;
-            const balance =
-                this.dataInfo?.attributes?.qpoint?.data?.attributes?.balance;
-
-            const hasAutoCash = arrRow.some((item) => "AutoCash" in item);
-
-            if (hasAutoCash) {
-                const result = arrRow?.map((item) => {
-                    if (item?.AutoCashType === "QFP") {
-                        return balance >= item?.CashValue ? true : false;
-                    } else {
-                        return true;
-                    }
-                });
-
-                const hasFalseValue = !result.some((value) => value === false);
-
-                return hasFalseValue ? "" : "disable";
-            } else {
-                const result = arrRow?.every((itemA) => {
-                    const matchingItemB = this.arrInventory?.find(
-                        (itemB) => itemB.ItemDefId === itemA.ItemDefId
-                    );
-                    return matchingItemB
-                        ? itemA.Count <= matchingItemB.ItemCount
-                        : false;
-                });
-
-                return result ? "" : "disable";
-            }
+            this.activeButton = button;
+            // if (button === ButtonName.Player) {
+            //     this.showCoomingSoon = true;
+            // } else {
+            //     this.activeButton = button;
+            // }
         },
         async getDataInventor() {
-            try {
-                const res = await userServiceInventory.getListInventory(
-                    Number(this.userId)
-                );
-                const filterData = res?.Items?.filter(
-                    (item) => item?.ItemDef?.Type === EItemDefType.Common
-                );
-                const filterBadge = res?.Items?.filter(
-                    (item) => item?.ItemDef?.Type === EItemDefType.Medal
-                );
-                this.itemsBadge = filterBadge;
-                const groupedData = filterBadge.reduce((acc, item) => {
-                    const category = item.ItemDef.Category;
-                    if (!acc[category]) {
-                        acc[category] = [];
-                    }
-                    acc[category].push(item);
-                    return acc;
-                }, {});
-                this.groupedBadge = groupedData;
+            const res = await axios.get(`https://b816-171-224-181-35.ngrok-free.app/api/v1/inventory/getInventory?userId=${this.userId}`,
+                {
+                    headers: {"ngrok-skip-browser-warning": "1"},
+                }
+            )
+            const data = JSON.parse(res.data.message)
 
-                this.arrInventory = filterData;
+            const filterPlayer = data?.Items?.filter(
+                (item) => item?.ItemDef?.Category === "PLAYER"
+            );
+            this.dataPlayer = filterPlayer
 
-                const groupedItems = filterData?.reduce(
-                    (accumulator, currentItem) => {
+            const countName = countNameDefaultInStack(filterPlayer);
+            const resultGroupedPlayer = groupedPlayer(countName)
+            const resultSort = sortedGroupPlayer(resultGroupedPlayer)
+            this.arrPlayer = resultSort
+
+                //
+                     const filterData = data?.Items?.filter(
+                        (item) => item?.ItemDef?.Type === EItemDefType.Common
+                    );
+                     const groupedItems = filterData?.reduce(
+                        (accumulator, currentItem) => {
                         const category = currentItem.ItemDef.Category;
                         if (!accumulator[category]) {
                             accumulator[category] = [];
@@ -498,40 +484,77 @@ export default defineComponent({
                         return accumulator;
                     },
                     {}
-                );
+                    );
+                        this.arrInventory = filterData;
+                        this.itemsInventory = groupedItems;
 
-                this.itemsInventory = groupedItems;
-            } catch (error) {
-                console.error(error);
-            }
-        },
-        handleNoClaim() {
-            this.showClaim = false;
+            // try {
+            //     const res = await userServiceInventory.getListInventory(
+            //         Number(this.userId)
+            //     );
+            //     const filterData = res?.Items?.filter(
+            //         (item) => item?.ItemDef?.Type === EItemDefType.Common
+            //     );
+            //     const filterBadge = res?.Items?.filter(
+            //         (item) => item?.ItemDef?.Type === EItemDefType.Medal
+            //     );
+            //     this.itemsBadge = filterBadge;
+            //     const groupedData = filterBadge.reduce((acc, item) => {
+            //         const category = item.ItemDef.Category;
+            //         if (!acc[category]) {
+            //             acc[category] = [];
+            //         }
+            //         acc[category].push(item);
+            //         return acc;
+            //     }, {});
+            //     this.groupedBadge = groupedData;
+
+            //     this.arrInventory = filterData;
+
+            //     const groupedItems = filterData?.reduce(
+            //         (accumulator, currentItem) => {
+            //             const category = currentItem.ItemDef.Category;
+            //             if (!accumulator[category]) {
+            //                 accumulator[category] = [];
+            //             }
+            //             accumulator[category].push(currentItem);
+            //             return accumulator;
+            //         },
+            //         {}
+            //     );
+
+            //     this.itemsInventory = groupedItems;
+            // } catch (error) {
+            //     console.error(error);
+            // }
         },
         async handleYesClaim() {
             try {
                 this.loadingBtn = true;
                 const data = {
-                    UserId: this.userId,
-                    CombineId: this.itemFusion.id,
+                    UserId: this.userId.toString(),
+                    CombineId: this.itemFusion.id.toString(),
                 };
-                const res = await userServiceInventory.makeFusion(data);
+                // const res = await userServiceInventory.makeFusion(data);
+                const res = await axios.post(`https://b816-171-224-181-35.ngrok-free.app/api/v1/fusion/makeFusion`, data);
+                const newRes = JSON.parse(res.data.message)
                 trackEventBtn({
                     label: "Fusion",
                 });
-                if (res.success) {
-                    const mess = res?.data
+                console.log(newRes);
+                
+                if (newRes.success) {
+                    this.dataFusionPlayer = newRes.data[0]
+                    const mess = newRes?.data
                         ?.map((item) => {
                             return `${item?.count} - ${item?.Name}`;
                         })
                         ?.join(", ");
-
+                    this.isFusionPlayer = true
                     await this.renderSuccess(`Received ${mess}`);
-                    await this.getDataInventor();
-                    await this.getFausion();
-                    await this.getDataInfo();
+                    await this.refeshData()
                 } else {
-                    await this.renderErr(`Received ${res?.data}`);
+                    await this.renderErr(`Received ${newRes?.data}`);
                 }
             } catch (error) {
                 if (error?.response?.status === 401) {
@@ -545,29 +568,44 @@ export default defineComponent({
             }
         },
         async getFausion() {
-            try {
-                const resFusion: IFusionString[] =
-                    await userServiceInventory.getFusion();
-                const parseFusion = resFusion?.map((item) => {
+            const res = await axios.get(`https://b816-171-224-181-35.ngrok-free.app/api/v1/fusion/getFusions`,
+                {headers: { "ngrok-skip-browser-warning": "1"},}
+            )
+            const data = JSON.parse(res.data.message)
+                const parseFusion = data?.map((item) => {
                     return {
                         ...item,
-                        ResourcesItemDefIds: JSON.parse(
+                        ResourcesItemDefIds:  JSON.parse(
                             item?.ResourcesItemDefIds
                         ),
                     };
                 });
-
+                
                 this.listFusion = parseFusion;
-            } catch (error) {
-                console.error(error);
-            }
+
+            // try {
+            //     const resFusion: IFusionString[] =
+            //         await userServiceInventory.getFusion();
+            //     const parseFusion = resFusion?.map((item) => {
+            //         return {
+            //             ...item,
+            //             ResourcesItemDefIds: JSON.parse(
+            //                 item?.ResourcesItemDefIds
+            //             ),
+            //         };
+            //     });
+
+            //     this.listFusion = parseFusion;
+            // } catch (error) {
+            //     console.error(error);
+            // }
         },
         async handleFausion(item) {
-            this.isMaintenance = true
-            // this.showClaim = true;
-            // this.itemFusion = item;
+            // this.isMaintenance = true
+            this.showClaim = true;
+            this.itemFusion = item;
         },
-        async handleUseInventory(item: IItemInventory) {
+        async useInventory(item: IItemInventory) {
             // this.isMaintenance = true
             this.useItem = item;
             this.openUseCount = true;
@@ -641,86 +679,76 @@ export default defineComponent({
                 this.openUseCount = false;
             }
         },
-        noUseNumber() {
-            this.openUseCount = false;
+        handlePlayer(item: IItemInventory){  
+            console.log(item);
+            console.log(this.dataPlayer);
+            
+            
+            this.itemDefault = item?.id
+            this.openItem = true
+            this.listDetailPlayer = this.dataPlayer?.filter(el => el?.ItemDefId === item.ItemDefId)   
+                     
         },
+        async refeshData(){
+            await this.getDataInventor();
+            await this.getFausion();
+            await this.getDataInfo();
+        }
     },
 });
 </script>
 
 <style scoped lang="scss">
-@import "@/styles/global.scss";
+// @import "@/styles/global.scss";
 
 .wr-inventory-page {
-    height: 100%;
-    position: absolute;
-    width: 100%;
-    top: 0%;
-    left: 0;
-    z-index: 999;
-    animation: fadeInDetailEvent 0.1s ease forwards;
-    color: #fff;
+    @apply absolute top-0 left-0 w-full h-full z-[999] text-white bg-center bg-no-repeat bg-cover;
+    animation: fadeInDetail 0.1s ease forwards;
     background-image: url("./../../../public/assets/inventory/background-inventory.png");
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
 }
 
-@keyframes fadeInDetailEvent {
+@keyframes fadeInDetail {
     0% {
         opacity: 0;
         transform: translate(50%, 50%) scale(0.5);
     }
-
     100% {
         opacity: 1;
         transform: translate(0%, 0%) scale(1);
     }
 }
 
-.btn-inventory {
-    display: flex;
-    width: 100%;
-    padding: 7px 0;
-    background-color: #0d2779;
-    justify-content: space-around;
-    font-size: 12px;
-    font-weight: 800;
+.inventory-btns-banner {
+    @apply flex w-full py-[7px] bg-[#0d2779] justify-around text-[12px] font-extrabold;
 }
 
-.btn-item-inventory.active {
-    background: #ffa53a;
-    color: white;
+.inventory-btn-banner.active {
+    @apply bg-[#ffa53a] text-white;
 }
 
-.btn-item-inventory {
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
+.inventory-btn-banner {
+    @apply px-[10px] py-[5px] rounded-md cursor-pointer;
+}
+
+.inventory-btn-page {
+    @apply h-full flex flex-col gap-[10px] bg-[#00175f] rounded-[10px] p-2 overflow-y-auto;
+    scrollbar-width: none;
+} 
+
+.row-page {
+    @apply border-b border-[#2F9AD6] p-1 rounded-md
+}
+.title-row {
+    @apply text-[14px] mb-1 font-extrabold
 }
 
 .wr-box {
     height: 100%;
     padding: 15px;
-    .inventory-detail {
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        background-color: #00175f;
-        border-radius: 10px;
-        overflow-y: auto;
-        scrollbar-width: none;
-    }
-
-    .img-badge {
-        width: 100%;
-        object-fit: cover;
-    }
     .box-item {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
-        gap: 20px 10px;
+        gap: 8px;
         animation: slideIn 0.5s forwards;
 
         button {
@@ -728,24 +756,6 @@ export default defineComponent({
             font-size: 12px;
             border-radius: 8px;
             min-width: fit-content;
-        }
-
-        .item {
-            position: relative;
-            display: flex;
-        }
-
-        .item-img {
-            width: 100%;
-            position: relative;
-            cursor: pointer;
-
-            img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                border-radius: 5px;
-            }
         }
     }
 
@@ -764,24 +774,13 @@ export default defineComponent({
 }
 
 .slot-item {
-    font-size: 10px;
-    font-weight: 800;
-    padding: 5px;
-    position: absolute;
-    top: 0;
-    right: 0;
+    @apply text-[10px] font-extrabold p-[5px] absolute top-0 right-0 text-[#fffb3a] bg-black/50 rounded-bl-[10px];
     text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
         1px 1px 0 #000;
-    background-color: rgba(0, 0, 0, 0.5);
-    border-bottom-left-radius: 10px;
-    color: #fffb3a;
-}
-
-.animation-inventory {
-    animation: slideIn 0.5s forwards;
 }
 
 .slideIn-fusion {
+    @apply flex justify-between p-1.5 border-2 border-[#56d6ff] rounded-md;
     animation: slideIn 0.5s forwards;
 }
 
@@ -789,7 +788,6 @@ export default defineComponent({
     from {
         opacity: 0;
     }
-
     to {
         opacity: 1;
     }
@@ -799,38 +797,31 @@ export default defineComponent({
     from {
         opacity: 1;
     }
-
     to {
         opacity: 0;
     }
 }
 
 .button-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: rgba(0, 0, 0, 0.5);
-    flex-direction: column;
-    gap: 5px;
-    z-index: 1;
+    @apply absolute top-0 left-0 w-full h-full flex justify-center items-center bg-black/50 flex-col gap-[5px] z-10;
 }
 
-.overlay-btn {
-    margin: 5px;
-    padding: 10px 20px;
-    background-color: white;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    border-radius: 5px;
+.custom-flex-column {
+  @apply flex flex-col gap-[5px];
 }
 
-.overlay-btn:hover {
-    background-color: #ddd;
+.number-configuration {
+    @apply absolute top-[20%] left-[17%] text-[8px];
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+}
+.code-configuration {
+    @apply absolute top-[33%] left-[17%] text-[6px];
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+}
+.name-item-player {
+    @apply absolute bottom-[25%] left-[50%] text-[6px] transform -translate-x-1/2 text-center;
+}
+.count-item-player {
+    @apply absolute bottom-[35%] right-[20%] text-[8px];
 }
 </style>

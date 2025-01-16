@@ -1,7 +1,5 @@
 <script setup lang="ts">
-// import MainGame from "./rising-star/MainGame.vue";
 import MainGame from "./../../rising-star/MainGame.vue";
-// import Phaser from "phaser";
 import { onMounted, ref, toRaw } from "vue";
 
 interface PhaserScene {
@@ -11,7 +9,7 @@ interface PhaserScene {
 const phaserRef: any = ref<{ scene?: PhaserScene }>();
 
 onMounted(() => {
-    window.Telegram.WebApp.expand();
+    window.Telegram.WebApp.expand()
 });
 </script>
 
@@ -74,9 +72,7 @@ export default {
         let last_name = dataUserTele?.user?.last_name || "";
 
         return {
-            // isLoadingCreen: true,
             storePermission: false,
-            // isTelegramLogin: !!first_name || !!last_name,
             first_name: first_name,
             last_name: last_name,
             idUser: dataUserTele?.user?.id?.toString() ?? "",
@@ -549,9 +545,9 @@ export default {
         },
         async onAutoInteract() {
             this.isMaintenance = true
-            trackEventBtn({
-                label: "AutoMining",
-            });
+            // trackEventBtn({
+            //     label: "AutoMining",
+            // });
             // const walletType = localStorage.getItem("walletType");
             // if (walletType !== CURRENT_WALLET_VERSION) {
             //     localStorage.removeItem("tallyVaults");
@@ -630,22 +626,6 @@ export default {
         handleMenu(){
             this.showOptions = false;
         },
-        openAnnouncement(){
-            const platform = window.Telegram.WebApp.platform;
-
-            const channelLink = "https://t.me/QFanClubAnnouncement";
-            const tgSchemaLink = "tg://resolve?domain=QFanClubAnnouncement";
-
-            if(platform?.includes("web")){
-                const link = document.createElement('a');
-                    link.href = channelLink;
-                    link.target = '_blank';
-                    link.click();
-                    link.remove();
-            }else{
-                window.location.href = channelLink;
-            }
-        }
     },
     async mounted() {
         Telegram.WebApp.ready();

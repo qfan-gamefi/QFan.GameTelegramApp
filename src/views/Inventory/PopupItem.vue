@@ -19,8 +19,8 @@
 
                     <div class="flex gap-2 font-semibold px-5">
                         <div class="flex-1 relative">
-                            <div v-if="['iconic', 'legendary'].includes(itemDetail?.ItemDef?.Grade?.toLowerCase())" class="shine shine-2"></div>
-                            <div v-if="['iconic', 'legendary'].includes(itemDetail?.ItemDef?.Grade?.toLowerCase())" class="shine shine-3"></div>
+                            <div v-if="['iconic', 'legendary'].includes(itemDetail?.ItemDef?.Grade?.toLowerCase())" class="shine-A shine-2"></div>
+                            <div v-if="['iconic', 'legendary'].includes(itemDetail?.ItemDef?.Grade?.toLowerCase())" class="shine-A shine-3"></div>
                             <img
                                 class="w-full object-cover fadein"
                                 :src="
@@ -127,6 +127,7 @@ import { defineComponent, PropType } from "vue";
 import { renderConfiguration } from "./inventoryHelpers";
 import axios from "axios";
 import { processPlayerDetails } from "../Fomation/defination-fomation";
+import userServiceInventory from "@/services/inventoryService";
 
 export default defineComponent({
     name: "PopupItemPage",
@@ -198,22 +199,13 @@ export default defineComponent({
                     itemId: this.itemDetail?.id.toString(),
                     userId: this.userId?.toString(),
                 };
-                const res = await axios.post(
-                    "https://b816-171-224-181-35.ngrok-free.app/api/v1/item/updateDefaultInStack",
-                    raw,
-                    {
-                        headers: {
-                            "ngrok-skip-browser-warning": "1",
-                            "Content-Type": "application/json",
-                        },
-                    }
-                );
-                const dataRes = JSON.parse(res?.data?.message);
 
-                if (dataRes?.success) {
+                const res = await userServiceInventory.useDefault(raw)
+
+                if (res?.success) {
                     const newData = this.newDataList?.map((item) => {
-                        if (item?.id === dataRes.data?.id) {
-                            return dataRes.data;
+                        if (item?.id === res.data?.id) {
+                            return res.data;
                         }
                         return {
                             ...item,
@@ -257,24 +249,25 @@ export default defineComponent({
 }
 
 .number-configuration {
-    @apply absolute top-[28%] left-[25%] text-xs;
-    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
-        1px 1px 0 #000;
+    @apply top-[28%] left-[25%] text-xs;
 }
 .code-configuration {
-    @apply absolute top-[20%] left-[25%] text-xs;
-    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
-        1px 1px 0 #000;
-}
-.name-item-player {
-    @apply absolute bottom-[30%] left-[50%] text-xs transform -translate-x-1/2;
+    @apply top-[20%] left-[25%] text-xs;
 }
 
+.number-configuration, .code-configuration, .name-item-player {
+    position: absolute;
+    text-shadow: #000 0px 0px 1px,   #000 0px 0px 1px,   #000 0px 0px 1px,
+     #000 0px 0px 1px,   #000 0px 0px 1px,   #000 0px 0px 1px;
+}
+
+.name-item-player {
+    @apply bottom-[30%] left-[50%] text-xs transform -translate-x-1/2 text-[#FFFDB7];
+}
 .slot-item {
     @apply text-[10px] font-extrabold p-[5px] absolute top-0 right-0 text-[#fffb3a] bg-black/50 rounded-bl-[10px];
     text-shadow: -1px -1px 0 #000, 1px -1px 0 #000;
 }
-
 .box-table {
     @apply bg-[#0c2678] p-1 rounded-lg;
 }

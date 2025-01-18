@@ -53,7 +53,7 @@ export const disableFusion = (
     }
 };
 
-export const renderConfiguration = (configuration: string) => {
+export const renderConfiguration = (configuration: string) => {    
     if (!configuration || configuration === "undefined") {
         return 0;
     }

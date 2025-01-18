@@ -98,3 +98,23 @@
     width: 5px;
     height: 5px;
 }
+
+.shine-A {
+    position: absolute;
+    background: #e280f8;
+    transform: rotate(15deg);
+    animation: shine 3s infinite;
+}
+
+.shine-A:before,
+.shine-A:after {
+    content: "";
+    display: block;
+    position: absolute;
+}
+
+.shine-A:after {
+    background: #e280f8;
+    transform: rotate(45deg);
+    box-shadow: 0 0 8px 5px #e280f8;
+}

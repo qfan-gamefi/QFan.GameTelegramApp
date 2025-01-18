@@ -124,6 +124,7 @@ import { defineComponent, PropType } from "vue";
 import axios from "axios";
 import { renderConfiguration } from "../Inventory/inventoryHelpers";
 import { getPlateImage, getPlayerImage, processPlayerDetails } from "./defination-fomation";
+import userServiceInventory from "@/services/inventoryService";
 
 export default defineComponent({
     name: "PopupAddPlayerPage",
@@ -193,30 +194,22 @@ export default defineComponent({
                     itemId: this.itemDetail?.id.toString(),
                     userId: "",
                 };
-                const res = await axios.post(
-                    "https://b816-171-224-181-35.ngrok-free.app/api/v1/item/updateDefaultInStack",
-                    raw,
-                    {
-                        headers: {
-                            "ngrok-skip-browser-warning": "1",
-                            "Content-Type": "application/json",
-                        },
-                    }
-                );
-                const dataRes = JSON.parse(res?.data?.message);
+                const res = await userServiceInventory.useDefault(raw);
 
-                if (dataRes?.success) {
-                    const newData = this.newDataList?.map((item) => {
-                        if (item?.id === dataRes.data?.id) {
-                            return dataRes.data;
-                        }
-                        return {
-                            ...item,
-                            DefaultInStack: false,
-                        };
-                    });
-                    this.newDataList = [...newData]
-                }
+                // const dataRes = JSON.parse(res?.data?.message);
+
+                // if (dataRes?.success) {
+                //     const newData = this.newDataList?.map((item) => {
+                //         if (item?.id === dataRes.data?.id) {
+                //             return dataRes.data;
+                //         }
+                //         return {
+                //             ...item,
+                //             DefaultInStack: false,
+                //         };
+                //     });
+                //     this.newDataList = [...newData]
+                // }
             } catch (error) {
                 // Handle error here if necessary
             } finally {
@@ -247,18 +240,19 @@ export default defineComponent({
     @apply text-xs rounded text-center relative text-white border border-[#89a2ef] p-2 w-[90%];
 }
 
+.number-configuration, .code-configuration, .name-item-player {
+    position: absolute;
+    text-shadow: #000 0px 0px 1px,   #000 0px 0px 1px,   #000 0px 0px 1px,
+     #000 0px 0px 1px,   #000 0px 0px 1px,   #000 0px 0px 1px;
+}
 .number-configuration {
     @apply absolute top-[28%] left-[25%] text-xs;
-    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
-        1px 1px 0 #000;
 }
 .code-configuration {
     @apply absolute top-[20%] left-[25%] text-xs;
-    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
-        1px 1px 0 #000;
 }
 .name-item-player {
-    @apply absolute bottom-[30%] left-[50%] text-xs transform -translate-x-1/2;
+    @apply absolute bottom-[30%] left-[50%] text-xs transform -translate-x-1/2 text-[#FFFDB7];
 }
 
 .slot-item {

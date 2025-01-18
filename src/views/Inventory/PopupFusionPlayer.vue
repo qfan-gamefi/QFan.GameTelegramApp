@@ -108,7 +108,6 @@ export default defineComponent({
     watch: {
         visible(newVal, oldVal) {
             if (newVal) {
-                console.log(this.data);
 
                 this.itemDetail = this.data
                 this.itemDetail = this.processPlayerDetails(this.itemDetail);

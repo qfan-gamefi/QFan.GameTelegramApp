@@ -484,10 +484,8 @@ export default defineComponent({
                 }, {});
                 this.groupedBadge = groupedData;
 
-                this.arrInventory = filterData;
-
-                const groupedItems = filterData?.reduce(
-                    (accumulator, currentItem) => {
+                     const groupedItems = filterData?.reduce(
+                        (accumulator, currentItem) => {
                         const category = currentItem.ItemDef.Category;
                         if (!accumulator[category]) {
                             accumulator[category] = [];
@@ -496,9 +494,10 @@ export default defineComponent({
                         return accumulator;
                     },
                     {}
-                );
+                    );
+                        this.arrInventory = filterData;
+                        this.itemsInventory = groupedItems;
 
-                this.itemsInventory = groupedItems;
             } catch (error) {
                 console.error(error);
             }

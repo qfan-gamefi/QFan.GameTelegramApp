@@ -3,6 +3,9 @@
         <!-- <router-link to="/airdrop">
             <img loading="lazy" :src="iconAirdrop" class="w-[50px]" />
         </router-link> -->
+        <router-link to="/fomation">
+            <img loading="lazy" :src="iconFomation" class="w-[50px]" />
+        </router-link>
         <div @click="setRouterFusion()">
             <router-link to="/inventory">
                 <img loading="lazy" :src="iconFusion" class="img-fusion" />
@@ -85,6 +88,9 @@ export default {
                 return "/assets/inventory/inventory_logo.png";
             }
         },
+        iconFomation(){
+            return "/assets/fomation/fomation_logo.png";
+        }
     },
     watch: {
         autoFlipStore(newValue) {
@@ -183,114 +189,6 @@ export default {
     }
 }
 
-.shine {
-    position: absolute;
-    /* top: 10%;
-    left: 65%;
-    width: 1px;
-    height: 18px; */
-    background: #fff;
-    transform: rotate(15deg);
-    animation: shine 3s infinite;
-}
-
-.shine:before,
-.shine:after {
-    content: "";
-    display: block;
-    position: absolute;
-}
-
-.shine:after {
-    /* top: 6px;
-    left: -2px;
-    width: 5px;
-    height: 5px; */
-    background: #fff;
-    transform: rotate(45deg);
-    box-shadow: 0 0 8px 5px rgba(255, 255, 255, 0.75);
-}
-
-@keyframes shine {
-    0% {
-        opacity: 0;
-    }
-
-    34% {
-        opacity: 0;
-        transform: rotate(15deg);
-    }
-
-    40% {
-        opacity: 0.6;
-        transform: rotate(620deg);
-    }
-
-    48%,
-    100% {
-        opacity: 0;
-        transform: rotate(635deg);
-    }
-}
-
-.shine-1 {
-    top: 55%;
-    left: 15%;
-    width: 1px;
-    height: 18px;
-}
-
-.shine-1:after {
-    top: 6px;
-    left: -2px;
-    width: 5px;
-    height: 5px;
-}
-
-.shine-2 {
-    top: 60%;
-    left: 80%;
-    width: 1px;
-    height: 18px;
-    animation-delay: 0.5s;
-}
-
-.shine-2:after {
-    top: 6px;
-    left: -2px;
-    width: 5px;
-    height: 5px;
-}
-
-.shine-3 {
-    top: 10%;
-    left: 15%;
-    width: 1px;
-    height: 16px;
-    animation-delay: 1s;
-}
-
-.shine-3:after {
-    top: 6px;
-    left: -2px;
-    width: 5px;
-    height: 5px;
-}
-
-.shine-4 {
-    top: 5%;
-    left: 75%;
-    width: 1px;
-    height: 16px;
-    animation-delay: 1s;
-}
-
-.shine-4:after {
-    top: 6px;
-    left: -2px;
-    width: 5px;
-    height: 5px;
-}
 .icon-auto-flip {
     position: absolute;
     top: -10%;

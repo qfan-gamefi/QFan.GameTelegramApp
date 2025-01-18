@@ -12,6 +12,7 @@ import "./index.css";
 import "./styles/global.scss";
 import "./styles/app.css";
 import "./styles/animation/popup.scss";
+import "./styles/glowing.css";
 import AutoMining from "./views/Home/AutoMining.vue";
 import { GA_TRACKING_ID } from "./config/googleAnalytics";
 import { createI18n } from 'vue-i18n';

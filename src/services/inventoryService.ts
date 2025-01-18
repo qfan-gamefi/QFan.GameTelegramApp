@@ -94,6 +94,18 @@ const userServiceInventory = {
         const res = await axiosInventory.post(`/credentials/verify`, data);
         return res.status == 200 ? JSON.parse(res.data.message) : {};
     },
+    async useDefault(data: { itemId: string; userId: string }) {
+        const res = await axiosInventory.post(`/item/updateDefaultInStack`, data);
+        return res.status == 200 ? JSON.parse(res.data.message) : {};
+    },
+    async getFileConfig(userId: string ) {
+        const res = await axiosInventory.get(`/lineup/fieldConfig?userId=${userId}`);
+        return res.status == 200 ? JSON.parse(res.data.message) : {};
+    },
+    async postFileConfig(data: { userId: string; cells: any }) {
+        const res = await axiosInventory.post(`/lineup/fieldConfig?userId`, data);
+        return res.status == 200 ? JSON.parse(res.data.message) : {};
+    },
 };
 
 export default userServiceInventory;

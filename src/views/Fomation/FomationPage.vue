@@ -7,12 +7,11 @@
         />
         <div class="score-name">
             <div class="flex gap-2">
-                <img
-                    class="w-7 object-cover"
-                    src="/assets/fomation/ball_fomation.png"
-                    loading="lazy"
-                />
-                <div>{{ totalConfiguration }}</div>
+                <!-- <img src="/assets/mining/fire-gif.gif" class="h-12" loading="lazy" /> -->
+                <div class="flex gap-1">
+                    BP
+                    <div class="text-red-500">{{ totalConfiguration }}</div>
+                </div>
             </div>
 
             <div class="text-name">{{ first_name }} {{ last_name }}</div>
@@ -105,7 +104,7 @@
                                             item?.ItemDef?.Grade?.toLowerCase()
                                         )
                                     "
-                                    class="shine shine-2"
+                                    class="shine-A shine-2"
                                 ></div>
                                 <div
                                     v-if="
@@ -113,7 +112,7 @@
                                             item?.ItemDef?.Grade?.toLowerCase()
                                         )
                                     "
-                                    class="shine shine-3"
+                                    class="shine-A shine-3"
                                 ></div>
                                 <img
                                     class="object-cover absolute top-[16%] right-[5%] w-[60%] fadein"
@@ -216,6 +215,8 @@
                 </span>
             </button>
         </div>
+
+        <PopupPassword :visible="isPass" @cancel="isPass = false" />
     </div>
 </template>
 
@@ -228,12 +229,14 @@ import {
     getPlayerImage,
     countNameDefaultInStack,
     groupedPlayer,
-    sortedGroupPlayer
+    sortedGroupPlayer,
 } from "./defination-fomation";
 import PopupAddPlayer from "./PopupAddPlayer.vue";
 import { IDetailPlayer, IItemInventory } from "@/interface";
 import PopupConfirm from "@/components/PopupConfirm.vue";
 import NotificationToast from "@/components/NotificationToast.vue";
+import userServiceInventory from "@/services/inventoryService";
+import PopupPassword from "@/components/popup/PopupPassword.vue";
 
 export default {
     name: "FomationPage",
@@ -242,6 +245,7 @@ export default {
         PopupAddPlayer,
         PopupConfirm,
         NotificationToast,
+        PopupPassword,
     },
     async created() {
         await this.getFileConfig();
@@ -267,6 +271,7 @@ export default {
             Array.from({ length: rows }, () => Array(cols).fill(null));
 
         return {
+            isPass: false,
             first_name: userInfo?.user?.first_name || "su",
             last_name: userInfo?.user?.last_name || "fly 007",
             userId: userInfo?.user?.id || "",
@@ -323,49 +328,59 @@ export default {
             this.totalConfiguration = totalConfiguration;
         },
         async getFileConfig() {
-            const res = await axios.get(
-                `https://b816-171-224-181-35.ngrok-free.app/api/v1/lineup/fieldConfig?userId=${this.userId}`,
-                {
-                    headers: { "ngrok-skip-browser-warning": "1" },
-                }
-            );
-            const data = JSON.parse(res.data.message);
-
-            const mapIds = (arr) => {
-                return arr.map((row) =>
-                    row.map((cell) => (cell && cell.id) || null)
+            // const res = await axios.get(
+            //     `https://3f96-171-224-181-35.ngrok-free.app/api/v1/lineup/fieldConfig?userId=${this.userId}`,
+            //     {
+            //         headers: { "ngrok-skip-browser-warning": "1" },
+            //     }
+            // );
+            try {
+                const res = await userServiceInventory.getFileConfig(
+                    this.userId
                 );
-            };
+                const mapIds = (arr) => {
+                    return arr.map((row) =>
+                        row.map((cell) => (cell && cell.id) || null)
+                    );
+                };
 
-            const arrCellsId = mapIds(data.data);
-            this.idsListCells = arrCellsId;
-            this.dataList = [...data.data];
+                const arrCellsId = mapIds(res.data);
+                this.idsListCells = arrCellsId;
+                this.dataList = [...res.data];
 
-            const extractIds = (arr) => {
-                const ids = [];
-                arr.forEach((row) => {
-                    row.forEach((cell) => {
-                        if (cell && cell.ItemDefId) {
-                            ids.push(cell.ItemDefId);
-                        }
+                const extractIds = (arr) => {
+                    const ids = [];
+                    arr.forEach((row) => {
+                        row.forEach((cell) => {
+                            if (cell && cell.ItemDefId) {
+                                ids.push(cell.ItemDefId);
+                            }
+                        });
                     });
-                });
-                return ids;
-            };
+                    return ids;
+                };
 
-            const idsItemDef = extractIds(data.data);
-            this.totalItemDefId = idsItemDef;
+                const idsItemDef = extractIds(res.data);
+                this.totalItemDefId = idsItemDef;
+            } catch (error) {
+                if (error?.response?.status === 401) {
+                    this.isPass = true;
+                }
+            }
         },
         async getDataInventor() {
-            const res = await axios.get(
-                `https://b816-171-224-181-35.ngrok-free.app/api/v1/inventory/getInventory?userId=${this.userId}`,
-                {
-                    headers: { "ngrok-skip-browser-warning": "1" },
-                }
+            // const res = await axios.get(
+            //     `https://3f96-171-224-181-35.ngrok-free.app/api/v1/inventory/getInventory?userId=${this.userId}`,
+            //     {
+            //         headers: { "ngrok-skip-browser-warning": "1" },
+            //     }
+            // );
+            const res = await userServiceInventory.getListInventory(
+                Number(this.userId)
             );
-            const data = JSON.parse(res.data.message);
-            this.dataInventory = data;
-            this.getGroupItemDef(data);
+            // const data = JSON.parse(res.data.message);
+            this.dataInventory = res;
+            this.getGroupItemDef(res);
         },
         getGroupItemDef(data) {
             const filterPlayer = data?.Items?.filter(
@@ -376,9 +391,9 @@ export default {
 
             const countName = countNameDefaultInStack(filterPlayer);
 
-            const resultGroupedPlayer = groupedPlayer(countName)
+            const resultGroupedPlayer = groupedPlayer(countName);
 
-            const resultSort = sortedGroupPlayer(resultGroupedPlayer)
+            const resultSort = sortedGroupPlayer(resultGroupedPlayer);
 
             this.grPlayer = resultSort;
         },
@@ -405,20 +420,19 @@ export default {
                     userId: this.userId?.toString(),
                     cells: this.idsListCells,
                 };
-                const res = await axios.post(
-                    "https://b816-171-224-181-35.ngrok-free.app/api/v1/lineup/fieldConfig",
-                    raw,
-                    {
-                        headers: {
-                            "ngrok-skip-browser-warning": "1",
-                            "Content-Type": "application/json",
-                        },
-                    }
-                );
-                const dataRes = JSON.parse(res?.data?.message);
-                console.log(dataRes);
+                const res = await userServiceInventory.postFileConfig(raw);
+                // const res = await axios.post(
+                //     "https://3f96-171-224-181-35.ngrok-free.app/api/v1/lineup/fieldConfig",
+                //     raw,
+                //     {
+                //         headers: {
+                //             "ngrok-skip-browser-warning": "1",
+                //             "Content-Type": "application/json",
+                //         },
+                //     }
+                // );
 
-                if (dataRes?.success) {
+                if (res?.success) {
                     this.renderSuccess("Add player success");
                     await this.getFileConfig();
                     await this.getDataInventor();
@@ -486,16 +500,16 @@ export default {
         async savePlayer() {
             await this.callAddPlayer();
         },
-        handleClearAll(){
-            console.log(this.dataList);
-            console.log(this.idsListCells);
+        handleClearAll() {
+            // console.log(this.dataList);
+            // console.log(this.idsListCells);
             const createEmptyGrid = (rows, cols) =>
-            Array.from({ length: rows }, () => Array(cols).fill(null));
+                Array.from({ length: rows }, () => Array(cols).fill(null));
 
-            this.dataList = createEmptyGrid(6, 5)
-            this.idsListCells = createEmptyGrid(6, 5)
-            this.totalItemDefId = []
-        }
+            this.dataList = createEmptyGrid(6, 5);
+            this.idsListCells = createEmptyGrid(6, 5);
+            this.totalItemDefId = [];
+        },
     },
 };
 </script>
@@ -505,18 +519,21 @@ export default {
     @apply text-white absolute px-5 pt-0 pb-0;
 }
 
+.number-configuration,
+.code-configuration,
+.name-item-player {
+    position: absolute;
+    text-shadow: #000 0px 0px 1px, #000 0px 0px 1px, #000 0px 0px 1px,
+        #000 0px 0px 1px, #000 0px 0px 1px, #000 0px 0px 1px;
+}
 .number-configuration {
     @apply absolute top-[35%] left-[17%] text-[8px];
-    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
-        1px 1px 0 #000;
 }
 .code-configuration {
     @apply absolute top-[25%] left-[17%] text-[6px];
-    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
-        1px 1px 0 #000;
 }
 .name-item-player {
-    @apply absolute bottom-[25%] left-[50%] text-[6px] transform -translate-x-1/2 text-center;
+    @apply absolute bottom-[25%] left-[50%] text-[6px] transform -translate-x-1/2 text-center text-[#FFFDB7];
 }
 
 .row-page {

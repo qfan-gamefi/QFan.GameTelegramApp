@@ -13,22 +13,11 @@
                 </div>
 
                 <div class="title">
-                    <img
-                        class="w-full object-cover fadein absolute top-[9%] left-0"
-                        src="/assets/fomation/paper_fireworks_l.png"
-                        loading="lazy"
-                    />
-                    <img
-                        class="w-full object-cover fadein absolute bottom-0 right-0"
-                        src="/assets/fomation/paper_fireworks_r.png"
-                        loading="lazy"
-                    />
-
-                    <div class="mb-3 font-extrabold">
+                    <div class="mb-3 font-extrabold text-xl">
                         Congratulation
                     </div>
 
-                    <div class="flex gap-2 font-semibold px-10">
+                    <div class="flex gap-2 font-semibold px-8">
                         <div class="flex-1 relative">
                             <!-- <div
                                 v-if="
@@ -56,13 +45,13 @@
                                 :src="getPlayerImage(itemDetail)"
                                 loading="lazy"
                             />
-                            <!-- <div class="number-configuration">
+                            <div class="number-configuration">
                                 {{
                                     renderConfiguration(
                                         itemDetail?.Configuration
                                     )
                                 }}
-                            </div> -->
+                            </div>
                             <div class="code-configuration">
                                 {{ itemDetail?.Code }}
                             </div>
@@ -71,9 +60,9 @@
                             </div>
                         </div>
 
-                        <!-- <div class="flex-1">
+                        <div class="flex-1 text-sm">
                             <div
-                                class="flex w-full justify-between px-4 mb-2"
+                                class="flex w-full justify-between px-2 mb-1"
                                 v-for="item in itemDetail?.ConfigurationArr"
                             >
                                 <div>{{ item?.Configuration }}</div>
@@ -81,7 +70,7 @@
                                     {{ Math.round(item?.value) }}
                                 </div>
                             </div>
-                        </div> -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -122,9 +111,7 @@ export default defineComponent({
                 console.log(this.data);
 
                 this.itemDetail = this.data
-                // if (item) {
-                //     this.itemDetail = this.processPlayerDetails(item);
-                // }
+                this.itemDetail = this.processPlayerDetails(this.itemDetail);
             }
         },
     },
@@ -174,19 +161,24 @@ export default defineComponent({
 }
 
 .popup-content {
-    @apply text-xl rounded text-center relative text-white border border-[#89a2ef] p-2 w-[90%] flex flex-col gap-2;
+    @apply rounded text-center relative text-white border border-[#89a2ef] p-2 w-[90%] flex flex-col gap-2;
 }
 
+.number-configuration, .code-configuration, .name-item-player {
+    font-size: 14px;
+    position: absolute;
+    text-shadow: #000 0px 0px 1px,   #000 0px 0px 1px,   #000 0px 0px 1px,
+     #000 0px 0px 1px,   #000 0px 0px 1px,   #000 0px 0px 1px;
+}
 .number-configuration {
-    @apply absolute top-[28%] left-[25%] ;
-    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
-        1px 1px 0 #000;
+    @apply absolute top-[30%] left-[20%] ;
+
 }
 .code-configuration {
-    @apply absolute top-[25%] left-[25%];
+    @apply absolute top-[20%] left-[20%];
     text-shadow: -1px -1px 0 #000, 1px -1px 0 #000;
 }
 .name-item-player {
-    @apply absolute bottom-[25%] left-[50%] transform -translate-x-1/2;
+    @apply absolute bottom-[23%] left-[50%] transform -translate-x-1/2 text-[#FFFDB7];
 }
 </style>

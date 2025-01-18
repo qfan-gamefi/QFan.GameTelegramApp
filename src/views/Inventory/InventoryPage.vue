@@ -197,8 +197,8 @@
                                     :src="JSON.parse(item?.ItemDef?.ImageUrl)?.Plate"
                                     loading="lazy"
                                 />
-                                <div v-if="['iconic', 'legendary'].includes(item?.ItemDef?.Grade?.toLowerCase())" class="shine shine-2"></div>
-                                <div v-if="['iconic', 'legendary'].includes(item?.ItemDef?.Grade?.toLowerCase())" class="shine shine-3"></div>
+                                <div v-if="['iconic', 'legendary'].includes(item?.ItemDef?.Grade?.toLowerCase())" class="shine-A shine-2"></div>
+                                <div v-if="['iconic', 'legendary'].includes(item?.ItemDef?.Grade?.toLowerCase())" class="shine-A shine-3"></div>
                                 <img
                                     class="object-cover absolute top-[16%] right-[5%] w-[60%]"
                                     :src="JSON.parse(item?.ItemDef?.ImageUrl)?.Player"
@@ -453,29 +453,41 @@ export default defineComponent({
             // }
         },
         async getDataInventor() {
-            const res = await axios.get(`https://b816-171-224-181-35.ngrok-free.app/api/v1/inventory/getInventory?userId=${this.userId}`,
-                {
-                    headers: {"ngrok-skip-browser-warning": "1"},
-                }
-            )
-            const data = JSON.parse(res.data.message)
-
-            const filterPlayer = data?.Items?.filter(
+            try {
+                const res = await userServiceInventory.getListInventory(
+                    Number(this.userId)
+                );
+                const filterData = res?.Items?.filter(
+                    (item) => item?.ItemDef?.Type === EItemDefType.Common
+                );
+                const filterBadge = res?.Items?.filter(
+                    (item) => item?.ItemDef?.Type === EItemDefType.Medal
+                );
+                const filterPlayer = res?.Items?.filter(
                 (item) => item?.ItemDef?.Category === "PLAYER"
-            );
-            this.dataPlayer = filterPlayer
+                );
 
-            const countName = countNameDefaultInStack(filterPlayer);
-            const resultGroupedPlayer = groupedPlayer(countName)
-            const resultSort = sortedGroupPlayer(resultGroupedPlayer)
-            this.arrPlayer = resultSort
+                this.dataPlayer = filterPlayer
+                const countName = countNameDefaultInStack(filterPlayer);
+                const resultGroupedPlayer = groupedPlayer(countName)
+                const resultSort = sortedGroupPlayer(resultGroupedPlayer)
+                this.arrPlayer = resultSort
 
-                //
-                     const filterData = data?.Items?.filter(
-                        (item) => item?.ItemDef?.Type === EItemDefType.Common
-                    );
-                     const groupedItems = filterData?.reduce(
-                        (accumulator, currentItem) => {
+                this.itemsBadge = filterBadge;
+                const groupedData = filterBadge.reduce((acc, item) => {
+                    const category = item.ItemDef.Category;
+                    if (!acc[category]) {
+                        acc[category] = [];
+                    }
+                    acc[category].push(item);
+                    return acc;
+                }, {});
+                this.groupedBadge = groupedData;
+
+                this.arrInventory = filterData;
+
+                const groupedItems = filterData?.reduce(
+                    (accumulator, currentItem) => {
                         const category = currentItem.ItemDef.Category;
                         if (!accumulator[category]) {
                             accumulator[category] = [];
@@ -484,49 +496,12 @@ export default defineComponent({
                         return accumulator;
                     },
                     {}
-                    );
-                        this.arrInventory = filterData;
-                        this.itemsInventory = groupedItems;
+                );
 
-            // try {
-            //     const res = await userServiceInventory.getListInventory(
-            //         Number(this.userId)
-            //     );
-            //     const filterData = res?.Items?.filter(
-            //         (item) => item?.ItemDef?.Type === EItemDefType.Common
-            //     );
-            //     const filterBadge = res?.Items?.filter(
-            //         (item) => item?.ItemDef?.Type === EItemDefType.Medal
-            //     );
-            //     this.itemsBadge = filterBadge;
-            //     const groupedData = filterBadge.reduce((acc, item) => {
-            //         const category = item.ItemDef.Category;
-            //         if (!acc[category]) {
-            //             acc[category] = [];
-            //         }
-            //         acc[category].push(item);
-            //         return acc;
-            //     }, {});
-            //     this.groupedBadge = groupedData;
-
-            //     this.arrInventory = filterData;
-
-            //     const groupedItems = filterData?.reduce(
-            //         (accumulator, currentItem) => {
-            //             const category = currentItem.ItemDef.Category;
-            //             if (!accumulator[category]) {
-            //                 accumulator[category] = [];
-            //             }
-            //             accumulator[category].push(currentItem);
-            //             return accumulator;
-            //         },
-            //         {}
-            //     );
-
-            //     this.itemsInventory = groupedItems;
-            // } catch (error) {
-            //     console.error(error);
-            // }
+                this.itemsInventory = groupedItems;
+            } catch (error) {
+                console.error(error);
+            }
         },
         async handleYesClaim() {
             try {
@@ -535,17 +510,16 @@ export default defineComponent({
                     UserId: this.userId.toString(),
                     CombineId: this.itemFusion.id.toString(),
                 };
-                // const res = await userServiceInventory.makeFusion(data);
-                const res = await axios.post(`https://b816-171-224-181-35.ngrok-free.app/api/v1/fusion/makeFusion`, data);
-                const newRes = JSON.parse(res.data.message)
+                const res = await userServiceInventory.makeFusion(data);
+                // const res = await axios.post(`https://3f96-171-224-181-35.ngrok-free.app/api/v1/fusion/makeFusion`, data);
+                // const newRes = JSON.parse(res.data.message)
                 trackEventBtn({
                     label: "Fusion",
                 });
-                console.log(newRes);
                 
-                if (newRes.success) {
-                    this.dataFusionPlayer = newRes.data[0]
-                    const mess = newRes?.data
+                if (res.success) {
+                    this.dataFusionPlayer = res.data[0]
+                    const mess = res?.data
                         ?.map((item) => {
                             return `${item?.count} - ${item?.Name}`;
                         })
@@ -554,7 +528,7 @@ export default defineComponent({
                     await this.renderSuccess(`Received ${mess}`);
                     await this.refeshData()
                 } else {
-                    await this.renderErr(`Received ${newRes?.data}`);
+                    await this.renderErr(`Received ${res?.data}`);
                 }
             } catch (error) {
                 if (error?.response?.status === 401) {
@@ -568,37 +542,22 @@ export default defineComponent({
             }
         },
         async getFausion() {
-            const res = await axios.get(`https://b816-171-224-181-35.ngrok-free.app/api/v1/fusion/getFusions`,
-                {headers: { "ngrok-skip-browser-warning": "1"},}
-            )
-            const data = JSON.parse(res.data.message)
-                const parseFusion = data?.map((item) => {
+            try {
+                const resFusion: IFusionString[] =
+                    await userServiceInventory.getFusion();
+                const parseFusion = resFusion?.map((item) => {
                     return {
                         ...item,
-                        ResourcesItemDefIds:  JSON.parse(
+                        ResourcesItemDefIds: JSON.parse(
                             item?.ResourcesItemDefIds
                         ),
                     };
                 });
-                
+
                 this.listFusion = parseFusion;
-
-            // try {
-            //     const resFusion: IFusionString[] =
-            //         await userServiceInventory.getFusion();
-            //     const parseFusion = resFusion?.map((item) => {
-            //         return {
-            //             ...item,
-            //             ResourcesItemDefIds: JSON.parse(
-            //                 item?.ResourcesItemDefIds
-            //             ),
-            //         };
-            //     });
-
-            //     this.listFusion = parseFusion;
-            // } catch (error) {
-            //     console.error(error);
-            // }
+            } catch (error) {
+                console.error(error);
+            }
         },
         async handleFausion(item) {
             // this.isMaintenance = true
@@ -680,9 +639,6 @@ export default defineComponent({
             }
         },
         handlePlayer(item: IItemInventory){  
-            console.log(item);
-            console.log(this.dataPlayer);
-            
             
             this.itemDefault = item?.id
             this.openItem = true
@@ -810,16 +766,20 @@ export default defineComponent({
   @apply flex flex-col gap-[5px];
 }
 
+.number-configuration, .code-configuration, .name-item-player {
+    position: absolute;
+    text-shadow: #000 0px 0px 1px,   #000 0px 0px 1px,   #000 0px 0px 1px,
+     #000 0px 0px 1px,   #000 0px 0px 1px,   #000 0px 0px 1px;
+}
+
 .number-configuration {
-    @apply absolute top-[20%] left-[17%] text-[8px];
-    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    @apply top-[20%] left-[17%] text-[8px];
 }
 .code-configuration {
-    @apply absolute top-[33%] left-[17%] text-[6px];
-    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    @apply top-[33%] left-[17%] text-[6px];
 }
 .name-item-player {
-    @apply absolute bottom-[25%] left-[50%] text-[6px] transform -translate-x-1/2 text-center;
+    @apply bottom-[25%] left-[50%] text-[6px] transform -translate-x-1/2 text-center text-[#FFFDB7];
 }
 .count-item-player {
     @apply absolute bottom-[35%] right-[20%] text-[8px];

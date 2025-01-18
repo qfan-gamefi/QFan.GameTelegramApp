@@ -58,6 +58,15 @@
                             <div class="name-item-player">
                                 {{ itemDetail?.Name }}
                             </div>
+                            <div class="flex absolute bottom-[18%] left-[50%] transform -translate-x-1/2">
+                                <img
+                                    v-for="(image, index) in imgStarSilver"
+                                    :key="index"
+                                    class="w-2 object-cover"
+                                    :src="image"
+                                    loading="lazy"
+                                />
+                            </div>
                         </div>
 
                         <div class="flex-1 text-sm">
@@ -119,6 +128,13 @@ export default defineComponent({
         return {
             loading: false,
             itemDetail: {} as IDetailPlayer,
+            imgStarSilver: [
+                "/assets/fomation/star-silver.png",
+                "/assets/fomation/star-silver.png",
+                "/assets/fomation/star-silver.png",
+                "/assets/fomation/star-silver.png",
+                "/assets/fomation/star-silver.png",
+            ],
         };
     },
     methods: {

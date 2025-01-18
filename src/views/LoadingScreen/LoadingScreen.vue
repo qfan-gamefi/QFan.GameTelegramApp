@@ -1,6 +1,7 @@
 <template>
     <div class="loading-screen" v-if="!hasLoaded" loading="lazy">
         <img  class="w-20 absolute top-[10%] left-[50%] transform -translate-x-1/2" src='/assets/logo.svg' />
+        <img  class="absolute top-[26%] left-[50%] transform -translate-x-1/2" src='/assets/player_loading.png' />
         <div class="woodwork-loader">
             <div class="runner"></div>
         </div>
@@ -37,7 +38,7 @@ export default defineComponent({
     top: 50%;
     transform: translate(0%, -50%);
     height: 100%;
-    background-image: url("./../../../public/assets/Loading2.png");
+    background-image: url("./../../../public/assets/Loading3.png");
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;

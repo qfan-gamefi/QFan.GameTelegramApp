@@ -208,6 +208,16 @@
                                 <div class="code-configuration">{{item?.Code}}</div>
                                 <div class="name-item-player">{{item?.Name}}</div>
                                 <div class="slot-item">{{item?.ItemCount}}</div>
+                                <div class="flex absolute bottom-[20%] left-[50%] transform -translate-x-1/2">
+                                    <img
+                                        v-for="(image, index) in imgStarSilver"
+                                        :key="index"
+                                        class="w-1 object-cover"
+                                        :src="image"
+                                        loading="lazy"
+                                    />
+                                </div>
+                                
                             </div>
                         </div>
                     </div>
@@ -408,7 +418,14 @@ export default defineComponent({
             listDetailPlayer: [] as IItemInventory[],
             itemDefault: 0,
             isFusionPlayer: false,
-            dataFusionPlayer: {} as IItemInventory
+            dataFusionPlayer: {} as IItemInventory,
+            imgStarSilver: [
+                "/assets/fomation/star-silver.png",
+                "/assets/fomation/star-silver.png",
+                "/assets/fomation/star-silver.png",
+                "/assets/fomation/star-silver.png",
+                "/assets/fomation/star-silver.png",
+            ],
         };
     },
     methods: {

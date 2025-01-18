@@ -67,7 +67,8 @@ export const renderConfiguration = (configuration: string) => {
         stats.Stamina +
         stats.Dribbling +
         stats.Speed +
-        stats.Confidence
+        stats.Confidence + 
+        stats.Shot
     );
     return total;
 }

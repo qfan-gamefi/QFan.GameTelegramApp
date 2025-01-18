@@ -99,7 +99,7 @@ export default defineComponent({
             last_name: last_name || '',
             isAnimated: false,
             animationTimeout: null,
-            urlAvt: "./../../../public/assets/no-img.jpg",
+            urlAvt: "/assets/no-img.jpg",
             dataLevel: {} as ILevel,
             expLevelNext: {} as ILevel,
             percentageLevel: 0,
@@ -121,7 +121,7 @@ export default defineComponent({
             }, 1000);
         },
         async getAvt() {
-            //get avt from localstorage
+        try {
             const avt = localStorage.getItem("avt");
             const avtExpTime = localStorage.getItem("avtExpTime");
             if (avt && avtExpTime && new Date(avtExpTime) > new Date()) {
@@ -131,15 +131,19 @@ export default defineComponent({
             }
 
             const res = await userServiceTelebot.getAvtTelegram(this.idUser);
-            this.urlAvt = res?.length > 0 ? res : "./../../../public/assets/logo.jpg";
-            //set avt to localstorage
-            localStorage.setItem("avt", res);
-            //set expire time for avt to 10 days
-            const date = new Date();
-            date.setDate(date.getDate() + 10);
-            localStorage.setItem("avtExpTime", date.toString());
-            
-            this.$store.commit("setAvtStore", res);
+            this.urlAvt = res && res.length > 0 ? res : "/assets/no-img.jpg";
+
+            // Update localStorage with the new avatar and expiration time
+            localStorage.setItem("avt", this.urlAvt);
+            const expirationDate = new Date();
+            expirationDate.setDate(expirationDate.getDate() + 10);
+            localStorage.setItem("avtExpTime", expirationDate.toISOString());
+
+            this.$store.commit("setAvtStore", this.urlAvt);
+            } catch (error) {
+                this.urlAvt = "./../../../public/assets/logo.jpg";
+                this.$store.commit("setAvtStore", this.urlAvt);
+            }
         },
         async getLevels() {                        
             const dataLv: ILevel[] =

@@ -57,6 +57,15 @@
                                 {{ item?.Code }}
                             </div>
                             <div class="name-item-player">{{ item?.Name }}</div>
+                            <div class="flex absolute bottom-[20%] left-[50%] transform -translate-x-1/2">
+                                <img
+                                    v-for="(image, index) in imgStarSilver"
+                                    :key="index"
+                                    class="w-1 object-cover"
+                                    :src="image"
+                                    loading="lazy"
+                                />
+                            </div>
                         </div>
 
                         <div v-if="!item && totalItemDefId?.length < 11">
@@ -133,6 +142,15 @@
                                 </div>
                                 <div class="slot-item">
                                     {{ item?.ItemCount }}
+                                </div>
+                                <div class="flex absolute bottom-[20%] left-[50%] transform -translate-x-1/2">
+                                    <img
+                                        v-for="(image, index) in imgStarSilver"
+                                        :key="index"
+                                        class="w-1 object-cover"
+                                        :src="image"
+                                        loading="lazy"
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -296,6 +314,13 @@ export default {
             totalItemDefId: [],
             itemClick: {} as IDetailPlayer,
             totalConfiguration: 0,
+            imgStarSilver: [
+                "/assets/fomation/star-silver.png",
+                "/assets/fomation/star-silver.png",
+                "/assets/fomation/star-silver.png",
+                "/assets/fomation/star-silver.png",
+                "/assets/fomation/star-silver.png",
+            ],
         };
     },
     methods: {
@@ -363,9 +388,9 @@ export default {
                 const idsItemDef = extractIds(res.data);
                 this.totalItemDefId = idsItemDef;
             } catch (error) {
-                if (error?.response?.status === 401) {
-                    this.isPass = true;
-                }
+                // if (error?.response?.status === 401) {
+                //     this.isPass = true;
+                // }
             }
         },
         async getDataInventor() {

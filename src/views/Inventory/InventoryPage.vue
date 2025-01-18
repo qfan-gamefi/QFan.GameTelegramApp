@@ -55,7 +55,7 @@
                                     >
                                         <div v-if="item?.ItemDef?.Consumable">
                                             <button
-                                                @click="useInventory(item)"
+                                                @click="handleUseInventory(item)"
                                                 :disabled="loadingBtn"
                                             >
                                                 <div v-if="loadingBtn">

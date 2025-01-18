@@ -55,7 +55,7 @@
                                     >
                                         <div v-if="item?.ItemDef?.Consumable">
                                             <button
-                                                @click="useInventory(item)"
+                                                @click="handleUseInventory(item)"
                                                 :disabled="loadingBtn"
                                             >
                                                 <div v-if="loadingBtn">
@@ -563,7 +563,7 @@ export default defineComponent({
             this.showClaim = true;
             this.itemFusion = item;
         },
-        async useInventory(item: IItemInventory) {
+        async handleUseInventory(item: IItemInventory) {
             // this.isMaintenance = true
             this.useItem = item;
             this.openUseCount = true;

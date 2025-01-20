@@ -21,6 +21,18 @@
         </div>
 
         <div class="wr-box" :style="{ height: calcHeightInventory }">
+
+            <div class="wr-filter-player" v-if="activeButton === 'Player'">
+                <GroupPlayerComponent
+                    v-for="(position, index) in ['Position']"
+                    :position="position" 
+                    @groupClicked="handleGroupClick"
+                    :key="index"
+                />
+                <i class="fa-solid fa-filter fa-sm"></i>
+            </div>
+            
+
             <div class="inventory-btn-page">
                 <div v-if="activeButton === 'Inventory'">
                     <div
@@ -319,16 +331,17 @@ import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
 import userService from "@/services/userService";
 import BackButtonTelegram from "@/mixins/BackButtonTelegram";
 import { debounce, trackEventBtn } from "@/utils";
-import { renderTitleKey, formatNumber, disableFusion, renderConfiguration, renderItemFusion } from "./inventoryHelpers";
+import { renderTitleKey, formatNumber, disableFusion, renderConfiguration, renderItemFusion, fnGroupPosition } from "./inventoryHelpers";
 import { ButtonName, Button } from "./defination-inventory";
 import PopupComponent from "@/components/popup/PopupComponent.vue";
 import InputField from "@/components/Input/InputField.vue";
 import axios from "axios";
 import PopupItem from "./PopupItem.vue";
 import PopupFusionPlayerPage from "./PopupFusionPlayer.vue";
-import { countNameDefaultInStack } from "../Fomation/defination-fomation";
+import { countNameDefaultInStack, getPlateImage, getPlayerImage } from "../Fomation/defination-fomation";
 import { sortedGroupPlayer } from "../Fomation/defination-fomation";
 import { groupedPlayer } from "../Fomation/defination-fomation";
+import GroupPlayerComponent from "./GroupPlayerComponent.vue";
 
 export default defineComponent({
     name: "InventoryPage",
@@ -342,7 +355,8 @@ export default defineComponent({
         PopupComponent,
         InputField,
         PopupItem,
-        PopupFusionPlayerPage
+        PopupFusionPlayerPage,
+        GroupPlayerComponent
     },
     created() {
         this.getDataInfo();
@@ -361,7 +375,7 @@ export default defineComponent({
             if (this.$i18n.locale === 'zh') {
                 return '/assets/inventory/banner-inventory-zh.png';
             } else if (this.$i18n.locale === 'vi') {
-                return '/assets/inventory/banner-inventory.png';
+                return '/assets/inventory/banner-inventory-player.png';
             }
             return '/assets/inventory/banner-inventory.png';
         }
@@ -400,6 +414,7 @@ export default defineComponent({
             itemsBadge: [] as IItemInventory[],
             arrInventory: [] as IItemInventory[],
             arrPlayer: {} as { [key: string]: IItemInventory[] },
+            arrPlayerGrade: {} as { [key: string]: IItemInventory[] },
             dataPlayer: {} as { [key: string]: IItemInventory[] }, //data not merge count
 
             listFusion: [] as IFusion[],
@@ -426,6 +441,7 @@ export default defineComponent({
                 "/assets/fomation/star-silver.png",
                 "/assets/fomation/star-silver.png",
             ],
+            // selectedGroups: [],
         };
     },
     methods: {
@@ -434,12 +450,30 @@ export default defineComponent({
         disableFusion,
         renderConfiguration,
         renderItemFusion,
+        // getPlateImage,
+        // getPlayerImage,
+        fnGroupPosition,
         updateHeight() {
-            const img = this.$refs.bannerInventory;
+            const img = this.$refs.bannerInventory;            
+            // if (img) {                
+            //     img.onload = () => {
+            //         const heightPx = this.activeButton === 'Player' ? '82px' : '42px'                    
+            //         this.calcHeightInventory = `calc(100% - ${heightPx} - ${img.clientHeight}px)`;
+            //     };
+            // }
+
             if (img) {
-                img.onload = () => {
-                    this.calcHeightInventory = `calc(100% - 42px - ${img.clientHeight}px)`;
+                const onLoadHandler = () => {
+                    const heightPx = this.activeButton === 'Player' ? '84px' : '42px';
+                    this.calcHeightInventory = `calc(100% - ${heightPx} - ${img.clientHeight}px)`;
+                    img.removeEventListener("load", onLoadHandler);
                 };
+
+                if (img.complete) {
+                    onLoadHandler();
+                } else {
+                    img.addEventListener("load", onLoadHandler);
+                }
             }
         },
         async getDataInfo() {
@@ -463,11 +497,7 @@ export default defineComponent({
         setActiveButton(button: ButtonName) {
             this.$store.commit("setRouterFusion", false);
             this.activeButton = button;
-            // if (button === ButtonName.Player) {
-            //     this.showCoomingSoon = true;
-            // } else {
-            //     this.activeButton = button;
-            // }
+            this.updateHeight();
         },
         async getDataInventor() {
             try {
@@ -488,7 +518,9 @@ export default defineComponent({
                 const countName = countNameDefaultInStack(filterPlayer);
                 const resultGroupedPlayer = groupedPlayer(countName)
                 const resultSort = sortedGroupPlayer(resultGroupedPlayer)
+                
                 this.arrPlayer = resultSort
+                this.arrPlayerGrade = resultSort
 
                 this.itemsBadge = filterBadge;
                 const groupedData = filterBadge.reduce((acc, item) => {
@@ -540,7 +572,11 @@ export default defineComponent({
                             return `${item?.count} - ${item?.Name}`;
                         })
                         ?.join(", ");
-                    this.isFusionPlayer = true
+                        
+                        // show popup fusion player
+                        if(res?.data?.[0]?.Configuration){
+                            this.isFusionPlayer = true
+                        }
                     await this.renderSuccess(`Received ${mess}`);
                     await this.refeshData()
                 } else {
@@ -661,6 +697,13 @@ export default defineComponent({
             this.listDetailPlayer = this.dataPlayer?.filter(el => el?.ItemDefId === item.ItemDefId)   
                      
         },
+        handleGroupClick(titleGroup: string, isActive: boolean) {
+            if(titleGroup == 'Position' && isActive){
+                this.arrPlayer = fnGroupPosition(this.arrPlayer)
+            }else{
+                this.arrPlayer = this.arrPlayerGrade
+            }
+        },
         async refeshData(){
             await this.getDataInventor();
             await this.getFausion();
@@ -704,7 +747,6 @@ export default defineComponent({
 
 .inventory-btn-page {
     @apply h-full flex flex-col gap-[10px] bg-[#00175f] rounded-[10px] p-2 overflow-y-auto;
-    scrollbar-width: none;
 } 
 
 .row-page {
@@ -799,5 +841,9 @@ export default defineComponent({
 }
 .count-item-player {
     @apply absolute bottom-[35%] right-[20%] text-[8px];
+}
+
+.wr-filter-player {
+    @apply flex gap-3 bg-[#00175f] rounded-md p-1 px-2 items-center justify-end mb-2;
 }
 </style>

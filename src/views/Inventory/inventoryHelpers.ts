@@ -102,3 +102,19 @@ export const renderItemFusion = (item: IItemDefFusion, type: "bg" | "count", arr
         }
     }
 }
+
+export function fnGroupPosition(input) {
+    const output = {};
+
+    Object.entries(input)?.forEach(([rarity, items]) => {
+        (items as any[])?.forEach(item => {
+            const key = `${rarity} - ${item.Code}`;
+            if (!output[key]) {
+                output[key] = [];
+            }
+            output[key]?.push(item);
+        });
+    });
+
+    return output;
+}

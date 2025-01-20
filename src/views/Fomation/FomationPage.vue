@@ -83,7 +83,17 @@
 
             <div v-bind:class="{ 'overlay-popup': isGroupPlayer }"></div>
             <div v-if="isGroupPlayer" class="grPlayer fadein">
-                <div class="h-[calc(100%-30px)] overflow-y-auto">
+                <div class="wr-filter-player">
+                    <GroupPlayerComponent
+                        v-for="(position, index) in ['Position']"
+                        :position="position" 
+                        @groupClicked="handleGroupClick"
+                        :key="index"
+                    />
+                    <i class="fa-solid fa-filter fa-sm"></i>
+                </div>
+
+                <div class="h-[calc(100%-81px)] overflow-y-auto my-2">
                     <div
                         v-for="(player, title) in grPlayer"
                         :key="title"
@@ -241,7 +251,7 @@
 <script lang="ts">
 import BackButtonTelegram from "@/mixins/BackButtonTelegram";
 import axios from "axios";
-import { renderConfiguration } from "../Inventory/inventoryHelpers";
+import { fnGroupPosition, renderConfiguration } from "../Inventory/inventoryHelpers";
 import {
     getPlateImage,
     getPlayerImage,
@@ -255,6 +265,7 @@ import PopupConfirm from "@/components/PopupConfirm.vue";
 import NotificationToast from "@/components/NotificationToast.vue";
 import userServiceInventory from "@/services/inventoryService";
 import PopupPassword from "@/components/popup/PopupPassword.vue";
+import GroupPlayerComponent from "../Inventory/GroupPlayerComponent.vue";
 
 export default {
     name: "FomationPage",
@@ -264,6 +275,7 @@ export default {
         PopupConfirm,
         NotificationToast,
         PopupPassword,
+        GroupPlayerComponent
     },
     async created() {
         await this.getFileConfig();
@@ -290,8 +302,8 @@ export default {
 
         return {
             isPass: false,
-            first_name: userInfo?.user?.first_name || "su",
-            last_name: userInfo?.user?.last_name || "fly 007",
+            first_name: userInfo?.user?.first_name || "",
+            last_name: userInfo?.user?.last_name || "",
             userId: userInfo?.user?.id || "",
             showNotification: false,
             notificationMessage: "",
@@ -304,6 +316,7 @@ export default {
             dataPlayer: [] as IDetailPlayer[], //data not merge count
             isGroupPlayer: false,
             grPlayer: {} as { [key: string]: IDetailPlayer[] },
+            grPlayerGrade: {} as { [key: string]: IDetailPlayer[] },
             dataList: createEmptyGrid(6, 5),
             idxParent: 0,
             idxChildren: 0,
@@ -327,6 +340,7 @@ export default {
         renderConfiguration,
         getPlateImage,
         getPlayerImage,
+        fnGroupPosition,
         async renderNotification(message, type) {
             this.notificationMessage = message;
             this.notificationType = type;
@@ -413,14 +427,12 @@ export default {
                     item?.ItemDef?.Category === "PLAYER" &&
                     this.totalItemDefId?.indexOf(item?.ItemDefId) === -1
             );
-
             const countName = countNameDefaultInStack(filterPlayer);
-
             const resultGroupedPlayer = groupedPlayer(countName);
-
             const resultSort = sortedGroupPlayer(resultGroupedPlayer);
 
             this.grPlayer = resultSort;
+            this.grPlayerGrade = resultSort;
         },
         handleAddPlayer(item, index, idx) {
             this.isGroupPlayer = true;
@@ -438,9 +450,6 @@ export default {
         async callAddPlayer() {
             try {
                 this.loading = true;
-
-                // const newCells = this.idsListCells
-                // newCells[this.idxParent][this.idxChildren] = this.itemAdd?.id;
                 const raw = {
                     userId: this.userId?.toString(),
                     cells: this.idsListCells,
@@ -526,14 +535,19 @@ export default {
             await this.callAddPlayer();
         },
         handleClearAll() {
-            // console.log(this.dataList);
-            // console.log(this.idsListCells);
             const createEmptyGrid = (rows, cols) =>
                 Array.from({ length: rows }, () => Array(cols).fill(null));
 
             this.dataList = createEmptyGrid(6, 5);
             this.idsListCells = createEmptyGrid(6, 5);
             this.totalItemDefId = [];
+        },
+        handleGroupClick(titleGroup: string, isActive: boolean) {
+            if(titleGroup == 'Position' && isActive){
+                this.grPlayer = fnGroupPosition(this.grPlayer)
+            }else{
+                this.grPlayer = this.grPlayerGrade
+            }
         },
     },
 };
@@ -571,7 +585,6 @@ export default {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 8px;
-    // animation: slideIn 0.5s forwards;
 }
 .slot-item {
     @apply text-[10px] font-extrabold p-[5px] absolute top-0 right-0 text-[#fffb3a] bg-black/50 rounded-bl-[10px];
@@ -591,7 +604,7 @@ export default {
     @apply max-w-[480px];
 }
 .btn-grPlayer {
-    @apply fixed bottom-0 left-1/2 transform -translate-x-1/2 border-t border-solid border-[#38652b] w-full p-2;
+    @apply fixed bottom-0 left-1/2 transform -translate-x-1/2 border-t w-full p-2;
 }
 .score-name {
     @apply absolute top-0 left-0 bg-white w-full p-2 flex items-center text-[#00175F] font-extrabold text-2xl justify-between;
@@ -601,5 +614,8 @@ export default {
 }
 .text-name {
     @apply max-w-[200px] whitespace-nowrap overflow-hidden text-ellipsis;
+}
+.wr-filter-player {
+    @apply flex gap-3 pb-2 items-center justify-end border-b border-solid;
 }
 </style>

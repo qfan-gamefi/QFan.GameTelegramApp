@@ -197,7 +197,7 @@ export default defineComponent({
                     (item) => item?.ItemDef?.Type === EItemDefType.Medal
                 );
                 const categoryMap = {};
-                filterBadge.forEach(item => {
+                filterBadge?.forEach(item => {
                     const category = item.ItemDef.Category;
                     const itemDefId = item.ItemDefId;
                     if (!categoryMap[category] || itemDefId > categoryMap[category]?.ItemDefId) {

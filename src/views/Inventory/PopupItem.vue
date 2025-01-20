@@ -166,7 +166,12 @@ export default defineComponent({
     watch: {
         visible(newVal, oldVal) {
             if (newVal) {                
-                this.newDataList = [...this.listData];                
+                this.newDataList = this.listData?.map((item) => {
+                    return {
+                        ...item,
+                        ConfigurationNumber: renderConfiguration(item?.Configuration),
+                    }
+                })?.sort((a, b) => b.ConfigurationNumber - a.ConfigurationNumber);               
 
                 const item = this.listData.find(
                     (item) => item?.id === this.idDefault

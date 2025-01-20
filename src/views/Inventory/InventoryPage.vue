@@ -377,7 +377,7 @@ export default defineComponent({
             } else if (this.$i18n.locale === 'vi') {
                 return '/assets/inventory/banner-inventory-player.png';
             }
-            return '/assets/inventory/banner-inventory.png';
+            return '/assets/inventory/banner-inventory-player.png';
         }
     },
     watch: {

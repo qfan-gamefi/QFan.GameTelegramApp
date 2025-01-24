@@ -162,7 +162,7 @@
                                     />
                                 </div>
                                 <div class="flex flex-col gap-2 items-center">
-                                    <div class="font-extrabold">
+                                    <div class="font-extrabold text-center">
                                         {{ item.Name }}
                                     </div>
                                     <div class="relative">
@@ -396,7 +396,7 @@ export default defineComponent({
             loadingBtn: false,
             showCoomingSoon: false,
             apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
-            userId: userInfo?.user?.id || "",
+            userId: userInfo?.user?.id || "2123800227",
             showNotification: false,
             notificationMessage: "",
             notificationType: "",
@@ -559,7 +559,7 @@ export default defineComponent({
                     CombineId: this.itemFusion.id.toString(),
                 };
                 const res = await userServiceInventory.makeFusion(data);
-                // const res = await axios.post(`https://3f96-171-224-181-35.ngrok-free.app/api/v1/fusion/makeFusion`, data);
+                // const res = await axios.post(`https://e168-171-224-181-35.ngrok-free.app/api/v1/fusion/makeFusion`, data);
                 // const newRes = JSON.parse(res.data.message)
                 trackEventBtn({
                     label: "Fusion",
@@ -574,7 +574,9 @@ export default defineComponent({
                         ?.join(", ");
                         
                         // show popup fusion player
-                        if(res?.data?.[0]?.Configuration){
+                        const configuration = res?.data?.[0]?.Configuration ? JSON.parse(res.data[0].Configuration) : null;
+                        
+                        if(configuration && Object.keys(configuration).length > 0){
                             this.isFusionPlayer = true
                         }
                     await this.renderSuccess(`Received ${mess}`);

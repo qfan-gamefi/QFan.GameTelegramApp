@@ -14,14 +14,6 @@
                     v-if="!loadingPage"
                 >
                     <div class="flex gap-1">
-                        {{ (infoWallet?.balance || 0)?.toFixed(4) }}
-                        <img
-                            src="@public/assets/logo-quai.svg"
-                            loading="lazy"
-                            class="w-3"
-                        />
-                    </div>
-                    <div class="flex gap-1">
                         {{ renderBalace() }}
                         <img
                             class="w-3"
@@ -32,7 +24,7 @@
                 </div>
                 <div v-else><i class="fa-solid fa-rotate"></i></div>
             </div>
-            <div class="flex gap-3 justify-end">
+            <!-- <div class="flex gap-3 justify-end">
                 <div
                     class="btn-transaction bg-[#2ebd85]"
                     @click="handleDeposit('deposit')"
@@ -54,7 +46,7 @@
                         <i class="fa-solid fa-spinner fa-spin"></i>
                     </div>
                 </div>
-            </div>
+            </div> -->
         </div>
 
         <div
@@ -85,7 +77,7 @@
                 <div class="w-[20%] text-right">{{ $t("floor_price") }}</div>
             </div>
 
-            <div class="overflow-scroll h-[calc(100vh-200px)] no-scrollbar">
+            <div class="overflow-scroll h-[calc(100vh-180px)] no-scrollbar">
                 <div v-for="(item, index) in listShop" :key="index">
                     <div
                         class="flex items-center text-[10px] overflow-y-auto border-b border-b-[#2f9ad6] mx-2 px-2 py-2 animation-item-market"
@@ -94,21 +86,21 @@
                         <div class="w-[10%] text-left">{{ index + 1 }}</div>
                         <div class="w-[50%] text-left flex gap-3 items-center">
                             <img
-                                :src="item?.ItemDef?.ImageUrl"
-                                :alt="item?.ItemDef?.Description"
+                                :src="item?.ImageUrl"
+                                :alt="item?.Description"
                                 loading="lazy"
                                 class="w-12"
                             />
-                            <div>{{ item?.ItemDef?.Name }}</div>
+                            <div>{{ item?.Name }}</div>
                         </div>
                         <div class="w-[20%] text-center">
-                            {{ formattedBalance(item?.TotalSell) }}
+                            {{ formattedBalance(item?.totalsell) }}
                         </div>
                         <div class="w-[20%] text-right">
                             <div>{{ $t("starting_at") }}:</div>
                             <div>
-                                {{ formattedBalance(item?.GoodSellPrice) }}
-                                {{ item?.GoodPriceType }}
+                                {{ formattedBalance(item?.goodsellprice) }}
+                                <!-- {{ item?.GoodPriceType }} -->
                             </div>
                         </div>
                     </div>
@@ -166,6 +158,7 @@ import userService from "@/services/userService";
 import userServiceInventory from "@/services/inventoryService";
 import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
 import BackButtonTelegram from "@/mixins/BackButtonTelegram";
+import axios from "axios";
 
 export default defineComponent({
     name: "ShopPage",
@@ -193,7 +186,7 @@ export default defineComponent({
             loadingPage: false,
             showCoomingSoon: false,
             apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
-            userId: userInfo?.user?.id || "",
+            userId: userInfo?.user?.id || "2123800227",
 
             showNotification: false,
             notificationMessage: "",
@@ -205,7 +198,7 @@ export default defineComponent({
             btnCategory,
 
             isViewCart: false,
-            listShop: [] as IDetailCart[],
+            listShop: [] , //as IDetailCart[],
             dataDetailCart: {} as IDetailCart,
 
             isDeposit: false,
@@ -268,6 +261,13 @@ export default defineComponent({
         async getListMarket() {
             try {
                 const res = await userServiceInventory.getListMarket();
+                // const res1 = await axios.get(`https://5615-171-224-177-67.ngrok-free.app/api/v1/order/getMarketList`, {
+                //     headers: {
+                //         "ngrok-skip-browser-warning": "1",}}
+                //     );
+                // const res =    JSON.parse(res1.data.message)
+                console.log(res);
+                
                 this.listShop = res;
             } catch (error) {
                 console.error("Error", error);

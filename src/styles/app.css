@@ -598,11 +598,12 @@
     grid-template-columns: 1fr 1fr;
     transition: 0.6s ease-in-out;
     gap: 8px;
+    direction: rtl;
 }
 
 .btn-language-icon {
     position: absolute;
-    top: calc(3% + 56px);
+    top: calc(3% + 28px);
     right: 0%;
     z-index: 1;
     display: flex;
@@ -629,7 +630,7 @@
     gap: 8px;
 }
 #openmenu:checked ~ .btn-language-icon {
-    top: calc(3% + 84px);
+    top: calc(3% + 56px);
 }
 #openmenu:checked ~ .btn-language-icon {
     width: calc(50% - 4px);

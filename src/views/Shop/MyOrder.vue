@@ -15,7 +15,7 @@
             />
         </div>
     </div>
-    <div class="box-item h-[calc(100vh-220px)] p-[10px_15px] overflow-auto">
+    <div class="box-item h-[calc(100vh-200px)] p-[10px_15px] overflow-auto">
         <div class="order-item" v-for="(item, index) in listOrder" :key="index">
             <div class="flex gap-[10px]">
                 <div class="w-[60px]">
@@ -34,13 +34,14 @@
                         <div class="price-row">
                             <span>{{ $t("price") }}:</span>
                             <span class="price-value">{{
-                                formattedBalance(item?.Price)
+                                formattedBalance(item?.price)
                             }}</span>
                         </div>
                         <div class="qty-row">
                             <span>{{ $t("remain_qtty") }}:</span>
                             <span class="qty-value">
-                                {{ item?.Count }}/{{ item?.OriginCount }}
+                                <!-- {{ item?.Count }}/{{ item?.OriginCount }} -->
+                                {{ item?.remainingQuantity }}/{{ item?.quantity }}
                             </span>
                         </div>
                         <div class="amount-row">
@@ -48,7 +49,7 @@
                             <span class="amount-value">
                                 {{
                                     formattedBalance(
-                                        item?.OriginCount * item?.Price
+                                        item?.quantity * Number(item?.price)
                                     )
                                 }}</span
                             >
@@ -60,8 +61,9 @@
             <div class="flex">
                 <div class="flex flex-col justify-between text-right">
                     <div class="text-xs" :class="[statusColorClass(item)]">
-                        <div>{{ $t(renderStatus(item)) }}</div>
-                        <div
+                        <!-- <div>{{ $t(renderStatus(item)) }}</div> -->
+                        <div>{{ renderStatus(item) }}</div>
+                        <!-- <div
                             class="text-[10px]"
                             v-if="
                                 item?.Status === 'A' &&
@@ -69,7 +71,7 @@
                             "
                         >
                             (Partial Filled)
-                        </div>
+                        </div> -->
                     </div>
 
                     <div class="text-[9px]">
@@ -77,7 +79,8 @@
                             class="font-extrabold text-xs"
                             :class="classBS(item)"
                         >
-                            {{ $t(renderBS(item)) }}
+                            <!-- {{ $t(renderBS(item)) }} -->
+                            {{ renderBS(item) }}
                         </div>
                         <div class="status-date">
                             {{ formatDateDDMMYYYY(item?.createdAt) }}
@@ -87,8 +90,8 @@
                             {{ formatTime(item?.createdAt) }}
                         </div>
 
-                        <div v-if="item?.Status === 'A'">
-                            <button @click="handleCancelOrder(item?.id)">
+                        <div v-if="item?.status === ('UNCONFIRMED' || 'OPEN' || 'PARTIAL')">
+                            <button @click="handleCancelOrder(item?.id, item)">
                                 {{ $t("cancel") }}
                             </button>
                         </div>
@@ -139,6 +142,7 @@ import { defineComponent } from "vue";
 import PopupPassword from "@/components/popup/PopupPassword.vue";
 import PopupConfirm from "@/components/PopupConfirm.vue";
 import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
+import axios from "axios";
 
 export default defineComponent({
     name: "MyOrderPage",
@@ -169,7 +173,7 @@ export default defineComponent({
         const userInfo = window.Telegram.WebApp.initDataUnsafe;
 
         return {
-            userId: userInfo?.user?.id || "",
+            userId: userInfo?.user?.id || "2123800227",
             showNotification: false,
             notificationMessage: "success",
             notificationType: "success",
@@ -182,6 +186,7 @@ export default defineComponent({
             selectOptionsStatus,
             isPass: false,
             itemId: null,
+            itemCancel: {},
             loadingBtn: false,
             showPopup: false,
             isMaintenance: false,
@@ -215,17 +220,19 @@ export default defineComponent({
             return "";
         },
         renderStatus(item: IOrderList) {
-            if (item?.Status === "A") {
-                return "active";
-            }
-            if (item?.Status === "FF") {
-                return "full_filled";
-            }
-            if (item?.Status === "CC") {
-                return "cancel";
-            }
+            return item?.status
+            // if (item?.Status === "A") {
+            //     return "active";
+            // }
+            // if (item?.Status === "FF") {
+            //     return "full_filled";
+            // }
+            // if (item?.Status === "CC") {
+            //     return "cancel";
+            // }
         },
         renderBS(item: IOrderList) {
+            return item?.side
             if (item.Side === "B") {
                 return "buy";
             }
@@ -234,10 +241,10 @@ export default defineComponent({
             }
         },
         classBS(item: IOrderList) {
-            if (item.Side === "B") {
+            if (item.side === "BUY") {
                 return `text-[#2ebd85]`;
             }
-            if (item.Side === "S") {
+            if (item.side === "SELL") {
                 return `text-[#f6465d]`;
             }
         },
@@ -270,28 +277,55 @@ export default defineComponent({
         },
         async callOrderShop() {
             try {
-                const res = await userServiceInventory.callOrderShop(
-                    this.userId
+                // const res = await userServiceInventory.callOrderShop(
+                //     this.userId
+                // );
+                const data = await axios.get(
+                    `https://5615-171-224-177-67.ngrok-free.app/api/v1/order/getUserItemOrderList?UserId=${this.userId}`, {
+                        headers: {
+                            "ngrok-skip-browser-warning": "1",}}
                 );
-                this.listOrderBuy = res?.data?.BuyList;
-                this.listOrderSell = res?.data?.SellList;
-                this.listOrder = res?.data?.BuyList.concat(res?.data?.SellList);
+                const res = JSON.parse(data.data.message)
+                console.log(res?.data);
+                this.listOrderBuy = res?.data?.filter(item => item?.side == 'BUY');
+                this.listOrderSell = res?.data?.filter(item => item?.side == 'SELL');
+                this.listOrder = res?.data
             } catch (error) {
                 console.log(error);
             }
         },
-        async handleCancelOrder(id: number) {
-            this.isMaintenance = true
-            // this.showPopup = true;
-            // this.itemId = id;
+        async handleCancelOrder(id: number, item) {
+            // this.isMaintenance = true
+            this.showPopup = true;
+            this.itemId = id;
+            this.itemCancel = item;
+            console.log(item);
+            
         },
         async handleYes() {
             try {
                 this.loadingBtn = true;
-                const res = await userServiceInventory.cancelOrder(
-                    this.itemId,
-                    this.userId
+                // const res = await userServiceInventory.cancelOrder(
+                //     this.itemId,
+                //     this.userId
+                // );
+                console.log(this.itemCancel);
+                
+                const data = await axios.post(
+                    `https://5615-171-224-177-67.ngrok-free.app/api/v1/order/cancelOrder`, {
+                        
+                    "itemDefId": this.itemCancel?.code,
+                    "userId": "2123800227",
+                    "price": Number(this.itemCancel.price),
+                    "count": this.itemCancel.quantity,
+                    "priceType": "QFP",
+                    "orderId": this.itemCancel.id
+                
+                    } ,{
+                        headers: {
+                            "ngrok-skip-browser-warning": "1",}}
                 );
+                const res = data.status == 200 ? JSON.parse(data.data.message) : {};
                 if (res.success) {
                     this.renderSuccess("stt.success");
                     await this.callOrderShop();

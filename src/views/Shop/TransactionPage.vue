@@ -1,6 +1,6 @@
 <template>
     <div
-        class="h-[calc(100vh-180px)] p-[10px_15px] overflow-auto flex flex-col gap-2"
+        class="h-[calc(100vh-150px)] p-[10px_15px] overflow-auto flex flex-col gap-2"
     >
         <div
             class="border border-[#2f9ad6] px-2 py-1 rounded-md"

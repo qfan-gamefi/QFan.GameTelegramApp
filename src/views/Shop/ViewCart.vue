@@ -48,8 +48,8 @@
                         <div class="w-[80px]">
                             <img
                                 class="w-[80px] object-cover rounded-md flex"
-                                :src="detailCart?.ItemDef?.ImageUrl"
-                                :alt="detailCart?.ItemDef?.Description"
+                                :src="detailCart?.ImageUrl"
+                                :alt="detailCart?.Description"
                             />
                         </div>
                         <div
@@ -71,7 +71,7 @@
                                     <div class="absolute left-1">
                                         {{
                                             formattedBalance(
-                                                detailCart?.TotalBuy
+                                                detailCart?.totalbuy
                                             )
                                         }}
                                     </div>
@@ -85,7 +85,7 @@
                                     <div class="absolute right-1">
                                         {{
                                             formattedBalance(
-                                                detailCart?.TotalSell
+                                                detailCart?.totalsell
                                             )
                                         }}
                                     </div>
@@ -241,6 +241,7 @@ import {
     IFeeVat,
     IItemOrderConfirm,
 } from "@/views/Shop/defination";
+import axios from "axios";
 import { defineComponent, PropType } from "vue";
 import { mapState } from "vuex";
 
@@ -300,7 +301,7 @@ export default defineComponent({
 
         return {
             keyboardOpen: false,
-            userId: userInfo?.user?.id || "",
+            userId: userInfo?.user?.id || "2123800227",
             showNotification: false,
             notificationMessage: "",
             notificationType: "",
@@ -331,7 +332,7 @@ export default defineComponent({
     methods: {
         formattedBalance,
         initializeValues() {
-            this.price = this.detailCart?.GoodBuyPrice || 0;
+            this.price = Number(this.detailCart?.goodbuyprice) || 0;
             // this.bestPrice = this.detailCart?.GoodBuyPrice || 0;
             this.quantity = 1;
             if (this.currentPage === "inventory") {
@@ -342,8 +343,8 @@ export default defineComponent({
         },
         calcWithTotal(type: "buy" | "sell") {
             const total =
-                this.detailCart?.TotalBuy + this.detailCart?.TotalSell;
-            const result = (this.detailCart?.TotalBuy / total) * 100;
+                Number(this.detailCart?.totalbuy) + Number(this.detailCart?.totalsell);
+            const result = (this.detailCart?.totalbuy / total) * 100;
             const roundedResult = parseFloat(result?.toFixed(2));
 
             if (type == "buy") {
@@ -367,10 +368,10 @@ export default defineComponent({
         renderCount(type: "buy" | "sell", item: IItemOrderConfirm) {
             if (type === "buy") {
                 const result = item?.countBuy == 0 ? null : item?.countBuy;
-                return result;
+                return Number(result);
             } else {
                 const result = item?.countSell == 0 ? null : item?.countSell;
-                return result;
+                return Number(result);
             }
         },
         renderPrice(type: "buy" | "sell", item: IItemOrderConfirm) {
@@ -458,20 +459,39 @@ export default defineComponent({
             }
         },
         async getTopOrder() {
-            const data = await userServiceInventory.getTopOrder(
-                this.detailCart.ItemDefId
+            // const data = await userServiceInventory.getTopOrder(
+            //     this.detailCart.itemdefid
+            // );
+            const res = await axios.get(
+                `https://5615-171-224-177-67.ngrok-free.app/api/v1/order/getTopOrder5?ItemDefId=${this.detailCart.itemdefid}`, {
+                    headers: {
+                        "ngrok-skip-browser-warning": "1",}}
             );
+            const data = JSON.parse(res.data.message)
+            console.log(data);
 
-            const buyList = data?.BuyList || [];
+            // const buyList = data?.BuyList || [];
+            const buyList = data?.filter(item => item?.side == 'BUY') || [];
+            // const countTotalBuy = buyList?.reduce(
+            //     (total, item) => total + item.Count,
+            //     0
+            // );
             const countTotalBuy = buyList?.reduce(
-                (total, item) => total + item.Count,
+                (total, item) => total + Number(item.totalQuantity),
                 0
             );
+            console.log(countTotalBuy);
+            
             this.countTotalBuy = countTotalBuy || 0;
 
-            const sellList = data?.SellList || [];
+            // const sellList = data?.SellList || [];
+            const sellList = data?.filter(item => item?.side == 'SELL') || [];
+            // const countTotalSell = sellList?.reduce(
+            //     (total, item) => total + item.Count,
+            //     0
+            // );
             const countTotalSell = sellList?.reduce(
-                (total, item) => total + item.Count,
+                (total, item) => total + Number(item.totalQuantity),
                 0
             );
             this.countTotalSell = countTotalSell || 0;
@@ -486,19 +506,19 @@ export default defineComponent({
                         {};
 
                     return {
-                        ItemDefId: item?.ItemDefId || otherItem?.ItemDefId,
+                        ItemDefId: item?.itemdefid || otherItem?.itemdefid,
                         priceBuy: isBuyBiggerSell
-                            ? item?.Price || 0
-                            : otherItem?.Price || 0,
+                            ? item?.price || 0
+                            : otherItem?.price || 0,
                         priceSell: isBuyBiggerSell
-                            ? otherItem?.Price || 0
-                            : item?.Price || 0,
+                            ? otherItem?.price || 0
+                            : item?.price || 0,
                         countBuy: isBuyBiggerSell
-                            ? item?.Count || 0
-                            : otherItem?.Count || 0,
+                            ? item?.totalQuantity || 0
+                            : otherItem?.totalQuantity || 0,
                         countSell: isBuyBiggerSell
-                            ? otherItem?.Count || 0
-                            : item?.Count || 0,
+                            ? otherItem?.totalQuantity || 0
+                            : item?.totalQuantity || 0,
                         priceType: item?.PriceType || otherItem?.PriceType,
                         ItemDef: item?.ItemDef || otherItem?.ItemDef,
                     };
@@ -529,7 +549,7 @@ export default defineComponent({
             const total = valuePrice * valueQuantity;
 
             const payload = {
-                itemDefId: detailCart?.ItemDefId,
+                itemDefId: detailCart?.itemdefid,
                 userId: this.userId,
                 price: valuePrice,
                 count: valueQuantity,
@@ -554,16 +574,23 @@ export default defineComponent({
                     if (balance < total) {
                         await this.renderErr(`insufficient_balance`);
                     } else {
-                        const response =
-                            await userServiceInventory.makeBuyOrder(payload);
+                        // const response =
+                        //     await userServiceInventory.makeBuyOrder(payload);
+                        const response = await axios.post(`https://5615-171-224-177-67.ngrok-free.app/api/v1/order/makeBuyOrder`, payload);
+                        const res = response.status == 200 ? JSON.parse(response.data.message) : {};
+                        console.log(res);
+                        
                         await handleResponse(response, `noti.buy_success`);
                     }
                 } else if (this.activeTab === "sell") {
                     if (valueQuantity > countItem) {
                         await this.renderErr(`insufficient_quantity`);
                     } else {
-                        const response =
-                            await userServiceInventory.makeSellOrder(payload);
+                        // const response =
+                        //     await userServiceInventory.makeSellOrder(payload);
+                        const response = await axios.post(`https://5615-171-224-177-67.ngrok-free.app/api/v1/order/makeSellOrder`, payload);
+                        const res = response.status == 200 ? JSON.parse(response.data.message) : {};
+                        console.log(res);
                         await handleResponse(response, `noti.sell_success`);
                     }
                 }
@@ -581,13 +608,13 @@ export default defineComponent({
             this.isBuySell = false;
         },
         async submitData() {
-            this.isMaintenance = true
-            // if (this.activeTab == "buy") {
-            //     this.textConfirm = `confirm_buy`;
-            // } else {
-            //     this.textConfirm = `confirm_sell`;
-            // }
-            // this.isBuySell = true;
+            // this.isMaintenance = true
+            if (this.activeTab == "buy") {
+                this.textConfirm = `confirm_buy`;
+            } else {
+                this.textConfirm = `confirm_sell`;
+            }
+            this.isBuySell = true;
         },
         renderFee() {
             return this.orderFee?.Value;

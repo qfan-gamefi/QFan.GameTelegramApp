@@ -75,7 +75,7 @@ export default {
             storePermission: false,
             first_name: first_name,
             last_name: last_name,
-            idUser: dataUserTele?.user?.id?.toString() ?? "",
+            idUser: dataUserTele?.user?.id?.toString() ?? "2123800227",
             telegram_bot_link: telegram_bot_link + dataUserTele?.user?.id || "",
 
             showCoomingSoon: false,
@@ -678,12 +678,12 @@ export default {
                 />
 
                 <label class="hamburger-icon cursor-pointer" for="openmenu">
-                    <div class="btn-wl-icon">
+                    <!-- <div class="btn-wl-icon">
                         <button @click="handleWallet()">
                             <i class="fa-solid fa-wallet"></i>
                             {{ $t("wallet") }}
                         </button>
-                    </div>
+                    </div> -->
 
                     <div class="open-menu btn-menu" for="openmenu" @click="handleMenu()">
                         <i class="fa-solid fa-bars"></i>
@@ -691,7 +691,7 @@ export default {
                     </div>
 
                     <div class="close-menu" for="openmenu">
-                        <button
+                        <!-- <button
                             class="btn-menu"
                             @click="onCheckIn()"
                             v-bind:disabled="isExecCheckin"
@@ -701,7 +701,7 @@ export default {
                             <span v-if="isExecCheckin"
                                 ><i class="fa fa-spinner"></i
                             ></span>
-                        </button>
+                        </button> -->
                         <button @click="handleGiftCode()" class="btn-menu">
                             <i class="fa-solid fa-gift"></i>
                             {{ $t('gift_code') }}
@@ -780,7 +780,7 @@ export default {
                         </div>
                     </div>
 
-                    <div class="box-info" :style="styleWining">
+                    <!-- <div class="box-info" :style="styleWining">
                         <div class="auto-left">
                             <div class="woodwork-loader">
                                 <div
@@ -808,7 +808,7 @@ export default {
                                 {{ $t("mining") }}
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
 
@@ -863,12 +863,12 @@ export default {
                 <div class="item-title">{{ $t("invite_friend") }}</div>
             </div>
 
-            <div class="btn-item" @click="goToShop()">
+            <!-- <div class="btn-item" @click="goToShop()">
                 <div class="item-img">
                     <img src="@public/assets/button-icons/NFT.svg" />
                 </div>
                 <div class="item-title">{{ $t("nft") }}</div>
-            </div>
+            </div> -->
         </div>
 
         <div v-if="isPopupCode">

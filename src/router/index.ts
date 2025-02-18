@@ -17,26 +17,26 @@ const routes = [
         name: "HomeComponent",
         component: HomePage,
     },
-    {
-        path: "/wallet",
-        name: "WalletForm",
-        component: WalletForm,
-    },
-    {
-        path: "/wallet/create",
-        name: "WalletCreate",
-        component: WalletCreate,
-    },
+    // {
+    //     path: "/wallet",
+    //     name: "WalletForm",
+    //     component: WalletForm,
+    // },
+    // {
+    //     path: "/wallet/create",
+    //     name: "WalletCreate",
+    //     component: WalletCreate,
+    // },
     {
         path: "/flip",
         name: "FlipPage",
         component: FlipPage,
     },
-    {
-        path: "/wallet/detail",
-        name: "WalletDetail",
-        component: Wallet,
-    },
+    // {
+    //     path: "/wallet/detail",
+    //     name: "WalletDetail",
+    //     component: Wallet,
+    // },
     {
         path: "/inventory",
         name: "InventoryPage",
@@ -47,16 +47,16 @@ const routes = [
         name: "ShopPage",
         component: ShopPage,
     },
-    {
-        path: "/shop",
-        name: "Shop",
-        component: NFT,
-    },
-    {
-        path: "/airdrop",
-        name: "AirdropPage",
-        component: AirdropPage,
-    },
+    // {
+    //     path: "/shop",
+    //     name: "Shop",
+    //     component: NFT,
+    // },
+    // {
+    //     path: "/airdrop",
+    //     name: "AirdropPage",
+    //     component: AirdropPage,
+    // },
     {
         path: "/fomation",
         name: "FomationPage",

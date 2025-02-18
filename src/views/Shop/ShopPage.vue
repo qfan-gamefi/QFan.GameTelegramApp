@@ -13,14 +13,14 @@
                     class="flex gap-4 text-[12px] f-bangopro"
                     v-if="!loadingPage"
                 >
-                    <div class="flex gap-1">
+                    <!-- <div class="flex gap-1">
                         {{ (infoWallet?.balance || 0)?.toFixed(4) }}
                         <img
-                            src="@public/assets/logo-quai.svg"
+                            src="@public/assets/logo-qua.svg"
                             loading="lazy"
                             class="w-3"
                         />
-                    </div>
+                    </div> -->
                     <div class="flex gap-1">
                         {{ renderBalace() }}
                         <img
@@ -32,7 +32,7 @@
                 </div>
                 <div v-else><i class="fa-solid fa-rotate"></i></div>
             </div>
-            <div class="flex gap-3 justify-end">
+            <!-- <div class="flex gap-3 justify-end">
                 <div
                     class="btn-transaction bg-[#2ebd85]"
                     @click="handleDeposit('deposit')"
@@ -54,7 +54,7 @@
                         <i class="fa-solid fa-spinner fa-spin"></i>
                     </div>
                 </div>
-            </div>
+            </div> -->
         </div>
 
         <div

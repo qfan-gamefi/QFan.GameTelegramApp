@@ -1,3 +1,4 @@
+import axiosBase from "./axiosBase";
 import axiosInventory from "./axiosInventory";
 
 const userServiceInventory = {
@@ -105,6 +106,40 @@ const userServiceInventory = {
     async postFileConfig(data: { userId: string; cells: any }) {
         const res = await axiosInventory.post(`/lineup/fieldConfig?userId`, data);
         return res.status == 200 ? JSON.parse(res.data.message) : {};
+    },
+
+    //pvp
+    async getYourRank(userId: number) {
+        const res = await axiosBase.get(`/inventory/rank/player?userId=${userId}`);
+        return res.data
+    },
+    async getLeaderboard() {
+        const res = await axiosBase.get(`/inventory/rank/leaderboard?limit=20&page=1`);
+        return res.data
+    },
+    async rankHistory(userId: number) {
+        const res = await axiosBase.get(`/inventory/rank/history?userId=${userId}&limit=20&page=1`);
+        return res.data
+    },
+    async rankOpponents(userId: number) {
+        const res = await axiosBase.get(`/inventory/rank/opponents?userId=${userId}`);
+        return res.data
+    },
+    async getEnergy(userId: number) {
+        const res = await axiosBase.get(`/inventory/api/v1/energy/get-energy?userId=${userId}&actionCode=MATCH`);
+        return res.data
+    },
+    async handleRefresh(userId: number) {
+        const res = await axiosBase.post(`inventory/rank/refresh-opponents`, {
+            userId: userId,
+        });
+        return res.data
+    },
+    async playRank(data: any) {
+        const res = await axiosBase.post(`inventory/rank/play`, {
+            ...data,
+        });
+        return res.data
     },
 };
 

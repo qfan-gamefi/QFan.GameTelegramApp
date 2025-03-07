@@ -3,6 +3,9 @@
         <!-- <router-link to="/airdrop">
             <img loading="lazy" :src="iconAirdrop" class="w-[50px]" />
         </router-link> -->
+        <router-link to="/tournaments">
+            <img loading="lazy" src="/assets/tournaments/tournament.png" class="w-[50px]" />
+        </router-link>
         <router-link to="/fomation">
             <img loading="lazy" :src="iconFomation" class="w-[50px]" />
         </router-link>
@@ -117,7 +120,7 @@ export default {
     top: 37%;
     right: 5%;
     display: flex;
-    gap: 15px;
+    gap: 10px;
     align-items: end;
 }
 

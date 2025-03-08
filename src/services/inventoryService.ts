@@ -109,7 +109,7 @@ const userServiceInventory = {
     },
 
     //pvp
-    async getYourRank(userId: number) {
+    async getYourRank(userId: string) {
         const res = await axiosBase.get(`/inventory/rank/player?userId=${userId}`);
         return res.data
     },
@@ -117,19 +117,19 @@ const userServiceInventory = {
         const res = await axiosBase.get(`/inventory/rank/leaderboard?limit=20&page=1`);
         return res.data
     },
-    async rankHistory(userId: number) {
+    async rankHistory(userId: string) {
         const res = await axiosBase.get(`/inventory/rank/history?userId=${userId}&limit=20&page=1`);
         return res.data
     },
-    async rankOpponents(userId: number) {
+    async rankOpponents(userId: string) {
         const res = await axiosBase.get(`/inventory/rank/opponents?userId=${userId}`);
         return res.data
     },
-    async getEnergy(userId: number) {
+    async getEnergy(userId: string) {
         const res = await axiosBase.get(`/inventory/api/v1/energy/get-energy?userId=${userId}&actionCode=MATCH`);
         return res.data
     },
-    async handleRefresh(userId: number) {
+    async handleRefresh(userId: string) {
         const res = await axiosBase.post(`inventory/rank/refresh-opponents`, {
             userId: userId,
         });

@@ -153,7 +153,7 @@ export default defineComponent({
 
             try {
                 const res = await userServiceInventory.playRank({
-                    userId: this.userId,
+                    userId: this.userId.toString(),
                     opponentId: this.itemFight.userId,
                     userName: `${this.first_name} ${this.last_name}`,
                     imageUrl: avt || "",

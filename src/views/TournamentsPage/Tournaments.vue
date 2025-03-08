@@ -255,7 +255,7 @@ export default {
             }
         },
         async getYourRank() {
-            const res = await userServiceInventory.getYourRank(this.userId);
+            const res = await userServiceInventory.getYourRank(this.userId?.toString());
             this.yourRank = res?.data;
         },
         async getLeaderboard() {
@@ -263,11 +263,11 @@ export default {
             this.leaderBoardData = res?.data?.leaderboard;
         },
         async rankHistory() {
-            const res = await userServiceInventory.rankHistory(this.userId);
+            const res = await userServiceInventory.rankHistory(this.userId?.toString());
             this.history = res?.data?.history;
         },
         async rankOpponents() {
-            const res = await userServiceInventory.rankOpponents(this.userId);
+            const res = await userServiceInventory.rankOpponents(this.userId?.toString());
             this.dataOpponents = res?.data?.opponents;
             this.timeRefreshesIn = Math.ceil(Number(res?.data?.refreshesIn));
         },
@@ -280,11 +280,11 @@ export default {
             await this.rankOpponents();
         },
         async getEnergy() {
-            const res = await userServiceInventory.getEnergy(this.userId);
+            const res = await userServiceInventory.getEnergy(this.userId?.toString());
             this.energyData = res;
         },
         async handleRefresh() {
-            const res = await userServiceInventory.handleRefresh(this.userId);
+            const res = await userServiceInventory.handleRefresh(this.userId?.toString());
             this.dataOpponents = res?.data?.opponents;
             this.timeRefreshesIn = Math.ceil(Number(res?.data?.refreshesIn));
             this.startCountdown();

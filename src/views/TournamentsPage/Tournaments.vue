@@ -21,27 +21,29 @@
             <div class="leader-scroll">
                 <div class="rank-index">
                     <div
-                        v-for="(item, index) in leaderBoardData"
-                        :key="item.userId || index"
+                        v-for="(el, index) in leaderBoardData"
+                        :key="el.userId || index"
                         class="flex bg-[#EDF1FF] items-center p-2 justify-between rounded-md"
                     >
                         <div class="flex gap-5 items-center">
-                            <div>{{ index + 1 }}</div>
+                            <div class="w-7 text-center">{{ index + 1 }}</div>
                             <div class="flex gap-2 items-center">
                                 <img
-                                    v-if="!item?.imageUrl"
+                                    v-if="!el?.imageUrl"
                                     src="/assets/logo.svg"
                                     class="w-3"
                                     alt="Logo"
                                 />
-                                <img v-else 
-                                    :src='item?.imageUrl'
-                                    class="w-3"
-                                    alt="avt"  />
-                                {{ item?.userName || item?.userId }}
+                                <img
+                                    v-else
+                                    :src="el?.imageUrl"
+                                    class="w-3 rounded-md"
+                                    alt="avt"
+                                />
+                                {{ el?.userName || el?.userId }}
                             </div>
                         </div>
-                        <div>{{ item.rankPoints }}</div>
+                        <div>{{ el?.rankPoints }}</div>
                     </div>
                 </div>
             </div>
@@ -115,30 +117,43 @@
         <div v-if="activeIndex === 2" class="text-black">
             <div class="title text-white">RECORD</div>
 
-            <div>
-                <div class="header-record">
-                    <div>User 1</div>
-                    <div>Score</div>
-                    <div>User 2</div>
-                </div>
+            <div class="header-record">
+                <div>User 1</div>
+                <div>Score</div>
+                <div>User 2</div>
+            </div>
 
-                <div class="scroll-record">
-                    <div
-                        v-for="item in history"
-                        :key="item.id"
-                        class="flex p-2 bg-[#EDF1FF] text-xs w-full"
-                        :class="styleRowHistory(item)"
-                    >
+            <div class="scroll-record">
+                <div
+                    v-for="el in history"
+                    :key="el.id"
+                    class="p-2 bg-[#EDF1FF] text-xs w-full border-b mb-1"
+                >
+                    <div class="w-full flex">
                         <div class="w-2/5">
-                            {{ first_name }} {{ last_name }}
+                            <p class="truncate w-3/5">
+                                {{ first_name }} {{ last_name }}
+                            </p>
                         </div>
-                        <div class="w-1/5 text-center">
-                            {{ item.matchScore.user }} -
-                            {{ item.matchScore.opponent }}
+                        <div
+                            class="w-1/5 text-center"
+                            :class="styleRowHistory(el)"
+                        >
+                            {{ el?.matchScore?.user }} -
+                            {{ el?.matchScore?.opponent }}
                         </div>
-                        <div class="w-2/5 text-right">
-                            {{ item?.userName || item?.opponentId }}
+                        <div class="w-2/5 flex justify-end">
+                            <p class="truncate w-3/5">
+                                {{ el?.userName || el?.opponentId }}
+                            </p>
                         </div>
+                    </div>
+
+                    <div
+                        class="text-end text-[9px]"
+                        :class="styleRowHistory(el)"
+                    >
+                        {{ el?.pointsChange }} RankPoints
                     </div>
                 </div>
             </div>
@@ -148,7 +163,7 @@
             <div class="box-btn">
                 <div
                     v-for="(item, index) in [
-                        'SCHEDULE',
+                        'LEADERBOARD',
                         'TOURNAMENT',
                         'RECORD',
                     ]"
@@ -170,6 +185,7 @@
             :visible="isPopup"
             @no="closePopup()"
             :itemFight="itemFight"
+            @refeshData="refeshData()"
         />
     </div>
 </template>
@@ -203,6 +219,12 @@ export default {
         activeIndex(newVal, oldVal) {
             if (newVal === 2) {
                 this.rankHistory();
+            }
+            if (newVal === 1) {
+                this.getEnergy();
+            }
+            if (newVal === 0) {
+                this.getLeaderboard();
             }
         },
     },
@@ -255,7 +277,9 @@ export default {
             }
         },
         async getYourRank() {
-            const res = await userServiceInventory.getYourRank(this.userId?.toString());
+            const res = await userServiceInventory.getYourRank(
+                this.userId?.toString()
+            );
             this.yourRank = res?.data;
         },
         async getLeaderboard() {
@@ -263,11 +287,15 @@ export default {
             this.leaderBoardData = res?.data?.leaderboard;
         },
         async rankHistory() {
-            const res = await userServiceInventory.rankHistory(this.userId?.toString());
+            const res = await userServiceInventory.rankHistory(
+                this.userId?.toString()
+            );
             this.history = res?.data?.history;
         },
         async rankOpponents() {
-            const res = await userServiceInventory.rankOpponents(this.userId?.toString());
+            const res = await userServiceInventory.rankOpponents(
+                this.userId?.toString()
+            );
             this.dataOpponents = res?.data?.opponents;
             this.timeRefreshesIn = Math.ceil(Number(res?.data?.refreshesIn));
         },
@@ -280,20 +308,27 @@ export default {
             await this.rankOpponents();
         },
         async getEnergy() {
-            const res = await userServiceInventory.getEnergy(this.userId?.toString());
+            const res = await userServiceInventory.getEnergy(
+                this.userId?.toString()
+            );
             this.energyData = res;
         },
         async handleRefresh() {
-            const res = await userServiceInventory.handleRefresh(this.userId?.toString());
+            const res = await userServiceInventory.handleRefresh(
+                this.userId?.toString()
+            );
             this.dataOpponents = res?.data?.opponents;
             this.timeRefreshesIn = Math.ceil(Number(res?.data?.refreshesIn));
             this.startCountdown();
         },
-        styleRowHistory(item){
-            if(item?.result === 'WIN') return 'text-green-500'
-            if(item?.result === 'DRAW') return 'text-orange-500'
-            if(item?.result === 'LOSE') return 'text-red-500'
-        }
+        styleRowHistory(item) {
+            if (item?.result == "WIN") return "text-green-500";
+            if (item?.result == "DRAW") return "text-yellow-400";
+            if (item?.result == "LOSE") return "text-red-500";
+        },
+        async refeshData() {
+            await this.getEnergy();
+        },
     },
 };
 </script>
@@ -325,7 +360,7 @@ export default {
     @apply flex justify-between items-center p-2 rounded-md;
 }
 .wr-btn {
-    @apply absolute bottom-0 left-0 w-full text-sm font-bold px-5 py-1 bg-[#0078E7] text-black;
+    @apply absolute bottom-0 left-0 w-full text-xs font-bold px-5 py-1 bg-[#0078E7] text-black;
 }
 .box-btn {
     @apply flex w-full justify-between bg-[#ffffff9e] rounded-full;

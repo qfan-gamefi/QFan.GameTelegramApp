@@ -21,13 +21,16 @@
                         <div class="scoreboard">
                             <div class="player-score">
                                 <div>{{ first_name }} {{ last_name }}</div>
+
                                 <div class="absolute right-2 text-xl">
                                     {{ dataPlay?.match?.score?.user }}
+                                      <!-- {{ score1 }} -->
                                 </div>
                             </div>
                             <div class="opponent-score">
                                 <div class="absolute left-2 text-xl">
                                     {{ dataPlay?.match?.score?.opponent }}
+                                    <!-- {{ score2 }} -->
                                 </div>
                                 <div>
                                     {{
@@ -41,35 +44,29 @@
 
                     <div class="timeout-message">Time out</div>
 
-                    <div v-if="loading">
+                    <!-- <div v-if="loading">
                         <i class="fa-solid fa-spinner fa-spin"></i>
-                    </div>
+                    </div> -->
 
-                    <div class="timeout-timer" v-if="!loading">90:00</div>
+                    <div class="timeout-timer">90:00</div>
+
                     <div v-if="dataPlay?.match?.result === 'DRAW' && !loading">
                         DRAW
                     </div>
-                    <div class="grid gap-1" v-if="!loading">
+
+                    <div class="body-match">
                         <div
-                            v-for="(
-                                item, index
-                            ) in dataPlay?.match?.events?.filter(
-                                (el) => el.type === 'goal'
-                            )"
+                            v-for="(item, index) in displayedItems"
                             :key="index"
-                            :style="{ animationDelay: `${index * 0.2}s` }"
                             class="box-goal-item"
                         >
-                            <div v-if="item.type === 'goal'" class="item-goal">
+                            <div class="item-goal">
                                 <div
                                     class="goal-scorer"
                                     v-if="item?.score?.team1 && item?.player"
                                 >
                                     {{ item?.player }}
-                                    <img
-                                        class="w-3"
-                                        src="/assets/tournaments/ball_play.png"
-                                    />
+                                    <img class="w-3" :src="ballPlay" />
                                 </div>
 
                                 <div class="time-goal">
@@ -80,22 +77,27 @@
                                     class="goal-scorer justify-end"
                                     v-if="item?.score?.team2 && item?.player"
                                 >
-                                    <img
-                                        class="w-3"
-                                        src="/assets/tournaments/ball_play.png"
-                                    />
+                                    <img class="w-3" :src="ballPlay" />
                                     {{ item?.player }}
                                 </div>
                             </div>
                         </div>
+
+                        <div v-if="loading">
+                            <i class="fa-solid fa-spinner fa-spin"></i>
+                        </div>
                     </div>
                 </div>
             </div>
+            <PopupPassword :visible="isPass" @cancel="isPass = false" />
         </div>
+        
     </transition>
+    
 </template>
 
 <script lang="ts">
+import PopupPassword from "@/components/popup/PopupPassword.vue";
 import userServiceInventory from "@/services/inventoryService";
 import axios from "axios";
 import { defineComponent } from "vue";
@@ -121,10 +123,14 @@ export default defineComponent({
             required: true,
         },
     },
+    components: {
+        PopupPassword,
+    },
     watch: {
         async visible(newVal, oldVal) {
             if (newVal) {
-                this.playRank();
+                await this.playRank();
+                this.displayElementsSequentially();
             }
         },
     },
@@ -132,17 +138,28 @@ export default defineComponent({
     data() {
         const userInfo = window.Telegram.WebApp.initDataUnsafe;
         return {
+            ballPlay: "/assets/tournaments/ball_play.png",
             loading: false,
             userId: userInfo?.user?.id || "",
             first_name: userInfo?.user?.first_name || "",
             last_name: userInfo?.user?.last_name || "",
             dataPlay: null,
+            dataGoal: null,
+            maxDelay: 10000,
+            displayedItems: [],
+            isPass: false,
+            score1: 0,
+            score2: 0
         };
     },
     methods: {
         no() {
             this.dataPlay = {};
+            this.displayedItems = [];
+            this.score1 = 0
+            this.score2 = 0
             this.$emit("no");
+            this.$emit("refeshData");
         },
         refeshData() {
             this.$emit("refeshData");
@@ -150,7 +167,6 @@ export default defineComponent({
         async playRank() {
             this.loading = true;
             const avt = localStorage.getItem("avt");
-
             try {
                 const res = await userServiceInventory.playRank({
                     userId: this.userId.toString(),
@@ -158,9 +174,29 @@ export default defineComponent({
                     userName: `${this.first_name} ${this.last_name}`,
                     imageUrl: avt || "",
                 });
+
                 this.dataPlay = res?.data;
+                this.dataGoal =
+                    res?.data?.match?.events?.filter(
+                        (el) => el?.type == "goal"
+                    ) || [];
             } catch (error) {
+                if (error?.response?.status === 401) {
+                    this.isPass = true;
+                }
             } finally {
+                this.loading = false;
+            }
+        },
+        async displayElementsSequentially() {
+            for (let i = 0; i < this.dataGoal.length; i++) {
+                this.loading = true;
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+                
+                const dataPush = this.dataGoal[i]
+                
+                this.displayedItems.push(dataPush);
+                
                 this.loading = false;
             }
         },
@@ -196,18 +232,23 @@ export default defineComponent({
 .goal-scorer {
     @apply w-2/5 flex items-center gap-2;
 }
+
 .scoreboard {
     @apply absolute bottom-[-75%] flex w-full text-center font-extrabold;
 }
+
 .player-score {
     @apply bg-[#9E00FF] p-2 rounded-tl-md rounded-bl-md flex flex-1 justify-center relative items-center;
 }
+
 .opponent-score {
     @apply bg-[#0045AC] p-2 rounded-tr-md rounded-br-md flex flex-1 justify-center relative items-center;
 }
+
 .time-goal {
     @apply w-1/5 flex justify-center items-center bg-green-500;
 }
+
 .item-goal {
     @apply p-2 flex bg-[#EDF1FF] rounded-md text-black;
 }
@@ -217,6 +258,7 @@ export default defineComponent({
         opacity: 0;
         transform: translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -226,5 +268,9 @@ export default defineComponent({
 .box-goal-item {
     opacity: 0;
     animation: fadeIn 0.5s ease-out forwards;
+}
+
+.body-match {
+    @apply grid gap-1 overflow-y-scroll max-h-[300px];
 }
 </style>

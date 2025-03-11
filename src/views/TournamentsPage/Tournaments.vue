@@ -8,11 +8,11 @@
                     <img src="/assets/tournaments/gift.png" class="w-5" />
                     Reward
                 </div>
-                <div class="px-2 flex justify-between">
+                <div class="px-2 flex-between">
                     <div>Rank 1</div>
                     <div>100K</div>
                 </div>
-                <div class="px-2 flex justify-between">
+                <div class="px-2 flex-between">
                     <div>Rank 2</div>
                     <div>50k</div>
                 </div>
@@ -23,27 +23,43 @@
                     <div
                         v-for="(el, index) in leaderBoardData"
                         :key="el.userId || index"
-                        class="flex bg-[#EDF1FF] items-center p-2 justify-between rounded-md"
+                        class="grid bg-[#EDF1FF] p-2 rounded-md"
                     >
-                        <div class="flex gap-5 items-center">
-                            <div class="w-7 text-center">{{ index + 1 }}</div>
-                            <div class="flex gap-2 items-center">
-                                <img
-                                    v-if="!el?.imageUrl"
-                                    src="/assets/logo.svg"
-                                    class="w-3"
-                                    alt="Logo"
-                                />
-                                <img
-                                    v-else
-                                    :src="el?.imageUrl"
-                                    class="w-3 rounded-md"
-                                    alt="avt"
-                                />
-                                {{ el?.userName || el?.userId }}
+                        <div class="flex-between">
+                            <div class="flex gap-2 w-[60%]">
+                                <div class="min-w-7 text-center">
+                                    {{ index + 1 }}
+                                </div>
+                                <div class="flex gap-2 items-center">
+                                    <img
+                                        v-if="!el?.imageUrl"
+                                        src="/assets/logo.svg"
+                                        class="w-3"
+                                        alt="Logo"
+                                    />
+                                    <img
+                                        v-else
+                                        :src="el?.imageUrl"
+                                        class="w-3 rounded-md"
+                                        alt="avt"
+                                    />
+                                    <div class="truncate w-4/5">
+                                        {{ el?.userName || el?.userId }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="w-[35%] text-end">
+                                {{ el?.rankPoints }} RankPoint
                             </div>
                         </div>
-                        <div>{{ el?.rankPoints }}</div>
+                        <div class="flex justify-end gap-2 text-[9px]">
+                            {{ el?.rewards?.QFP || 0 }}
+                            <img
+                                src="/assets/logo.svg"
+                                class="w-3"
+                                alt="Logo"
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -63,14 +79,16 @@
                 </div>
                 <div>
                     <div class="rank-title">Rewards</div>
-                    <div>0</div>
+                    <div class="flex gap-1 justify-center">
+                        {{ yourRank?.rewards?.QFP || 0 }}
+                        <img src="/assets/logo.svg" class="w-3" alt="Logo" />
+                    </div>
                 </div>
-                <div>?</div>
             </div>
 
-            <div class="flex justify-between mb-2">
+            <div class="flex-between mb-2">
                 <div class="flex gap-1">
-                    <img src="/assets/tournaments/ticket.png" class="w-5" />
+                    <img src="/assets/tournaments/ball2.png" class="w-6" />
                     {{ energyData?.currentEnergy }}/{{ energyData?.maxEnergy }}
                 </div>
                 <div class="flex items-center" @click="handleRefresh()">
@@ -104,10 +122,9 @@
                             @click="handleFight(item)"
                         >
                             <img
-                                src="/assets/tournaments/fight.png"
+                                src="/assets/tournaments/match_pvp.png"
                                 class="w-20"
                             />
-                            <div class="number-ticket text-outline">-1</div>
                         </div>
                     </div>
                 </div>
@@ -222,6 +239,8 @@ export default {
             }
             if (newVal === 1) {
                 this.getEnergy();
+                this.rankOpponents();
+                this.getYourRank();
             }
             if (newVal === 0) {
                 this.getLeaderboard();
@@ -370,18 +389,17 @@ export default {
     @apply flex justify-evenly bg-black text-xs relative pb-3 font-medium rounded-t-md;
 }
 
-.text-outline {
-    text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black,
-        1px 1px 0 black;
-}
-
-.number-ticket {
-    @apply absolute font-extrabold text-white top-1 right-6;
-}
+// .text-outline {
+//     text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black,
+//         1px 1px 0 black;
+// }
 .header-record {
     @apply flex justify-between p-2 text-white bg-black rounded-t-md text-xs;
 }
 .scroll-record {
     @apply overflow-y-scroll h-[calc(100vh-140px)];
+}
+.flex-between{
+    @apply flex justify-between
 }
 </style>

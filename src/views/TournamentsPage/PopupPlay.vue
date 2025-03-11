@@ -20,19 +20,17 @@
 
                         <div class="scoreboard">
                             <div class="player-score">
-                                <div>{{ first_name }} {{ last_name }}</div>
+                                <div class="truncate w-3/4">{{ first_name }} {{ last_name }}</div>
 
                                 <div class="absolute right-2 text-xl">
-                                    {{ dataPlay?.match?.score?.user }}
-                                      <!-- {{ score1 }} -->
+                                      {{ scoreResult?.team1 }}
                                 </div>
                             </div>
                             <div class="opponent-score">
                                 <div class="absolute left-2 text-xl">
-                                    {{ dataPlay?.match?.score?.opponent }}
-                                    <!-- {{ score2 }} -->
+                                    {{ scoreResult?.team2 }}
                                 </div>
-                                <div>
+                                <div class="truncate w-3/4">
                                     {{
                                         dataPlay?.opponent?.userName ||
                                         dataPlay?.opponent?.userId
@@ -43,10 +41,6 @@
                     </div>
 
                     <div class="timeout-message">Time out</div>
-
-                    <!-- <div v-if="loading">
-                        <i class="fa-solid fa-spinner fa-spin"></i>
-                    </div> -->
 
                     <div class="timeout-timer">90:00</div>
 
@@ -148,16 +142,14 @@ export default defineComponent({
             maxDelay: 10000,
             displayedItems: [],
             isPass: false,
-            score1: 0,
-            score2: 0
+            scoreResult: null
         };
     },
     methods: {
         no() {
             this.dataPlay = {};
             this.displayedItems = [];
-            this.score1 = 0
-            this.score2 = 0
+            this.scoreResult = null
             this.$emit("no");
             this.$emit("refeshData");
         },
@@ -189,12 +181,13 @@ export default defineComponent({
             }
         },
         async displayElementsSequentially() {
-            for (let i = 0; i < this.dataGoal.length; i++) {
+            for (let i = 0; i < this.dataGoal?.length; i++) {
                 this.loading = true;
                 await new Promise((resolve) => setTimeout(resolve, 1000));
                 
                 const dataPush = this.dataGoal[i]
                 
+                this.scoreResult = dataPush?.score
                 this.displayedItems.push(dataPush);
                 
                 this.loading = false;

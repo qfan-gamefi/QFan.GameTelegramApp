@@ -13,10 +13,10 @@ const axiosBase = axios.create({
 axiosBase.interceptors.request.use(
     (config) => {
         const passVerify = localStorage.getItem("passVerify");
+        const base64X = localStorage.getItem("auth-x");
 
-        if (passVerify) {
-            config.headers["Authorization"] = `Bearer ${passVerify}`;
-        }
+        passVerify && (config.headers["Authorization"] = `Bearer ${passVerify}`);
+        base64X && (config.headers["x-telegram-auth"] = base64X);
         return config;
     },
     (error) => {

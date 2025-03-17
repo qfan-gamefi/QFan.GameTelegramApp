@@ -3,9 +3,9 @@
         <!-- <router-link to="/airdrop">
             <img loading="lazy" :src="iconAirdrop" class="w-[50px]" />
         </router-link> -->
-        <router-link to="/tournaments">
+        <!-- <router-link to="/tournaments">
             <img loading="lazy" src="/assets/tournaments/tournament.png" class="w-[50px]" />
-        </router-link>
+        </router-link> -->
         <router-link to="/fomation">
             <img loading="lazy" :src="iconFomation" class="w-[50px]" />
         </router-link>

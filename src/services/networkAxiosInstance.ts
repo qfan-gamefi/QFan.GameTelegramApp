@@ -9,14 +9,14 @@ export const networkAxiosInstance = axios.create({
 });
 networkAxiosInstance.interceptors.request.use((config) => {
     const passVerify = localStorage.getItem("passVerify");
-    const base64X = localStorage.getItem("auth-x");
+    // const base64X = localStorage.getItem("auth-x");
 
     if (passVerify) {
         config.headers["Authorization"] = `Bearer ${passVerify}`;
     }
-    if (base64X) {
-        config.headers["x-telegram-auth"] = base64X;
-    }
+    // if (base64X) {
+    //     config.headers["x-telegram-auth"] = base64X;
+    // }
 
     return config;
 });
@@ -30,14 +30,14 @@ export const networkAdminAxiosInstance = axios.create({
 });
 networkAdminAxiosInstance.interceptors.request.use((config) => {
     const passVerify = localStorage.getItem("passVerify");
-    const base64X = localStorage.getItem("auth-x");
+    // const base64X = localStorage.getItem("auth-x");
 
     if (passVerify) {
         config.headers["Authorization"] = `Bearer ${passVerify}`;
     }
-    if (base64X) {
-        config.headers["x-telegram-auth"] = base64X;
-    }
+    // if (base64X) {
+    //     config.headers["x-telegram-auth"] = base64X;
+    // }
 
     return config;
 });

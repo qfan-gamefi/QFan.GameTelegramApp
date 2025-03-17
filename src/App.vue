@@ -8,21 +8,21 @@ export default {
         AutoFlip,
     },
     data() {
-        const dataTelegram = window.Telegram?.WebApp?.initDataUnsafe;
+        // const dataTelegram = window.Telegram?.WebApp?.initDataUnsafe;
 
-        const reqTelegramX = {
-            id: dataTelegram?.user?.id,
-            first_name: dataTelegram?.user?.first_name,
-            username: dataTelegram?.user?.username,
-            photo_url: dataTelegram?.user?.photo_url || "",
-            auth_date: dataTelegram?.auth_date,
-            hash: dataTelegram?.hash,
-        };
-        const jsonString = JSON.stringify(reqTelegramX);
-        const buf = jsonString && Buffer.from(jsonString, "utf-8");
-        const base64X = buf.toString("base64");
+        // const reqTelegramX = {
+        //     id: dataTelegram?.user?.id,
+        //     first_name: dataTelegram?.user?.first_name,
+        //     username: dataTelegram?.user?.username,
+        //     photo_url: dataTelegram?.user?.photo_url || "",
+        //     auth_date: dataTelegram?.auth_date,
+        //     hash: dataTelegram?.hash,
+        // };
+        // const jsonString = JSON.stringify(reqTelegramX);
+        // const buf = jsonString && Buffer.from(jsonString, "utf-8");
+        // const base64X = buf.toString("base64");
 
-        localStorage.setItem("auth-x", base64X);
+        // localStorage.setItem("auth-x", base64X);
         return {};
     },
 };

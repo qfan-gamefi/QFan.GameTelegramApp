@@ -399,7 +399,7 @@ export default defineComponent({
             loadingBtn: false,
             showCoomingSoon: false,
             apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
-            userId: userInfo?.user?.id || "2123800227",
+            userId: userInfo?.user?.id || "",
             showNotification: false,
             notificationMessage: "",
             notificationType: "",

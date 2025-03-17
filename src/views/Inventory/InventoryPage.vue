@@ -165,7 +165,7 @@
                                     <div class="font-extrabold text-center">
                                         {{ item.Name }}
                                     </div>
-                                    <div class="relative">
+                                    <div class="relative" v-if="!item?.Treasure?.Description?.endsWith('Lightning')">
                                         <img
                                             class="w-[60px] rounded-md"
                                             :src="item?.Treasure?.ImageUrl"
@@ -174,6 +174,7 @@
                                             {{ item?.TreasureCount }}
                                         </div>
                                     </div>
+                                    <LightningCard v-else :cardImage="item?.Treasure?.ImageUrl" :itemCount="item?.TreasureCount" :freezeAfter="30"  />
                                     <div
                                         :class="[
                                             'btn-fusion',
@@ -342,6 +343,7 @@ import { countNameDefaultInStack, getPlateImage, getPlayerImage } from "../Fomat
 import { sortedGroupPlayer } from "../Fomation/defination-fomation";
 import { groupedPlayer } from "../Fomation/defination-fomation";
 import GroupPlayerComponent from "./GroupPlayerComponent.vue";
+import LightningCard from "@/components/LightningCard.vue";
 
 export default defineComponent({
     name: "InventoryPage",
@@ -356,7 +358,8 @@ export default defineComponent({
         InputField,
         PopupItem,
         PopupFusionPlayerPage,
-        GroupPlayerComponent
+        GroupPlayerComponent,
+        LightningCard
     },
     created() {
         this.getDataInfo();
@@ -396,7 +399,7 @@ export default defineComponent({
             loadingBtn: false,
             showCoomingSoon: false,
             apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
-            userId: userInfo?.user?.id || "2123800227",
+            userId: userInfo?.user?.id || "",
             showNotification: false,
             notificationMessage: "",
             notificationType: "",
@@ -607,7 +610,7 @@ export default defineComponent({
                         ),
                     };
                 });
-
+                
                 this.listFusion = parseFusion;
             } catch (error) {
                 console.error(error);
@@ -790,9 +793,7 @@ export default defineComponent({
 }
 
 .slot-item {
-    @apply text-[10px] font-extrabold p-[5px] absolute top-0 right-0 text-[#fffb3a] bg-black/50 rounded-bl-[10px];
-    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
-        1px 1px 0 #000;
+    @apply text-[10px] font-extrabold p-[5px] absolute top-0 right-0 text-white bg-black/50 rounded-bl-[10px];
 }
 
 .slideIn-fusion {
@@ -848,4 +849,5 @@ export default defineComponent({
 .wr-filter-player {
     @apply flex gap-3 bg-[#00175f] rounded-md p-1 px-2 items-center justify-end mb-2;
 }
+
 </style>

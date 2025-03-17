@@ -11,10 +11,10 @@ const axiosPredictInstance = axios.create({
 axiosPredictInstance.interceptors.request.use(
     (config) => {
         const passVerify = localStorage.getItem("passVerify");
-        const base64X = localStorage.getItem("auth-x");
+        // const base64X = localStorage.getItem("auth-x");
 
         passVerify && (config.headers["Authorization"] = `Bearer ${passVerify}`);
-        base64X && (config.headers["x-telegram-auth"] = base64X);
+        // base64X && (config.headers["x-telegram-auth"] = base64X);
         return config;
     },
     (error) => {

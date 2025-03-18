@@ -112,22 +112,22 @@ const userService = {
         const res = await axiosInstance.post(`booster/upLevel`, dataForm);
         return res.data;
     },
-    async claimCheckin(userId: string, toAddress: string, hash: string) {
-        try {
-            const dataForm = {
-                playerId: userId,
-                address: toAddress,
-                hash,
-            };
-            const res = await networkAxiosInstance.post(
-                `interact/daily-checkin`,
-                dataForm
-            );
-            return res.data;
-        } catch (error) {
-            console.log(error);
-            return error?.response?.data;
-        }
+    async claimCheckin(userId: string, toAddress?: string, hash?: string) {
+        const dataForm = {
+            playerId: userId,
+            // address: toAddress,
+            // hash,
+        };
+        const res = await networkAxiosInstance.post(
+            `interact/daily-checkin`,
+            dataForm
+        );
+        return res.data;
+        // try {
+            
+        // } catch (error) {
+        //     return error?.response?.data;
+        // }
     },
     async autoInteract(userId: string, toAddress: string, hash: any) {
         try {

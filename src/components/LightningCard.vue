@@ -93,7 +93,7 @@ export default {
                     );
                 elements.forEach((el) => {
                     if (el.parentNode === this.$refs.lightningContainer) {
-                        this.$refs.lightningContainer.removeChild(el);
+                        this.$refs.lightningContainer?.removeChild(el);
                     }
                 });
             }
@@ -233,9 +233,9 @@ export default {
                     // Add more branches (80% chance)
                     if (Math.random() > 0.2) {
                         const containerWidth =
-                            this.$refs.lightningContainer.offsetWidth;
+                            this.$refs.lightningContainer?.offsetWidth;
                         const containerHeight =
-                            this.$refs.lightningContainer.offsetHeight;
+                            this.$refs.lightningContainer?.offsetHeight;
                         const startX = Math.random() * containerWidth;
                         const startY = Math.random() * containerHeight;
                         const angle = Math.random() * Math.PI * 2;
@@ -275,10 +275,10 @@ export default {
 
         // Create surrounding lightning
         createSurroundingLightning(color) {
-            const containerWidth = this.$refs.lightningContainer.offsetWidth;
-            const containerHeight = this.$refs.lightningContainer.offsetHeight;
-            const cardWidth = this.$refs.playerCard.offsetWidth;
-            const cardHeight = this.$refs.playerCard.offsetHeight;
+            const containerWidth = this.$refs.lightningContainer?.offsetWidth;
+            const containerHeight = this.$refs.lightningContainer?.offsetHeight;
+            const cardWidth = this.$refs.playerCard?.offsetWidth;
+            const cardHeight = this.$refs.playerCard?.offsetHeight;
 
             // Calculate center points (relative to lightning container)
             const centerX = containerWidth / 2;
@@ -511,7 +511,7 @@ export default {
                                 bolt.parentNode ===
                                     this.$refs.lightningContainer
                             ) {
-                                this.$refs.lightningContainer.removeChild(bolt);
+                                this.$refs.lightningContainer?.removeChild(bolt);
                             }
                         }, 200);
                     }, 100);
@@ -532,18 +532,18 @@ export default {
             const svg = document.createElementNS(svgNS, "svg");
             svg.setAttribute(
                 "width",
-                this.$refs.lightningContainer.offsetWidth
+                this.$refs.lightningContainer?.offsetWidth
             );
             svg.setAttribute(
                 "height",
-                this.$refs.lightningContainer.offsetHeight
+                this.$refs.lightningContainer?.offsetHeight
             );
 
             // Get card boundaries for containment
-            const containerWidth = this.$refs.lightningContainer.offsetWidth;
-            const containerHeight = this.$refs.lightningContainer.offsetHeight;
-            const cardWidth = this.$refs.playerCard.offsetWidth;
-            const cardHeight = this.$refs.playerCard.offsetHeight;
+            const containerWidth = this.$refs.lightningContainer?.offsetWidth;
+            const containerHeight = this.$refs.lightningContainer?.offsetHeight;
+            const cardWidth = this.$refs.playerCard?.offsetWidth;
+            const cardHeight = this.$refs.playerCard?.offsetHeight;
 
             // Calculate card boundaries (with padding)
             const padding = 10; // pixels of padding inside the card edge
@@ -659,7 +659,7 @@ export default {
                                 bolt.parentNode ===
                                     this.$refs.lightningContainer
                             ) {
-                                this.$refs.lightningContainer.removeChild(bolt);
+                                this.$refs.lightningContainer?.removeChild(bolt);
                             }
                         }, 150);
                     }, 70);

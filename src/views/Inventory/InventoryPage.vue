@@ -147,9 +147,9 @@
                                 >
                                     <div
                                         class="text-center p-1 rounded-md"
-                                        :class="renderItemFusion(el, 'bg', arrInventory, dataInfo)"
+                                        :class="renderItemFusion(el, 'bg', arrInventory, dataInfo, infoWallet, item)"
                                     >
-                                        {{ renderItemFusion(el, "count", arrInventory, dataInfo) }}
+                                        {{ renderItemFusion(el, "count", arrInventory, dataInfo, infoWallet, item) }}
                                     </div>
                                     <img
                                         class="w-[55px]"
@@ -330,7 +330,7 @@ import {
 import NotificationToast from "@/components/NotificationToast.vue";
 import PopupConfirm from "@/components/PopupConfirm.vue";
 import ViewCart from "./../Shop/ViewCart.vue";
-import { IDetailCart } from "@/views/Shop/defination";
+import { IDetailCart, IInfoWallet } from "@/views/Shop/defination";
 import PopupPassword from "@/components/popup/PopupPassword.vue";
 import { mapState } from "vuex";
 import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
@@ -370,6 +370,7 @@ export default defineComponent({
         this.getDataInfo();
         this.getDataInventor();
         this.getFausion();
+        this.callWalletInfo()
 
         this.yesUseNumber = debounce(this.yesUseNumber, 500);
         this.handleYesClaim = debounce(this.handleYesClaim, 500);
@@ -451,6 +452,7 @@ export default defineComponent({
             ],
             // selectedGroups: [],
             totalPlayers: 0,
+            infoWallet: {} as IInfoWallet,
         };
     },
     methods: {
@@ -715,6 +717,16 @@ export default defineComponent({
             }else{
                 this.arrPlayer = this.arrPlayerGrade
             }
+        },
+        async callWalletInfo() {
+            try {
+                const res = await userService.getWalletInfo(this.userId);
+                console.log(res?.[0]);
+                
+                this.infoWallet = res?.[0];
+            } catch (error) {
+                console.log("Error", error);
+            } 
         },
         async refeshData(){
             await this.getDataInventor();

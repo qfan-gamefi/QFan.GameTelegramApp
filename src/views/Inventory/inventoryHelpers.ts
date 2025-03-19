@@ -1,4 +1,5 @@
 import { IFusion, IItemDefFusion, IItemInventory } from "@/interface";
+import { IInfoWallet } from "../Shop/defination";
 
 export function renderTitleKey(key: string) {
     return key
@@ -73,7 +74,14 @@ export const renderConfiguration = (configuration: string) => {
     return total;
 }
 
-export const renderItemFusion = (item: IItemDefFusion, type: "bg" | "count", arrInventory: IItemInventory[], dataInfo: any) => {
+export const renderItemFusion = (
+    item: IItemDefFusion, 
+    type: "bg" | "count", 
+    arrInventory: IItemInventory[], 
+    dataInfo: any, 
+    infoWallet: IInfoWallet, 
+    detail: IFusion
+) => {
     const { ItemDefId, AutoCash, CashValue, Count } = item || {};
     const filterIdItem: IItemInventory = arrInventory?.find(
         (el) => el.ItemDefId === ItemDefId
@@ -82,24 +90,25 @@ export const renderItemFusion = (item: IItemDefFusion, type: "bg" | "count", arr
     const formatBalace = formatNumber(dataBalance?.balance);
     const countItem = filterIdItem?.ItemCount || 0;
     const countHash = Count || 0;
+    const hasQFP = detail?.ResourcesItemDefIds?.some(item => item?.AutoCashType == "QFP");
+    const balanceQ = parseFloat(parseFloat(infoWallet?.balance).toFixed(2));
 
     if (type === "count") {
-        if (AutoCash && AutoCash === 1) {
-            const formatCashValue = formatNumber(Number(CashValue));
-            return `${formatBalace}/${formatCashValue}`;
-        } else {
-            return `${countItem}/${countHash}`;
+        if (hasQFP) {
+            return AutoCash === 1 
+                ? `${formatBalace}/${formatNumber(Number(CashValue))}` 
+                : `${countItem}/${countHash}`;
         }
+        return `${balanceQ}/${CashValue}`;
     }
     if (type === "bg") {
         const bgRed = "bg-[#FF0000]";
         const bgGreen = "bg-[#2cde00]";
 
-        if (AutoCash && AutoCash === 1) {
-            return dataBalance?.balance >= CashValue ? bgGreen : bgRed;
-        } else {
-            return countItem >= countHash ? bgGreen : bgRed;
+        if (AutoCash === 1) {
+            return (hasQFP ? dataBalance?.balance : balanceQ) >= CashValue ? bgGreen : bgRed;
         }
+        return countItem >= countHash ? bgGreen : bgRed;
     }
 }
 

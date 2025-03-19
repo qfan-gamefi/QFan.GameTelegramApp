@@ -130,7 +130,7 @@ export interface IInfoWallet {
     playerId: string;
     walletType: "ON_CHAIN";
     address: string;
-    balance: number;
+    balance: string;
     unit: "QUAI";
     isActive: boolean;
 }

@@ -23,13 +23,18 @@
         <div class="wr-box" :style="{ height: calcHeightInventory }">
 
             <div class="wr-filter-player" v-if="activeButton === 'Player'">
-                <GroupPlayerComponent
-                    v-for="(position, index) in ['Position']"
-                    :position="position" 
-                    @groupClicked="handleGroupClick"
-                    :key="index"
-                />
-                <i class="fa-solid fa-filter fa-sm"></i>
+                <div class="text-xs">
+                    Total Players: {{ totalPlayers }}
+                </div>
+                <div class="flex gap-2 items-center">
+                    <GroupPlayerComponent
+                        v-for="(position, index) in ['Position']"
+                        :position="position" 
+                        @groupClicked="handleGroupClick"
+                        :key="index"
+                    />
+                    <i class="fa-solid fa-filter fa-sm"></i>
+                </div>
             </div>
             
 
@@ -142,9 +147,9 @@
                                 >
                                     <div
                                         class="text-center p-1 rounded-md"
-                                        :class="renderItemFusion(el, 'bg', arrInventory, dataInfo)"
+                                        :class="renderItemFusion(el, 'bg', arrInventory, dataInfo, infoWallet, item)"
                                     >
-                                        {{ renderItemFusion(el, "count", arrInventory, dataInfo) }}
+                                        {{ renderItemFusion(el, "count", arrInventory, dataInfo, infoWallet, item) }}
                                     </div>
                                     <img
                                         class="w-[55px]"
@@ -325,7 +330,7 @@ import {
 import NotificationToast from "@/components/NotificationToast.vue";
 import PopupConfirm from "@/components/PopupConfirm.vue";
 import ViewCart from "./../Shop/ViewCart.vue";
-import { IDetailCart } from "@/views/Shop/defination";
+import { IDetailCart, IInfoWallet } from "@/views/Shop/defination";
 import PopupPassword from "@/components/popup/PopupPassword.vue";
 import { mapState } from "vuex";
 import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
@@ -365,6 +370,7 @@ export default defineComponent({
         this.getDataInfo();
         this.getDataInventor();
         this.getFausion();
+        this.callWalletInfo()
 
         this.yesUseNumber = debounce(this.yesUseNumber, 500);
         this.handleYesClaim = debounce(this.handleYesClaim, 500);
@@ -445,6 +451,8 @@ export default defineComponent({
                 "/assets/fomation/star-silver.png",
             ],
             // selectedGroups: [],
+            totalPlayers: 0,
+            infoWallet: {} as IInfoWallet,
         };
     },
     methods: {
@@ -524,6 +532,7 @@ export default defineComponent({
                 
                 this.arrPlayer = resultSort
                 this.arrPlayerGrade = resultSort
+                this.totalPlayers = Object.values(resultSort)?.reduce((sum, arr: any) => sum + arr?.length, 0);
 
                 this.itemsBadge = filterBadge;
                 const groupedData = filterBadge.reduce((acc, item) => {
@@ -709,6 +718,16 @@ export default defineComponent({
                 this.arrPlayer = this.arrPlayerGrade
             }
         },
+        async callWalletInfo() {
+            try {
+                const res = await userService.getWalletInfo(this.userId);
+                console.log(res?.[0]);
+                
+                this.infoWallet = res?.[0];
+            } catch (error) {
+                console.log("Error", error);
+            } 
+        },
         async refeshData(){
             await this.getDataInventor();
             await this.getFausion();
@@ -724,7 +743,7 @@ export default defineComponent({
 .wr-inventory-page {
     @apply absolute top-0 left-0 w-full h-full z-[999] text-white bg-center bg-no-repeat bg-cover;
     animation: fadeInDetail 0.1s ease forwards;
-    background-image: url("./../../../public/assets/inventory/background-inventory.png");
+    background-image: url("/assets/inventory/background-inventory.png");
 }
 
 @keyframes fadeInDetail {
@@ -847,7 +866,7 @@ export default defineComponent({
 }
 
 .wr-filter-player {
-    @apply flex gap-3 bg-[#00175f] rounded-md p-1 px-2 items-center justify-end mb-2;
+    @apply flex gap-3 bg-[#00175f] rounded-md p-1 px-2 items-center justify-between mb-2;
 }
 
 </style>

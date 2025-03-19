@@ -494,54 +494,63 @@ export default {
             trackEventBtn({
                 label: "Checkin",
             });
-            this.isMaintenance = true
-            // try {
-            //     this.titleCheckin = "processing";
-            //     this.isExecCheckin = true;
-            //     const keyringService = new HDKeyring();
-            //     const isUnlock = await keyringService.unlock();
-            //     if (isUnlock) {
-            //         const activeWallet = keyringService.getActiveWallet();
-            //         const address = await activeWallet?.address;
+            // this.isMaintenance = true
+            try {
+                this.titleCheckin = "processing";
+                this.isExecCheckin = true;
+                const claimCheckin = await userService.claimCheckin(
+                        this.idUser
+                    );
+                if(claimCheckin){
+                    this.renderSuccess("Checkin success!")
+                    await this.getInfoUser();
+                }
+                
+                // const keyringService = new HDKeyring();
+                // const isUnlock = await keyringService.unlock();
+                // if (isUnlock) {
+                //     const activeWallet = keyringService.getActiveWallet();
+                //     const address = await activeWallet?.address;
 
-            //         if (!address) {
-            //             this.$router.push({ name: "WalletCreate" });
-            //             return;
-            //         }
+                //     if (!address) {
+                //         this.$router.push({ name: "WalletCreate" });
+                //         return;
+                //     }
 
-            //         const request: QuaiTransactionRequest = {
-            //             from: address,
-            //             to: CONTRACT_OWNER_ADDRESS,
-            //         };
+                //     const request: QuaiTransactionRequest = {
+                //         from: address,
+                //         to: CONTRACT_OWNER_ADDRESS,
+                //     };
 
-            //         const tx = (await keyringService.sendTokenTransaction(
-            //             request
-            //         )) as unknown as unknown as QuaiTransactionResponse;
+                //     const tx = (await keyringService.sendTokenTransaction(
+                //         request
+                //     )) as unknown as unknown as QuaiTransactionResponse;
 
-            //         const claimCheckin = await userService.claimCheckin(
-            //             this.idUser,
-            //             activeWallet?.address as string,
-            //             tx.hash as string
-            //         );
-            //         await this.getInfoUser();
+                //     const claimCheckin = await userService.claimCheckin(
+                //         this.idUser,
+                //         activeWallet?.address as string,
+                //         tx.hash as string
+                //     );
+                //     await this.getInfoUser();
                     
-            //         if (claimCheckin.error) {
-            //              this.renderErr(claimCheckin?.message);
+                //     if (claimCheckin.error) {
+                //          this.renderErr(claimCheckin?.message);
                          
-            //         } else {
-            //             await this.renderSuccess("Checkin success!");
-            //         }
-            //     } else {
-            //         this.$router.push({ name: "WalletCreate" });
-            //     }
-            // } catch (error) {
-            //     this.renderErr(
-            //         "Checkin failed! Chain is not ready to interact."
-            //     );
-            // } finally {                
-            //     this.isExecCheckin = false;
-            //     this.titleCheckin = "check_in";
-            // }
+                //     } else {
+                //         await this.renderSuccess("Checkin success!");
+                //     }
+                // } else {
+                //     this.$router.push({ name: "WalletCreate" });
+                // }
+            } catch (error) {
+                this.renderErr(error?.response?.data?.message)
+                // this.renderErr(
+                //     "Checkin failed! Chain is not ready to interact."
+                // );
+            } finally {                
+                this.isExecCheckin = false;
+                this.titleCheckin = "check_in";
+            }
         },
         async onAutoInteract() {
             this.isMaintenance = true
@@ -678,12 +687,12 @@ export default {
                 />
 
                 <label class="hamburger-icon cursor-pointer" for="openmenu">
-                    <div class="btn-wl-icon">
+                    <!-- <div class="btn-wl-icon">
                         <button @click="handleWallet()">
                             <i class="fa-solid fa-wallet"></i>
                             {{ $t("wallet") }}
                         </button>
-                    </div>
+                    </div> -->
 
                     <div class="open-menu btn-menu" for="openmenu" @click="handleMenu()">
                         <i class="fa-solid fa-bars"></i>
@@ -780,7 +789,7 @@ export default {
                         </div>
                     </div>
 
-                    <div class="box-info" :style="styleWining">
+                    <!-- <div class="box-info" :style="styleWining">
                         <div class="auto-left">
                             <div class="woodwork-loader">
                                 <div
@@ -808,7 +817,7 @@ export default {
                                 {{ $t("mining") }}
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
 
@@ -863,12 +872,12 @@ export default {
                 <div class="item-title">{{ $t("invite_friend") }}</div>
             </div>
 
-            <div class="btn-item" @click="goToShop()">
+            <!-- <div class="btn-item" @click="goToShop()">
                 <div class="item-img">
                     <img src="@public/assets/button-icons/NFT.svg" />
                 </div>
                 <div class="item-title">{{ $t("nft") }}</div>
-            </div>
+            </div> -->
         </div>
 
         <div v-if="isPopupCode">

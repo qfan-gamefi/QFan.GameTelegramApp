@@ -10,6 +10,7 @@ import ShopPage from "@/views/Shop/ShopPage.vue";
 import NFT from "@/views/NFT/NFT.vue";
 import AirdropPage from "@/views/Airdrop/AirdropPage.vue";
 import FomationPage from "@/views/Fomation/FomationPage.vue";
+import TournamentsPage from "@/views/TournamentsPage/Tournaments.vue";
 
 const routes = [
     {
@@ -17,26 +18,26 @@ const routes = [
         name: "HomeComponent",
         component: HomePage,
     },
-    {
-        path: "/wallet",
-        name: "WalletForm",
-        component: WalletForm,
-    },
-    {
-        path: "/wallet/create",
-        name: "WalletCreate",
-        component: WalletCreate,
-    },
+    // {
+    //     path: "/wallet",
+    //     name: "WalletForm",
+    //     component: WalletForm,
+    // },
+    // {
+    //     path: "/wallet/create",
+    //     name: "WalletCreate",
+    //     component: WalletCreate,
+    // },
     {
         path: "/flip",
         name: "FlipPage",
         component: FlipPage,
     },
-    {
-        path: "/wallet/detail",
-        name: "WalletDetail",
-        component: Wallet,
-    },
+    // {
+    //     path: "/wallet/detail",
+    //     name: "WalletDetail",
+    //     component: Wallet,
+    // },
     {
         path: "/inventory",
         name: "InventoryPage",
@@ -47,20 +48,25 @@ const routes = [
         name: "ShopPage",
         component: ShopPage,
     },
-    {
-        path: "/shop",
-        name: "Shop",
-        component: NFT,
-    },
-    {
-        path: "/airdrop",
-        name: "AirdropPage",
-        component: AirdropPage,
-    },
+    // {
+    //     path: "/shop",
+    //     name: "Shop",
+    //     component: NFT,
+    // },
+    // {
+    //     path: "/airdrop",
+    //     name: "AirdropPage",
+    //     component: AirdropPage,
+    // },
     {
         path: "/fomation",
         name: "FomationPage",
         component: FomationPage,
+    },
+    {
+        path: "/tournaments",
+        name: "TournamentsPage",
+        component: TournamentsPage,
     },
 ];
 

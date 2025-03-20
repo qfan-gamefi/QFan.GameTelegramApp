@@ -14,9 +14,12 @@ axiosInstance.interceptors.request.use(
     (config) => {
         // Add any custom request configuration here, like auth tokens
         const passVerify = localStorage.getItem("passVerify");
-
+        // const base64X = localStorage.getItem("auth-x");
         // if (passVerify) {
         //     config.headers["Authorization"] = `Bearer ${passVerify}`;
+        // }
+        // if (base64X) {
+        //     config.headers["x-telegram-auth"] = base64X;
         // }
 
         return config;

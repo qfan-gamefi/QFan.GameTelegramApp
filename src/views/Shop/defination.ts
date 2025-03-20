@@ -75,19 +75,46 @@ export interface ItemDefShop {
 }
 
 export interface ItemShop {
-    id: number;
+    // id: number;
+    // ItemDefId: number;
+    // GoodBuyPrice: number;
+    // GoodSellPrice: number;
+    // Side: "S" | "B";
+    // GoodPrice: number;
+    // GoodPriceType: string;
+    // createdAt: string | null;
+    // updatedAt: string | null;
+    // deletedAt: string | null;
+    // ItemDef: ItemDefShop;
+    // TotalBuy: number;
+    // TotalSell: number;
     ItemDefId: number;
-    GoodBuyPrice: number;
-    GoodSellPrice: number;
-    Side: "S" | "B";
-    GoodPrice: number;
-    GoodPriceType: string;
-    createdAt: string | null;
-    updatedAt: string | null;
+    TotalSell: string;
+    GoodSellPrice: string;
+    TotalBUY: string;
+    GoodBuyPrice: string;
+    id: number;
+    Name: string;
+    Code: string;
+    Description: string;
+    Grade: string;
+    Effect: string | null;
+    RarityPoint: number;
+    Attachable: string | null;
+    Type: string;
+    ImageUrl: string;
+    createdAt: string;
+    updatedAt: string;
     deletedAt: string | null;
-    ItemDef: ItemDefShop;
-    TotalBuy: number;
-    TotalSell: number;
+    Stackable: number;
+    Consumable: string | null;
+    ConsumeData: string | null;
+    Tradable: number;
+    Category: string;
+    ItemTracking: number;
+    ItemDynamicCost: string | null;
+    InitialData: string | null;
+    partition: number;
 }
 
 export interface IDetailCart extends ItemShop {}
@@ -123,6 +150,7 @@ export interface IFeeVat {
     };
     ConfigDescription: string;
     Status: "A";
+    ValueType: string;
 }
 
 export interface IInfoWallet {
@@ -130,7 +158,7 @@ export interface IInfoWallet {
     playerId: string;
     walletType: "ON_CHAIN";
     address: string;
-    balance: number;
+    balance: string;
     unit: "QUAI";
     isActive: boolean;
 }

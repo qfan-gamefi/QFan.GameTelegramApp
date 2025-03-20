@@ -71,7 +71,7 @@
                                     <div class="absolute left-1">
                                         {{
                                             formattedBalance(
-                                                detailCart?.totalbuy
+                                                detailCart?.TotalBUY
                                             )
                                         }}
                                     </div>
@@ -85,7 +85,7 @@
                                     <div class="absolute right-1">
                                         {{
                                             formattedBalance(
-                                                detailCart?.totalsell
+                                                detailCart?.TotalSell
                                             )
                                         }}
                                     </div>
@@ -137,12 +137,6 @@
             <div class="cart-payment">
                 <div class="price-quantity">
                     <div class="price flex-1">
-                        <!-- <InputField
-                            v-model="price"
-                            label="Price"
-                            placeholder="Enter price"
-                        /> -->
-
                         <InputSelect
                             v-model="price"
                             label="price"
@@ -167,7 +161,7 @@
                         <div>{{ renderAmount() }}</div>
                     </div>
                     <div class="fee">
-                        <div>{{ $t('fee') }} ({{ this.orderFee?.ValueType }})</div>
+                        <div>{{ $t('fee') }} ({{ orderFee?.ValueType }})</div>
                         <div>{{ renderFee() }}</div>
                     </div>
                     <div class="total-payment">
@@ -309,13 +303,12 @@ export default defineComponent({
             price: 0,
             quantity: 1,
             itemsInventory: [] as IItemInventory[],
-            // bestPrice: 0,
 
             orderFee: {} as IFeeVat,
             vat: 0,
 
             selectedOption: "QFP",
-            quaiOptions: ["QFP"],
+            qOptions: ["QFP"],
 
             countTotalBuy: 0,
             countTotalSell: 0,
@@ -333,7 +326,6 @@ export default defineComponent({
         formattedBalance,
         initializeValues() {
             this.price = Number(this.detailCart?.goodbuyprice) || 0;
-            // this.bestPrice = this.detailCart?.GoodBuyPrice || 0;
             this.quantity = 1;
             if (this.currentPage === "inventory") {
                 this.activeTab = "sell";
@@ -343,8 +335,8 @@ export default defineComponent({
         },
         calcWithTotal(type: "buy" | "sell") {
             const total =
-                Number(this.detailCart?.totalbuy) + Number(this.detailCart?.totalsell);
-            const result = (this.detailCart?.totalbuy / total) * 100;
+                Number(this.detailCart?.TotalBuy) + Number(this.detailCart?.TotalSell);
+            const result = (this.detailCart?.TotalBuy / total) * 100;
             const roundedResult = parseFloat(result?.toFixed(2));
 
             if (type == "buy") {
@@ -463,7 +455,7 @@ export default defineComponent({
             //     this.detailCart.itemdefid
             // );
             const res = await axios.get(
-                `https://5615-171-224-177-67.ngrok-free.app/api/v1/order/getTopOrder5?ItemDefId=${this.detailCart.itemdefid}`, {
+                `https://94ad8d17454c.ngrok.app/inventory/api/v1/order/getTopOrder5?ItemDefId=${this.detailCart.ItemDefId}`, {
                     headers: {
                         "ngrok-skip-browser-warning": "1",}}
             );
@@ -530,7 +522,8 @@ export default defineComponent({
                     .filter((item) => item?.priceSell >= 0)
                     .map((item) => item?.priceSell)
             ); //min sell
-
+                console.log(mergedList);
+                
             this.price = minPriceSell;
             this.listDetail = mergedList;
         },
@@ -549,18 +542,18 @@ export default defineComponent({
             const total = valuePrice * valueQuantity;
 
             const payload = {
-                itemDefId: detailCart?.itemdefid,
+                itemDefId: detailCart?.ItemDefId,
                 userId: this.userId,
                 price: valuePrice,
-                count: valueQuantity,
-                priceType: detailCart?.GoodPriceType || this.selectedOption,
+                quantity: valueQuantity,
+                priceType: this.selectedOption,
             };
 
             const handleResponse = async (response, successMsg) => {
                 trackEventBtn({
                     label: this.activeTab,
                 });
-                if (response.success) {
+                if (response) {
                     await this.renderSuccess(successMsg);
                     this.$emit("closeCallApi");
                 } else {
@@ -576,11 +569,11 @@ export default defineComponent({
                     } else {
                         // const response =
                         //     await userServiceInventory.makeBuyOrder(payload);
-                        const response = await axios.post(`https://5615-171-224-177-67.ngrok-free.app/api/v1/order/makeBuyOrder`, payload);
+                        const response = await axios.post(`https://94ad8d17454c.ngrok.app/inventory/api/v1/order/makeBuyOrder`, payload);
                         const res = response.status == 200 ? JSON.parse(response.data.message) : {};
                         console.log(res);
                         
-                        await handleResponse(response, `noti.buy_success`);
+                        await handleResponse(res, `noti.buy_success`);
                     }
                 } else if (this.activeTab === "sell") {
                     if (valueQuantity > countItem) {
@@ -588,10 +581,10 @@ export default defineComponent({
                     } else {
                         // const response =
                         //     await userServiceInventory.makeSellOrder(payload);
-                        const response = await axios.post(`https://5615-171-224-177-67.ngrok-free.app/api/v1/order/makeSellOrder`, payload);
+                        const response = await axios.post(`https://94ad8d17454c.ngrok.app/inventory/api/v1/order/makeSellOrder`, payload);
                         const res = response.status == 200 ? JSON.parse(response.data.message) : {};
                         console.log(res);
-                        await handleResponse(response, `noti.sell_success`);
+                        await handleResponse(res, `noti.sell_success`);
                     }
                 }
             } catch (error) {
@@ -675,7 +668,7 @@ $t-white-color: rgb(255, 255, 255);
     display: flex;
     justify-content: space-between;
     padding: 20px 15px;
-    background-image: url("./../../../public/assets/shop/banner-shop.png");
+    background-image: url("/assets/shop/banner-shop.png");
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
@@ -687,7 +680,7 @@ $t-white-color: rgb(255, 255, 255);
 .cart-payment {
     color: $t-white-color;
     padding: 10px 15px;
-    background-image: url("./../../../public/assets/shop/banner-shop.png");
+    background-image: url("/assets/shop/banner-shop.png");
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;

@@ -78,7 +78,7 @@
             </div>
 
             <div class="overflow-scroll h-[calc(100vh-180px)] no-scrollbar">
-                <div v-for="(item, index) in listShop" :key="index">
+                <div v-for="(item, index) in listShop" :key="item?.id">
                     <div
                         class="flex items-center text-[10px] overflow-y-auto border-b border-b-[#2f9ad6] mx-2 px-2 py-2 animation-item-market"
                         @click="addCart(item)"
@@ -94,13 +94,12 @@
                             <div>{{ item?.Name }}</div>
                         </div>
                         <div class="w-[20%] text-center">
-                            {{ formattedBalance(item?.totalsell) }}
+                            {{ formattedBalance(item?.TotalSell) }}
                         </div>
                         <div class="w-[20%] text-right">
                             <div>{{ $t("starting_at") }}:</div>
                             <div>
-                                {{ formattedBalance(item?.goodsellprice) }}
-                                <!-- {{ item?.GoodPriceType }} -->
+                                {{ formattedBalance(item?.GoodSellPrice) }}
                             </div>
                         </div>
                     </div>
@@ -186,7 +185,7 @@ export default defineComponent({
             loadingPage: false,
             showCoomingSoon: false,
             apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
-            userId: userInfo?.user?.id || "2123800227",
+            userId: userInfo?.user?.id || "",
 
             showNotification: false,
             notificationMessage: "",
@@ -198,7 +197,7 @@ export default defineComponent({
             btnCategory,
 
             isViewCart: false,
-            listShop: [] , //as IDetailCart[],
+            listShop: [] as IDetailCart[],
             dataDetailCart: {} as IDetailCart,
 
             isDeposit: false,
@@ -231,23 +230,23 @@ export default defineComponent({
         setActiveButton(button: EButtonName) {
             this.activeButton = button;
         },
-        getBtnClass(item) {
-            if (item?.Side === "S") {
-                return "sell-btn";
-            }
-            if (item?.Side === "B") {
-                return "buy-btn";
-            }
-            return "";
-        },
-        renderBtnBS(item: ItemShop) {
-            if (item?.Side === "S") {
-                return "Sell";
-            }
-            if (item?.Side === "B") {
-                return "Buy";
-            }
-        },
+        // getBtnClass(item) {
+        //     if (item?.Side === "S") {
+        //         return "sell-btn";
+        //     }
+        //     if (item?.Side === "B") {
+        //         return "buy-btn";
+        //     }
+        //     return "";
+        // },
+        // renderBtnBS(item: ItemShop) {
+        //     if (item?.Side === "S") {
+        //         return "Sell";
+        //     }
+        //     if (item?.Side === "B") {
+        //         return "Buy";
+        //     }
+        // },
         // viewCard() {
         //     this.isViewCart = true;
         // },
@@ -260,12 +259,12 @@ export default defineComponent({
         },
         async getListMarket() {
             try {
-                const res = await userServiceInventory.getListMarket();
-                // const res1 = await axios.get(`https://5615-171-224-177-67.ngrok-free.app/api/v1/order/getMarketList`, {
-                //     headers: {
-                //         "ngrok-skip-browser-warning": "1",}}
-                //     );
-                // const res =    JSON.parse(res1.data.message)
+                // const res = await userServiceInventory.getListMarket();
+                const res1 = await axios.get(`https://94ad8d17454c.ngrok.app/inventory/api/v1/order/getMarketList`, {
+                    headers: {
+                        "ngrok-skip-browser-warning": "1",}}
+                    );
+                const res =    JSON.parse(res1.data.message)
                 console.log(res);
                 
                 this.listShop = res;
@@ -275,6 +274,8 @@ export default defineComponent({
             }
         },
         addCart(item) {
+            console.log(item);
+            
             this.isViewCart = true;
             this.dataDetailCart = item;
         },
@@ -305,7 +306,7 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
-@import "@/styles/global.scss";
+// @import "@/styles/global.scss";
 
 $t-white-color: rgb(255, 255, 255);
 $bg-color: #00165a;
@@ -348,7 +349,7 @@ button {
 .banner {
     padding: 10px 15px;
     color: $t-white-color;
-    background-image: url("./../../../public/assets/shop/banner-shop.png");
+    background-image: url("/assets/shop/banner-shop.png");
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;

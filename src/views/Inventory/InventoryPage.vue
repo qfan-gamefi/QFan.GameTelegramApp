@@ -131,8 +131,8 @@
                 >
                     <div
                         class="text-[10px]"
-                        v-for="(item, index) in listFusion"
-                        :key="index"
+                        v-for="(item) in listFusion"
+                        :key="item?.id"
                     >
                         <div class="slideIn-fusion">
                             <div
@@ -149,7 +149,7 @@
                                         class="text-center p-1 rounded-md"
                                         :class="renderItemFusion(el, 'bg', arrInventory, dataInfo, infoWallet, item)"
                                     >
-                                        {{ renderItemFusion(el, "count", arrInventory, dataInfo, infoWallet, item) }}
+                                        {{ renderItemFusion(el, "count", arrInventory, dataInfo, infoWallet, item)}}
                                     </div>
                                     <img
                                         class="w-[55px]"
@@ -185,7 +185,7 @@
                                             'btn-fusion',
                                             {
                                                 disable:
-                                                    disableFusion(item, dataInfo, arrInventory),
+                                                    disableFusion(item, dataInfo, arrInventory, infoWallet),
                                             },
                                         ]"
                                     >
@@ -317,38 +317,34 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import userServiceInventory from "@/services/inventoryService";
 import {
-    EItemDefType,
-    IFusion,
-    IFusionString,
-    IItemDefFusion,
-    IItemInventory,
+EItemDefType,
+IFusion,
+IFusionString,
+IItemInventory
 } from "@/interface";
+import userServiceInventory from "@/services/inventoryService";
+import { defineComponent } from "vue";
 
-import NotificationToast from "@/components/NotificationToast.vue";
-import PopupConfirm from "@/components/PopupConfirm.vue";
-import ViewCart from "./../Shop/ViewCart.vue";
-import { IDetailCart, IInfoWallet } from "@/views/Shop/defination";
-import PopupPassword from "@/components/popup/PopupPassword.vue";
-import { mapState } from "vuex";
-import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
-import userService from "@/services/userService";
-import BackButtonTelegram from "@/mixins/BackButtonTelegram";
-import { debounce, trackEventBtn } from "@/utils";
-import { renderTitleKey, formatNumber, disableFusion, renderConfiguration, renderItemFusion, fnGroupPosition } from "./inventoryHelpers";
-import { ButtonName, Button } from "./defination-inventory";
-import PopupComponent from "@/components/popup/PopupComponent.vue";
 import InputField from "@/components/Input/InputField.vue";
-import axios from "axios";
-import PopupItem from "./PopupItem.vue";
-import PopupFusionPlayerPage from "./PopupFusionPlayer.vue";
-import { countNameDefaultInStack, getPlateImage, getPlayerImage } from "../Fomation/defination-fomation";
-import { sortedGroupPlayer } from "../Fomation/defination-fomation";
-import { groupedPlayer } from "../Fomation/defination-fomation";
-import GroupPlayerComponent from "./GroupPlayerComponent.vue";
 import LightningCard from "@/components/LightningCard.vue";
+import NotificationToast from "@/components/NotificationToast.vue";
+import PopupComingSoon from "@/components/popup/PopupComingSoon.vue";
+import PopupComponent from "@/components/popup/PopupComponent.vue";
+import PopupPassword from "@/components/popup/PopupPassword.vue";
+import PopupConfirm from "@/components/PopupConfirm.vue";
+import BackButtonTelegram from "@/mixins/BackButtonTelegram";
+import userService from "@/services/userService";
+import { debounce, trackEventBtn } from "@/utils";
+import { IDetailCart, IInfoWallet } from "@/views/Shop/defination";
+import { mapState } from "vuex";
+import { countNameDefaultInStack, groupedPlayer, sortedGroupPlayer } from "../Fomation/defination-fomation";
+import ViewCart from "./../Shop/ViewCart.vue";
+import { Button, ButtonName } from "./defination-inventory";
+import GroupPlayerComponent from "./GroupPlayerComponent.vue";
+import { disableFusion, fnGroupPosition, formatNumber, renderConfiguration, renderItemFusion, renderTitleKey } from "./inventoryHelpers";
+import PopupFusionPlayerPage from "./PopupFusionPlayer.vue";
+import PopupItem from "./PopupItem.vue";
 
 export default defineComponent({
     name: "InventoryPage",
@@ -379,7 +375,7 @@ export default defineComponent({
         this.updateHeight();
     },
     computed: {
-        ...mapState(["rewardInfo", "routerFusion"]),
+        ...mapState(["rewardInfo", "routerFusion", "infoWalletQ"]),
         bannerSrc() {
             if (this.$i18n.locale === 'zh') {
                 return '/assets/inventory/banner-inventory-zh.png';
@@ -571,12 +567,9 @@ export default defineComponent({
                     CombineId: this.itemFusion.id.toString(),
                 };
                 const res = await userServiceInventory.makeFusion(data);
-                // const res = await axios.post(`https://e168-171-224-181-35.ngrok-free.app/api/v1/fusion/makeFusion`, data);
-                // const newRes = JSON.parse(res.data.message)
                 trackEventBtn({
                     label: "Fusion",
                 });
-                
                 if (res.success) {
                     this.dataFusionPlayer = res.data[0]
                     const mess = res?.data
@@ -592,9 +585,13 @@ export default defineComponent({
                             this.isFusionPlayer = true
                         }
                     await this.renderSuccess(`Received ${mess}`);
+                    
+                    this.infoWallet.balance = Number(this.infoWallet?.balance) - Number(this.itemFusion?.ResourcesItemDefIds?.[0]?.CashValue);
+                    this.$store.commit("setInfoWalletQ", {...this.infoWallet});
+
                     await this.refeshData()
                 } else {
-                    await this.renderErr(`Received ${res?.data}`);
+                    await this.renderErr(`Error!`);
                 }
             } catch (error) {
                 if (error?.response?.status === 401) {
@@ -619,13 +616,12 @@ export default defineComponent({
                         ),
                     };
                 });
-                
                 this.listFusion = parseFusion;
             } catch (error) {
                 console.error(error);
             }
         },
-        async handleFausion(item) {
+        async handleFausion(item) {            
             // this.isMaintenance = true
             this.showClaim = true;
             this.itemFusion = item;
@@ -721,9 +717,8 @@ export default defineComponent({
         async callWalletInfo() {
             try {
                 const res = await userService.getWalletInfo(this.userId);
-                console.log(res?.[0]);
-                
                 this.infoWallet = res?.[0];
+                this.$store.commit("setInfoWalletQ", res?.[0]);
             } catch (error) {
                 console.log("Error", error);
             } 

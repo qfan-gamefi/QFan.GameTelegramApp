@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import MainGame from "./../../rising-star/MainGame.vue";
 import { onMounted, ref, toRaw } from "vue";
+import MainGame from "./../../rising-star/MainGame.vue";
 
 interface PhaserScene {
     changeScene: () => void;
@@ -23,8 +23,7 @@ import PopupComponent from "@/components/popup/PopupComponent.vue";
 import PopupPassword from "@/components/popup/PopupPassword.vue";
 import { GA_TRACKING_ID } from "@/config/googleAnalytics";
 import {
-CONTRACT_OWNER_ADDRESS,
-CURRENT_WALLET_VERSION,
+CURRENT_WALLET_VERSION
 } from "@/crypto_utils/constants";
 import HDKeyring from "@/crypto_utils/HDKeyring";
 import type { ILevel } from "@/interface";
@@ -36,10 +35,6 @@ import InfoUser from "@/views/InfoUser/InfoUser.vue";
 import LoadingScreen from "@/views/LoadingScreen/LoadingScreen.vue";
 import MissionList from "@/views/Mission/MissionsList.vue";
 import { type Wallet } from "quais";
-import type {
-QuaiTransactionRequest,
-QuaiTransactionResponse,
-} from "quais/lib/esm/providers";
 import { mapState } from "vuex";
 import BoxAction from "./BoxAction.vue";
 import VersionPage from "./VersionPage.vue";

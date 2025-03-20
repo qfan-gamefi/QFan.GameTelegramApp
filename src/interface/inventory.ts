@@ -67,7 +67,7 @@ export interface IItemDefFusion {
     ItemDefId: number;
     Count: number;
     ImageUrl: string;
-    CashValue: string;
+    CashValue: number;
     AutoCash: number;
     AutoCashType: string
 }

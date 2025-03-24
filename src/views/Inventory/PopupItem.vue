@@ -19,9 +19,16 @@
 
                     <div class="flex gap-2 font-semibold px-5">
                         <div class="flex-1 relative">
-                            <div v-if="['iconic', 'legendary'].includes(itemDetail?.ItemDef?.Grade?.toLowerCase())" class="shine-A shine-2"></div>
-                            <div v-if="['iconic', 'legendary'].includes(itemDetail?.ItemDef?.Grade?.toLowerCase())" class="shine-A shine-3"></div>
-                            <img
+                            <div v-if="['legendary'].includes(itemDetail?.ItemDef?.Grade?.toLowerCase())" class="shine-A shine-2"></div>
+                            <div v-if="['legendary'].includes(itemDetail?.ItemDef?.Grade?.toLowerCase())" class="shine-A shine-3"></div>
+                            
+                            <LightningCard
+                                v-if="['iconic'].includes(itemDetail?.ItemDef?.Grade?.toLowerCase())"
+                                :cardImage="JSON.parse(itemDetail?.ItemDef?.ImageUrl)?.Plate" :freezeAfter="30"
+                                :widthImg="'w-full'"
+                            />
+                            <img 
+                                v-else
                                 class="w-full object-cover fadein"
                                 :src="
                                     JSON.parse(itemDetail?.ItemDef?.ImageUrl)
@@ -134,12 +141,15 @@
 import { IItemInventory, IDetailPlayer } from "@/interface";
 import { defineComponent, PropType } from "vue";
 import { renderConfiguration } from "./inventoryHelpers";
-import axios from "axios";
 import { processPlayerDetails } from "../Fomation/defination-fomation";
 import userServiceInventory from "@/services/inventoryService";
+import LightningCard from "@/components/LightningCard.vue";
 
 export default defineComponent({
     name: "PopupItemPage",
+    components: {
+        LightningCard
+    },
     props: {
         listData: {
             type: Array as PropType<IItemInventory[]>,

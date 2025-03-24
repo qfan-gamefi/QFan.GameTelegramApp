@@ -1,5 +1,6 @@
-import { ILevel } from "@/interface";
+import { IItemInventory, ILevel } from "@/interface";
 import type { IPlayer } from "@/interface/rewardInfo";
+import { IInfoWallet } from "@/views/Shop/defination";
 import { createStore } from "vuex";
 
 interface State {
@@ -14,7 +15,9 @@ interface State {
     countFlip: number;
     routerFusion: boolean
     avtStore: string | null
-    dataLvStore: ILevel[]
+    dataLvStore: ILevel[],
+    infoWalletQ: IInfoWallet;
+    playersPosition: { [key: string]: IItemInventory[] };
 }
 
 const store = createStore<State>({
@@ -31,7 +34,9 @@ const store = createStore<State>({
             countFlip: 0,
             routerFusion: false,
             avtStore: null,
-            dataLvStore: []
+            dataLvStore: [],
+            infoWalletQ: {} as IInfoWallet,
+            playersPosition: null
         };
     },
     mutations: {
@@ -57,13 +62,7 @@ const store = createStore<State>({
             state.autoMiningStore = payload;
         },
         setAutoMessStore(state: State, payload: boolean) {
-            // console.log('payload', payload)
-            // state.autoMessStore = !payload;
             state.autoMessStore = payload;
-            // state.autoMessStore = false;
-            // setTimeout(() => {
-            //     state.autoMessStore = payload;
-            // }, 0);
         },
         setAutoMessTextStore(state: State, payload: string) {
             state.autoMessTextStore = payload;
@@ -76,6 +75,12 @@ const store = createStore<State>({
         },
         setDataLvStore(state: State, payload: ILevel[]) {
             state.dataLvStore = payload;
+        },
+        setInfoWalletQ(state: State, payload: IInfoWallet) {
+            state.infoWalletQ = payload;
+        },
+        setPlayersPosition(state: State, payload: { [key: string]: IItemInventory[] }) {
+            state.playersPosition = payload;
         },
     },
     actions: {

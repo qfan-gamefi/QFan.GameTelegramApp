@@ -213,7 +213,8 @@
 
     "btn": {
         "buy_sell": "Buy/Sell",
-        "submit": "Submit"
+        "submit": "Submit",
+        "see_more": "See more"
     },
 
     "stt": {

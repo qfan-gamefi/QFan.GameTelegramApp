@@ -21,25 +21,33 @@ export const formatNumber = (num: number) => {
 export const disableFusion = (
     item: IFusion,
     dataInfo,
-    arrInventory: IItemInventory[]
+    arrInventory: IItemInventory[],
+    infoWallet: IInfoWallet
 ) => {
     const arrRow = item.ResourcesItemDefIds;
     const balance = dataInfo?.attributes?.qpoint?.data?.attributes?.balance;
 
     const hasAutoCash = arrRow.some((item) => "AutoCash" in item);
 
+    const hasQFP = arrRow?.some(el => el?.AutoCashType == "QFP");
+    const balanceQ = parseFloat(parseFloat(infoWallet?.balance).toFixed(2));
+
     if (hasAutoCash) {
-        const result = arrRow?.map((item) => {
-            if (item?.AutoCashType === "QFP") {
-                return balance >= item?.CashValue;
-            } else {
-                return true;
-            }
-        });
-
-        const hasFalseValue = !result.some((value) => value === false);
-
-        return hasFalseValue ? "" : "disable";
+        if(hasQFP){
+            const result = arrRow?.map((item) => {
+                if (item?.AutoCashType === "QFP") {
+                    return balance >= item?.CashValue;
+                } else {
+                    const matchingInventory = arrInventory?.find((el) => el?.ItemDefId === item?.ItemDefId)
+                    return matchingInventory?.ItemCount >= item?.Count  ? true : false
+                }
+            });
+            const hasFalseValue = !result.some((value) => value === false);
+            return hasFalseValue ? "" : "disable";
+        }else{
+            const hasFalseValue = balanceQ >= arrRow?.[0]?.CashValue
+            return hasFalseValue ? "" : "disable";
+        }
     } else {
         const result = arrRow?.every((itemA) => {
             const matchingItemB = arrInventory?.find(
@@ -127,3 +135,16 @@ export function fnGroupPosition(input) {
 
     return output;
 }
+
+
+export function get10Title(data) {
+    const result = {};
+  
+    for (const title in data) {
+      if (Array.isArray(data[title])) {
+        result[title] = data[title].slice(0, 10);
+      }
+    }
+
+    return result;
+  }

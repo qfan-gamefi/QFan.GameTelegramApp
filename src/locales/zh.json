@@ -213,7 +213,8 @@
 
     "btn": {
         "buy_sell": "购买/出售",
-        "submit": "提交"
+        "submit": "提交",
+        "see_more": "查看更多"
     },
 
     "stt": {

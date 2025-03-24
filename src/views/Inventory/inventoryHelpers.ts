@@ -135,3 +135,16 @@ export function fnGroupPosition(input) {
 
     return output;
 }
+
+
+export function get10Title(data) {
+    const result = {};
+  
+    for (const title in data) {
+      if (Array.isArray(data[title])) {
+        result[title] = data[title].slice(0, 10);
+      }
+    }
+
+    return result;
+  }

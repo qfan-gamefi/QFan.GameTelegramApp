@@ -1,4 +1,4 @@
-import { ILevel } from "@/interface";
+import { IItemInventory, ILevel } from "@/interface";
 import type { IPlayer } from "@/interface/rewardInfo";
 import { IInfoWallet } from "@/views/Shop/defination";
 import { createStore } from "vuex";
@@ -16,7 +16,8 @@ interface State {
     routerFusion: boolean
     avtStore: string | null
     dataLvStore: ILevel[],
-    infoWalletQ: IInfoWallet 
+    infoWalletQ: IInfoWallet;
+    playersPosition: { [key: string]: IItemInventory[] };
 }
 
 const store = createStore<State>({
@@ -34,7 +35,8 @@ const store = createStore<State>({
             routerFusion: false,
             avtStore: null,
             dataLvStore: [],
-            infoWalletQ: {} as IInfoWallet
+            infoWalletQ: {} as IInfoWallet,
+            playersPosition: null
         };
     },
     mutations: {
@@ -76,6 +78,9 @@ const store = createStore<State>({
         },
         setInfoWalletQ(state: State, payload: IInfoWallet) {
             state.infoWalletQ = payload;
+        },
+        setPlayersPosition(state: State, payload: { [key: string]: IItemInventory[] }) {
+            state.playersPosition = payload;
         },
     },
     actions: {

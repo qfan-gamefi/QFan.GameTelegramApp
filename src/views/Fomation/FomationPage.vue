@@ -7,7 +7,6 @@
         />
         <div class="score-name">
             <div class="flex gap-2">
-                <!-- <img src="/assets/mining/fire-gif.gif" class="h-12" loading="lazy" /> -->
                 <div class="flex gap-1">
                     BP
                     <div class="text-red-500">{{ totalConfiguration }}</div>
@@ -31,13 +30,25 @@
                         @click="handleAddPlayer(item, index, idx)"
                     >
                         <div v-if="item && totalItemDefId?.length <= 11">
-                            <img
-                                v-if="(index === 5 && idx === 2) || index !== 5"
-                                :src="getPlateImage(item)"
-                                class="object-cover"
-                                :class="!item ? 'opacity-10' : 'fadein'"
-                                loading="lazy"
-                            />
+
+                            <div v-if="['iconic'].includes(item?.ItemDef?.Grade?.toLowerCase())">
+                                <LightningCard
+                                    :cardImage="JSON.parse(item?.ItemDef?.ImageUrl)?.Plate" :freezeAfter="50"
+                                    :widthImg="'w-full'"
+                                />
+                            </div>
+                           <div v-else>
+                                <img
+                                    v-if="(index === 5 && idx === 2) || index !== 5"
+                                    :src="getPlateImage(item)"
+                                    class="object-cover"
+                                    :class="!item ? 'opacity-10' : 'fadein'"
+                                    loading="lazy"
+                                />
+                           </div>
+                            
+                            <div v-if="['legendary'].includes(item?.ItemDef?.Grade?.toLowerCase())" class="shine-A shine-2"></div>
+                            <div v-if="['legendary'].includes(item?.ItemDef?.Grade?.toLowerCase())" class="shine-A shine-3"></div>
 
                             <div>
                                 <img
@@ -109,7 +120,13 @@
                                 class="relative cursor-pointer"
                                 @click="handleShowCf(item)"
                             >
+                                <LightningCard
+                                    v-if="['iconic'].includes(item?.ItemDef?.Grade?.toLowerCase())"
+                                    :cardImage="JSON.parse(item?.ItemDef?.ImageUrl)?.Plate" :freezeAfter="50"
+                                    :widthImg="'w-full'"
+                                />
                                 <img
+                                    v-else
                                     class="w-full object-cover fadein"
                                     :src="
                                         JSON.parse(item?.ItemDef?.ImageUrl)
@@ -118,19 +135,11 @@
                                     loading="lazy"
                                 />
                                 <div
-                                    v-if="
-                                        ['iconic', 'legendary'].includes(
-                                            item?.ItemDef?.Grade?.toLowerCase()
-                                        )
-                                    "
+                                    v-if="['legendary'].includes(item?.ItemDef?.Grade?.toLowerCase())"
                                     class="shine-A shine-2"
                                 ></div>
                                 <div
-                                    v-if="
-                                        ['iconic', 'legendary'].includes(
-                                            item?.ItemDef?.Grade?.toLowerCase()
-                                        )
-                                    "
+                                    v-if="['legendary'].includes(item?.ItemDef?.Grade?.toLowerCase())"
                                     class="shine-A shine-3"
                                 ></div>
                                 <img
@@ -163,6 +172,14 @@
                                     />
                                 </div>
                             </div>
+                        </div>
+
+                        <div
+                            class="see-more"
+                            v-if="player.length < (grPlayerGrade[title]?.length || 0)" @click="loadMore(title)"
+                        >
+                            {{ $t("btn.see_more") }}
+                            <i class="fa-solid fa-angle-right"></i>
                         </div>
                     </div>
 
@@ -249,23 +266,24 @@
 </template>
 
 <script lang="ts">
+import LightningCard from "@/components/LightningCard.vue";
+import NotificationToast from "@/components/NotificationToast.vue";
+import PopupPassword from "@/components/popup/PopupPassword.vue";
+import PopupConfirm from "@/components/PopupConfirm.vue";
+import { IDetailPlayer } from "@/interface";
 import BackButtonTelegram from "@/mixins/BackButtonTelegram";
-import axios from "axios";
-import { fnGroupPosition, renderConfiguration } from "../Inventory/inventoryHelpers";
+import userServiceInventory from "@/services/inventoryService";
+import GroupPlayerComponent from "../Inventory/GroupPlayerComponent.vue";
+import { fnGroupPosition, get10Title, renderConfiguration } from "../Inventory/inventoryHelpers";
 import {
-    getPlateImage,
-    getPlayerImage,
-    countNameDefaultInStack,
-    groupedPlayer,
-    sortedGroupPlayer,
+countNameDefaultInStack,
+getPlateImage,
+getPlayerImage,
+groupedPlayer,
+sortedGroupPlayer,
 } from "./defination-fomation";
 import PopupAddPlayer from "./PopupAddPlayer.vue";
-import { IDetailPlayer, IItemInventory } from "@/interface";
-import PopupConfirm from "@/components/PopupConfirm.vue";
-import NotificationToast from "@/components/NotificationToast.vue";
-import userServiceInventory from "@/services/inventoryService";
-import PopupPassword from "@/components/popup/PopupPassword.vue";
-import GroupPlayerComponent from "../Inventory/GroupPlayerComponent.vue";
+import { mapState } from "vuex";
 
 export default {
     name: "FomationPage",
@@ -275,7 +293,11 @@ export default {
         PopupConfirm,
         NotificationToast,
         PopupPassword,
-        GroupPlayerComponent
+        GroupPlayerComponent,
+        LightningCard
+    },
+    computed: {
+        ...mapState(["playersPosition"]),
     },
     async created() {
         await this.getFileConfig();
@@ -431,7 +453,8 @@ export default {
             const resultGroupedPlayer = groupedPlayer(countName);
             const resultSort = sortedGroupPlayer(resultGroupedPlayer);
 
-            this.grPlayer = resultSort;
+            this.grPlayer = get10Title(resultSort)
+            // this.grPlayer = resultSort;
             this.grPlayerGrade = resultSort;
         },
         handleAddPlayer(item, index, idx) {
@@ -455,16 +478,6 @@ export default {
                     cells: this.idsListCells,
                 };
                 const res = await userServiceInventory.postFileConfig(raw);
-                // const res = await axios.post(
-                //     "https://3f96-171-224-181-35.ngrok-free.app/api/v1/lineup/fieldConfig",
-                //     raw,
-                //     {
-                //         headers: {
-                //             "ngrok-skip-browser-warning": "1",
-                //             "Content-Type": "application/json",
-                //         },
-                //     }
-                // );
 
                 if (res?.success) {
                     this.renderSuccess("Add player success");
@@ -472,7 +485,6 @@ export default {
                     await this.getDataInventor();
                 }
             } catch (error) {
-                // Handle error here if necessary
                 this.renderErr(error);
             } finally {
                 this.loading = false;
@@ -544,11 +556,22 @@ export default {
         },
         handleGroupClick(titleGroup: string, isActive: boolean) {
             if(titleGroup == 'Position' && isActive){
+                this.$store.commit("setPlayersPosition", this.grPlayer);
                 this.grPlayer = fnGroupPosition(this.grPlayer)
             }else{
-                this.grPlayer = this.grPlayerGrade
+                // this.grPlayer = this.grPlayerGrade
+                this.grPlayer = this.playersPosition
             }
         },
+        loadMore(title){
+            const currentLength = this.grPlayer[title]?.length
+            const totalLength = this.grPlayerGrade[title].length;
+            
+            if (currentLength < totalLength) {
+                const newLength = Math.min(currentLength + 10, totalLength);
+                this.grPlayer[title] = this.grPlayerGrade[title].slice(0, newLength);
+            }
+        }
     },
 };
 </script>
@@ -584,7 +607,7 @@ export default {
 .box-item {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 8px;
+    gap: 4px;
 }
 .slot-item {
     @apply text-[10px] font-extrabold p-[5px] absolute top-0 right-0 text-[#fffb3a] bg-black/50 rounded-bl-[10px];
@@ -617,5 +640,8 @@ export default {
 }
 .wr-filter-player {
     @apply flex gap-3 pb-2 items-center justify-end border-b border-solid;
+}
+.see-more {
+    @apply text-xs w-fit cursor-pointer transition-transform duration-300 hover:translate-x-1
 }
 </style>

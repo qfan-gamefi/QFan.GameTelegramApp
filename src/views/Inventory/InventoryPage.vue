@@ -203,20 +203,27 @@
                     <div
                         v-for="(player, title) in arrPlayer"
                         :key="title"
-                        class="row-page animation-row"
+                        class="row-page fadein"
                     >
                         <div class="title-row">
                             {{ title }}
                         </div>
                         <div class="box-item">
-                            <div v-for="item in player" :key="item?.id" class="relative cursor-pointer" @click="handlePlayer(item)">
+                            <div v-for="item in player" :key="item?.id" class="relative cursor-pointer fadein" @click="handlePlayer(item)">
+                                
+                                <LightningCard
+                                    v-if="['iconic'].includes(item?.ItemDef?.Grade?.toLowerCase())"
+                                    :cardImage="JSON.parse(item?.ItemDef?.ImageUrl)?.Plate" :freezeAfter="30"
+                                    :widthImg="'w-full'"
+                                />
                                 <img
+                                    v-else
                                     class="w-full object-cover"
                                     :src="JSON.parse(item?.ItemDef?.ImageUrl)?.Plate"
                                     loading="lazy"
                                 />
-                                <div v-if="['iconic', 'legendary'].includes(item?.ItemDef?.Grade?.toLowerCase())" class="shine-A shine-2"></div>
-                                <div v-if="['iconic', 'legendary'].includes(item?.ItemDef?.Grade?.toLowerCase())" class="shine-A shine-3"></div>
+                                <div v-if="['legendary'].includes(item?.ItemDef?.Grade?.toLowerCase())" class="shine-A shine-2"></div>
+                                <div v-if="['legendary'].includes(item?.ItemDef?.Grade?.toLowerCase())" class="shine-A shine-3"></div>
                                 <img
                                     class="object-cover absolute top-[16%] right-[5%] w-[60%]"
                                     :src="JSON.parse(item?.ItemDef?.ImageUrl)?.Player"
@@ -238,7 +245,16 @@
                                 
                             </div>
                         </div>
+
+                        <div
+                            class="see-more"
+                            v-if="player.length < (arrPlayerGrade[title]?.length || 0)" @click="loadMore(title)"
+                        >
+                            {{ $t("btn.see_more") }}
+                            <i class="fa-solid fa-angle-right"></i>
+                        </div>
                     </div>
+                    
                 </div>
             </div>
         </div>
@@ -342,7 +358,7 @@ import { countNameDefaultInStack, groupedPlayer, sortedGroupPlayer } from "../Fo
 import ViewCart from "./../Shop/ViewCart.vue";
 import { Button, ButtonName } from "./defination-inventory";
 import GroupPlayerComponent from "./GroupPlayerComponent.vue";
-import { disableFusion, fnGroupPosition, formatNumber, renderConfiguration, renderItemFusion, renderTitleKey } from "./inventoryHelpers";
+import { disableFusion, fnGroupPosition, formatNumber, renderConfiguration, renderItemFusion, renderTitleKey, get10Title } from "./inventoryHelpers";
 import PopupFusionPlayerPage from "./PopupFusionPlayer.vue";
 import PopupItem from "./PopupItem.vue";
 
@@ -375,7 +391,7 @@ export default defineComponent({
         this.updateHeight();
     },
     computed: {
-        ...mapState(["rewardInfo", "routerFusion", "infoWalletQ"]),
+        ...mapState(["rewardInfo", "routerFusion", "infoWalletQ", "playersPosition"]),
         bannerSrc() {
             if (this.$i18n.locale === 'zh') {
                 return '/assets/inventory/banner-inventory-zh.png';
@@ -452,6 +468,7 @@ export default defineComponent({
         };
     },
     methods: {
+        get10Title,
         renderTitleKey,
         formatNumber,
         disableFusion,
@@ -526,7 +543,8 @@ export default defineComponent({
                 const resultGroupedPlayer = groupedPlayer(countName)
                 const resultSort = sortedGroupPlayer(resultGroupedPlayer)
                 
-                this.arrPlayer = resultSort
+                this.arrPlayer = get10Title(resultSort)
+                
                 this.arrPlayerGrade = resultSort
                 this.totalPlayers = Object.values(resultSort)?.reduce((sum, arr: any) => sum + arr?.length, 0);
 
@@ -701,7 +719,6 @@ export default defineComponent({
             }
         },
         handlePlayer(item: IItemInventory){  
-            
             this.itemDefault = item?.id
             this.openItem = true
             this.listDetailPlayer = this.dataPlayer?.filter(el => el?.ItemDefId === item.ItemDefId)   
@@ -709,9 +726,10 @@ export default defineComponent({
         },
         handleGroupClick(titleGroup: string, isActive: boolean) {
             if(titleGroup == 'Position' && isActive){
+                this.$store.commit("setPlayersPosition", this.arrPlayer);
                 this.arrPlayer = fnGroupPosition(this.arrPlayer)
             }else{
-                this.arrPlayer = this.arrPlayerGrade
+                this.arrPlayer = this.playersPosition
             }
         },
         async callWalletInfo() {
@@ -727,6 +745,15 @@ export default defineComponent({
             await this.getDataInventor();
             await this.getFausion();
             await this.getDataInfo();
+        },
+        loadMore(title){
+            const currentLength = this.arrPlayer[title]?.length
+            const totalLength = this.arrPlayerGrade[title].length;
+            
+            if (currentLength < totalLength) {
+                const newLength = Math.min(currentLength + 10, totalLength);
+                this.arrPlayer[title] = this.arrPlayerGrade[title].slice(0, newLength);
+            }
         }
     },
 });
@@ -863,5 +890,7 @@ export default defineComponent({
 .wr-filter-player {
     @apply flex gap-3 bg-[#00175f] rounded-md p-1 px-2 items-center justify-between mb-2;
 }
-
+.see-more {
+    @apply text-xs w-fit cursor-pointer transition-transform duration-300 hover:translate-x-1
+}
 </style>

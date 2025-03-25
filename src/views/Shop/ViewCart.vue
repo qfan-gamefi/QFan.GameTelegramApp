@@ -141,7 +141,7 @@
                             v-model="price"
                             label="price"
                             placeholder="enter_price"
-                            :options="quaiOptions"
+                            :options="qOptions"
                             v-model:selectedOption="selectedOption"
                             type="number"
                         />
@@ -295,7 +295,7 @@ export default defineComponent({
 
         return {
             keyboardOpen: false,
-            userId: userInfo?.user?.id || "2123800227",
+            userId: userInfo?.user?.id || "",
             showNotification: false,
             notificationMessage: "",
             notificationType: "",
@@ -335,8 +335,8 @@ export default defineComponent({
         },
         calcWithTotal(type: "buy" | "sell") {
             const total =
-                Number(this.detailCart?.TotalBuy) + Number(this.detailCart?.TotalSell);
-            const result = (this.detailCart?.TotalBuy / total) * 100;
+                Number(this.detailCart?.TotalBUY) + Number(this.detailCart?.TotalSell);
+            const result = (this.detailCart?.TotalBUY / total) * 100;
             const roundedResult = parseFloat(result?.toFixed(2));
 
             if (type == "buy") {
@@ -455,10 +455,12 @@ export default defineComponent({
             //     this.detailCart.itemdefid
             // );
             const res = await axios.get(
-                `https://94ad8d17454c.ngrok.app/inventory/api/v1/order/getTopOrder5?ItemDefId=${this.detailCart.ItemDefId}`, {
+                `https://2awesome.ngrok.app/inventory/api/v1/order/getTopOrder5?ItemDefId=${this.detailCart.ItemDefId}`, {
                     headers: {
                         "ngrok-skip-browser-warning": "1",}}
             );
+            console.log(res);
+            
             const data = JSON.parse(res.data.message)
             console.log(data);
 
@@ -569,7 +571,7 @@ export default defineComponent({
                     } else {
                         // const response =
                         //     await userServiceInventory.makeBuyOrder(payload);
-                        const response = await axios.post(`https://94ad8d17454c.ngrok.app/inventory/api/v1/order/makeBuyOrder`, payload);
+                        const response = await axios.post(`https://2awesome.ngrok.app/inventory/api/v1/order/makeBuyOrder`, payload);
                         const res = response.status == 200 ? JSON.parse(response.data.message) : {};
                         console.log(res);
                         
@@ -581,7 +583,7 @@ export default defineComponent({
                     } else {
                         // const response =
                         //     await userServiceInventory.makeSellOrder(payload);
-                        const response = await axios.post(`https://94ad8d17454c.ngrok.app/inventory/api/v1/order/makeSellOrder`, payload);
+                        const response = await axios.post(`https://2awesome.ngrok.app/inventory/api/v1/order/makeSellOrder`, payload);
                         const res = response.status == 200 ? JSON.parse(response.data.message) : {};
                         console.log(res);
                         await handleResponse(res, `noti.sell_success`);

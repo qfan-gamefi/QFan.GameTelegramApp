@@ -111,9 +111,9 @@
             <MyOrderPage />
         </div>
 
-        <div v-if="activeButton === EButtonName.Transactions">
+        <!-- <div v-if="activeButton === EButtonName.Transactions">
             <TransactionPage />
-        </div>
+        </div> -->
 
         <ViewCart
             :isViewCart="isViewCart"
@@ -149,7 +149,7 @@ import {
 } from "@/views/Shop/defination";
 import ViewCart from "./ViewCart.vue";
 import MyOrderPage from "./MyOrder.vue";
-import TransactionPage from "./TransactionPage.vue";
+// import TransactionPage from "./TransactionPage.vue";
 import DepositInShop from "./Deposit.vue";
 import { mapState } from "vuex";
 import { debounce, formattedBalance } from "@/utils";
@@ -167,7 +167,7 @@ export default defineComponent({
         DepositInShop,
         MyOrderPage,
         PopupComingSoon,
-        TransactionPage,
+        // TransactionPage,
     },
     computed: {
         ...mapState(["rewardInfo"]),
@@ -260,7 +260,7 @@ export default defineComponent({
         async getListMarket() {
             try {
                 // const res = await userServiceInventory.getListMarket();
-                const res1 = await axios.get(`https://94ad8d17454c.ngrok.app/inventory/api/v1/order/getMarketList`, {
+                const res1 = await axios.get(`https://2awesome.ngrok.app/inventory/api/v1/order/getMarketList`, {
                     headers: {
                         "ngrok-skip-browser-warning": "1",}}
                     );

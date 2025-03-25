@@ -1,7 +1,7 @@
 <template>
-    <div class="container-fomation responsive-fomation">
+    <div class="container-fomation">
         <img
-            class="w-full object-cover relative"
+            class="w-full object-cover relative responsive-fomation"
             src="/assets/fomation/fomation_bg2.png"
             loading="lazy"
         />
@@ -282,14 +282,14 @@ getPlayerImage,
 groupedPlayer,
 sortedGroupPlayer,
 } from "./defination-fomation";
-import PopupAddPlayer from "./PopupAddPlayer.vue";
+// import PopupAddPlayer from "./PopupAddPlayer.vue";
 import { mapState } from "vuex";
 
 export default {
     name: "FomationPage",
     mixins: [BackButtonTelegram],
     components: {
-        PopupAddPlayer,
+        // PopupAddPlayer,
         PopupConfirm,
         NotificationToast,
         PopupPassword,
@@ -624,7 +624,14 @@ export default {
     @apply opacity-50 cursor-none;
 }
 .responsive-fomation {
-    @apply max-w-[480px];
+    
+    @media (max-width: 768px) {
+        @apply max-w-[70%];
+    }
+    @media (max-width: 430px) {
+        @apply max-w-[430px];
+    }
+    
 }
 .btn-grPlayer {
     @apply fixed bottom-0 left-1/2 transform -translate-x-1/2 border-t w-full p-2;
@@ -633,7 +640,7 @@ export default {
     @apply absolute top-0 left-0 bg-white w-full p-2 flex items-center text-[#00175F] font-extrabold text-2xl justify-between;
 }
 .container-fomation {
-    @apply relative flex items-center justify-center bg-[#237000] h-screen;
+    @apply relative flex items-center justify-center bg-[#237000] h-screen max-w-[768px];
 }
 .text-name {
     @apply max-w-[200px] whitespace-nowrap overflow-hidden text-ellipsis;

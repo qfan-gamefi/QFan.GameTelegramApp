@@ -1,6 +1,6 @@
 <template>
     <div class="header-actions">
-        <div class="w-24">
+        <div class="w-28">
             <SelectBox
                 v-model:value="selectedStatus"
                 :options="selectOptionsStatus"
@@ -21,14 +21,14 @@
                 <div class="w-[60px]">
                     <img
                         class="object-cover"
-                        :src="item?.ItemDef?.ImageUrl"
+                        :src="item?.itemImage"
                         alt="order-img"
                         loading="lazy"
                     />
                 </div>
                 <div class="content text-xs">
                     <div class="title">
-                        {{ item?.ItemDef?.Name }}
+                        {{ item?.itemName }}
                     </div>
                     <div class="desc">
                         <div class="price-row">
@@ -90,7 +90,7 @@
                             {{ formatTime(item?.createdAt) }}
                         </div>
 
-                        <div v-if="item?.status === ('UNCONFIRMED' || 'OPEN' || 'PARTIAL')">
+                        <div v-if="['UNCONFIRMED', 'OPEN', 'PARTIAL'].includes(item?.status)">
                             <button @click="handleCancelOrder(item?.id, item)">
                                 {{ $t("cancel") }}
                             </button>
@@ -173,7 +173,7 @@ export default defineComponent({
         const userInfo = window.Telegram.WebApp.initDataUnsafe;
 
         return {
-            userId: userInfo?.user?.id || "2123800227",
+            userId: userInfo?.user?.id || "",
             showNotification: false,
             notificationMessage: "success",
             notificationType: "success",
@@ -181,7 +181,7 @@ export default defineComponent({
             listOrderBuy: [] as IOrderList[],
             listOrderSell: [] as IOrderList[],
             selectedValue: "All" as BuySellOption,
-            selectedStatus: "All" as StatusOption,
+            selectedStatus: "All",
             selectOptions,
             selectOptionsStatus,
             isPass: false,
@@ -232,12 +232,11 @@ export default defineComponent({
             // }
         },
         renderBS(item: IOrderList) {
-            return item?.side
-            if (item.Side === "B") {
-                return "buy";
+            if (item.side === "BUY") {
+                return "Buy";
             }
-            if (item.Side === "S") {
-                return "sell";
+            if (item.side === "SELL") {
+                return "Sell";
             }
         },
         classBS(item: IOrderList) {
@@ -250,7 +249,6 @@ export default defineComponent({
         },
         applyFilters() {
             let filteredList = [];
-
             // Filter by Buy/Sell
             if (this.selectedValue === "Buy") {
                 filteredList = this.listOrderBuy;
@@ -259,20 +257,18 @@ export default defineComponent({
             } else {
                 filteredList = this.listOrderBuy.concat(this.listOrderSell);
             }
-
             // Filter by Status
             if (this.selectedStatus !== "All") {
                 filteredList = filteredList.filter(
-                    (item) => item?.Status === this.selectedStatus
+                    (item) => item?.status === this.selectedStatus
                 );
             }
-
             this.listOrder = filteredList;
         },
-        handleFilter(value: "Buy" | "Sell" | "All") {
+        handleFilter() {
             this.applyFilters();
         },
-        handleStatus(value: "A" | "FF" | "CC" | "All") {
+        handleStatus() {
             this.applyFilters();
         },
         async callOrderShop() {
@@ -281,12 +277,11 @@ export default defineComponent({
                 //     this.userId
                 // );
                 const data = await axios.get(
-                    `https://5615-171-224-177-67.ngrok-free.app/api/v1/order/getUserItemOrderList?UserId=${this.userId}`, {
+                    `https://2awesome.ngrok.app/inventory/api/v1/order/getUserItemOrderList?UserId=${this.userId}`, {
                         headers: {
                             "ngrok-skip-browser-warning": "1",}}
                 );
                 const res = JSON.parse(data.data.message)
-                console.log(res?.data);
                 this.listOrderBuy = res?.data?.filter(item => item?.side == 'BUY');
                 this.listOrderSell = res?.data?.filter(item => item?.side == 'SELL');
                 this.listOrder = res?.data
@@ -294,13 +289,11 @@ export default defineComponent({
                 console.log(error);
             }
         },
-        async handleCancelOrder(id: number, item) {
+        async handleCancelOrder(id: string, item) {
             // this.isMaintenance = true
             this.showPopup = true;
             this.itemId = id;
             this.itemCancel = item;
-            console.log(item);
-            
         },
         async handleYes() {
             try {
@@ -312,21 +305,22 @@ export default defineComponent({
                 console.log(this.itemCancel);
                 
                 const data = await axios.post(
-                    `https://5615-171-224-177-67.ngrok-free.app/api/v1/order/cancelOrder`, {
+                    `https://2awesome.ngrok.app/inventory/api/v1/order/cancelOrder`, {
                         
                     "itemDefId": this.itemCancel?.code,
-                    "userId": "2123800227",
+                    "quantity": this.itemCancel.quantity,
                     "price": Number(this.itemCancel.price),
-                    "count": this.itemCancel.quantity,
-                    "priceType": "QFP",
-                    "orderId": this.itemCancel.id
+                    "userId": this.userId?.toString(),
+                    "orderId": this.itemCancel.id,
                 
                     } ,{
                         headers: {
                             "ngrok-skip-browser-warning": "1",}}
                 );
+                
                 const res = data.status == 200 ? JSON.parse(data.data.message) : {};
-                if (res.success) {
+                
+                if (res.status === 200) {
                     this.renderSuccess("stt.success");
                     await this.callOrderShop();
                 } else {

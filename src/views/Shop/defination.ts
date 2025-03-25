@@ -17,6 +17,15 @@ enum EBtnCategoryLabel {
     PLAYER = "Player",
 }
 
+export type OrderStatusMarket = 
+    | "UNCONFIRMED" 
+    | "OPEN" 
+    | "PARTIAL" 
+    | "FILLED" 
+    | "CANCELLED" 
+    | "REJECTED" 
+    | "REJECTED_PAID";
+
 export const btnCategory = [
     {
         label: EBtnCategoryLabel.ALL,
@@ -35,12 +44,12 @@ export const btnCategory = [
 export enum EButtonName {
     MarketPlace = "Market",
     MyOrders = "Orders",
-    Transactions = "Transactions",
+    // Transactions = "Transactions",
 }
 export enum EButtonLabel {
     MarketPlace = "market_place",
     MyOrders = "my_order",
-    Transactions = "transactions",
+    // Transactions = "transactions",
 }
 
 export const btnShop = [
@@ -49,10 +58,10 @@ export const btnShop = [
         label: EButtonLabel.MarketPlace,
     },
     { name: EButtonName.MyOrders, label: EButtonLabel.MyOrders },
-    {
-        name: EButtonName.Transactions,
-        label: EButtonLabel.Transactions,
-    },
+    // {
+    //     name: EButtonName.Transactions,
+    //     label: EButtonLabel.Transactions,
+    // },
 ] as BtnHeader[];
 
 export interface ItemDefShop {
@@ -120,21 +129,38 @@ export interface ItemShop {
 export interface IDetailCart extends ItemShop {}
 
 export interface IOrderList {
-    id: number;
-    UserId: string;
-    ItemDefId: number;
-    Price: number;
-    PriceType: string;
-    Count: number;
-    OriginCount: number;
-    Side: "B" | "S";
-    RefItemOrderId: number | null;
-    RefItemId: number | null;
-    Status: string;
-    createdAt: Date; // or Date if you want to parse it into a Date object
-    updatedAt: Date; // or Date if you want to parse it into a Date object
-    deletedAt: Date | null;
-    ItemDef: ItemDefShop;
+    averagePrice: string;
+    code:  number;
+    id: string;
+    matchedCost: string;
+    partition: number;
+    price: string;
+    quantity: number;
+    refInfo: any;
+    remainingQuantity: number;
+    side: 'BUY' | 'SELL' | "CANCEL";
+    status: OrderStatusMarket
+    timestamp: string;
+    updatedAt: string;
+    userId: string;
+    createdAt: Date;
+    itemImage: string;
+    itemName: string
+
+    // UserId: string;
+    // ItemDefId: number;
+    // // Price: number;
+    // PriceType: string;
+    // Count: number;
+    // OriginCount: number;
+    // Side: "B" | "S";
+    // RefItemOrderId: number | null;
+    // RefItemId: number | null;
+    // Status: string;
+    // // createdAt: Date; // or Date if you want to parse it into a Date object
+    // // updatedAt: Date; // or Date if you want to parse it into a Date object
+    // // deletedAt: Date | null;
+    // // ItemDef: ItemDefShop;
 }
 
 export interface IFeeVat {
@@ -179,12 +205,25 @@ export const selectOptions = [
     { value: "Sell", text: "sell" },
 ];
 
+// const orderStatuses: OrderStatusMarket[] = [
+//     "UNCONFIRMED", "OPEN", "PARTIAL", 
+//     "FILLED", "CANCELLED", "REJECTED", "REJECTED_PAID"
+// ] as const;
+// export const selectOptionsStatus = orderStatuses.map(status => ({
+//     value: status,
+//     label: status.replace("_", " ").toLowerCase().replace(/\b\w/g, c => c.toUpperCase())
+// }));
 export const selectOptionsStatus = [
     { value: "All", text: "all" },
-    { value: "A", text: "active" },
-    { value: "FF", text: "fulfilled" },
-    { value: "CC", text: "cancel" },
+    { value: "UNCONFIRMED", text: "Unconfirmed" },
+    { value: "OPEN", text: "Open" },
+    { value: "PARTIAL", text: "Partial" },
+    { value: "FILLED", text: "Filled" },
+    { value: "CANCELLED", text: "Cancelled" },
+    { value: "REJECTED", text: "Rejected" },
+    { value: "REJECTED_PAID", text: "Rejected Paid" },
 ];
+// status: 'UNCONFIRMED' | 'OPEN' | 'PARTIAL' | 'FILLED' | 'CANCELLED' | 'REJECTED' | 'REJECTED_PAID';
 
 export type BuySellOption = "Buy" | "Sell" | "All";
 export type StatusOption = "A" | "FF" | "CC" | "All";

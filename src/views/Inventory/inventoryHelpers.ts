@@ -32,6 +32,9 @@ export const disableFusion = (
     const hasQFP = arrRow?.some(el => el?.AutoCashType == "QFP");
     const balanceQ = parseFloat(parseFloat(infoWallet?.balance).toFixed(2));
 
+    const hasQFP = arrRow?.some(el => el?.AutoCashType == "QFP");
+    const balanceQ = parseFloat(parseFloat(infoWallet?.balance).toFixed(2));
+
     if (hasAutoCash) {
         if(hasQFP){
             const result = arrRow?.map((item) => {

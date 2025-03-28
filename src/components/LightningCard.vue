@@ -682,7 +682,7 @@ export default {
     height: 100%;
     border-radius: 6px;
     overflow: hidden;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    /* box-shadow: 0 0 20px rgba(255, 255, 255, 0.2); */
     transition: transform 0.05s;
     cursor: pointer;
 }
@@ -728,9 +728,9 @@ export default {
     mix-blend-mode: screen;
     pointer-events: none;
     border-radius: 15px;
-    animation: pulse 1.5s infinite alternate;
+    /* animation: pulse 1.5s infinite alternate; */
     filter: blur(3px);
-    box-shadow: 0 0 25px rgba(0, 195, 255, 0.8);
+    /* box-shadow: 0 0 25px rgba(0, 195, 255, 0.8); */
 }
 
 .item-count {

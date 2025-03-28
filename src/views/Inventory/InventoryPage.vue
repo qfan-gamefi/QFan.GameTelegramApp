@@ -168,7 +168,7 @@
                                 </div>
                                 <div class="flex flex-col gap-2 items-center">
                                     <div class="font-extrabold text-center">
-                                        {{ item.Name }}
+                                        {{ item?.Name }}
                                     </div>
                                     <div class="relative" v-if="!item?.Treasure?.Description?.endsWith('Lightning')">
                                         <img
@@ -180,6 +180,7 @@
                                         </div>
                                     </div>
                                     <LightningCard v-else :cardImage="item?.Treasure?.ImageUrl" :itemCount="item?.TreasureCount" :freezeAfter="30"  />
+                                    
                                     <div
                                         :class="[
                                             'btn-fusion',
@@ -634,7 +635,8 @@ export default defineComponent({
                         ),
                     };
                 });
-                this.listFusion = parseFusion;
+                
+                this.listFusion = parseFusion
             } catch (error) {
                 console.error(error);
             }

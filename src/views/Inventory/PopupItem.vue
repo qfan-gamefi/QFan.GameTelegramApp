@@ -88,6 +88,7 @@
                             <div
                                 class="flex w-full justify-between px-4 mb-2"
                                 v-for="item in itemDetail?.ConfigurationArr"
+                                :key="item?.id"
                             >
                                 <div>{{ item?.Configuration }}</div>
                                 <div class="text-[#FFEA00]">
@@ -280,10 +281,10 @@ export default defineComponent({
 }
 
 .number-configuration {
-    @apply top-[28%] left-[25%] text-xs;
+    @apply top-[28%] left-[18%] text-xs;
 }
 .code-configuration {
-    @apply top-[20%] left-[25%] text-xs;
+    @apply top-[20%] left-[18%] text-xs;
 }
 
 .number-configuration, .code-configuration, .name-item-player {

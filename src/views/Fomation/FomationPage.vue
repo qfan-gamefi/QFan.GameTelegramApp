@@ -1,7 +1,7 @@
 <template>
-    <div class="container-fomation responsive-fomation">
+    <div class="container-fomation">
         <img
-            class="w-full object-cover relative"
+            class="w-full object-cover relative responsive-fomation"
             src="/assets/fomation/fomation_bg2.png"
             loading="lazy"
         />
@@ -624,7 +624,12 @@ export default {
     @apply opacity-50 cursor-none;
 }
 .responsive-fomation {
-    @apply max-w-[480px];
+    @media (max-width: 768px) {
+        @apply max-w-[70%];
+    }
+    @media (max-width: 430px) {
+        @apply max-w-[430px];
+    }
 }
 .btn-grPlayer {
     @apply fixed bottom-0 left-1/2 transform -translate-x-1/2 border-t w-full p-2;

@@ -24,10 +24,10 @@ export const disableFusion = (
     arrInventory: IItemInventory[],
     infoWallet: IInfoWallet
 ) => {
-    const arrRow = item.ResourcesItemDefIds;
+    const arrRow = item?.ResourcesItemDefIds;
     const balance = dataInfo?.attributes?.qpoint?.data?.attributes?.balance;
 
-    const hasAutoCash = arrRow.some((item) => "AutoCash" in item);
+    const hasAutoCash = arrRow?.some((item) => "AutoCash" in item);
 
     const hasQFP = arrRow?.some(el => el?.AutoCashType == "QFP");
     const balanceQ = parseFloat(parseFloat(infoWallet?.balance).toFixed(2));
@@ -99,6 +99,7 @@ export const renderItemFusion = (
     const countItem = filterIdItem?.ItemCount || 0;
     const countHash = Count || 0;
     const hasQFP = detail?.ResourcesItemDefIds?.some(item => item?.AutoCashType == "QFP");
+    const hasQ = detail?.ResourcesItemDefIds?.some(item => item?.AutoCashType == "QUAI");
     const balanceQ = parseFloat(parseFloat(infoWallet?.balance).toFixed(2));
 
     if (type === "count") {
@@ -107,7 +108,10 @@ export const renderItemFusion = (
                 ? `${formatBalace}/${formatNumber(Number(CashValue))}` 
                 : `${countItem}/${countHash}`;
         }
-        return `${balanceQ}/${CashValue}`;
+        if(hasQ){
+            return `${balanceQ}/${CashValue}`;
+        }
+        return `${countItem}/${Count}`;
     }
     if (type === "bg") {
         const bgRed = "bg-[#FF0000]";

@@ -168,7 +168,7 @@
                                 </div>
                                 <div class="flex flex-col gap-2 items-center">
                                     <div class="font-extrabold text-center">
-                                        {{ item.Name }}
+                                        {{ item?.Name }}
                                     </div>
                                     <div class="relative" v-if="!item?.Treasure?.Description?.endsWith('Lightning')">
                                         <img
@@ -180,6 +180,7 @@
                                         </div>
                                     </div>
                                     <LightningCard v-else :cardImage="item?.Treasure?.ImageUrl" :itemCount="item?.TreasureCount" :freezeAfter="30"  />
+                                    
                                     <div
                                         :class="[
                                             'btn-fusion',
@@ -634,7 +635,41 @@ export default defineComponent({
                         ),
                     };
                 });
-                this.listFusion = parseFusion;
+
+                const test =  [{
+                    id: 4,
+                    Name: "Iconic Messi",
+                    Code: "Messi",
+                    ResourcesItemDefIds: [
+                        {
+                            ItemDefId: 548,
+                            Count: 500,
+                            ImageUrl: "https://api-gateway.qfan.xyz/uploads/photo_2025_03_24_16_45_04_d12678accd.jpg"
+                        }
+                    ],
+                    TreasureId: 33,
+                    TreasureCount: 1,
+                    Active: false,
+                    createdAt: null,
+                    updatedAt: null,
+                    deletedAt: null,
+                    Treasure: {
+                        id: 33,
+                        Name: "Messi Iconic",
+                        Description: "MESSI_ICONIC.Lightning",
+                        AutoRefill: true,
+                        TreasurePlayerId: "-1",
+                        SuccessRate: 100,
+                        Status: "D",
+                        ImageUrl: "https://api-gateway.qfan.xyz/uploads/Lionel_Messi_ec0090320d.png",
+                        createdAt: "2024-08-14T13:52:00.000Z",
+                        updatedAt: "2024-08-14T13:52:00.000Z"
+                    }
+                }];
+                // console.log(test);
+                
+                this.listFusion = [...parseFusion, ...test];
+                // this.listFusion = test;
             } catch (error) {
                 console.error(error);
             }

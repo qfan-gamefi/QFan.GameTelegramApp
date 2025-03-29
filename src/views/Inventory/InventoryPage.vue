@@ -136,10 +136,10 @@
                     >
                         <div class="slideIn-fusion">
                             <div
-                                class="flex items-center gap-2.5 w-[220px] overflow-auto"
+                                class="flex gap-2.5 w-[220px] overflow-auto h-full"
                             >
                                 <div
-                                    class="custom-flex-column min-w-[55px]"
+                                    class="flex flex-col gap-[5px] min-w-[55px]"
                                     v-for="(
                                         el, idx
                                     ) in item?.ResourcesItemDefIds"
@@ -151,11 +151,13 @@
                                     >
                                         {{ renderItemFusion(el, "count", arrInventory, dataInfo, infoWallet, item)}}
                                     </div>
-                                    <img
-                                        class="w-[55px]"
-                                        :src="el?.ImageUrl"
-                                        loading="lazy"
-                                    />
+                                    <div class="flex justify-center items-center flex-1">
+                                        <img
+                                            class="w-[55px] rounded"
+                                            :src="el?.ImageUrl"
+                                            loading="lazy"
+                                        />
+                                    </div>
                                 </div>
                             </div>
 
@@ -605,9 +607,14 @@ export default defineComponent({
                         }
                     await this.renderSuccess(`Received ${mess}`);
                     
-                    this.infoWallet.balance = Number(this.infoWallet?.balance) - Number(this.itemFusion?.ResourcesItemDefIds?.[0]?.CashValue);
-                    this.$store.commit("setInfoWalletQ", {...this.infoWallet});
+                    const deductedBalance = Number(this.infoWallet?.balance) - Number(this.itemFusion?.ResourcesItemDefIds?.[0]?.CashValue);
 
+                    if (deductedBalance > 0) {
+                        this.infoWallet.balance = deductedBalance;
+                        this.$store.commit("setInfoWalletQ", { ...this.infoWallet });
+                    }else{
+                        await this.callWalletInfo()
+                    }
                     await this.refeshData()
                 } else {
                     await this.renderErr(`Error!`);

@@ -100,7 +100,7 @@ export const renderItemFusion = (
     const countHash = Count || 0;
     const hasQFP = detail?.ResourcesItemDefIds?.some(item => item?.AutoCashType == "QFP");
     const hasQ = detail?.ResourcesItemDefIds?.some(item => item?.AutoCashType == "QUAI");
-    const balanceQ = parseFloat(parseFloat(infoWallet?.balance).toFixed(2));
+    const balanceQ = Number(infoWallet?.balance).toFixed(2);
 
     if (type === "count") {
         if (hasQFP) {

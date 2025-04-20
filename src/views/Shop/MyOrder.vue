@@ -318,14 +318,14 @@ export default defineComponent({
                             "ngrok-skip-browser-warning": "1",}}
                 );
                 
-                const res = data.status == 200 ? JSON.parse(data.data.message) : {};
+                // const res = data.status == 200 ? JSON.parse(data.data.message) : {};
                 
-                if (res.status === 200) {
+                // if (res.status === 200) {
                     this.renderSuccess("stt.success");
                     await this.callOrderShop();
-                } else {
-                    this.renderErr("stt.failed");
-                }
+                // } else {
+                //     this.renderErr("stt.failed");
+                // }
             } catch (error) {
                 if (error?.response?.status === 401) {
                     this.isPass = true;

@@ -111,20 +111,24 @@
                             </div>
                             <div class="gird gap-2">
                                 <div>{{ item?.userId }}</div>
-
                                 <div>RankPoint: {{ item?.rankPoints }}</div>
                             </div>
                         </div>
 
-                        <div
-                            v-if="!item.isDefeated"
-                            class="relative"
-                            @click="handleFight(item)"
-                        >
-                            <img
-                                src="/assets/tournaments/match_pvp.png"
-                                class="w-20"
-                            />
+                        <div class="flex items-center justify-between flex-1">
+                            <div class="text-center font-bold text-blue-600 text-lg ml-[15px]">
+                                ⚔️ {{ item?.totalCombatPower }}
+                            </div>
+                            <div
+                                v-if="!item.isDefeated"
+                                class="relative"
+                                @click="handleFight(item)"
+                            >
+                                <img
+                                    src="/assets/tournaments/match_pvp.png"
+                                    class="w-20"
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -135,9 +139,9 @@
             <div class="title text-white">RECORD</div>
 
             <div class="header-record">
-                <div>User 1</div>
+                <div>Player</div>
                 <div>Score</div>
-                <div>User 2</div>
+                <div>Rival</div>
             </div>
 
             <div class="scroll-record">
